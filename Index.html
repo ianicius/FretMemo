@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guitar Fretboard Trainer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-light: #ffffff;
+            --bg-panel: #f7f7f7;
+            --text-dark: #1f1f1f;
+            --text-light: #6b7280;
+            --accent-color: #3b82f6; /* A simple, clean blue */
+            --border-color: #e5e7eb;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            touch-action: manipulation;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* --- Side Panel --- */
+        #side-panel {
+            flex-shrink: 0;
+            width: 320px;
+            background-color: var(--bg-panel);
+            border-right: 1px solid var(--border-color);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            transform: translateX(-100%);
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: 100;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+        
+        #main-content {
+            width: 100%;
+            transition: margin-left 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), width 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        body.panel-visible #side-panel {
+            transform: translateX(0);
+        }
+
+        body.panel-visible #main-content {
+            margin-left: 320px;
+            width: calc(100% - 320px);
+        }
+        
+        #settings-toggle-btn {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 101;
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(5px);
+            border-radius: 50%;
+            border: 1px solid var(--border-color);
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        body.panel-visible #settings-toggle-btn {
+             transform: translateX(320px);
+        }
+
+        /* --- Fretboard --- */
+        #fretboard {
+            background: var(--bg-light);
+            border: 2px solid var(--text-dark);
+            display: grid;
+        }
+        .fret { 
+            border-right: 2px solid #a0a0a0; 
+        }
+        /* This is the "nut" */
+        .fret[data-fret='0'] {
+            border-right-width: 6px;
+            border-right-color: var(--text-dark);
+        }
+        .fret[data-fret='12'] {
+            border-right: none;
+        }
+        .string-line { background-color: #525252; }
+        .marker-dot {
+            background-color: #d4d4d4;
+        }
+
+        /* --- Note Highlight --- */
+        #highlight-dot {
+            background-color: transparent;
+            border: 4px solid var(--accent-color);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+        
+        /* --- UI Elements --- */
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 20px; height: 20px;
+            background: var(--accent-color);
+            cursor: pointer; border-radius: 50%;
+        }
+        input[type=range] { background-color: #d4d4d4; }
+        input[type=number], input[type=checkbox], select {
+            background-color: var(--bg-light);
+            border: 1px solid var(--border-color);
+            color: var(--text-dark);
+        }
+        input[type=checkbox]:checked { background-color: var(--accent-color); }
+        
+        /* --- Stats Modal --- */
+        #stats-modal-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+        
+        /* --- Switcher Buttons --- */
+        .switcher-btn {
+            color: var(--text-light);
+        }
+        .switcher-btn.active {
+            background-color: var(--accent-color);
+            color: var(--bg-light);
+            font-weight: bold;
+        }
+        
+        /* --- Practice Note Display --- */
+        .practice-note-container {
+            min-height: 288px; /* Height of fretboard + answer options */
+        }
+        .current-practice-note {
+            font-size: 10rem;
+            line-height: 1;
+            color: var(--text-dark);
+        }
+        .beat-dot {
+            transition: all 0.2s ease-in-out;
+        }
+        .beat-dot.active {
+            background-color: var(--accent-color);
+            transform: scale(1.25);
+        }
+
+        /* --- Tablature View --- */
+        .tab-string {
+            height: 2.5rem;
+            border-bottom: 2px solid #a0a0a0;
+            display: flex;
+            align-items: center;
+        }
+        .tab-fret-number {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="panel-hidden">
+
+    <!-- Settings Toggle Button -->
+    <button id="settings-toggle-btn" class="p-3 text-gray-600 hover:text-black">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 0 2l-.15.08a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l-.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1 0-2l.15-.08a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+    </button>
+    
+    <!-- Side Panel with Settings -->
+    <div id="side-panel">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b border-gray-300 pb-2">Settings</h2>
+        <div class="space-y-6">
+            <h3 class="text-lg font-semibold text-gray-700">Metronome</h3>
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <label for="bpm-slider" class="font-medium text-gray-600">Tempo</label>
+                    <span id="bpm-display" class="text-lg font-bold text-gray-800">60 BPM</span>
+                </div>
+                <input type="range" id="bpm-slider" min="30" max="280" value="60" class="w-full h-2 rounded-lg appearance-none cursor-pointer">
+            </div>
+            <div>
+                <label for="note-duration" class="block text-left font-medium mb-2 text-gray-600">Note Duration (beats)</label>
+                <input type="number" id="note-duration" value="1" min="1" class="w-full rounded-md p-2 text-center">
+            </div>
+            <div>
+                <div class="flex items-center">
+                    <input type="checkbox" id="speed-up-toggle" class="h-5 w-5 rounded focus:ring-0">
+                    <label for="speed-up-toggle" class="ml-3 font-medium text-gray-600">Accelerate Automatically</label>
+                </div>
+                <div id="speed-up-controls" class="grid grid-cols-2 gap-4 mt-3 max-h-0 overflow-hidden opacity-0">
+                    <div>
+                        <label for="speed-up-amount" class="text-sm text-gray-500">By BPM</label>
+                        <input type="number" id="speed-up-amount" value="5" min="1" class="w-full rounded-md p-2 text-center">
+                    </div>
+                    <div>
+                        <label for="speed-up-interval" class="text-sm text-gray-500">Every X beats</label>
+                        <input type="number" id="speed-up-interval" value="8" min="1" class="w-full rounded-md p-2 text-center">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="practice-settings-container" class="border-t border-gray-300 pt-4 mt-6 hidden">
+             <h3 class="text-lg font-semibold text-gray-700 mb-4">Practice Settings</h3>
+             <div>
+                <label for="interval-select" class="block text-left font-medium mb-2 text-gray-600">Note Sequence</label>
+                <select id="interval-select" class="w-full rounded-md p-2">
+                    <option value="random">Random</option>
+                    <option value="thirds">Thirds</option>
+                    <option value="fifths">Fifths</option>
+                    <option value="sevenths">Sevenths</option>
+                </select>
+            </div>
+        </div>
+        <div class="border-t border-gray-300 pt-4 mt-6">
+            <h3 class="text-lg font-semibold text-gray-700 mb-4">Note Settings</h3>
+            <div class="space-y-4">
+                <div class="flex items-center">
+                    <input type="checkbox" id="naturals-only-toggle" class="h-5 w-5 rounded focus:ring-0">
+                    <label for="naturals-only-toggle" class="ml-3 font-medium text-gray-600">Naturals Only</label>
+                </div>
+                <div>
+                    <label class="block text-left font-medium mb-2 text-gray-600">Choose notes to practice:</label>
+                    <div id="note-selection-grid" class="grid grid-cols-4 gap-2">
+                        <!-- Checkboxes will be generated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" class="min-h-screen flex items-center justify-center">
+        <div class="w-full max-w-6xl mx-auto text-center p-4">
+            <header class="mb-4">
+                <h1 class="text-4xl font-bold text-gray-800">Guitar Fretboard Trainer</h1>
+                <p class="text-gray-500 mt-2">Choose your training mode</p>
+                <!-- Module Switcher -->
+                <div class="mt-4 flex justify-center bg-gray-100 p-1 rounded-lg max-w-sm mx-auto">
+                    <button data-module="guessNote" class="switcher-btn module-switch-btn active w-1/2 p-2 rounded-md transition-colors">Guess the Note</button>
+                    <button data-module="playPractice" class="switcher-btn module-switch-btn w-1/2 p-2 rounded-md transition-colors">Playing Practice</button>
+                </div>
+                <div id="stats-display" class="mt-4 text-lg flex justify-center items-center space-x-6 bg-gray-100 p-2 rounded-lg max-w-xs mx-auto">
+                    <div>
+                        <span class="text-green-600 font-bold">Correct: </span>
+                        <span id="correct-count">0</span>
+                    </div>
+                    <div class="border-l h-6 border-gray-300"></div>
+                    <div>
+                        <span class="text-red-600 font-bold">Incorrect: </span>
+                        <span id="incorrect-count">0</span>
+                    </div>
+                </div>
+            </header>
+
+            <div id="view-switcher-container">
+                <div class="mt-4 flex justify-center bg-gray-100 p-1 rounded-lg max-w-md mx-auto">
+                    <button data-view="fretboard" class="switcher-btn view-switch-btn active w-1/3 p-2 rounded-md transition-colors text-sm">Fretboard → Note</button>
+                    <button data-view="tab" class="switcher-btn view-switch-btn w-1/3 p-2 rounded-md transition-colors text-sm">Tab → Note</button>
+                    <button data-view="noteToTab" class="switcher-btn view-switch-btn w-1/3 p-2 rounded-md transition-colors text-sm">Note → Tab</button>
+                </div>
+            </div>
+            
+            <div id="fretboard-container" class="relative w-full overflow-x-auto pb-8 mt-4">
+                <div id="fretboard" class="rounded-lg shadow-lg py-2" style="grid-template-rows: repeat(6, 1fr);"></div>
+                <div id="fret-numbers" class="relative mt-1"><div class="grid"></div></div>
+            </div>
+
+            <div id="tab-container" class="hidden relative w-full max-w-xl mx-auto pb-8 mt-4 font-mono text-xl p-4">
+                 <!-- Tablature view will be generated here -->
+            </div>
+
+            <div id="note-to-tab-question-container" class="hidden practice-note-container flex flex-col items-center justify-center">
+                 <span class="current-practice-note font-bold"></span>
+            </div>
+            
+            <div id="practice-note-container" class="hidden practice-note-container flex flex-col items-center justify-center">
+                <span class="current-practice-note font-bold"></span>
+                <div class="mt-4 text-center h-16">
+                     <span class="text-xs text-gray-400 uppercase tracking-widest">Next</span>
+                     <span id="next-practice-note" class="block text-4xl font-semibold text-gray-400"></span>
+                </div>
+                <div id="beat-dots-container" class="flex justify-center items-center gap-3 mt-2 h-6"></div>
+            </div>
+
+            <div id="answer-options" class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto"></div>
+            <div id="feedback" class="mt-6 h-10 text-2xl font-semibold transition-opacity duration-300"></div>
+            
+            <!-- Controls Panel -->
+            <div class="mt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <button id="metronome-btn" class="w-full sm:w-auto px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg shadow-md transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-blue-300">
+                    Start Metronome
+                </button>
+                <button id="next-btn" class="w-full sm:w-auto px-8 py-3 bg-gray-700 hover:bg-gray-800 text-white font-bold rounded-lg shadow-md transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-gray-300">
+                    Next Note
+                </button>
+                <button id="stats-btn" class="w-full sm:w-auto px-6 py-3 bg-gray-700 hover:bg-gray-800 text-white font-bold rounded-lg shadow-md transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-gray-300">
+                    Show Stats
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Stats Modal -->
+    <div id="stats-modal-overlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div id="stats-modal" class="bg-white rounded-lg shadow-2xl w-full max-w-md border">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h2 class="text-2xl font-bold text-gray-800">Mistake Statistics</h2>
+                <button id="close-stats-btn" class="text-gray-400 hover:text-black text-2xl font-bold">&times;</button>
+            </div>
+            <div id="stats-content" class="p-6 max-h-80 overflow-y-auto">
+                <!-- Stats will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Data Model ---
+            const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+            const tuning = ['E', 'B', 'G', 'D', 'A', 'E'];
+            const FRET_COUNT = 12;
+
+            // --- DOM Elements ---
+            const bodyEl = document.body;
+            const fretboardEl = document.getElementById('fretboard');
+            const fretboardContainer = document.getElementById('fretboard-container');
+            const fretNumbersEl = document.querySelector('#fret-numbers div');
+            const answerOptionsEl = document.getElementById('answer-options');
+            const feedbackEl = document.getElementById('feedback');
+            const nextBtn = document.getElementById('next-btn');
+            const sidePanel = document.getElementById('side-panel');
+            const settingsToggleBtn = document.getElementById('settings-toggle-btn');
+            const bpmSlider = document.getElementById('bpm-slider');
+            const bpmDisplay = document.getElementById('bpm-display');
+            const metronomeBtn = document.getElementById('metronome-btn');
+            const noteDurationInput = document.getElementById('note-duration');
+            const speedUpToggle = document.getElementById('speed-up-toggle');
+            const speedUpControls = document.getElementById('speed-up-controls');
+            const speedUpAmount = document.getElementById('speed-up-amount');
+            const speedUpInterval = document.getElementById('speed-up-interval');
+            const correctCountEl = document.getElementById('correct-count');
+            const incorrectCountEl = document.getElementById('incorrect-count');
+            const statsDisplay = document.getElementById('stats-display');
+            const statsBtn = document.getElementById('stats-btn');
+            const statsModalOverlay = document.getElementById('stats-modal-overlay');
+            const statsContentEl = document.getElementById('stats-content');
+            const closeStatsBtn = document.getElementById('close-stats-btn');
+            const moduleSwitchBtns = document.querySelectorAll('.module-switch-btn');
+            const practiceNoteContainer = document.getElementById('practice-note-container');
+            const nextPracticeNoteEl = document.getElementById('next-practice-note');
+            const beatDotsContainer = document.getElementById('beat-dots-container');
+            const naturalsOnlyToggle = document.getElementById('naturals-only-toggle');
+            const noteSelectionGrid = document.getElementById('note-selection-grid');
+            const viewSwitcherContainer = document.getElementById('view-switcher-container');
+            const viewSwitchBtns = document.querySelectorAll('.view-switch-btn');
+            const tabContainer = document.getElementById('tab-container');
+            const noteToTabQuestionContainer = document.getElementById('note-to-tab-question-container');
+            const practiceSettingsContainer = document.getElementById('practice-settings-container');
+            const intervalSelect = document.getElementById('interval-select');
+            
+            // --- Application State ---
+            let currentModule = 'guessNote';
+            let currentView = 'fretboard';
+            let correctAnswer = '';
+            let isAnswered = false;
+            let metronomeIntervalId = null;
+            let isMetronomeOn = false;
+            let speedUpTickCounter = 0;
+            let noteTickCounter = 0;
+            let audioCtx;
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let noteMistakes = {};
+            let nextPracticeNote = null;
+
+            // --- Audio Logic ---
+            function setupAudio() {
+                if (!audioCtx && (window.AudioContext || window.webkitAudioContext)) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+            function playTick() {
+                if (!audioCtx) return;
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                oscillator.type = 'triangle';
+                oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                oscillator.start(audioCtx.currentTime);
+                oscillator.stop(audioCtx.currentTime + 0.05);
+            }
+
+            // --- UI Creation ---
+            function createFretboard() {
+                fretboardEl.innerHTML = '';
+                fretNumbersEl.innerHTML = '';
+                
+                const gridTemplate = `5% repeat(${FRET_COUNT}, 1fr)`; 
+                fretboardEl.style.gridTemplateColumns = gridTemplate;
+                fretNumbersEl.style.gridTemplateColumns = gridTemplate;
+                const stringThickness = [1, 1.2, 1.5, 1.8, 2.1, 2.4];
+
+                for (let i = 0; i < tuning.length; i++) {
+                    for (let j = 0; j <= FRET_COUNT; j++) {
+                        const fretEl = document.createElement('div');
+                        fretEl.classList.add('fret', 'relative', 'flex', 'items-center', 'justify-center', 'h-12');
+                        fretEl.dataset.string = i;
+                        fretEl.dataset.fret = j;
+                        const stringLine = document.createElement('div');
+                        stringLine.classList.add('string-line', 'w-full', 'absolute');
+                        stringLine.style.height = `${stringThickness[i]}px`;
+                        fretEl.appendChild(stringLine);
+                        fretboardEl.appendChild(fretEl);
+                    }
+                }
+                const markers = { 3: [2], 5: [2], 7: [2], 9: [2], 12: [1, 3] };
+                for (const fret in markers) {
+                    markers[fret].forEach(stringIndex => {
+                         const targetFret = fretboardEl.querySelector(`.fret[data-string='${stringIndex}'][data-fret='${fret}']`);
+                         if(targetFret) {
+                            const markerDot = document.createElement('div');
+                            markerDot.classList.add('marker-dot', 'absolute', 'w-5', 'h-5', 'rounded-full', 'left-1/2', 'z-0');
+                            markerDot.style.top = '100%';
+                            markerDot.style.transform = 'translate(-50%, -50%)';
+                            targetFret.appendChild(markerDot);
+                         }
+                    });
+                }
+                
+                const emptyFretDiv = document.createElement('div');
+                fretNumbersEl.appendChild(emptyFretDiv); 
+                for (let j = 1; j <= FRET_COUNT; j++) {
+                    const fretNumEl = document.createElement('div');
+                    fretNumEl.classList.add('relative', 'flex', 'justify-center', 'text-gray-500', 'text-sm');
+                    if ([3, 5, 7, 9, 12].includes(j)) {
+                        fretNumEl.textContent = j;
+                    }
+                    fretNumbersEl.appendChild(fretNumEl);
+                }
+            }
+
+            function createTabView() {
+                tabContainer.innerHTML = '';
+                tuning.forEach((stringName, stringIndex) => {
+                    const stringEl = document.createElement('div');
+                    stringEl.classList.add('tab-string');
+                    stringEl.dataset.stringIndex = stringIndex;
+                    stringEl.innerHTML = `
+                        <span class="w-4 text-gray-500">${stringName}</span>
+                        <span>|--</span>
+                        <span class="tab-fret-number w-8 h-8 flex items-center justify-center">-</span>
+                        <span>--|</span>
+                    `;
+                    tabContainer.appendChild(stringEl);
+                });
+            }
+
+            // --- Core Logic ---
+            function getNote(stringIndex, fretNumber) {
+                const openNote = tuning[stringIndex];
+                const openNoteIndex = notes.indexOf(openNote);
+                const noteIndex = (openNoteIndex + fretNumber) % 12;
+                return notes[noteIndex];
+            }
+            
+            function drawBeatDots() {
+                beatDotsContainer.innerHTML = '';
+                const duration = parseInt(noteDurationInput.value) || 1;
+                const dotsToDraw = Math.min(duration, 16); 
+                for (let i = 0; i < dotsToDraw; i++) {
+                    const dot = document.createElement('div');
+                    dot.classList.add('beat-dot', 'w-3', 'h-3', 'bg-gray-300', 'rounded-full');
+                    beatDotsContainer.appendChild(dot);
+                }
+            }
+
+            function updateActiveDot(beatIndex) {
+                const dots = beatDotsContainer.children;
+                if (!dots) return;
+                for (let i = 0; i < dots.length; i++) {
+                     dots[i].classList.toggle('active', i === beatIndex);
+                     dots[i].classList.toggle('bg-gray-300', i !== beatIndex);
+                }
+            }
+
+            function getActiveNotes() {
+                if (naturalsOnlyToggle.checked) {
+                    return notes.filter(n => !n.includes('#'));
+                }
+                const selectedNotes = Array.from(document.querySelectorAll('.note-select-checkbox:checked')).map(cb => cb.dataset.note);
+                if (selectedNotes.length === 0) {
+                    document.querySelectorAll('.note-select-checkbox').forEach(cb => cb.checked = true);
+                    return notes;
+                }
+                return selectedNotes;
+            }
+
+            function getIntervalNote(currentNote, intervalType) {
+                const currentNoteIndex = notes.indexOf(currentNote);
+                if (currentNoteIndex === -1) return getActiveNotes()[0]; 
+
+                let interval;
+                switch (intervalType) {
+                    case 'thirds':
+                        interval = Math.random() < 0.5 ? 3 : 4; // Minor or Major Third
+                        break;
+                    case 'fifths':
+                        interval = 7; // Perfect Fifth
+                        break;
+                    case 'sevenths':
+                        interval = Math.random() < 0.5 ? 10 : 11; // Minor or Major Seventh
+                        break;
+                    default:
+                        return null; // Should not happen if called correctly
+                }
+                const nextNoteIndex = (currentNoteIndex + interval) % 12;
+                return notes[nextNoteIndex];
+            }
+
+            function newQuestion() {
+                const activeNotes = getActiveNotes();
+                if (activeNotes.length === 0) {
+                     feedbackEl.textContent = 'Please select at least one note to practice!';
+                     return;
+                }
+
+                isAnswered = false;
+                feedbackEl.textContent = '';
+                
+                if (currentModule === 'guessNote') {
+                    if (currentView === 'fretboard' || currentView === 'tab') {
+                        const targetNote = activeNotes[Math.floor(Math.random() * activeNotes.length)];
+                        const occurrences = [];
+                        for (let i = 0; i < tuning.length; i++) {
+                            for (let j = 0; j <= FRET_COUNT; j++) {
+                                if (getNote(i, j) === targetNote) {
+                                    occurrences.push({ string: i, fret: j });
+                                }
+                            }
+                        }
+                        if (occurrences.length === 0) { newQuestion(); return; }
+                        const { string: randomString, fret: randomFret } = occurrences[Math.floor(Math.random() * occurrences.length)];
+                        correctAnswer = targetNote;
+                        
+                        if (currentView === 'fretboard') {
+                            const highlightedFret = fretboardEl.querySelector('.highlighted');
+                            if (highlightedFret) {
+                                const oldDot = highlightedFret.querySelector('#highlight-dot');
+                                if(oldDot) oldDot.remove();
+                                highlightedFret.classList.remove('highlighted');
+                            }
+                            const targetFret = fretboardEl.querySelector(`.fret[data-string='${randomString}'][data-fret='${randomFret}']`);
+                            const highlightDot = document.createElement('div');
+                            highlightDot.id = 'highlight-dot';
+                            highlightDot.classList.add('w-8', 'h-8', 'rounded-full', 'z-10');
+                            targetFret.appendChild(highlightDot);
+                            targetFret.classList.add('highlighted');
+                        } else { // Tab view
+                            tabContainer.querySelectorAll('.tab-fret-number').forEach(el => el.textContent = '-');
+                            const targetStringEl = tabContainer.querySelector(`.tab-string[data-string-index='${randomString}'] .tab-fret-number`);
+                            if (targetStringEl) {
+                                targetStringEl.textContent = randomFret;
+                            }
+                        }
+
+                        const options = new Set([correctAnswer]);
+                         while (options.size < 4) {
+                            options.add(notes[Math.floor(Math.random() * notes.length)]);
+                        }
+                        answerOptionsEl.innerHTML = '';
+                        Array.from(options).sort(() => Math.random() - 0.5).forEach(note => {
+                            const button = document.createElement('button');
+                            button.textContent = note;
+                            button.classList.add('p-4', 'bg-white', 'border', 'border-gray-300', 'hover:bg-gray-100', 'rounded-lg', 'text-lg', 'font-semibold', 'transition-colors', 'duration-200');
+                            button.dataset.note = note;
+                            button.addEventListener('click', handleAnswer);
+                            answerOptionsEl.appendChild(button);
+                        });
+
+                    } else if (currentView === 'noteToTab') {
+                        const targetNote = activeNotes[Math.floor(Math.random() * activeNotes.length)];
+                        noteToTabQuestionContainer.querySelector('.current-practice-note').textContent = targetNote;
+
+                        const occurrences = [];
+                        for (let i = 0; i < tuning.length; i++) {
+                            for (let j = 1; j < FRET_COUNT; j++) {
+                                if (getNote(i, j) === targetNote) {
+                                    occurrences.push({ string: i, fret: j });
+                                }
+                            }
+                        }
+                        if (occurrences.length === 0) { newQuestion(); return; }
+                        const correctOccurrence = occurrences[Math.floor(Math.random() * occurrences.length)];
+                        correctAnswer = `${correctOccurrence.string}-${correctOccurrence.fret}`;
+
+                        const options = new Set([correctAnswer]);
+                        while(options.size < 4) {
+                            const randomString = Math.floor(Math.random() * tuning.length);
+                            const randomFret = Math.floor(Math.random() * 11) + 1;
+                            const randomPosition = `${randomString}-${randomFret}`;
+                            if (getNote(randomString, randomFret) !== targetNote) {
+                                options.add(randomPosition);
+                            }
+                        }
+
+                        answerOptionsEl.innerHTML = '';
+                        Array.from(options).sort(() => Math.random() - 0.5).forEach(pos => {
+                            const [string, fret] = pos.split('-');
+                            const button = document.createElement('button');
+                            button.innerHTML = `<span class="font-bold">${tuning[string]}</span> <span class="text-gray-500">string</span> - <span class="font-bold">${fret}</span> <span class="text-gray-500">fret</span>`;
+                            button.classList.add('p-4', 'bg-white', 'border', 'border-gray-300', 'hover:bg-gray-100', 'rounded-lg', 'text-lg', 'transition-colors', 'duration-200');
+                            button.dataset.position = pos;
+                            button.addEventListener('click', handleAnswer);
+                            answerOptionsEl.appendChild(button);
+                        });
+                    }
+                } else if (currentModule === 'playPractice') {
+                    const currentNote = practiceNoteContainer.querySelector('.current-practice-note').textContent;
+                    
+                    if (nextPracticeNote === null || !activeNotes.includes(nextPracticeNote)) {
+                        nextPracticeNote = activeNotes[Math.floor(Math.random() * activeNotes.length)];
+                    }
+                    
+                    const newCurrentNote = nextPracticeNote;
+                    practiceNoteContainer.querySelector('.current-practice-note').textContent = newCurrentNote;
+                    
+                    const intervalType = intervalSelect.value;
+                    let newNextNote;
+                    if (intervalType === 'random') {
+                        const possibleNextNotes = activeNotes.filter(n => n !== newCurrentNote);
+                        newNextNote = (possibleNextNotes.length > 0) ? possibleNextNotes[Math.floor(Math.random() * possibleNextNotes.length)] : newCurrentNote;
+                    } else {
+                        newNextNote = getIntervalNote(newCurrentNote, intervalType);
+                    }
+                    nextPracticeNote = newNextNote;
+                    
+                    nextPracticeNoteEl.textContent = nextPracticeNote;
+                    drawBeatDots();
+                    updateActiveDot(0);
+                }
+            }
+            
+            function updateStatsDisplay() {
+                correctCountEl.textContent = correctCount;
+                incorrectCountEl.textContent = incorrectCount;
+            }
+
+            function handleAnswer(e) {
+                if (isAnswered) return;
+                isAnswered = true;
+
+                const allButtons = answerOptionsEl.querySelectorAll('button');
+                allButtons.forEach(btn => { btn.disabled = true; });
+
+                if (currentView === 'noteToTab') {
+                    const selectedPosition = e.currentTarget.dataset.position;
+                    if (selectedPosition === correctAnswer) {
+                        correctCount++;
+                        feedbackEl.textContent = 'Correct!';
+                        feedbackEl.className = 'mt-6 h-10 text-2xl font-semibold transition-opacity duration-300 text-green-600';
+                        e.currentTarget.classList.add('bg-green-100', 'border-green-400');
+                    } else {
+                        incorrectCount++;
+                        const [string, fret] = correctAnswer.split('-');
+                        noteMistakes[getNote(string, fret)] = (noteMistakes[getNote(string, fret)] || 0) + 1;
+                        feedbackEl.innerHTML = `Wrong! Correct was <span class="font-bold">${tuning[string]} string - ${fret} fret</span>`;
+                        feedbackEl.className = 'mt-6 h-10 text-xl font-semibold transition-opacity duration-300 text-red-600';
+                        e.currentTarget.classList.add('bg-red-100', 'border-red-400');
+                        allButtons.forEach(btn => {
+                            if (btn.dataset.position === correctAnswer) {
+                                btn.classList.add('bg-green-100', 'border-green-400');
+                            }
+                        });
+                    }
+                } else {
+                    const selectedNote = e.currentTarget.dataset.note;
+                    if (selectedNote === correctAnswer) {
+                        correctCount++;
+                        feedbackEl.textContent = 'Correct!';
+                        feedbackEl.className = 'mt-6 h-10 text-2xl font-semibold transition-opacity duration-300 text-green-600';
+                        e.currentTarget.classList.add('bg-green-100', 'border-green-400');
+                    } else {
+                        incorrectCount++;
+                        noteMistakes[correctAnswer] = (noteMistakes[correctAnswer] || 0) + 1;
+                        feedbackEl.textContent = `Wrong! The correct note was ${correctAnswer}`;
+                        feedbackEl.className = 'mt-6 h-10 text-2xl font-semibold transition-opacity duration-300 text-red-600';
+                        e.currentTarget.classList.add('bg-red-100', 'border-red-400');
+                        allButtons.forEach(btn => {
+                            if (btn.dataset.note === correctAnswer) {
+                                btn.classList.add('bg-green-100', 'border-green-400');
+                            }
+                        });
+                    }
+                }
+                
+                updateStatsDisplay();
+                if (!isMetronomeOn) {
+                    setTimeout(newQuestion, 1200);
+                }
+            }
+
+            // --- Metronome Logic ---
+            function metronomeTick() {
+                playTick();
+                speedUpTickCounter++;
+                noteTickCounter++;
+
+                if (currentModule === 'playPractice') {
+                    updateActiveDot(noteTickCounter);
+                }
+
+                if (speedUpToggle.checked) {
+                    const speedInterval = parseInt(speedUpInterval.value) || 8;
+                    if (speedUpTickCounter >= speedInterval) {
+                        speedUpTickCounter = 0;
+                        const amount = parseInt(speedUpAmount.value) || 5;
+                        const currentBpm = parseInt(bpmSlider.value);
+                        const newBpm = Math.min(parseInt(bpmSlider.max), currentBpm + amount);
+                        if (newBpm !== currentBpm) {
+                            bpmSlider.value = newBpm;
+                            bpmDisplay.textContent = `${newBpm} BPM`;
+                            clearInterval(metronomeIntervalId);
+                            metronomeIntervalId = setInterval(metronomeTick, 60000 / newBpm);
+                        }
+                    }
+                }
+
+                const noteDuration = parseInt(noteDurationInput.value) || 1;
+                if (noteTickCounter >= noteDuration) {
+                    if (currentModule === 'guessNote' && !isAnswered) {
+                        incorrectCount++;
+                        if (currentView === 'noteToTab') {
+                            const [string, fret] = correctAnswer.split('-');
+                             noteMistakes[getNote(string, fret)] = (noteMistakes[getNote(string, fret)] || 0) + 1;
+                        } else {
+                            noteMistakes[correctAnswer] = (noteMistakes[correctAnswer] || 0) + 1;
+                        }
+                        updateStatsDisplay();
+                        feedbackEl.textContent = `Too slow!`;
+                        feedbackEl.className = 'mt-6 h-10 text-2xl font-semibold transition-opacity duration-300 text-yellow-600';
+                    }
+                    newQuestion();
+                    noteTickCounter = 0;
+                }
+            }
+
+            function toggleMetronome() {
+                setupAudio();
+                isMetronomeOn = !isMetronomeOn;
+                if (isMetronomeOn) {
+                    metronomeBtn.textContent = 'Stop Metronome';
+                    metronomeBtn.classList.replace('bg-blue-500', 'bg-red-500');
+                    metronomeBtn.classList.replace('hover:bg-blue-600', 'hover:bg-red-600');
+                    nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    nextBtn.disabled = true;
+                    
+                    speedUpTickCounter = 0;
+                    noteTickCounter = -1; 
+                    
+                    metronomeIntervalId = setInterval(metronomeTick, 60000 / parseInt(bpmSlider.value));
+                    metronomeTick(); 
+                } else {
+                    clearInterval(metronomeIntervalId);
+                    metronomeBtn.textContent = 'Start Metronome';
+                    metronomeBtn.classList.replace('bg-red-500', 'bg-blue-500');
+                    metronomeBtn.classList.replace('hover:bg-red-600', 'hover:bg-blue-600');
+                    nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    nextBtn.disabled = false;
+                    if (currentModule === 'playPractice') {
+                        updateActiveDot(-1);
+                    }
+                }
+            }
+            
+            // --- UI Management ---
+            function displayDetailedStats() {
+                statsContentEl.innerHTML = '';
+                const sortedMistakes = Object.entries(noteMistakes).sort((a, b) => b[1] - a[1]);
+
+                if (sortedMistakes.length === 0) {
+                    statsContentEl.innerHTML = '<p class="text-center text-gray-500">No mistakes! Great job!</p>';
+                } else {
+                    const list = document.createElement('ul');
+                    list.className = 'space-y-3';
+                    sortedMistakes.forEach(([note, count]) => {
+                        const item = document.createElement('li');
+                        item.className = 'flex justify-between items-center bg-gray-100 p-3 rounded-lg';
+                        item.innerHTML = `
+                            <span class="font-bold text-lg text-gray-800">${note}</span>
+                            <span class="text-red-600">${count} ${count > 1 ? 'mistakes' : 'mistake'}</span>
+                        `;
+                        list.appendChild(item);
+                    });
+                    statsContentEl.appendChild(list);
+                }
+                statsModalOverlay.classList.remove('hidden');
+            }
+            
+            function setModule(moduleName) {
+                currentModule = moduleName;
+                moduleSwitchBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.module === moduleName));
+
+                const isGuessNote = moduleName === 'guessNote';
+                viewSwitcherContainer.classList.toggle('hidden', !isGuessNote);
+                statsDisplay.classList.toggle('hidden', !isGuessNote);
+                statsBtn.classList.toggle('hidden', !isGuessNote);
+                practiceNoteContainer.classList.toggle('hidden', isGuessNote);
+                practiceSettingsContainer.classList.toggle('hidden', isGuessNote);
+                
+                setView(isGuessNote ? currentView : 'none');
+                
+                beatDotsContainer.innerHTML = '';
+                feedbackEl.textContent = '';
+                
+                newQuestion();
+            }
+
+            function setView(viewName) {
+                if (viewName !== 'none') {
+                    currentView = viewName;
+                    viewSwitchBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.view === viewName));
+                }
+
+                fretboardContainer.classList.toggle('hidden', viewName !== 'fretboard');
+                tabContainer.classList.toggle('hidden', viewName !== 'tab');
+                noteToTabQuestionContainer.classList.toggle('hidden', viewName !== 'noteToTab');
+                answerOptionsEl.classList.toggle('hidden', currentModule !== 'guessNote');
+
+                newQuestion();
+            }
+            
+            function populateNoteSelection() {
+                noteSelectionGrid.innerHTML = '';
+                notes.forEach(note => {
+                    const container = document.createElement('div');
+                    container.classList.add('flex', 'items-center');
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = `note-check-${note.replace('#', 's')}`;
+                    checkbox.dataset.note = note;
+                    checkbox.checked = true;
+                    checkbox.classList.add('note-select-checkbox', 'h-4', 'w-4', 'rounded', 'focus:ring-0', 'text-accent-color');
+                    const label = document.createElement('label');
+                    label.htmlFor = `note-check-${note.replace('#', 's')}`;
+                    label.textContent = note;
+                    label.classList.add('ml-2', 'text-sm', 'text-gray-600');
+                    container.appendChild(checkbox);
+                    container.appendChild(label);
+                    noteSelectionGrid.appendChild(container);
+                });
+            }
+
+            // --- Initialization ---
+            populateNoteSelection();
+            
+            naturalsOnlyToggle.addEventListener('change', () => {
+                const isChecked = naturalsOnlyToggle.checked;
+                document.querySelectorAll('.note-select-checkbox').forEach(cb => {
+                    cb.disabled = isChecked;
+                    cb.parentElement.classList.toggle('opacity-50', isChecked);
+                });
+                if (!isMetronomeOn) newQuestion();
+            });
+
+            document.querySelectorAll('.note-select-checkbox').forEach(cb => {
+                cb.addEventListener('change', () => {
+                    if (!isMetronomeOn) newQuestion();
+                });
+            });
+
+            settingsToggleBtn.addEventListener('click', () => {
+                bodyEl.classList.toggle('panel-visible');
+            });
+            
+            document.addEventListener('keydown', (e) => {
+                if (e.code === 'Space') {
+                    if (e.target.tagName.toLowerCase() !== 'input') {
+                        e.preventDefault();
+                        toggleMetronome();
+                    }
+                }
+            });
+
+            bpmSlider.addEventListener('input', (e) => {
+                bpmDisplay.textContent = `${e.target.value} BPM`;
+                if (isMetronomeOn) {
+                    clearInterval(metronomeIntervalId);
+                    metronomeIntervalId = setInterval(metronomeTick, 60000 / parseInt(e.target.value));
+                }
+            });
+            noteDurationInput.addEventListener('input', () => {
+                if (currentModule === 'playPractice' && !isMetronomeOn) {
+                    drawBeatDots();
+                    updateActiveDot(-1);
+                }
+            });
+            speedUpToggle.addEventListener('change', (e) => {
+                speedUpControls.classList.toggle('max-h-0', !e.target.checked);
+                speedUpControls.classList.toggle('opacity-0', !e.target.checked);
+                speedUpControls.classList.toggle('max-h-40', e.target.checked);
+                speedUpControls.classList.toggle('opacity-100', e.target.checked);
+            });
+            metronomeBtn.addEventListener('click', toggleMetronome);
+            nextBtn.addEventListener('click', newQuestion);
+            statsBtn.addEventListener('click', displayDetailedStats);
+            closeStatsBtn.addEventListener('click', () => statsModalOverlay.classList.add('hidden'));
+            statsModalOverlay.addEventListener('click', (e) => {
+                if (e.target === statsModalOverlay) {
+                    statsModalOverlay.classList.add('hidden');
+                }
+            });
+            moduleSwitchBtns.forEach(btn => {
+                btn.addEventListener('click', () => setModule(btn.dataset.module));
+            });
+            viewSwitchBtns.forEach(btn => {
+                btn.addEventListener('click', () => setView(btn.dataset.view));
+            });
+
+            createFretboard();
+            createTabView();
+            setModule('guessNote'); // Initial setup
+        });
+    </script>
+</body>
+</html>
+
