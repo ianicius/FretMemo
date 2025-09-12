@@ -141,12 +141,6 @@
         }
         input[type=checkbox]:checked { background-color: var(--accent-color); }
         
-        /* --- Stats Modal --- */
-        #stats-modal-overlay {
-            background-color: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(5px);
-        }
-        
         /* --- Switcher Buttons --- */
         .switcher-btn {
             color: var(--text-light);
@@ -184,6 +178,13 @@
         .tab-fret-number {
             color: var(--accent-color);
             font-weight: bold;
+        }
+
+        /* --- Tuner Display --- */
+        #tuner-display.correct {
+            background-color: #dcfce7;
+            border-color: #4ade80;
+            color: #166534;
         }
     </style>
 
@@ -240,14 +241,20 @@
             </div>
             <div id="practice-settings-container" class="border-t border-gray-300 pt-4 mt-5 hidden">
                  <h3 class="text-md font-semibold text-gray-700 mb-3">Practice Settings</h3>
-                 <div>
-                    <label for="interval-select" class="block text-left text-sm font-medium mb-1 text-gray-600">Note Sequence</label>
-                    <select id="interval-select" class="w-full rounded-md">
-                        <option value="random">Random</option>
-                        <option value="thirds">Thirds</option>
-                        <option value="fifths">Fifths</option>
-                        <option value="sevenths">Sevenths</option>
-                    </select>
+                 <div class="space-y-3">
+                    <div>
+                        <label for="interval-select" class="block text-left text-sm font-medium mb-1 text-gray-600">Note Sequence</label>
+                        <select id="interval-select" class="w-full rounded-md">
+                            <option value="random">Random</option>
+                            <option value="thirds">Thirds</option>
+                            <option value="fifths">Fifths</option>
+                            <option value="sevenths">Sevenths</option>
+                        </select>
+                    </div>
+                     <div class="flex items-center">
+                        <input type="checkbox" id="mic-enable-toggle" class="h-4 w-4 rounded focus:ring-0">
+                        <label for="mic-enable-toggle" class="ml-2 text-sm font-medium text-gray-600">Enable Microphone Input</label>
+                    </div>
                 </div>
             </div>
             <div class="border-t border-gray-300 pt-4 mt-5">
@@ -325,6 +332,12 @@
             
             <div id="practice-note-container" class="hidden practice-note-container flex flex-col items-center justify-center">
                 <span class="current-practice-note font-bold"></span>
+                <div id="tuner-container" class="mt-4 h-16">
+                    <div id="tuner-display" class="hidden items-center justify-center p-3 rounded-lg border-2 border-gray-300 bg-gray-100 transition-colors">
+                        <span class="text-xs text-gray-500 uppercase tracking-widest mr-3">Detected:</span>
+                        <span id="detected-note" class="text-2xl font-bold text-gray-800 w-16">-</span>
+                    </div>
+                </div>
                 <div class="mt-4 text-center h-16">
                      <span class="text-xs text-gray-400 uppercase tracking-widest">Next</span>
                      <span id="next-practice-note" class="block text-4xl font-semibold text-gray-400"></span>
@@ -408,6 +421,9 @@
             const noteToTabQuestionContainer = document.getElementById('note-to-tab-question-container');
             const practiceSettingsContainer = document.getElementById('practice-settings-container');
             const intervalSelect = document.getElementById('interval-select');
+            const micEnableToggle = document.getElementById('mic-enable-toggle');
+            const tunerDisplay = document.getElementById('tuner-display');
+            const detectedNoteEl = document.getElementById('detected-note');
             
             // --- Application State ---
             let currentModule = 'guessNote';
@@ -419,17 +435,23 @@
             let speedUpTickCounter = 0;
             let noteTickCounter = 0;
             let audioCtx;
+            let analyser;
+            let micStream;
+            let pitchDetectionIntervalId;
             let correctCount = 0;
             let incorrectCount = 0;
             let noteMistakes = {};
             let nextPracticeNote = null;
 
-            // --- Audio Logic ---
+            // --- Audio & Pitch Detection Logic ---
+            const noteStrings = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+            
             function setupAudio() {
                 if (!audioCtx && (window.AudioContext || window.webkitAudioContext)) {
                     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 }
             }
+
             function playTick() {
                 if (!audioCtx) return;
                 const oscillator = audioCtx.createOscillator();
@@ -443,6 +465,110 @@
                 oscillator.start(audioCtx.currentTime);
                 oscillator.stop(audioCtx.currentTime + 0.05);
             }
+            
+            function noteFromPitch(frequency) {
+                const noteNum = 12 * (Math.log(frequency / 440) / Math.log(2));
+                return noteStrings[Math.round(noteNum + 69) % 12];
+            }
+
+            function autoCorrelate(buf, sampleRate) {
+                const SIZE = buf.length;
+                let rms = 0;
+                for (let i = 0; i < SIZE; i++) {
+                    const val = buf[i];
+                    rms += val * val;
+                }
+                rms = Math.sqrt(rms / SIZE);
+                if (rms < 0.01) return -1;
+
+                let r1 = 0, r2 = SIZE - 1, thres = 0.2;
+                for (let i = 0; i < SIZE / 2; i++) {
+                    if (Math.abs(buf[i]) < thres) { r1 = i; break; }
+                }
+                for (let i = 1; i < SIZE / 2; i++) {
+                    if (Math.abs(buf[SIZE - i]) < thres) { r2 = SIZE - i; break; }
+                }
+
+                buf = buf.slice(r1, r2);
+                const newSize = buf.length;
+                const c = new Array(newSize).fill(0);
+                for (let i = 0; i < newSize; i++) {
+                    for (let j = 0; j < newSize - i; j++) {
+                        c[i] = c[i] + buf[j] * buf[j + i];
+                    }
+                }
+
+                let d = 0;
+                while (d < c.length && c[d] > c[d + 1]) d++;
+                let maxval = -1, maxpos = -1;
+                for (let i = d; i < c.length; i++) {
+                    if (c[i] > maxval) {
+                        maxval = c[i];
+                        maxpos = i;
+                    }
+                }
+                let T0 = maxpos;
+
+                const x1 = c[T0 - 1], x2 = c[T0], x3 = c[T0 + 1];
+                const a = (x1 + x3 - 2 * x2) / 2;
+                const b = (x3 - x1) / 2;
+                if (a) T0 = T0 - b / (2 * a);
+
+                return sampleRate / T0;
+            }
+            
+            function updatePitch() {
+                const buffer = new Float32Array(analyser.fftSize);
+                analyser.getFloatTimeDomainData(buffer);
+                const fundamental = autoCorrelate(buffer, audioCtx.sampleRate);
+                
+                if (fundamental !== -1) {
+                    const detectedNote = noteFromPitch(fundamental);
+                    detectedNoteEl.textContent = detectedNote;
+                    const targetNote = practiceNoteContainer.querySelector('.current-practice-note').textContent;
+                    
+                    if(detectedNote === targetNote) {
+                        tunerDisplay.classList.add('correct');
+                        detectedNoteEl.textContent = "Correct!";
+                    } else {
+                        tunerDisplay.classList.remove('correct');
+                    }
+
+                } else {
+                    detectedNoteEl.textContent = "--";
+                     tunerDisplay.classList.remove('correct');
+                }
+            }
+
+            async function toggleMicInput(enable) {
+                if (enable) {
+                    try {
+                        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                        micStream = stream;
+                        setupAudio();
+                        analyser = audioCtx.createAnalyser();
+                        analyser.fftSize = 2048;
+                        const source = audioCtx.createMediaStreamSource(stream);
+                        source.connect(analyser);
+                        tunerDisplay.classList.remove('hidden');
+                        pitchDetectionIntervalId = setInterval(updatePitch, 100);
+                    } catch (err) {
+                        alert("Microphone access denied. Please allow microphone access in your browser settings.");
+                        micEnableToggle.checked = false;
+                    }
+                } else {
+                    if(micStream) {
+                        micStream.getTracks().forEach(track => track.stop());
+                    }
+                    if(audioCtx && audioCtx.state !== 'closed') {
+                        audioCtx.close();
+                        audioCtx = null;
+                    }
+                    clearInterval(pitchDetectionIntervalId);
+                    tunerDisplay.classList.add('hidden');
+                }
+            }
+
 
             // --- UI Creation ---
             function createFretboard() {
@@ -968,6 +1094,9 @@
             });
             viewSwitchBtns.forEach(btn => {
                 btn.addEventListener('click', () => setView(btn.dataset.view));
+            });
+             micEnableToggle.addEventListener('change', (e) => {
+                toggleMicInput(e.target.checked);
             });
 
             createFretboard();
