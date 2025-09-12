@@ -5,7 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guitar Fretboard Trainer</title>
     <meta name="description" content="Master the guitar fretboard with an interactive trainer. Test your note knowledge with quizzes, practice with a metronome, and track your progress. Perfect for all guitar players.">
-    
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://fretmemo.net/">
+    <meta property="og:title" content="Guitar Fretboard Trainer">
+    <meta property="og:description" content="Master the guitar fretboard with an interactive trainer. Test your note knowledge with quizzes, practice with a metronome, and track your progress. Perfect for all guitar players.">
+    <meta property="og:image" content="https://fretmemo.net/fretmemo-preview.jpg">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://fretmemo.net/">
+    <meta property="twitter:title" content="Guitar Fretboard Trainer">
+    <meta property="twitter:description" content="Master the guitar fretboard with an interactive trainer. Test your note knowledge with quizzes, practice with a metronome, and track your progress. Perfect for all guitar players.">
+    <meta property="twitter:image" content="https://fretmemo.net/fretmemo-preview.jpg">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -42,9 +56,8 @@
             transform: translateX(-100%);
             transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             z-index: 100;
-            display: flex;
-            flex-direction: column;
             padding: 1.5rem;
+            overflow-y: auto;
         }
         
         #main-content {
@@ -166,7 +179,7 @@
             font-weight: bold;
         }
     </style>
-    
+
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-QVM7JS1NZW"></script>
     <script>
@@ -176,7 +189,6 @@
 
       gtag('config', 'G-QVM7JS1NZW');
     </script>
-    
 </head>
 <body class="panel-hidden">
 
@@ -958,7 +970,4 @@
     </script>
 </body>
 </html>
-
-
-
 
