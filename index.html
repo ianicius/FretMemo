@@ -437,7 +437,8 @@
             let audioCtx;
             let analyser;
             let micStream;
-            let pitchDetectionIntervalId;
+            let pitchDetectionFrameId;
+            let isPitchDetectionRunning = false;
             let correctCount = 0;
             let incorrectCount = 0;
             let noteMistakes = {};
@@ -447,23 +448,24 @@
             const noteStrings = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
             
             function setupAudio() {
-                if (!audioCtx && (window.AudioContext || window.webkitAudioContext)) {
+                if (!audioCtx) {
                     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 }
             }
 
             function playTick() {
-                if (!audioCtx) return;
-                const oscillator = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
+                const tickCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = tickCtx.createOscillator();
+                const gainNode = tickCtx.createGain();
                 oscillator.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
+                gainNode.connect(tickCtx.destination);
                 oscillator.type = 'triangle';
-                oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
-                gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-                oscillator.start(audioCtx.currentTime);
-                oscillator.stop(audioCtx.currentTime + 0.05);
+                oscillator.frequency.setValueAtTime(880, tickCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.5, tickCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, tickCtx.currentTime + 0.05);
+                oscillator.start(tickCtx.currentTime);
+                oscillator.stop(tickCtx.currentTime + 0.05);
+                setTimeout(() => tickCtx.close(), 100);
             }
             
             function noteFromPitch(frequency) {
@@ -479,7 +481,7 @@
                     rms += val * val;
                 }
                 rms = Math.sqrt(rms / SIZE);
-                if (rms < 0.01) return -1;
+                if (rms < 0.02) return -1;
 
                 let r1 = 0, r2 = SIZE - 1, thres = 0.2;
                 for (let i = 0; i < SIZE / 2; i++) {
@@ -517,7 +519,8 @@
                 return sampleRate / T0;
             }
             
-            function updatePitch() {
+            function runPitchDetection() {
+                if (!isPitchDetectionRunning) return;
                 const buffer = new Float32Array(analyser.fftSize);
                 analyser.getFloatTimeDomainData(buffer);
                 const fundamental = autoCorrelate(buffer, audioCtx.sampleRate);
@@ -538,6 +541,7 @@
                     detectedNoteEl.textContent = "--";
                      tunerDisplay.classList.remove('correct');
                 }
+                pitchDetectionFrameId = requestAnimationFrame(runPitchDetection);
             }
 
             async function toggleMicInput(enable) {
@@ -551,20 +555,23 @@
                         const source = audioCtx.createMediaStreamSource(stream);
                         source.connect(analyser);
                         tunerDisplay.classList.remove('hidden');
-                        pitchDetectionIntervalId = setInterval(updatePitch, 100);
+                        isPitchDetectionRunning = true;
+                        runPitchDetection();
                     } catch (err) {
+                        console.error("Microphone access error:", err);
                         alert("Microphone access denied. Please allow microphone access in your browser settings.");
                         micEnableToggle.checked = false;
                     }
                 } else {
+                    isPitchDetectionRunning = false;
+                    cancelAnimationFrame(pitchDetectionFrameId);
                     if(micStream) {
                         micStream.getTracks().forEach(track => track.stop());
+                        micStream = null;
                     }
                     if(audioCtx && audioCtx.state !== 'closed') {
-                        audioCtx.close();
-                        audioCtx = null;
+                         audioCtx.suspend();
                     }
-                    clearInterval(pitchDetectionIntervalId);
                     tunerDisplay.classList.add('hidden');
                 }
             }
@@ -925,9 +932,9 @@
             }
 
             function toggleMetronome() {
-                setupAudio();
                 isMetronomeOn = !isMetronomeOn;
                 if (isMetronomeOn) {
+                    setupAudio();
                     metronomeBtn.textContent = 'Stop Metronome';
                     metronomeBtn.classList.replace('bg-blue-500', 'bg-red-500');
                     metronomeBtn.classList.replace('hover:bg-blue-600', 'hover:bg-red-600');
