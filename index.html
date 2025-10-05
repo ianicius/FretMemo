@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guitar Fretboard Trainer</title>
+    <title>Guitar Fretboard Trainer - Fretboard Memorization & Note Learning Tool</title>
     <meta name="description" content="Master the guitar fretboard with an interactive trainer. Test your note knowledge with quizzes, practice with a metronome, and track your progress. Perfect for all guitar players.">
     <link rel="canonical" href="https://fretmemo.net/" />
 
@@ -44,6 +44,10 @@
             --accent-color: #60a5fa;
             --accent-color-translucent: rgba(96, 165, 250, 0.3);
             --border-color: #374151;
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
@@ -369,6 +373,40 @@
       }
     }
     </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [{
+        "@type": "Question",
+        "name": "Why is fretboard memorization so important for guitar players?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Fretboard memorization is crucial because it bridges the gap between music theory and practical playing. When you know the notes instantly, you can build chords, understand scales, and improvise freely without guessing. It's the foundation for becoming a more creative and confident musician."
+        }
+      },{
+        "@type": "Question",
+        "name": "How does the 'Guess the Note' mode work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "This mode uses active recall, a powerful learning technique. The tool highlights a random note on the fretboard, and your task is to identify it. This forces your brain to retrieve information, strengthening neural pathways and making notes learning much faster than passive review."
+        }
+      },{
+        "@type": "Question",
+        "name": "What's the best way to use the 'Playing Practice' mode?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Start with a slow tempo using the metronome. The tool will show you a note to play. The goal is to find and play it on your actual guitar before the next beat. You can enable the microphone to get real-time feedback. This mode is perfect for connecting theoretical knowledge with physical muscle memory."
+        }
+      },{
+        "@type": "Question",
+        "name": "Is this random note generator completely free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, this tool is 100% free to use. It was created to provide a high-quality practice resource for all guitar players who want to master their instrument."
+        }
+      }]
+    }</script>
 </head>
 <body class="panel-hidden">
 
@@ -492,6 +530,8 @@
             <p class="text-sm" style="color: var(--text-light);">
                 Feedback: 
                 <a href="mailto:raf.janicki@gmail.com" class="underline hover:text-accent-color">raf.janicki@gmail.com</a>
+                <span class="mx-2">|</span>
+                <a href="#faq-section" class="underline hover:text-accent-color">FAQ</a>
             </p>
             <a href='https://ko-fi.com/ianix' target='_blank' class="mt-4 inline-block">
                 <img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi2.png?v=3' border='0' alt='Buy Me a Coffee at ko-fi.com' />
@@ -500,13 +540,13 @@
     </div>
 
     <!-- Main Content -->
-    <div id="main-content" class="min-h-screen flex items-center justify-center">
+    <main id="main-content" class="min-h-screen flex flex-col items-center justify-center">
         <div class="w-full max-w-6xl mx-auto text-center p-4">
-            <header class="mb-4">
-                <h1 class="text-4xl font-bold" style="color: var(--text-dark);">Guitar Fretboard Trainer</h1>
-                <p class="mt-2" style="color: var(--text-light);">Choose your training mode</p>
+            <header class="mb-8">
+                <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight" style="color: var(--text-dark);">Interactive Fretboard Trainer for Guitar Note Learning</h1>
+                <p class="mt-3 text-lg" style="color: var(--text-light);">Choose your training mode below or scroll down for details</p>
                 <!-- Module Switcher -->
-                <div role="tablist" aria-label="Training Mode" class="mt-4 flex justify-center bg-gray-100 p-1 rounded-lg max-w-sm mx-auto" style="background-color: var(--bg-panel);">
+                <div role="tablist" aria-label="Training Mode" class="mt-6 flex justify-center bg-gray-100 p-1 rounded-lg max-w-sm mx-auto" style="background-color: var(--bg-panel);">
                     <button role="tab" aria-selected="true" data-module="guessNote" class="switcher-btn module-switch-btn active w-1/2 p-2 rounded-md transition-colors">Guess the Note</button>
                     <button role="tab" aria-selected="false" data-module="playPractice" class="switcher-btn module-switch-btn w-1/2 p-2 rounded-md transition-colors">Playing Practice</button>
                 </div>
@@ -579,7 +619,7 @@
                 </button>
             </div>
         </div>
-    </div>
+    </main>
 
     <div id="stats-modal-overlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
         <div id="stats-modal" role="dialog" aria-modal="true" aria-labelledby="stats-modal-title" class="rounded-lg shadow-2xl w-full max-w-md border" style="background-color: var(--bg-light); border-color: var(--border-color);">
@@ -590,6 +630,43 @@
             <div id="stats-content" class="p-6 max-h-80 overflow-y-auto"></div>
         </div>
     </div>
+
+    <section class="w-full max-w-3xl mx-auto text-left p-4 my-8" aria-labelledby="trainer-description-title">
+        <h2 id="trainer-description-title" class="text-2xl font-bold mb-4" style="color: var(--text-dark);">Master the Guitar Neck with FretMemo</h2>
+        <p class="text-lg" style="color: var(--text-light);">
+            Forgetting notes on the fretboard is a common hurdle in **guitar learning**. Our interactive trainer is designed to solve that. Using proven methods like spaced repetition and active recall, this tool accelerates your **fretboard memorization**. The built-in **random note generator** keeps your practice sessions fresh and effective, preventing you from falling into familiar patterns. Whether you want to improve your improvisation, understand music theory better, or simply play with more confidence, mastering the notes is the key. Start your journey to full fretboard fluency today! For more details, check out our FAQ section below.
+        </p>
+    </section>
+
+    <section id="faq-section" class="w-full max-w-3xl mx-auto p-4 my-8" aria-labelledby="faq-title">
+        <h2 id="faq-title" class="text-3xl font-bold text-center mb-6" style="color: var(--text-dark);">Frequently Asked Questions (FAQ)</h2>
+        <div class="space-y-4">
+            <details class="p-4 rounded-lg border" style="background-color: var(--bg-panel); border-color: var(--border-color);">
+                <summary class="font-semibold text-lg cursor-pointer" style="color: var(--text-dark);">Why is fretboard memorization so important for guitar players?</summary>
+                <p class="mt-2" style="color: var(--text-light);">
+                    Fretboard memorization is crucial because it bridges the gap between music theory and practical playing. When you know the notes instantly, you can build chords, understand scales, and improvise freely without guessing. It's the foundation for becoming a more creative and confident musician.
+                </p>
+            </details>
+            <details class="p-4 rounded-lg border" style="background-color: var(--bg-panel); border-color: var(--border-color);">
+                <summary class="font-semibold text-lg cursor-pointer" style="color: var(--text-dark);">How does the "Guess the Note" mode work?</summary>
+                <p class="mt-2" style="color: var(--text-light);">
+                    This mode uses active recall, a powerful learning technique. The tool highlights a random note on the fretboard, and your task is to identify it. This forces your brain to retrieve information, strengthening neural pathways and making **notes learning** much faster than passive review.
+                </p>
+            </details>
+            <details class="p-4 rounded-lg border" style="background-color: var(--bg-panel); border-color: var(--border-color);">
+                <summary class="font-semibold text-lg cursor-pointer" style="color: var(--text-dark);">What's the best way to use the "Playing Practice" mode?</summary>
+                <p class="mt-2" style="color: var(--text-light);">
+                    Start with a slow tempo using the metronome. The tool will show you a note to play. The goal is to find and play it on your actual guitar before the next beat. You can enable the microphone to get real-time feedback. This mode is perfect for connecting theoretical knowledge with physical muscle memory.
+                </p>
+            </details>
+             <details class="p-4 rounded-lg border" style="background-color: var(--bg-panel); border-color: var(--border-color);">
+                <summary class="font-semibold text-lg cursor-pointer" style="color: var(--text-dark);">Is this random note generator completely free?</summary>
+                <p class="mt-2" style="color: var(--text-light);">
+                    Yes, this tool is 100% free to use. It was created to provide a high-quality practice resource for all guitar players who want to master their instrument.
+                </p>
+            </details>
+        </div>
+    </section>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -971,20 +1048,28 @@
                 }
                 if (allOccurrences.length === 0) return null;
 
+                // Priorytet: inna struna niż obecna
+                let differentStringOccurrences = allOccurrences.filter(p => p.string !== currentPos.string);
+                
+                // Fallback: jeśli wszystkie opcje są na tej samej strunie, użyj wszystkich
+                if (differentStringOccurrences.length === 0) {
+                    differentStringOccurrences = allOccurrences;
+                }
+
                 let candidates;
                 if (fretboardDirection === 'up') {
-                    candidates = allOccurrences.filter(p => p.fret > currentPos.fret);
+                    candidates = differentStringOccurrences.filter(p => p.fret > currentPos.fret);
                     if (candidates.length === 0) {
                         fretboardDirection = 'down';
-                        candidates = allOccurrences.filter(p => p.fret < currentPos.fret);
-                        if (candidates.length === 0) candidates = allOccurrences; // Fallback
+                        candidates = differentStringOccurrences.filter(p => p.fret < currentPos.fret);
+                        if (candidates.length === 0) candidates = differentStringOccurrences;
                     }
                 } else { // 'down'
-                    candidates = allOccurrences.filter(p => p.fret < currentPos.fret);
+                    candidates = differentStringOccurrences.filter(p => p.fret < currentPos.fret);
                     if (candidates.length === 0) {
                         fretboardDirection = 'up';
-                        candidates = allOccurrences.filter(p => p.fret > currentPos.fret);
-                        if (candidates.length === 0) candidates = allOccurrences; // Fallback
+                        candidates = differentStringOccurrences.filter(p => p.fret > currentPos.fret);
+                        if (candidates.length === 0) candidates = differentStringOccurrences;
                     }
                 }
                 
