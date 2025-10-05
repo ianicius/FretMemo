@@ -24,6 +24,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
     <style>
         :root {
             --bg-light: #ffffff;
@@ -90,7 +95,7 @@
              transform: translateX(320px);
         }
 
-        /* --- Fretboard --- */
+        /* --- Fretboard 2D --- */
         #fretboard {
             background: var(--bg-light);
             border: 2px solid var(--text-dark);
@@ -99,7 +104,6 @@
         .fret { 
             border-right: 2px solid #a0a0a0; 
         }
-        /* This is the "nut" */
         .fret[data-fret='0'] {
             border-right-width: 6px;
             border-right-color: var(--text-dark);
@@ -179,13 +183,23 @@
             color: var(--accent-color);
             font-weight: bold;
         }
+        
+        #fretboard-3d-container {
+            height: 240px;
+            margin-top: 1rem;
+            margin-bottom: 2rem;
+            cursor: grab;
+        }
+        #fretboard-3d-container:active {
+            cursor: grabbing;
+        }
 
-        /* --- Tuner Display --- */
         #tuner-display.correct {
             background-color: #dcfce7;
             border-color: #4ade80;
             color: #166534;
         }
+
     </style>
 
     <!-- Google tag (gtag.js) -->
@@ -246,14 +260,29 @@
                         <label for="interval-select" class="block text-left text-sm font-medium mb-1 text-gray-600">Note Sequence</label>
                         <select id="interval-select" class="w-full rounded-md">
                             <option value="random">Random</option>
-                            <option value="thirds">Thirds</option>
+                            <option value="minorThird">Minor Third</option>
+                            <option value="majorThird">Major Third</option>
+                            <option value="fourths">Fourths</option>
                             <option value="fifths">Fifths</option>
                             <option value="sevenths">Sevenths</option>
                         </select>
                     </div>
-                     <div class="flex items-center">
+                    <div class="flex items-center">
                         <input type="checkbox" id="mic-enable-toggle" class="h-4 w-4 rounded focus:ring-0">
                         <label for="mic-enable-toggle" class="ml-2 text-sm font-medium text-gray-600">Enable Microphone Input</label>
+                    </div>
+                </div>
+            </div>
+             <div id="view-3d-settings-container" class="border-t border-gray-300 pt-4 mt-5 hidden">
+                 <h3 class="text-md font-semibold text-gray-700 mb-3">3D View Settings</h3>
+                 <div class="space-y-3">
+                     <div>
+                        <label for="angle-x-slider" class="block text-left text-sm font-medium mb-1 text-gray-600">Pochylenie (Góra/Dół)</label>
+                        <input type="range" id="angle-x-slider" min="-90" max="90" value="0" class="w-full rounded-lg appearance-none cursor-pointer">
+                    </div>
+                    <div>
+                        <label for="angle-y-slider" class="block text-left text-sm font-medium mb-1 text-gray-600">Obrót (Lewo/Prawo)</label>
+                        <input type="range" id="angle-y-slider" min="-90" max="90" value="0" class="w-full rounded-lg appearance-none cursor-pointer">
                     </div>
                 </div>
             </div>
@@ -310,10 +339,11 @@
             </header>
 
             <div id="view-switcher-container">
-                <div class="mt-4 flex justify-center bg-gray-100 p-1 rounded-lg max-w-md mx-auto">
-                    <button data-view="fretboard" class="switcher-btn view-switch-btn active w-1/3 p-2 rounded-md transition-colors text-sm">Fretboard → Note</button>
-                    <button data-view="tab" class="switcher-btn view-switch-btn w-1/3 p-2 rounded-md transition-colors text-sm">Tab → Note</button>
-                    <button data-view="noteToTab" class="switcher-btn view-switch-btn w-1/3 p-2 rounded-md transition-colors text-sm">Note → Tab</button>
+                <div class="mt-4 flex justify-center bg-gray-100 p-1 rounded-lg max-w-xl mx-auto">
+                    <button data-view="fretboard" class="switcher-btn view-switch-btn active w-1/4 p-2 rounded-md transition-colors text-sm">Fretboard → Note</button>
+                    <button data-view="fretboard3d" class="switcher-btn view-switch-btn w-1/4 p-2 rounded-md transition-colors text-sm">3D Fretboard</button>
+                    <button data-view="tab" class="switcher-btn view-switch-btn w-1/4 p-2 rounded-md transition-colors text-sm">Tab → Note</button>
+                    <button data-view="noteToTab" class="switcher-btn view-switch-btn w-1/4 p-2 rounded-md transition-colors text-sm">Note → Tab</button>
                 </div>
             </div>
             
@@ -321,6 +351,8 @@
                 <div id="fretboard" class="rounded-lg shadow-lg py-2" style="grid-template-rows: repeat(6, 1fr);"></div>
                 <div id="fret-numbers" class="relative mt-1"><div class="grid"></div></div>
             </div>
+
+            <div id="fretboard-3d-container" class="hidden"></div>
 
             <div id="tab-container" class="hidden relative w-full max-w-xl mx-auto pb-8 mt-4 font-mono text-xl p-4">
                  <!-- Tablature view will be generated here -->
@@ -381,7 +413,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             // --- Data Model ---
             const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-            const tuning = ['E', 'B', 'G', 'D', 'A', 'E'];
+            const tuning = ['E', 'B', 'G', 'D', 'A', 'E']; // High E to Low E
             const FRET_COUNT = 12;
 
             // --- DOM Elements ---
@@ -421,9 +453,10 @@
             const noteToTabQuestionContainer = document.getElementById('note-to-tab-question-container');
             const practiceSettingsContainer = document.getElementById('practice-settings-container');
             const intervalSelect = document.getElementById('interval-select');
-            const micEnableToggle = document.getElementById('mic-enable-toggle');
-            const tunerDisplay = document.getElementById('tuner-display');
-            const detectedNoteEl = document.getElementById('detected-note');
+            const fretboard3DContainer = document.getElementById('fretboard-3d-container');
+            const view3DSettingsContainer = document.getElementById('view-3d-settings-container');
+            const angleXSlider = document.getElementById('angle-x-slider');
+            const angleYSlider = document.getElementById('angle-y-slider');
             
             // --- Application State ---
             let currentModule = 'guessNote';
@@ -435,18 +468,16 @@
             let speedUpTickCounter = 0;
             let noteTickCounter = 0;
             let audioCtx;
-            let analyser;
-            let micStream;
-            let pitchDetectionFrameId;
-            let isPitchDetectionRunning = false;
             let correctCount = 0;
             let incorrectCount = 0;
             let noteMistakes = {};
             let nextPracticeNote = null;
-
-            // --- Audio & Pitch Detection Logic ---
-            const noteStrings = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
             
+            // --- 3D Scene State ---
+            let threeScene, camera, renderer, controls, fretboardGroup, noteHighlight;
+            let is3DInitialized = false;
+
+            // --- Audio Logic ---
             function setupAudio() {
                 if (!audioCtx) {
                     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -454,130 +485,132 @@
             }
 
             function playTick() {
-                const tickCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = tickCtx.createOscillator();
-                const gainNode = tickCtx.createGain();
+                if (!audioCtx) setupAudio();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
                 oscillator.connect(gainNode);
-                gainNode.connect(tickCtx.destination);
+                gainNode.connect(audioCtx.destination);
                 oscillator.type = 'triangle';
-                oscillator.frequency.setValueAtTime(880, tickCtx.currentTime);
-                gainNode.gain.setValueAtTime(0.5, tickCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, tickCtx.currentTime + 0.05);
-                oscillator.start(tickCtx.currentTime);
-                oscillator.stop(tickCtx.currentTime + 0.05);
-                setTimeout(() => tickCtx.close(), 100);
+                oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                oscillator.start(audioCtx.currentTime);
+                oscillator.stop(audioCtx.currentTime + 0.05);
             }
             
-            function noteFromPitch(frequency) {
-                const noteNum = 12 * (Math.log(frequency / 440) / Math.log(2));
-                return noteStrings[Math.round(noteNum + 69) % 12];
-            }
-
-            function autoCorrelate(buf, sampleRate) {
-                const SIZE = buf.length;
-                let rms = 0;
-                for (let i = 0; i < SIZE; i++) {
-                    const val = buf[i];
-                    rms += val * val;
-                }
-                rms = Math.sqrt(rms / SIZE);
-                if (rms < 0.02) return -1;
-
-                let r1 = 0, r2 = SIZE - 1, thres = 0.2;
-                for (let i = 0; i < SIZE / 2; i++) {
-                    if (Math.abs(buf[i]) < thres) { r1 = i; break; }
-                }
-                for (let i = 1; i < SIZE / 2; i++) {
-                    if (Math.abs(buf[SIZE - i]) < thres) { r2 = SIZE - i; break; }
-                }
-
-                buf = buf.slice(r1, r2);
-                const newSize = buf.length;
-                const c = new Array(newSize).fill(0);
-                for (let i = 0; i < newSize; i++) {
-                    for (let j = 0; j < newSize - i; j++) {
-                        c[i] = c[i] + buf[j] * buf[j + i];
-                    }
-                }
-
-                let d = 0;
-                while (d < c.length && c[d] > c[d + 1]) d++;
-                let maxval = -1, maxpos = -1;
-                for (let i = d; i < c.length; i++) {
-                    if (c[i] > maxval) {
-                        maxval = c[i];
-                        maxpos = i;
-                    }
-                }
-                let T0 = maxpos;
-
-                const x1 = c[T0 - 1], x2 = c[T0], x3 = c[T0 + 1];
-                const a = (x1 + x3 - 2 * x2) / 2;
-                const b = (x3 - x1) / 2;
-                if (a) T0 = T0 - b / (2 * a);
-
-                return sampleRate / T0;
-            }
-            
-            function runPitchDetection() {
-                if (!isPitchDetectionRunning) return;
-                const buffer = new Float32Array(analyser.fftSize);
-                analyser.getFloatTimeDomainData(buffer);
-                const fundamental = autoCorrelate(buffer, audioCtx.sampleRate);
+            // --- 3D Scene Logic ---
+            function init3D() {
+                if (is3DInitialized) return;
                 
-                if (fundamental !== -1) {
-                    const detectedNote = noteFromPitch(fundamental);
-                    detectedNoteEl.textContent = detectedNote;
-                    const targetNote = practiceNoteContainer.querySelector('.current-practice-note').textContent;
-                    
-                    if(detectedNote === targetNote) {
-                        tunerDisplay.classList.add('correct');
-                        detectedNoteEl.textContent = "Correct!";
-                    } else {
-                        tunerDisplay.classList.remove('correct');
-                    }
+                threeScene = new THREE.Scene();
+                threeScene.background = new THREE.Color(0xffffff);
 
-                } else {
-                    detectedNoteEl.textContent = "--";
-                     tunerDisplay.classList.remove('correct');
+                camera = new THREE.PerspectiveCamera(45, fretboard3DContainer.clientWidth / fretboard3DContainer.clientHeight, 0.1, 1000);
+                camera.position.set(0, 15, 25);
+                
+                renderer = new THREE.WebGLRenderer({ antialias: true });
+                renderer.setSize(fretboard3DContainer.clientWidth, fretboard3DContainer.clientHeight);
+                fretboard3DContainer.appendChild(renderer.domElement);
+
+                controls = new THREE.OrbitControls(camera, renderer.domElement);
+                controls.enableDamping = true;
+                controls.dampingFactor = 0.1;
+                controls.screenSpacePanning = false;
+                controls.minDistance = 5;
+                controls.maxDistance = 50;
+
+                // Lights
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+                threeScene.add(ambientLight);
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                directionalLight.position.set(5, 10, 7.5);
+                threeScene.add(directionalLight);
+
+                fretboardGroup = new THREE.Group();
+                
+                // Neck
+                const neckGeometry = new THREE.BoxGeometry(30, 0.5, 4);
+                const neckMaterial = new THREE.MeshStandardMaterial({ color: 0x4a2c20 });
+                const neck = new THREE.Mesh(neckGeometry, neckMaterial);
+                fretboardGroup.add(neck);
+
+                // Frets
+                const fretMaterial = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.8, roughness: 0.2 });
+                const fretHeight = 0.2;
+                for (let i = 0; i <= FRET_COUNT; i++) {
+                    const fretGeometry = new THREE.BoxGeometry(0.1, fretHeight, 4.2);
+                    const fret = new THREE.Mesh(fretGeometry, fretMaterial);
+                    const fretX = -14.25 + (i * 2.3);
+                    fret.position.set(fretX, 0.25 + fretHeight / 2, 0);
+                    fretboardGroup.add(fret);
                 }
-                pitchDetectionFrameId = requestAnimationFrame(runPitchDetection);
+
+                // Strings
+                const stringMaterial = new THREE.MeshStandardMaterial({ color: 0xeeeeee, metalness: 0.9, roughness: 0.1 });
+                const stringRadii = [0.02, 0.025, 0.03, 0.035, 0.04, 0.045];
+                for (let i = 0; i < 6; i++) {
+                    const stringGeometry = new THREE.CylinderGeometry(stringRadii[i], stringRadii[i], 30, 8);
+                    const string = new THREE.Mesh(stringGeometry, stringMaterial);
+                    string.rotation.z = Math.PI / 2;
+                    string.position.y = 0.55;
+                    string.position.z = -1.5 + (i * 0.6);
+                    fretboardGroup.add(string);
+                }
+
+                // Markers
+                const markerMaterial = new THREE.MeshStandardMaterial({ color: 0xf0f0f0 });
+                const markerGeometry = new THREE.CircleGeometry(0.2, 16);
+                const markers = { 3: [0], 5: [0], 7: [0], 9: [0], 12: [-0.9, 0.9] };
+                for (const fret in markers) {
+                    markers[fret].forEach(posZ => {
+                        const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+                        marker.rotation.x = -Math.PI / 2;
+                        const fretX = -14.25 + (fret * 2.3) - 1.15;
+                        marker.position.set(fretX, 0.51, posZ);
+                        fretboardGroup.add(marker);
+                    });
+                }
+                
+                threeScene.add(fretboardGroup);
+
+                const highlightGeo = new THREE.SphereGeometry(0.3, 16, 16);
+                const highlightMat = new THREE.MeshBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.7 });
+                noteHighlight = new THREE.Mesh(highlightGeo, highlightMat);
+                noteHighlight.visible = false;
+                threeScene.add(noteHighlight);
+                
+                animate3D();
+                is3DInitialized = true;
             }
 
-            async function toggleMicInput(enable) {
-                if (enable) {
-                    try {
-                        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                        micStream = stream;
-                        setupAudio();
-                        analyser = audioCtx.createAnalyser();
-                        analyser.fftSize = 2048;
-                        const source = audioCtx.createMediaStreamSource(stream);
-                        source.connect(analyser);
-                        tunerDisplay.classList.remove('hidden');
-                        isPitchDetectionRunning = true;
-                        runPitchDetection();
-                    } catch (err) {
-                        console.error("Microphone access error:", err);
-                        alert("Microphone access denied. Please allow microphone access in your browser settings.");
-                        micEnableToggle.checked = false;
-                    }
-                } else {
-                    isPitchDetectionRunning = false;
-                    cancelAnimationFrame(pitchDetectionFrameId);
-                    if(micStream) {
-                        micStream.getTracks().forEach(track => track.stop());
-                        micStream = null;
-                    }
-                    if(audioCtx && audioCtx.state !== 'closed') {
-                         audioCtx.suspend();
-                    }
-                    tunerDisplay.classList.add('hidden');
+            function animate3D() {
+                requestAnimationFrame(animate3D);
+                controls.update();
+                renderer.render(threeScene, camera);
+            }
+
+            function onWindowResize() {
+                if (!is3DInitialized) return;
+                camera.aspect = fretboard3DContainer.clientWidth / fretboard3DContainer.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(fretboard3DContainer.clientWidth, fretboard3DContainer.clientHeight);
+            }
+            window.addEventListener('resize', onWindowResize);
+
+            function update3DHighlight(string, fret) {
+                if (!is3DInitialized) return;
+                if(string === null || fret === null) {
+                    noteHighlight.visible = false;
+                    return;
                 }
+                const fretX = -14.25 + (fret * 2.3) - (fret > 0 ? 1.15 : 0);
+                const stringZ = -1.5 + ((5-string) * 0.6);
+                noteHighlight.position.set(fretX, 0.6, stringZ);
+                noteHighlight.visible = true;
             }
 
 
-            // --- UI Creation ---
+            // --- Core Logic ---
             function createFretboard() {
                 fretboardEl.innerHTML = '';
                 fretNumbersEl.innerHTML = '';
@@ -585,17 +618,17 @@
                 const gridTemplate = `5% repeat(${FRET_COUNT}, 1fr)`; 
                 fretboardEl.style.gridTemplateColumns = gridTemplate;
                 fretNumbersEl.style.gridTemplateColumns = gridTemplate;
-                const stringThickness = [1, 1.2, 1.5, 1.8, 2.1, 2.4];
+                const stringThickness = [1, 1.2, 1.5, 1.8, 2.1, 2.4]; 
 
-                for (let i = 0; i < tuning.length; i++) {
+                for (let i = 0; i < tuning.length; i++) { 
                     for (let j = 0; j <= FRET_COUNT; j++) {
                         const fretEl = document.createElement('div');
                         fretEl.classList.add('fret', 'relative', 'flex', 'items-center', 'justify-center', 'h-12');
-                        fretEl.dataset.string = i;
+                        fretEl.dataset.string = i; 
                         fretEl.dataset.fret = j;
                         const stringLine = document.createElement('div');
                         stringLine.classList.add('string-line', 'w-full', 'absolute');
-                        stringLine.style.height = `${stringThickness[i]}px`;
+                        stringLine.style.height = `${stringThickness[i]}px`; 
                         fretEl.appendChild(stringLine);
                         fretboardEl.appendChild(fretEl);
                     }
@@ -641,8 +674,7 @@
                     tabContainer.appendChild(stringEl);
                 });
             }
-
-            // --- Core Logic ---
+            
             function getNote(stringIndex, fretNumber) {
                 const openNote = tuning[stringIndex];
                 const openNoteIndex = notes.indexOf(openNote);
@@ -688,17 +720,23 @@
 
                 let interval;
                 switch (intervalType) {
-                    case 'thirds':
-                        interval = Math.random() < 0.5 ? 3 : 4; // Minor or Major Third
+                    case 'minorThird':
+                        interval = 3;
+                        break;
+                    case 'majorThird':
+                        interval = 4;
+                        break;
+                    case 'fourths':
+                        interval = 5;
                         break;
                     case 'fifths':
-                        interval = 7; // Perfect Fifth
+                        interval = 7; 
                         break;
                     case 'sevenths':
-                        interval = Math.random() < 0.5 ? 10 : 11; // Minor or Major Seventh
+                        interval = Math.random() < 0.5 ? 10 : 11; 
                         break;
                     default:
-                        return null; // Should not happen if called correctly
+                        return null; 
                 }
                 const nextNoteIndex = (currentNoteIndex + interval) % 12;
                 return notes[nextNoteIndex];
@@ -715,7 +753,7 @@
                 feedbackEl.textContent = '';
                 
                 if (currentModule === 'guessNote') {
-                    if (currentView === 'fretboard' || currentView === 'tab') {
+                    if (currentView === 'fretboard' || currentView === 'tab' || currentView === 'fretboard3d') {
                         const targetNote = activeNotes[Math.floor(Math.random() * activeNotes.length)];
                         const occurrences = [];
                         for (let i = 0; i < tuning.length; i++) {
@@ -730,6 +768,7 @@
                         correctAnswer = targetNote;
                         
                         if (currentView === 'fretboard') {
+                             update3DHighlight(null, null);
                             const highlightedFret = fretboardEl.querySelector('.highlighted');
                             if (highlightedFret) {
                                 const oldDot = highlightedFret.querySelector('#highlight-dot');
@@ -742,12 +781,15 @@
                             highlightDot.classList.add('w-8', 'h-8', 'rounded-full', 'z-10');
                             targetFret.appendChild(highlightDot);
                             targetFret.classList.add('highlighted');
-                        } else { // Tab view
+                        } else if (currentView === 'tab') {
+                            update3DHighlight(null, null);
                             tabContainer.querySelectorAll('.tab-fret-number').forEach(el => el.textContent = '-');
                             const targetStringEl = tabContainer.querySelector(`.tab-string[data-string-index='${randomString}'] .tab-fret-number`);
                             if (targetStringEl) {
                                 targetStringEl.textContent = randomFret;
                             }
+                        } else if(currentView === 'fretboard3d') {
+                            update3DHighlight(randomString, randomFret);
                         }
 
                         const options = new Set([correctAnswer]);
@@ -765,6 +807,7 @@
                         });
 
                     } else if (currentView === 'noteToTab') {
+                        update3DHighlight(null, null);
                         const targetNote = activeNotes[Math.floor(Math.random() * activeNotes.length)];
                         noteToTabQuestionContainer.querySelector('.current-practice-note').textContent = targetNote;
 
@@ -1007,11 +1050,20 @@
                     currentView = viewName;
                     viewSwitchBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.view === viewName));
                 }
-
+                
+                view3DSettingsContainer.classList.toggle('hidden', viewName !== 'fretboard3d');
                 fretboardContainer.classList.toggle('hidden', viewName !== 'fretboard');
                 tabContainer.classList.toggle('hidden', viewName !== 'tab');
                 noteToTabQuestionContainer.classList.toggle('hidden', viewName !== 'noteToTab');
+                fretboard3DContainer.classList.toggle('hidden', viewName !== 'fretboard3d');
                 answerOptionsEl.classList.toggle('hidden', currentModule !== 'guessNote');
+
+                if (viewName === 'fretboard3d') {
+                    init3D();
+                    onWindowResize(); // Adjust size on view switch
+                } else {
+                    update3DHighlight(null, null); // Hide highlight when switching away from 3D
+                }
 
                 newQuestion();
             }
@@ -1102,9 +1154,13 @@
             viewSwitchBtns.forEach(btn => {
                 btn.addEventListener('click', () => setView(btn.dataset.view));
             });
-             micEnableToggle.addEventListener('change', (e) => {
-                toggleMicInput(e.target.checked);
+            angleXSlider.addEventListener('input', (e) => {
+                if(fretboardGroup) fretboardGroup.rotation.x = THREE.MathUtils.degToRad(e.target.value);
             });
+            angleYSlider.addEventListener('input', (e) => {
+                if(fretboardGroup) fretboardGroup.rotation.y = THREE.MathUtils.degToRad(e.target.value);
+            });
+
 
             createFretboard();
             createTabView();
