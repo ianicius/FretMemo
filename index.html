@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guitar Fretboard Trainer</title>
     <meta name="description" content="Master the guitar fretboard with an interactive trainer. Test your note knowledge with quizzes, practice with a metronome, and track your progress. Perfect for all guitar players.">
+    <link rel="canonical" href="https://fretmemo.net/" />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
@@ -30,8 +31,19 @@
             --bg-panel: #f7f7f7;
             --text-dark: #1f1f1f;
             --text-light: #6b7280;
-            --accent-color: #3b82f6; /* A simple, clean blue */
+            --accent-color: #3b82f6;
+            --accent-color-translucent: rgba(59, 130, 246, 0.3);
             --border-color: #e5e7eb;
+        }
+
+        body.dark {
+            --bg-light: #111827;
+            --bg-panel: #1f2937;
+            --text-dark: #f9fafb;
+            --text-light: #9ca3af;
+            --accent-color: #60a5fa;
+            --accent-color-translucent: rgba(96, 165, 250, 0.3);
+            --border-color: #374151;
         }
 
         body {
@@ -41,6 +53,12 @@
             color: var(--text-dark);
             overflow-x: hidden;
             position: relative;
+        }
+        
+        *:focus-visible {
+            outline: 3px solid var(--accent-color);
+            outline-offset: 2px;
+            border-radius: 0.25rem;
         }
 
         /* --- Side Panel --- */
@@ -59,6 +77,39 @@
             display: flex;
             flex-direction: column;
             padding: 1.5rem;
+        }
+        
+        #side-panel h2 {
+            font-size: 1.25rem;
+            padding-bottom: 0.75rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        #side-panel h3 {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+            color: var(--text-light);
+        }
+        
+        #side-panel label, #side-panel .label-text {
+             font-size: 0.875rem; /* 14px */
+             color: var(--text-dark);
+        }
+        
+        .setting-group {
+            padding-bottom: 1.25rem;
+            margin-bottom: 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .setting-group:last-of-type {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
         }
         
         #main-content {
@@ -85,6 +136,10 @@
             border: 1px solid var(--border-color);
             transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
+        
+        body.dark #settings-toggle-btn {
+            background-color: rgba(31, 41, 55, 0.8);
+        }
 
         body.panel-visible #settings-toggle-btn {
              transform: translateX(320px);
@@ -96,10 +151,18 @@
             border: 2px solid var(--text-dark);
             display: grid;
         }
+
+        /* Lefty Mode */
+        body.lefty #fretboard-container {
+            transform: scaleX(-1);
+        }
+        body.lefty .fret, body.lefty #fret-numbers > div > div {
+             transform: scaleX(-1);
+        }
+
         .fret { 
             border-right: 2px solid #a0a0a0; 
         }
-        /* This is the "nut" */
         .fret[data-fret='0'] {
             border-right-width: 6px;
             border-right-color: var(--text-dark);
@@ -110,6 +173,7 @@
         .string-line { background-color: #525252; }
         .marker-dot {
             background-color: #d4d4d4;
+            body.dark & { background-color: #4b5563; }
         }
 
         /* --- Note Highlight --- */
@@ -117,29 +181,90 @@
             background-color: transparent;
             border: 4px solid var(--accent-color);
             box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+            width: 2rem;
+            height: 2rem;
+            border-radius: 9999px;
+            z-index: 10;
+            position: absolute; /* Changed for performance */
+            pointer-events: none; /* Changed for performance */
         }
         
-        /* --- UI Elements --- */
+        /* --- Modern UI Elements in Panel --- */
+        input[type=range] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 4px;
+            background: var(--border-color);
+            border-radius: 9999px;
+            outline: none;
+        }
         input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none; appearance: none;
-            width: 18px; height: 18px;
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
             background: var(--accent-color);
-            cursor: pointer; border-radius: 50%;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid var(--bg-panel);
+            margin-top: -7px;
+            transition: transform 0.1s ease-in-out;
         }
-        input[type=range] { 
-            background-color: #d4d4d4; 
-            height: 0.375rem;
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
         }
-        input[type=number], input[type=checkbox], select {
+
+        input[type=number], select {
             background-color: var(--bg-light);
             border: 1px solid var(--border-color);
             color: var(--text-dark);
             font-size: 0.875rem;
+            border-radius: 0.375rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            padding: 0.5rem 0.75rem;
         }
-        input[type=number], select {
-            padding: 0.375rem;
+        input[type=number]:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px var(--accent-color-translucent);
         }
-        input[type=checkbox]:checked { background-color: var(--accent-color); }
+        
+        input[type=checkbox] {
+            -webkit-appearance: none;
+            appearance: none;
+            background-color: var(--bg-light);
+            margin: 0;
+            font: inherit;
+            color: var(--text-dark);
+            width: 1.25em;
+            height: 1.25em;
+            border: 1px solid var(--border-color);
+            border-radius: 0.25em;
+            transform: translateY(-0.075em);
+            display: grid;
+            place-content: center;
+            cursor: pointer;
+        }
+        input[type=checkbox]::before {
+            content: "";
+            width: 0.75em;
+            height: 0.75em;
+            transform: scale(0);
+            transition: 120ms transform ease-in-out;
+            box-shadow: inset 1em 1em var(--accent-color);
+            transform-origin: center;
+            clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+        }
+        input[type=checkbox]:checked::before {
+            transform: scale(1);
+        }
+        input[type=checkbox]:focus {
+             outline: none;
+        }
+         input[type=checkbox]:focus-visible {
+            box-shadow: 0 0 0 3px var(--accent-color-translucent);
+        }
         
         /* --- Switcher Buttons --- */
         .switcher-btn {
@@ -150,10 +275,17 @@
             color: var(--bg-light);
             font-weight: bold;
         }
+        .switcher-btn:focus {
+            outline: none;
+        }
+        .switcher-btn:focus-visible {
+            box-shadow: 0 0 0 3px var(--accent-color-translucent);
+            z-index: 1;
+        }
         
         /* --- Practice Note Display --- */
         .practice-note-container {
-            min-height: 288px; /* Height of fretboard + answer options */
+            min-height: 288px;
         }
         .current-practice-note {
             font-size: 10rem;
@@ -186,6 +318,11 @@
             border-color: #4ade80;
             color: #166534;
         }
+        body.dark #tuner-display.correct {
+             background-color: #166534;
+             border-color: #4ade80;
+             color: #dcfce7;
+        }
     </style>
 
     <!-- Google tag (gtag.js) -->
@@ -197,6 +334,24 @@
 
       gtag('config', 'G-QVM7JS1NZW');
     </script>
+    
+    <!-- Schema.org for WebApplication -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Guitar Fretboard Trainer",
+      "description": "Master the guitar fretboard with an interactive trainer. Test your note knowledge with quizzes, practice with a metronome, and track your progress. Perfect for all guitar players.",
+      "url": "https://fretmemo.net/",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Any",
+      "browserRequirements": "Requires HTML5 support",
+      "offers": {
+        "@type": "Offer",
+        "price": "0"
+      }
+    }
+    </script>
 </head>
 <body class="panel-hidden">
 
@@ -207,79 +362,100 @@
     
     <!-- Side Panel with Settings -->
     <div id="side-panel">
-        <div class="flex-grow overflow-y-auto">
-            <h2 class="text-xl font-bold text-gray-800 mb-4 border-b border-gray-300 pb-2">Settings</h2>
-            <div class="space-y-5">
-                <h3 class="text-md font-semibold text-gray-700">Metronome</h3>
-                <div>
-                    <div class="flex items-center justify-between mb-1">
-                        <label for="bpm-slider" class="text-sm font-medium text-gray-600">Tempo</label>
-                        <span id="bpm-display" class="text-md font-bold text-gray-800">60 BPM</span>
-                    </div>
-                    <input type="range" id="bpm-slider" min="30" max="280" value="60" class="w-full rounded-lg appearance-none cursor-pointer">
-                </div>
-                <div>
-                    <label for="note-duration" class="block text-left text-sm font-medium mb-1 text-gray-600">Note Duration (beats)</label>
-                    <input type="number" id="note-duration" value="1" min="1" class="w-full rounded-md text-center">
-                </div>
-                <div>
-                    <div class="flex items-center">
-                        <input type="checkbox" id="speed-up-toggle" class="h-4 w-4 rounded focus:ring-0">
-                        <label for="speed-up-toggle" class="ml-2 text-sm font-medium text-gray-600">Accelerate Automatically</label>
-                    </div>
-                    <div id="speed-up-controls" class="grid grid-cols-2 gap-3 mt-2 max-h-0 overflow-hidden opacity-0">
-                        <div>
-                            <label for="speed-up-amount" class="text-xs text-gray-500">By BPM</label>
-                            <input type="number" id="speed-up-amount" value="5" min="1" class="w-full rounded-md text-center">
+        <div class="flex-grow overflow-y-auto pr-2">
+            <h2 style="color: var(--text-dark);">Settings</h2>
+            
+            <div class="setting-group">
+                <h3>Metronome</h3>
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label for="bpm-slider" class="font-medium">Tempo</label>
+                            <span id="bpm-display" class="text-sm font-bold px-2 py-1 rounded-md" style="background-color: var(--bg-light); color: var(--text-dark);">60 BPM</span>
                         </div>
-                        <div>
-                            <label for="speed-up-interval" class="text-xs text-gray-500">Every X beats</label>
-                            <input type="number" id="speed-up-interval" value="8" min="1" class="w-full rounded-md text-center">
+                        <input type="range" id="bpm-slider" min="30" max="280" value="60" class="w-full">
+                    </div>
+                    <div>
+                        <label for="note-duration" class="block text-left font-medium mb-2">Note Duration (beats)</label>
+                        <input type="number" id="note-duration" value="1" min="1" class="w-full text-center">
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" id="speed-up-toggle">
+                            <label for="speed-up-toggle" class="font-medium">Accelerate Automatically</label>
+                        </div>
+                        <div id="speed-up-controls" class="grid grid-cols-2 gap-3 mt-3 max-h-0 overflow-hidden opacity-0 transition-all duration-300">
+                            <div>
+                                <label for="speed-up-amount" class="text-xs" style="color: var(--text-light);">By BPM</label>
+                                <input type="number" id="speed-up-amount" value="5" min="1" class="w-full rounded-md text-center mt-1">
+                            </div>
+                            <div>
+                                <label for="speed-up-interval" class="text-xs" style="color: var(--text-light);">Every X beats</label>
+                                <input type="number" id="speed-up-interval" value="8" min="1" class="w-full rounded-md text-center mt-1">
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div id="practice-settings-container" class="border-t border-gray-300 pt-4 mt-5 hidden">
-                 <h3 class="text-md font-semibold text-gray-700 mb-3">Practice Settings</h3>
-                 <div class="space-y-3">
+
+            <div id="practice-settings-container" class="setting-group hidden">
+                 <h3>Practice Settings</h3>
+                 <div class="space-y-4">
                     <div>
-                        <label for="interval-select" class="block text-left text-sm font-medium mb-1 text-gray-600">Note Sequence</label>
+                        <label for="interval-select" class="block text-left font-medium mb-2">Note Sequence</label>
                         <select id="interval-select" class="w-full rounded-md">
                             <option value="random">Random</option>
-                            <option value="thirds">Thirds</option>
+                            <option value="minorThirds">Minor Thirds</option>
+                            <option value="majorThirds">Major Thirds</option>
+                            <option value="fourths">Fourths</option>
                             <option value="fifths">Fifths</option>
                             <option value="sevenths">Sevenths</option>
                         </select>
                     </div>
-                     <div class="flex items-center">
-                        <input type="checkbox" id="mic-enable-toggle" class="h-4 w-4 rounded focus:ring-0">
-                        <label for="mic-enable-toggle" class="ml-2 text-sm font-medium text-gray-600">Enable Microphone Input</label>
+                     <div class="flex items-center gap-3">
+                        <input type="checkbox" id="mic-enable-toggle">
+                        <label for="mic-enable-toggle" class="font-medium">Enable Microphone Input</label>
                     </div>
                 </div>
             </div>
-            <div class="border-t border-gray-300 pt-4 mt-5">
-                <h3 class="text-md font-semibold text-gray-700 mb-3">Note Settings</h3>
-                <div class="space-y-3">
-                    <div class="flex items-center">
-                        <input type="checkbox" id="naturals-only-toggle" class="h-4 w-4 rounded focus:ring-0">
-                        <label for="naturals-only-toggle" class="ml-2 text-sm font-medium text-gray-600">Naturals Only</label>
+
+            <div class="setting-group">
+                <h3>Note Settings</h3>
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" id="naturals-only-toggle">
+                        <label for="naturals-only-toggle" class="font-medium">Naturals Only</label>
                     </div>
                     <div>
-                        <label class="block text-left text-sm font-medium mb-2 text-gray-600">Choose notes to practice:</label>
+                        <span class="block text-left font-medium mb-2 label-text">Choose notes to practice:</span>
                         <div id="note-selection-grid" class="grid grid-cols-4 gap-2">
                             <!-- Checkboxes will be generated by JS -->
                         </div>
                     </div>
                 </div>
             </div>
+            
+            <div class="setting-group">
+                <h3>Appearance</h3>
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" id="dark-mode-toggle">
+                        <label for="dark-mode-toggle" class="font-medium">Dark Mode</label>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" id="lefty-toggle">
+                        <label for="lefty-toggle" class="font-medium">Left-Handed Mode</label>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="flex-shrink-0 border-t border-gray-300 pt-4 mt-6">
-            <p class="text-sm text-gray-500">
-                Feel free to share any feedback at 
+
+        <div class="flex-shrink-0 border-t pt-4 mt-4" style="border-color: var(--border-color);">
+            <p class="text-sm" style="color: var(--text-light);">
+                Feedback: 
                 <a href="mailto:raf.janicki@gmail.com" class="underline hover:text-accent-color">raf.janicki@gmail.com</a>
             </p>
-            <p class="text-sm text-gray-500 mt-4">Do you like it? Just ...:</p>
-            <a href='https://ko-fi.com/ianix' target='_blank' class="mt-2 inline-block">
+            <a href='https://ko-fi.com/ianix' target='_blank' class="mt-4 inline-block">
                 <img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi2.png?v=3' border='0' alt='Buy Me a Coffee at ko-fi.com' />
             </a>
         </div>
@@ -289,19 +465,19 @@
     <div id="main-content" class="min-h-screen flex items-center justify-center">
         <div class="w-full max-w-6xl mx-auto text-center p-4">
             <header class="mb-4">
-                <h1 class="text-4xl font-bold text-gray-800">Guitar Fretboard Trainer</h1>
-                <p class="text-gray-500 mt-2">Choose your training mode</p>
+                <h1 class="text-4xl font-bold" style="color: var(--text-dark);">Guitar Fretboard Trainer</h1>
+                <p class="mt-2" style="color: var(--text-light);">Choose your training mode</p>
                 <!-- Module Switcher -->
-                <div class="mt-4 flex justify-center bg-gray-100 p-1 rounded-lg max-w-sm mx-auto">
-                    <button data-module="guessNote" class="switcher-btn module-switch-btn active w-1/2 p-2 rounded-md transition-colors">Guess the Note</button>
-                    <button data-module="playPractice" class="switcher-btn module-switch-btn w-1/2 p-2 rounded-md transition-colors">Playing Practice</button>
+                <div role="tablist" aria-label="Training Mode" class="mt-4 flex justify-center bg-gray-100 p-1 rounded-lg max-w-sm mx-auto" style="background-color: var(--bg-panel);">
+                    <button role="tab" aria-selected="true" data-module="guessNote" class="switcher-btn module-switch-btn active w-1/2 p-2 rounded-md transition-colors">Guess the Note</button>
+                    <button role="tab" aria-selected="false" data-module="playPractice" class="switcher-btn module-switch-btn w-1/2 p-2 rounded-md transition-colors">Playing Practice</button>
                 </div>
-                <div id="stats-display" class="mt-4 text-lg flex justify-center items-center space-x-6 bg-gray-100 p-2 rounded-lg max-w-xs mx-auto">
+                <div id="stats-display" class="mt-4 text-lg flex justify-center items-center space-x-6 bg-gray-100 p-2 rounded-lg max-w-xs mx-auto" style="background-color: var(--bg-panel);">
                     <div>
                         <span class="text-green-600 font-bold">Correct: </span>
                         <span id="correct-count">0</span>
                     </div>
-                    <div class="border-l h-6 border-gray-300"></div>
+                    <div class="border-l h-6" style="border-color: var(--border-color);"></div>
                     <div>
                         <span class="text-red-600 font-bold">Incorrect: </span>
                         <span id="incorrect-count">0</span>
@@ -310,10 +486,10 @@
             </header>
 
             <div id="view-switcher-container">
-                <div class="mt-4 flex justify-center bg-gray-100 p-1 rounded-lg max-w-md mx-auto">
-                    <button data-view="fretboard" class="switcher-btn view-switch-btn active w-1/3 p-2 rounded-md transition-colors text-sm">Fretboard → Note</button>
-                    <button data-view="tab" class="switcher-btn view-switch-btn w-1/3 p-2 rounded-md transition-colors text-sm">Tab → Note</button>
-                    <button data-view="noteToTab" class="switcher-btn view-switch-btn w-1/3 p-2 rounded-md transition-colors text-sm">Note → Tab</button>
+                <div role="tablist" aria-label="View Mode" class="mt-4 flex justify-center bg-gray-100 p-1 rounded-lg max-w-md mx-auto" style="background-color: var(--bg-panel);">
+                    <button role="tab" aria-selected="true" data-view="fretboard" class="switcher-btn view-switch-btn active w-1/3 p-2 rounded-md transition-colors text-sm">Fretboard → Note</button>
+                    <button role="tab" aria-selected="false" data-view="tab" class="switcher-btn view-switch-btn w-1/3 p-2 rounded-md transition-colors text-sm">Tab → Note</button>
+                    <button role="tab" aria-selected="false" data-view="noteToTab" class="switcher-btn view-switch-btn w-1/3 p-2 rounded-md transition-colors text-sm">Note → Tab</button>
                 </div>
             </div>
             
@@ -333,14 +509,14 @@
             <div id="practice-note-container" class="hidden practice-note-container flex flex-col items-center justify-center">
                 <span class="current-practice-note font-bold"></span>
                 <div id="tuner-container" class="mt-4 h-16">
-                    <div id="tuner-display" class="hidden items-center justify-center p-3 rounded-lg border-2 border-gray-300 bg-gray-100 transition-colors">
-                        <span class="text-xs text-gray-500 uppercase tracking-widest mr-3">Detected:</span>
-                        <span id="detected-note" class="text-2xl font-bold text-gray-800 w-16">-</span>
+                    <div id="tuner-display" class="hidden items-center justify-center p-3 rounded-lg border-2 bg-gray-100 transition-colors" style="border-color: var(--border-color); background-color: var(--bg-panel);">
+                        <span class="text-xs uppercase tracking-widest mr-3" style="color: var(--text-light);">Detected:</span>
+                        <span id="detected-note" class="text-2xl font-bold w-16" style="color: var(--text-dark);">-</span>
                     </div>
                 </div>
                 <div class="mt-4 text-center h-16">
-                     <span class="text-xs text-gray-400 uppercase tracking-widest">Next</span>
-                     <span id="next-practice-note" class="block text-4xl font-semibold text-gray-400"></span>
+                     <span class="text-xs uppercase tracking-widest" style="color: var(--text-light);">Next</span>
+                     <span id="next-practice-note" class="block text-4xl font-semibold" style="color: var(--text-light);"></span>
                 </div>
                 <div id="beat-dots-container" class="flex justify-center items-center gap-3 mt-2 h-6"></div>
             </div>
@@ -348,7 +524,6 @@
             <div id="answer-options" class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto"></div>
             <div id="feedback" class="mt-6 h-10 text-2xl font-semibold transition-opacity duration-300"></div>
             
-            <!-- Controls Panel -->
             <div class="mt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
                 <button id="metronome-btn" class="w-full sm:w-auto px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg shadow-md transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-blue-300">
                     Start Metronome
@@ -363,17 +538,13 @@
         </div>
     </div>
 
-
-    <!-- Stats Modal -->
     <div id="stats-modal-overlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
-        <div id="stats-modal" class="bg-white rounded-lg shadow-2xl w-full max-w-md border">
-            <div class="flex justify-between items-center p-4 border-b">
-                <h2 class="text-2xl font-bold text-gray-800">Mistake Statistics</h2>
-                <button id="close-stats-btn" class="text-gray-400 hover:text-black text-2xl font-bold">&times;</button>
+        <div id="stats-modal" role="dialog" aria-modal="true" aria-labelledby="stats-modal-title" class="rounded-lg shadow-2xl w-full max-w-md border" style="background-color: var(--bg-light); border-color: var(--border-color);">
+            <div class="flex justify-between items-center p-4 border-b" style="border-color: var(--border-color);">
+                <h2 id="stats-modal-title" class="text-2xl font-bold" style="color: var(--text-dark);">Mistake Statistics</h2>
+                <button id="close-stats-btn" aria-label="Close statistics" class="hover:text-black text-2xl font-bold" style="color: var(--text-light);">&times;</button>
             </div>
-            <div id="stats-content" class="p-6 max-h-80 overflow-y-auto">
-                <!-- Stats will be inserted here -->
-            </div>
+            <div id="stats-content" class="p-6 max-h-80 overflow-y-auto"></div>
         </div>
     </div>
 
@@ -407,6 +578,7 @@
             const statsDisplay = document.getElementById('stats-display');
             const statsBtn = document.getElementById('stats-btn');
             const statsModalOverlay = document.getElementById('stats-modal-overlay');
+            const statsModal = document.getElementById('stats-modal');
             const statsContentEl = document.getElementById('stats-content');
             const closeStatsBtn = document.getElementById('close-stats-btn');
             const moduleSwitchBtns = document.querySelectorAll('.module-switch-btn');
@@ -424,6 +596,8 @@
             const micEnableToggle = document.getElementById('mic-enable-toggle');
             const tunerDisplay = document.getElementById('tuner-display');
             const detectedNoteEl = document.getElementById('detected-note');
+            const darkModeToggle = document.getElementById('dark-mode-toggle');
+            const leftyToggle = document.getElementById('lefty-toggle');
             
             // --- Application State ---
             let currentModule = 'guessNote';
@@ -432,6 +606,9 @@
             let isAnswered = false;
             let metronomeIntervalId = null;
             let isMetronomeOn = false;
+            let isCountingIn = false;
+            let countInCounter = 0;
+            const COUNT_IN_BEATS = 4;
             let speedUpTickCounter = 0;
             let noteTickCounter = 0;
             let audioCtx;
@@ -443,6 +620,11 @@
             let incorrectCount = 0;
             let noteMistakes = {};
             let nextPracticeNote = null;
+            let lastFocusedElement;
+            
+            // --- Performance & UI Caching ---
+            const highlightDot = document.createElement('div');
+            highlightDot.id = 'highlight-dot';
 
             // --- Audio & Pitch Detection Logic ---
             const noteStrings = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
@@ -453,15 +635,15 @@
                 }
             }
 
-            function playTick() {
+            function playTick(isCountIn = false) {
                 const tickCtx = new (window.AudioContext || window.webkitAudioContext)();
                 const oscillator = tickCtx.createOscillator();
                 const gainNode = tickCtx.createGain();
                 oscillator.connect(gainNode);
                 gainNode.connect(tickCtx.destination);
-                oscillator.type = 'triangle';
-                oscillator.frequency.setValueAtTime(880, tickCtx.currentTime);
-                gainNode.gain.setValueAtTime(0.5, tickCtx.currentTime);
+                oscillator.type = isCountIn ? 'sine' : 'triangle';
+                oscillator.frequency.setValueAtTime(isCountIn ? 440 : 880, tickCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.4, tickCtx.currentTime);
                 gainNode.gain.exponentialRampToValueAtTime(0.001, tickCtx.currentTime + 0.05);
                 oscillator.start(tickCtx.currentTime);
                 oscillator.stop(tickCtx.currentTime + 0.05);
@@ -618,12 +800,16 @@
                 fretNumbersEl.appendChild(emptyFretDiv); 
                 for (let j = 1; j <= FRET_COUNT; j++) {
                     const fretNumEl = document.createElement('div');
-                    fretNumEl.classList.add('relative', 'flex', 'justify-center', 'text-gray-500', 'text-sm');
+                    fretNumEl.classList.add('relative', 'flex', 'justify-center', 'text-sm');
+                    fretNumEl.style.color = 'var(--text-light)';
                     if ([3, 5, 7, 9, 12].includes(j)) {
                         fretNumEl.textContent = j;
                     }
                     fretNumbersEl.appendChild(fretNumEl);
                 }
+                
+                fretboardContainer.appendChild(highlightDot);
+                highlightDot.style.display = 'none';
             }
 
             function createTabView() {
@@ -633,7 +819,7 @@
                     stringEl.classList.add('tab-string');
                     stringEl.dataset.stringIndex = stringIndex;
                     stringEl.innerHTML = `
-                        <span class="w-4 text-gray-500">${stringName}</span>
+                        <span class="w-4" style="color: var(--text-light);">${stringName}</span>
                         <span>|--</span>
                         <span class="tab-fret-number w-8 h-8 flex items-center justify-center">-</span>
                         <span>--|</span>
@@ -688,20 +874,21 @@
 
                 let interval;
                 switch (intervalType) {
-                    case 'thirds':
-                        interval = Math.random() < 0.5 ? 3 : 4; // Minor or Major Third
-                        break;
-                    case 'fifths':
-                        interval = 7; // Perfect Fifth
-                        break;
-                    case 'sevenths':
-                        interval = Math.random() < 0.5 ? 10 : 11; // Minor or Major Seventh
-                        break;
-                    default:
-                        return null; // Should not happen if called correctly
+                    case 'minorThirds': interval = 3; break;
+                    case 'majorThirds': interval = 4; break;
+                    case 'fourths': interval = 5; break;
+                    case 'fifths': interval = 7; break;
+                    case 'sevenths': interval = Math.random() < 0.5 ? 10 : 11; break;
+                    default: return null;
                 }
                 const nextNoteIndex = (currentNoteIndex + interval) % 12;
-                return notes[nextNoteIndex];
+                let nextNote = notes[nextNoteIndex];
+                
+                const activeNotes = getActiveNotes();
+                if (!activeNotes.includes(nextNote)) {
+                    return activeNotes[Math.floor(Math.random() * activeNotes.length)];
+                }
+                return nextNote;
             }
 
             function newQuestion() {
@@ -713,6 +900,7 @@
 
                 isAnswered = false;
                 feedbackEl.textContent = '';
+                highlightDot.style.display = 'none';
                 
                 if (currentModule === 'guessNote') {
                     if (currentView === 'fretboard' || currentView === 'tab') {
@@ -730,18 +918,14 @@
                         correctAnswer = targetNote;
                         
                         if (currentView === 'fretboard') {
-                            const highlightedFret = fretboardEl.querySelector('.highlighted');
-                            if (highlightedFret) {
-                                const oldDot = highlightedFret.querySelector('#highlight-dot');
-                                if(oldDot) oldDot.remove();
-                                highlightedFret.classList.remove('highlighted');
-                            }
                             const targetFret = fretboardEl.querySelector(`.fret[data-string='${randomString}'][data-fret='${randomFret}']`);
-                            const highlightDot = document.createElement('div');
-                            highlightDot.id = 'highlight-dot';
-                            highlightDot.classList.add('w-8', 'h-8', 'rounded-full', 'z-10');
-                            targetFret.appendChild(highlightDot);
-                            targetFret.classList.add('highlighted');
+                            if (targetFret) {
+                                const fretRect = targetFret.getBoundingClientRect();
+                                const containerRect = fretboardContainer.getBoundingClientRect();
+                                highlightDot.style.left = `${fretRect.left - containerRect.left + (fretRect.width / 2) - 16}px`;
+                                highlightDot.style.top = `${fretRect.top - containerRect.top + (fretRect.height / 2) - 16}px`;
+                                highlightDot.style.display = 'block';
+                            }
                         } else { // Tab view
                             tabContainer.querySelectorAll('.tab-fret-number').forEach(el => el.textContent = '-');
                             const targetStringEl = tabContainer.querySelector(`.tab-string[data-string-index='${randomString}'] .tab-fret-number`);
@@ -758,7 +942,9 @@
                         Array.from(options).sort(() => Math.random() - 0.5).forEach(note => {
                             const button = document.createElement('button');
                             button.textContent = note;
-                            button.classList.add('p-4', 'bg-white', 'border', 'border-gray-300', 'hover:bg-gray-100', 'rounded-lg', 'text-lg', 'font-semibold', 'transition-colors', 'duration-200');
+                            button.classList.add('p-4', 'border', 'hover:bg-gray-100', 'rounded-lg', 'text-lg', 'font-semibold', 'transition-colors', 'duration-200');
+                            button.style.backgroundColor = 'var(--bg-light)';
+                            button.style.borderColor = 'var(--border-color)';
                             button.dataset.note = note;
                             button.addEventListener('click', handleAnswer);
                             answerOptionsEl.appendChild(button);
@@ -794,8 +980,10 @@
                         Array.from(options).sort(() => Math.random() - 0.5).forEach(pos => {
                             const [string, fret] = pos.split('-');
                             const button = document.createElement('button');
-                            button.innerHTML = `<span class="font-bold">${tuning[string]}</span> <span class="text-gray-500">string</span> - <span class="font-bold">${fret}</span> <span class="text-gray-500">fret</span>`;
-                            button.classList.add('p-4', 'bg-white', 'border', 'border-gray-300', 'hover:bg-gray-100', 'rounded-lg', 'text-lg', 'transition-colors', 'duration-200');
+                            button.innerHTML = `<span class="font-bold">${tuning[string]}</span> <span style="color:var(--text-light)">string</span> - <span class="font-bold">${fret}</span> <span style="color:var(--text-light)">fret</span>`;
+                            button.classList.add('p-4', 'border', 'hover:bg-gray-100', 'rounded-lg', 'text-lg', 'transition-colors', 'duration-200');
+                             button.style.backgroundColor = 'var(--bg-light)';
+                            button.style.borderColor = 'var(--border-color)';
                             button.dataset.position = pos;
                             button.addEventListener('click', handleAnswer);
                             answerOptionsEl.appendChild(button);
@@ -888,10 +1076,22 @@
 
             // --- Metronome Logic ---
             function metronomeTick() {
-                playTick();
-                speedUpTickCounter++;
-                noteTickCounter++;
+                if (isCountingIn) {
+                    playTick(true);
+                    feedbackEl.textContent = `Starting in ${COUNT_IN_BEATS - countInCounter}...`;
+                    feedbackEl.className = 'mt-6 h-10 text-2xl font-semibold transition-opacity duration-300 text-yellow-600';
+                    countInCounter++;
+                    if (countInCounter >= COUNT_IN_BEATS) {
+                        isCountingIn = false;
+                        noteTickCounter = 0;
+                        newQuestion();
+                    }
+                    return;
+                }
 
+                playTick(false);
+                speedUpTickCounter++;
+                
                 if (currentModule === 'playPractice') {
                     updateActiveDot(noteTickCounter);
                 }
@@ -913,7 +1113,7 @@
                 }
 
                 const noteDuration = parseInt(noteDurationInput.value) || 1;
-                if (noteTickCounter >= noteDuration) {
+                if (noteTickCounter >= noteDuration - 1) {
                     if (currentModule === 'guessNote' && !isAnswered) {
                         incorrectCount++;
                         if (currentView === 'noteToTab') {
@@ -928,6 +1128,8 @@
                     }
                     newQuestion();
                     noteTickCounter = 0;
+                } else {
+                    noteTickCounter++;
                 }
             }
 
@@ -941,8 +1143,9 @@
                     nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
                     nextBtn.disabled = true;
                     
+                    isCountingIn = true;
+                    countInCounter = 0;
                     speedUpTickCounter = 0;
-                    noteTickCounter = -1; 
                     
                     metronomeIntervalId = setInterval(metronomeTick, 60000 / parseInt(bpmSlider.value));
                     metronomeTick(); 
@@ -953,27 +1156,47 @@
                     metronomeBtn.classList.replace('hover:bg-red-600', 'hover:bg-blue-600');
                     nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                     nextBtn.disabled = false;
+                    isCountingIn = false;
+                    feedbackEl.textContent = '';
                     if (currentModule === 'playPractice') {
                         updateActiveDot(-1);
                     }
                 }
             }
             
-            // --- UI Management ---
+            // --- UI Management & Accessibility ---
+            function trapFocusInModal(e) {
+                const focusableElements = statsModal.querySelectorAll('button');
+                const firstElement = focusableElements[0];
+                const lastElement = focusableElements[focusableElements.length - 1];
+
+                if (e.key === 'Tab') {
+                    if (e.shiftKey && document.activeElement === firstElement) {
+                        e.preventDefault();
+                        lastElement.focus();
+                    } else if (!e.shiftKey && document.activeElement === lastElement) {
+                        e.preventDefault();
+                        firstElement.focus();
+                    }
+                }
+            }
+
             function displayDetailedStats() {
+                lastFocusedElement = document.activeElement;
                 statsContentEl.innerHTML = '';
                 const sortedMistakes = Object.entries(noteMistakes).sort((a, b) => b[1] - a[1]);
 
                 if (sortedMistakes.length === 0) {
-                    statsContentEl.innerHTML = '<p class="text-center text-gray-500">No mistakes! Great job!</p>';
+                    statsContentEl.innerHTML = `<p class="text-center" style="color:var(--text-light)">No mistakes! Great job!</p>`;
                 } else {
                     const list = document.createElement('ul');
                     list.className = 'space-y-3';
                     sortedMistakes.forEach(([note, count]) => {
                         const item = document.createElement('li');
-                        item.className = 'flex justify-between items-center bg-gray-100 p-3 rounded-lg';
+                        item.className = 'flex justify-between items-center p-3 rounded-lg';
+                        item.style.backgroundColor = 'var(--bg-panel)';
                         item.innerHTML = `
-                            <span class="font-bold text-lg text-gray-800">${note}</span>
+                            <span class="font-bold text-lg" style="color:var(--text-dark)">${note}</span>
                             <span class="text-red-600">${count} ${count > 1 ? 'mistakes' : 'mistake'}</span>
                         `;
                         list.appendChild(item);
@@ -981,11 +1204,25 @@
                     statsContentEl.appendChild(list);
                 }
                 statsModalOverlay.classList.remove('hidden');
+                closeStatsBtn.focus();
+                statsModalOverlay.addEventListener('keydown', trapFocusInModal);
+            }
+            
+            function closeStatsModal() {
+                 statsModalOverlay.classList.add('hidden');
+                 statsModalOverlay.removeEventListener('keydown', trapFocusInModal);
+                 if (lastFocusedElement) {
+                    lastFocusedElement.focus();
+                 }
             }
             
             function setModule(moduleName) {
                 currentModule = moduleName;
-                moduleSwitchBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.module === moduleName));
+                moduleSwitchBtns.forEach(btn => {
+                    const isActive = btn.dataset.module === moduleName;
+                    btn.classList.toggle('active', isActive);
+                    btn.setAttribute('aria-selected', isActive);
+                });
 
                 const isGuessNote = moduleName === 'guessNote';
                 viewSwitcherContainer.classList.toggle('hidden', !isGuessNote);
@@ -1005,7 +1242,11 @@
             function setView(viewName) {
                 if (viewName !== 'none') {
                     currentView = viewName;
-                    viewSwitchBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.view === viewName));
+                    viewSwitchBtns.forEach(btn => {
+                        const isActive = btn.dataset.view === viewName;
+                        btn.classList.toggle('active', isActive);
+                        btn.setAttribute('aria-selected', isActive);
+                    });
                 }
 
                 fretboardContainer.classList.toggle('hidden', viewName !== 'fretboard');
@@ -1020,25 +1261,35 @@
                 noteSelectionGrid.innerHTML = '';
                 notes.forEach(note => {
                     const container = document.createElement('div');
-                    container.classList.add('flex', 'items-center');
+                    container.classList.add('flex', 'items-center', 'gap-2');
                     const checkbox = document.createElement('input');
                     checkbox.type = 'checkbox';
                     checkbox.id = `note-check-${note.replace('#', 's')}`;
                     checkbox.dataset.note = note;
                     checkbox.checked = true;
-                    checkbox.classList.add('note-select-checkbox', 'h-4', 'w-4', 'rounded', 'focus:ring-0', 'text-accent-color');
                     const label = document.createElement('label');
                     label.htmlFor = `note-check-${note.replace('#', 's')}`;
                     label.textContent = note;
-                    label.classList.add('ml-2', 'text-sm', 'text-gray-600');
+                    label.classList.add('font-medium');
                     container.appendChild(checkbox);
                     container.appendChild(label);
                     noteSelectionGrid.appendChild(container);
                 });
             }
 
-            // --- Initialization ---
+            // --- Initialization & Event Listeners ---
+            
+            function applyStoredSettings() {
+                const isDark = localStorage.getItem('darkMode') === 'true';
+                bodyEl.classList.toggle('dark', isDark);
+                darkModeToggle.checked = isDark;
+                const isLefty = localStorage.getItem('leftyMode') === 'true';
+                bodyEl.classList.toggle('lefty', isLefty);
+                leftyToggle.checked = isLefty;
+            }
+
             populateNoteSelection();
+            applyStoredSettings();
             
             naturalsOnlyToggle.addEventListener('change', () => {
                 const isChecked = naturalsOnlyToggle.checked;
@@ -1060,17 +1311,28 @@
             });
             
             document.addEventListener('keydown', (e) => {
-                if (e.code === 'Space') {
-                    if (e.target.tagName.toLowerCase() !== 'input') {
-                        e.preventDefault();
-                        toggleMetronome();
+                if (e.code === 'Space' && document.activeElement.tagName !== 'INPUT') {
+                    e.preventDefault();
+                    toggleMetronome();
+                }
+                
+                if (['1', '2', '3', '4'].includes(e.key) && document.activeElement.tagName !== 'INPUT') {
+                    e.preventDefault();
+                    const buttons = answerOptionsEl.querySelectorAll('button');
+                    const index = parseInt(e.key) - 1;
+                    if (buttons[index] && !buttons[index].disabled) {
+                        buttons[index].click();
                     }
+                }
+                
+                if(e.key === 'Escape' && !statsModalOverlay.classList.contains('hidden')) {
+                    closeStatsModal();
                 }
             });
 
             bpmSlider.addEventListener('input', (e) => {
                 bpmDisplay.textContent = `${e.target.value} BPM`;
-                if (isMetronomeOn) {
+                if (isMetronomeOn && !isCountingIn) {
                     clearInterval(metronomeIntervalId);
                     metronomeIntervalId = setInterval(metronomeTick, 60000 / parseInt(e.target.value));
                 }
@@ -1090,10 +1352,10 @@
             metronomeBtn.addEventListener('click', toggleMetronome);
             nextBtn.addEventListener('click', newQuestion);
             statsBtn.addEventListener('click', displayDetailedStats);
-            closeStatsBtn.addEventListener('click', () => statsModalOverlay.classList.add('hidden'));
+            closeStatsBtn.addEventListener('click', closeStatsModal);
             statsModalOverlay.addEventListener('click', (e) => {
                 if (e.target === statsModalOverlay) {
-                    statsModalOverlay.classList.add('hidden');
+                    closeStatsModal();
                 }
             });
             moduleSwitchBtns.forEach(btn => {
@@ -1105,6 +1367,14 @@
              micEnableToggle.addEventListener('change', (e) => {
                 toggleMicInput(e.target.checked);
             });
+            darkModeToggle.addEventListener('change', (e) => {
+                bodyEl.classList.toggle('dark', e.target.checked);
+                localStorage.setItem('darkMode', e.target.checked);
+            });
+            leftyToggle.addEventListener('change', (e) => {
+                bodyEl.classList.toggle('lefty', e.target.checked);
+                localStorage.setItem('leftyMode', e.target.checked);
+            });
 
             createFretboard();
             createTabView();
@@ -1113,3 +1383,4 @@
     </script>
 </body>
 </html>
+
