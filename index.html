@@ -364,15 +364,12 @@
       "name": "Guitar Fretboard Trainer",
       "description": "Master the guitar fretboard with an interactive trainer. Test your note knowledge with quizzes, practice with a metronome, and track your progress. Perfect for all guitar players.",
       "url": "https://fretmemo.net/",
-      "isAccessibleForFree": true,
       "applicationCategory": "EducationalApplication",
       "operatingSystem": "Any",
       "browserRequirements": "Requires HTML5 support",
       "offers": {
         "@type": "Offer",
         "price": "0"
-        "priceCurrency": "USD",
-        "availability": "https://schema.org/InStock"
       }
     }
     </script>
@@ -459,13 +456,6 @@
             <div id="practice-settings-container" class="setting-group hidden">
                  <h3>Practice Settings</h3>
                  <div class="space-y-4">
-                    <div>
-                        <label for="practice-mode-switcher" class="block text-left font-medium mb-2">Mode</label>
-                        <div id="practice-mode-switcher" role="radiogroup" class="flex bg-gray-100 p-1 rounded-lg w-full" style="background-color: var(--bg-light);">
-                            <button role="radio" aria-checked="true" data-practice-mode="noteNames" class="practice-mode-btn switcher-btn active w-1/2 p-1 rounded-md transition-colors text-sm">Note Names</button>
-                            <button role="radio" aria-checked="false" data-practice-mode="tabSequence" class="practice-mode-btn switcher-btn w-1/2 p-1 rounded-md transition-colors text-sm">Tab Sequence</button>
-                        </div>
-                    </div>
                     <div>
                         <label for="interval-select" class="block text-left font-medium mb-2">Note Sequence</label>
                         <select id="interval-select" class="w-full rounded-md">
@@ -571,6 +561,13 @@
                     <button role="tab" aria-selected="true" data-view="fretboard" class="switcher-btn view-switch-btn active w-1/3 p-2 rounded-md transition-colors text-sm">Fretboard → Note</button>
                     <button role="tab" aria-selected="false" data-view="tab" class="switcher-btn view-switch-btn w-1/3 p-2 rounded-md transition-colors text-sm">Tab → Note</button>
                     <button role="tab" aria-selected="false" data-view="noteToTab" class="switcher-btn view-switch-btn w-1/3 p-2 rounded-md transition-colors text-sm">Note → Tab</button>
+                </div>
+            </div>
+            
+            <div id="practice-mode-container" class="hidden">
+                 <div role="radiogroup" aria-label="Practice Mode" class="mt-4 flex justify-center bg-gray-100 p-1 rounded-lg max-w-sm mx-auto" style="background-color: var(--bg-panel);">
+                    <button role="radio" aria-checked="true" data-practice-mode="noteNames" class="practice-mode-btn switcher-btn active w-1/2 p-2 rounded-md transition-colors text-sm">Note Names</button>
+                    <button role="radio" aria-checked="false" data-practice-mode="tabSequence" class="practice-mode-btn switcher-btn w-1/2 p-2 rounded-md transition-colors text-sm">Tab Sequence</button>
                 </div>
             </div>
             
@@ -718,6 +715,7 @@
             const naturalsOnlyToggle = document.getElementById('naturals-only-toggle');
             const noteSelectionGrid = document.getElementById('note-selection-grid');
             const viewSwitcherContainer = document.getElementById('view-switcher-container');
+            const practiceModeContainer = document.getElementById('practice-mode-container');
             const viewSwitchBtns = document.querySelectorAll('.view-switch-btn');
             const tabContainer = document.getElementById('tab-container');
             const noteToTabQuestionContainer = document.getElementById('note-to-tab-question-container');
@@ -1065,14 +1063,14 @@
                     if (candidates.length === 0) {
                         fretboardDirection = 'down';
                         candidates = differentStringOccurrences.filter(p => p.fret < currentPos.fret);
-                        if (candidates.length === 0) candidates = differentStringOccurrences;
+                        if (candidates.length === 0) candidates = differentStringOccurrences; // Fallback
                     }
                 } else { // 'down'
                     candidates = differentStringOccurrences.filter(p => p.fret < currentPos.fret);
                     if (candidates.length === 0) {
                         fretboardDirection = 'up';
                         candidates = differentStringOccurrences.filter(p => p.fret > currentPos.fret);
-                        if (candidates.length === 0) candidates = differentStringOccurrences;
+                        if (candidates.length === 0) candidates = differentStringOccurrences; // Fallback
                     }
                 }
                 
@@ -1478,10 +1476,14 @@
                 });
 
                 const isGuessNote = moduleName === 'guessNote';
+                const isPlayPractice = moduleName === 'playPractice';
+
                 viewSwitcherContainer.classList.toggle('hidden', !isGuessNote);
+                practiceModeContainer.classList.toggle('hidden', !isPlayPractice);
+
                 statsDisplay.classList.toggle('hidden', !isGuessNote);
                 statsBtn.classList.toggle('hidden', !isGuessNote);
-                practiceSettingsContainer.classList.toggle('hidden', isGuessNote);
+                practiceSettingsContainer.classList.toggle('hidden', !isPlayPractice);
                 
                 if (isGuessNote) {
                      practiceNoteContainer.classList.add('hidden');
@@ -1699,5 +1701,4 @@
     </script>
 </body>
 </html>
-
 
