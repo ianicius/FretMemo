@@ -181,7 +181,7 @@
         }
 
         /* --- Note Highlight --- */
-        #highlight-dot {
+        #highlight-dot, .spider-dot {
             background-color: transparent;
             border: 4px solid var(--accent-color);
             box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
@@ -189,8 +189,8 @@
             height: 2rem;
             border-radius: 9999px;
             z-index: 10;
-            position: absolute; /* Changed for performance */
-            pointer-events: none; /* Changed for performance */
+            position: absolute;
+            pointer-events: none;
         }
         
         /* --- Modern UI Elements in Panel --- */
@@ -488,6 +488,14 @@
                 </div>
             </div>
 
+            <div id="technique-settings-container" class="setting-group hidden">
+                 <h3>Technique Settings</h3>
+                 <div>
+                    <label for="spider-start-fret" class="block text-left font-medium mb-2">Start Fret</label>
+                    <input type="number" id="spider-start-fret" value="1" min="1" max="9" class="w-full text-center">
+                </div>
+            </div>
+
             <div class="setting-group">
                 <h3>Note Settings</h3>
                 <div class="space-y-4">
@@ -539,9 +547,10 @@
                 <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight" style="color: var(--text-dark);">Interactive Fretboard Trainer for Guitar Note Learning</h1>
                 <p class="mt-3 text-lg" style="color: var(--text-light);">Choose your training mode below or scroll down for details</p>
                 <!-- Module Switcher -->
-                <div role="tablist" aria-label="Training Mode" class="mt-6 flex justify-center bg-gray-100 p-1 rounded-lg max-w-sm mx-auto" style="background-color: var(--bg-panel);">
-                    <button role="tab" aria-selected="true" data-module="guessNote" class="switcher-btn module-switch-btn active w-1/2 p-2 rounded-md transition-colors">Guess the Note</button>
-                    <button role="tab" aria-selected="false" data-module="playPractice" class="switcher-btn module-switch-btn w-1/2 p-2 rounded-md transition-colors">Playing Practice</button>
+                <div role="tablist" aria-label="Training Mode" class="mt-6 flex justify-center bg-gray-100 p-1 rounded-lg max-w-md mx-auto" style="background-color: var(--bg-panel);">
+                    <button role="tab" aria-selected="true" data-module="guessNote" class="switcher-btn module-switch-btn active w-1/3 p-2 rounded-md transition-colors">Guess Note</button>
+                    <button role="tab" aria-selected="false" data-module="playPractice" class="switcher-btn module-switch-btn w-1/3 p-2 rounded-md transition-colors">Play Practice</button>
+                    <button role="tab" aria-selected="false" data-module="technique" class="switcher-btn module-switch-btn w-1/3 p-2 rounded-md transition-colors">Technique</button>
                 </div>
                 <div id="stats-display" class="mt-4 text-lg flex justify-center items-center space-x-6 bg-gray-100 p-2 rounded-lg max-w-xs mx-auto" style="background-color: var(--bg-panel);">
                     <div>
@@ -568,6 +577,12 @@
                  <div role="radiogroup" aria-label="Practice Mode" class="mt-4 flex justify-center bg-gray-100 p-1 rounded-lg max-w-sm mx-auto" style="background-color: var(--bg-panel);">
                     <button role="radio" aria-checked="true" data-practice-mode="noteNames" class="practice-mode-btn switcher-btn active w-1/2 p-2 rounded-md transition-colors text-sm">Note Names</button>
                     <button role="radio" aria-checked="false" data-practice-mode="tabSequence" class="practice-mode-btn switcher-btn w-1/2 p-2 rounded-md transition-colors text-sm">Tab Sequence</button>
+                </div>
+            </div>
+
+            <div id="technique-mode-container" class="hidden">
+                 <div role="radiogroup" aria-label="Technique Exercise" class="mt-4 flex justify-center bg-gray-100 p-1 rounded-lg max-w-sm mx-auto" style="background-color: var(--bg-panel);">
+                    <button role="radio" aria-checked="true" data-technique="spiderWalk" class="technique-mode-btn switcher-btn active w-full p-2 rounded-md transition-colors text-sm">Spider Walk</button>
                 </div>
             </div>
             
@@ -672,8 +687,9 @@
         document.addEventListener('DOMContentLoaded', () => {
             // --- Data Model ---
             const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-            const tuning = ['E', 'B', 'G', 'D', 'A', 'E'];
+            const tuning = ['E', 'B', 'G', 'D', 'A', 'E']; // Thin to Thick (Top to Bottom)
             const FRET_COUNT = 12;
+            const SPIDER_FINGERS = 4;
             const scalePatterns = {
                 majorScale: [2, 2, 1, 2, 2, 2, 1],
                 minorScale: [2, 1, 2, 2, 1, 2, 2],
@@ -716,6 +732,9 @@
             const noteSelectionGrid = document.getElementById('note-selection-grid');
             const viewSwitcherContainer = document.getElementById('view-switcher-container');
             const practiceModeContainer = document.getElementById('practice-mode-container');
+            const techniqueModeContainer = document.getElementById('technique-mode-container');
+            const techniqueSettingsContainer = document.getElementById('technique-settings-container');
+            const spiderStartFretInput = document.getElementById('spider-start-fret');
             const viewSwitchBtns = document.querySelectorAll('.view-switch-btn');
             const tabContainer = document.getElementById('tab-container');
             const noteToTabQuestionContainer = document.getElementById('note-to-tab-question-container');
@@ -734,6 +753,7 @@
             let currentModule = 'guessNote';
             let currentView = 'fretboard';
             let currentPracticeMode = 'noteNames';
+            let currentTechnique = 'spiderWalk';
             let correctAnswer = '';
             let isAnswered = false;
             let metronomeIntervalId = null;
@@ -756,11 +776,13 @@
             let fretboardDirection = 'up'; // 'up' or 'down'
             let currentScale = [];
             let currentScaleIndex = 0;
+            let spiderState = {};
             let lastFocusedElement;
             
             // --- Performance & UI Caching ---
             const highlightDot = document.createElement('div');
             highlightDot.id = 'highlight-dot';
+            const spiderDots = [];
 
             // --- Audio & Pitch Detection Logic ---
             const noteStrings = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
@@ -908,7 +930,7 @@
                 const gridTemplate = `5% repeat(${FRET_COUNT}, 1fr)`; 
                 fretboardEl.style.gridTemplateColumns = gridTemplate;
                 fretNumbersEl.style.gridTemplateColumns = gridTemplate;
-                const stringThickness = [1, 1.2, 1.5, 1.8, 2.1, 2.4];
+                const stringThickness = [1, 1.2, 1.5, 1.8, 2.1, 2.4]; // Thin to Thick
 
                 for (let i = 0; i < tuning.length; i++) {
                     for (let j = 0; j <= FRET_COUNT; j++) {
@@ -951,6 +973,15 @@
                 
                 fretboardContainer.appendChild(highlightDot);
                 highlightDot.style.display = 'none';
+
+                for (let i = 0; i < SPIDER_FINGERS; i++) {
+                    const dot = document.createElement('div');
+                    dot.className = 'spider-dot';
+                    dot.style.display = 'none';
+                    dot.style.borderColor = `hsl(${i * 60}, 70%, 50%)`; // Different color for each finger
+                    fretboardContainer.appendChild(dot);
+                    spiderDots.push(dot);
+                }
             }
 
             function createTabView() {
@@ -1088,6 +1119,11 @@
             }
 
             function newQuestion() {
+                if (currentModule === 'technique') {
+                    resetSpiderState();
+                    return;
+                }
+
                 let activeNotes = getActiveNotes();
                 const sequenceType = intervalSelect.value;
                 const isScaleMode = sequenceType.includes('Scale');
@@ -1122,14 +1158,7 @@
                         correctAnswer = targetNote;
                         
                         if (currentView === 'fretboard') {
-                            const targetFret = fretboardEl.querySelector(`.fret[data-string='${randomString}'][data-fret='${randomFret}']`);
-                            if (targetFret) {
-                                const fretRect = targetFret.getBoundingClientRect();
-                                const containerRect = fretboardContainer.getBoundingClientRect();
-                                highlightDot.style.left = `${fretRect.left - containerRect.left + (fretRect.width / 2) - 16}px`;
-                                highlightDot.style.top = `${fretRect.top - containerRect.top + (fretRect.height / 2) - 16}px`;
-                                highlightDot.style.display = 'block';
-                            }
+                            displayDotAt(highlightDot, randomString, randomFret);
                         } else { // Tab view
                             tabContainer.querySelectorAll('.tab-fret-number').forEach(el => el.textContent = '-');
                             const targetStringEl = tabContainer.querySelector(`.tab-string[data-string-index='${randomString}'] .tab-fret-number`);
@@ -1233,6 +1262,19 @@
                 }
             }
             
+            function displayDotAt(dot, string, fret) {
+                const targetFret = fretboardEl.querySelector(`.fret[data-string='${string}'][data-fret='${fret}']`);
+                if (targetFret) {
+                    const fretRect = targetFret.getBoundingClientRect();
+                    const containerRect = fretboardContainer.getBoundingClientRect();
+                    dot.style.left = `${fretRect.left - containerRect.left + (fretRect.width / 2) - 16}px`;
+                    dot.style.top = `${fretRect.top - containerRect.top + (fretRect.height / 2) - 16}px`;
+                    dot.style.display = 'block';
+                } else {
+                    dot.style.display = 'none';
+                }
+            }
+            
             function renderTabSequence(currentPos, nextPos) {
                 practiceTabView.innerHTML = '';
                 tuning.forEach((stringName, stringIndex) => {
@@ -1326,17 +1368,18 @@
                     if (countInCounter >= COUNT_IN_BEATS) {
                         isCountingIn = false;
                         noteTickCounter = 0;
-                        newQuestion();
+                        feedbackEl.textContent = '';
+                        if(currentModule === 'technique') {
+                           spiderWalkTick();
+                        } else {
+                           newQuestion();
+                        }
                     }
                     return;
                 }
 
                 playTick(false);
                 speedUpTickCounter++;
-                
-                if (currentModule === 'playPractice') {
-                    updateActiveDot(noteTickCounter);
-                }
 
                 if (speedUpToggle.checked) {
                     const speedInterval = parseInt(speedUpInterval.value) || 8;
@@ -1352,6 +1395,15 @@
                             metronomeIntervalId = setInterval(metronomeTick, 60000 / newBpm);
                         }
                     }
+                }
+
+                if (currentModule === 'technique') {
+                    spiderWalkTick();
+                    return;
+                }
+                
+                if (currentModule === 'playPractice') {
+                    updateActiveDot(noteTickCounter);
                 }
 
                 const noteDuration = parseInt(noteDurationInput.value) || 1;
@@ -1388,6 +1440,10 @@
                     isCountingIn = true;
                     countInCounter = 0;
                     speedUpTickCounter = 0;
+
+                    if (currentModule === 'technique') {
+                        resetSpiderState();
+                    }
                     
                     metronomeIntervalId = setInterval(metronomeTick, 60000 / parseInt(bpmSlider.value));
                     metronomeTick(); 
@@ -1403,8 +1459,81 @@
                     if (currentModule === 'playPractice') {
                         updateActiveDot(-1);
                     }
+                    if (currentModule === 'technique') {
+                        resetSpiderState();
+                    }
                 }
             }
+
+            // --- Technique Trainer Logic ---
+            function resetSpiderState() {
+                const userStartFret = parseInt(spiderStartFretInput.value, 10) || 1;
+                spiderState = {
+                    startFret: userStartFret,
+                    step: 0,
+                    stringDirection: 'up', // Start from thick string and go up
+                    fretDirection: 'right',
+                    positions: [null, null, null, null]
+                };
+                spiderDots.forEach(dot => dot.style.display = 'none');
+                highlightDot.style.display = 'none';
+            }
+
+            function spiderWalkTick() {
+                let { startFret, step, stringDirection, fretDirection, positions } = spiderState;
+
+                const fingerToMove = step % SPIDER_FINGERS;
+                const stringGroup = Math.floor(step / SPIDER_FINGERS);
+
+                let currentString;
+                 if (stringDirection === 'down') {
+                    currentString = stringGroup;
+                } else {
+                    currentString = (tuning.length - 1) - stringGroup;
+                }
+                
+                if (stringGroup >= tuning.length) {
+                    if (fretDirection === 'right') {
+                        startFret++;
+                        if (startFret > FRET_COUNT - SPIDER_FINGERS + 1) {
+                            startFret--; 
+                            fretDirection = 'left';
+                        }
+                    } else { // 'left'
+                        startFret--;
+                        if (startFret < 1) {
+                            startFret = 1;
+                            fretDirection = 'right';
+                        }
+                    }
+                    step = 0;
+                    stringDirection = stringDirection === 'down' ? 'up' : 'down';
+                    positions = [null, null, null, null];
+
+                    spiderState = { startFret, step, stringDirection, fretDirection, positions };
+                    spiderWalkTick();
+                    return;
+                }
+                
+                const currentFret = startFret + fingerToMove;
+                positions[fingerToMove] = { string: currentString, fret: currentFret };
+
+                spiderDots.forEach((dot, index) => {
+                    const pos = positions[index];
+                    if (pos) {
+                        displayDotAt(dot, pos.string, pos.fret);
+                    } else {
+                        dot.style.display = 'none';
+                    }
+                });
+
+                spiderState.step++;
+                spiderState.positions = positions;
+                spiderState.startFret = startFret;
+                spiderState.stringDirection = stringDirection;
+                spiderState.fretDirection = fretDirection;
+            }
+            
             
             // --- UI Management & Accessibility ---
             function trapFocusInModal(e) {
@@ -1477,19 +1606,28 @@
 
                 const isGuessNote = moduleName === 'guessNote';
                 const isPlayPractice = moduleName === 'playPractice';
+                const isTechnique = moduleName === 'technique';
 
                 viewSwitcherContainer.classList.toggle('hidden', !isGuessNote);
                 practiceModeContainer.classList.toggle('hidden', !isPlayPractice);
+                techniqueModeContainer.classList.toggle('hidden', !isTechnique);
 
-                statsDisplay.classList.toggle('hidden', !isGuessNote);
-                statsBtn.classList.toggle('hidden', !isGuessNote);
+                statsDisplay.classList.toggle('hidden', isTechnique);
+                statsBtn.classList.toggle('hidden', isTechnique);
                 practiceSettingsContainer.classList.toggle('hidden', !isPlayPractice);
+                techniqueSettingsContainer.classList.toggle('hidden', !isTechnique);
+                nextBtn.classList.toggle('hidden', isTechnique);
                 
-                if (isGuessNote) {
-                     practiceNoteContainer.classList.add('hidden');
-                     practiceTabView.classList.add('hidden');
-                } else {
+                practiceNoteContainer.classList.add('hidden');
+                practiceTabView.classList.add('hidden');
+                answerOptionsEl.classList.add('hidden');
+                fretboardContainer.classList.remove('hidden'); // Always show for technique
+                highlightDot.style.display = 'none'; // Ensure highlight dot is hidden
+
+                if (isPlayPractice) {
                     updatePracticeView();
+                } else if (isGuessNote) {
+                    answerOptionsEl.classList.remove('hidden');
                 }
 
                 setView(isGuessNote ? currentView : 'none');
@@ -1509,11 +1647,12 @@
                         btn.setAttribute('aria-selected', isActive);
                     });
                 }
-
-                fretboardContainer.classList.toggle('hidden', viewName !== 'fretboard');
-                tabContainer.classList.toggle('hidden', viewName !== 'tab');
-                noteToTabQuestionContainer.classList.toggle('hidden', viewName !== 'noteToTab');
-                answerOptionsEl.classList.toggle('hidden', currentModule !== 'guessNote');
+                
+                if (currentModule === 'guessNote') {
+                    fretboardContainer.classList.toggle('hidden', viewName !== 'fretboard');
+                    tabContainer.classList.toggle('hidden', viewName !== 'tab');
+                    noteToTabQuestionContainer.classList.toggle('hidden', viewName !== 'noteToTab');
+                }
 
                 newQuestion();
             }
@@ -1689,6 +1828,11 @@
                 bodyEl.classList.toggle('lefty', e.target.checked);
                 localStorage.setItem('leftyMode', e.target.checked);
             });
+             spiderStartFretInput.addEventListener('input', () => {
+                if (!isMetronomeOn) {
+                    resetSpiderState();
+                }
+            });
 
             createFretboard();
             createTabView();
@@ -1701,4 +1845,5 @@
     </script>
 </body>
 </html>
+
 
