@@ -1621,7 +1621,15 @@
                 practiceNoteContainer.classList.add('hidden');
                 practiceTabView.classList.add('hidden');
                 answerOptionsEl.classList.add('hidden');
-                fretboardContainer.classList.remove('hidden'); // Always show for technique
+            
+                // Explicitly manage fretboard visibility based on module
+                if (isPlayPractice) {
+                    fretboardContainer.classList.add('hidden');
+                } else if (isTechnique) {
+                    fretboardContainer.classList.remove('hidden');
+                }
+                // For 'guessNote', visibility will be handled by the setView() call below
+
                 highlightDot.style.display = 'none'; // Ensure highlight dot is hidden
 
                 if (isPlayPractice) {
@@ -1845,5 +1853,6 @@
     </script>
 </body>
 </html>
+
 
 
