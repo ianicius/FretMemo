@@ -778,6 +778,7 @@
             let currentScaleIndex = 0;
             let spiderState = {};
             let lastFocusedElement;
+            let wakeLock = null;
             
             // --- Performance & UI Caching ---
             const highlightDot = document.createElement('div');
@@ -920,6 +921,32 @@
                     tunerDisplay.classList.add('hidden');
                 }
             }
+            
+            // --- Screen Wake Lock API ---
+            const requestWakeLock = async () => {
+                if ('wakeLock' in navigator) {
+                    try {
+                        wakeLock = await navigator.wakeLock.request('screen');
+                        console.log('Screen Wake Lock is active.');
+                    } catch (err) {
+                        console.error(`${err.name}, ${err.message}`);
+                    }
+                } else {
+                    console.log('Wake Lock API not supported.');
+                }
+            };
+
+            const releaseWakeLock = async () => {
+                if (wakeLock !== null) {
+                    try {
+                        await wakeLock.release();
+                        wakeLock = null;
+                        console.log('Screen Wake Lock released.');
+                    } catch (err) {
+                         console.error(`${err.name}, ${err.message}`);
+                    }
+                }
+            };
 
 
             // --- UI Creation ---
@@ -1258,7 +1285,9 @@
                         renderTabSequence(currentPracticePos, nextPracticePos);
                     }
                     drawBeatDots();
-                    updateActiveDot(0);
+                    if (!isMetronomeOn) {
+                        updateActiveDot(0);
+                    }
                 }
             }
             
@@ -1369,11 +1398,6 @@
                         isCountingIn = false;
                         noteTickCounter = 0;
                         feedbackEl.textContent = '';
-                        if(currentModule === 'technique') {
-                           spiderWalkTick();
-                        } else {
-                           newQuestion();
-                        }
                     }
                     return;
                 }
@@ -1401,14 +1425,13 @@
                     spiderWalkTick();
                     return;
                 }
-                
-                if (currentModule === 'playPractice') {
-                    updateActiveDot(noteTickCounter);
-                }
 
                 const noteDuration = parseInt(noteDurationInput.value) || 1;
-                if (noteTickCounter >= noteDuration - 1) {
-                    if (currentModule === 'guessNote' && !isAnswered) {
+
+                // At the start of a cycle, generate the new question/note.
+                if (noteTickCounter === 0) {
+                    // Check for timeout on the PREVIOUS question in 'guessNote' mode.
+                    if (currentModule === 'guessNote' && !isAnswered && correctAnswer !== '') {
                         incorrectCount++;
                         if (currentView === 'noteToTab') {
                             const [string, fret] = correctAnswer.split('-');
@@ -1421,15 +1444,26 @@
                         feedbackEl.className = 'mt-6 h-10 text-2xl font-semibold transition-opacity duration-300 text-yellow-600';
                     }
                     newQuestion();
+                }
+
+                // Update the visual state for the CURRENT beat.
+                if (currentModule === 'playPractice') {
+                    updateActiveDot(noteTickCounter);
+                }
+
+                // Advance the counter for the next beat.
+                noteTickCounter++;
+
+                // Reset the counter if the duration has been reached, so the next tick starts a new cycle.
+                if (noteTickCounter >= noteDuration) {
                     noteTickCounter = 0;
-                } else {
-                    noteTickCounter++;
                 }
             }
 
             function toggleMetronome() {
                 isMetronomeOn = !isMetronomeOn;
                 if (isMetronomeOn) {
+                    requestWakeLock();
                     setupAudio();
                     metronomeBtn.textContent = 'Stop Metronome';
                     metronomeBtn.classList.replace('bg-blue-500', 'bg-red-500');
@@ -1448,6 +1482,7 @@
                     metronomeIntervalId = setInterval(metronomeTick, 60000 / parseInt(bpmSlider.value));
                     metronomeTick(); 
                 } else {
+                    releaseWakeLock();
                     clearInterval(metronomeIntervalId);
                     metronomeBtn.textContent = 'Start Metronome';
                     metronomeBtn.classList.replace('bg-red-500', 'bg-blue-500');
@@ -1621,7 +1656,7 @@
                 practiceNoteContainer.classList.add('hidden');
                 practiceTabView.classList.add('hidden');
                 answerOptionsEl.classList.add('hidden');
-            
+                
                 // Explicitly manage fretboard visibility based on module
                 if (isPlayPractice) {
                     fretboardContainer.classList.add('hidden');
@@ -1704,6 +1739,7 @@
                     checkbox.id = `note-check-${note.replace('#', 's')}`;
                     checkbox.dataset.note = note;
                     checkbox.checked = true;
+                    checkbox.classList.add('note-select-checkbox');
                     const label = document.createElement('label');
                     label.htmlFor = `note-check-${note.replace('#', 's')}`;
                     label.textContent = note;
@@ -1841,6 +1877,14 @@
                     resetSpiderState();
                 }
             });
+            
+            // Handle screen lock on visibility change
+            const handleVisibilityChange = async () => {
+                if (isMetronomeOn && document.visibilityState === 'visible') {
+                    requestWakeLock();
+                }
+            };
+            document.addEventListener('visibilitychange', handleVisibilityChange);
 
             createFretboard();
             createTabView();
@@ -1853,6 +1897,4 @@
     </script>
 </body>
 </html>
-
-
 
