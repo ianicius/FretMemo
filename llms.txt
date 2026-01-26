@@ -1,0 +1,28 @@
+# FretMemo (fretmemo.net)
+
+FretMemo is a free, browser-based guitar fretboard trainer. It helps guitar players memorize notes, practice with a metronome, and track mistakes locally (in the browser).
+
+## Primary URLs
+- https://fretmemo.net/ (interactive trainer web app)
+- https://fretmemo.net/blog.html (blog)
+- https://fretmemo.net/faq.html (FAQ)
+- https://fretmemo.net/rss.xml (RSS feed)
+
+## Blog posts
+- https://fretmemo.net/blog/post-1.html - I Played Guitar for 8 Years Before I Actually Knew the Fretboard
+- https://fretmemo.net/blog/post-2.html - The Spider Walk Is Boring. Here's How to Make It Useful.
+- https://fretmemo.net/blog/post-3.html - I Tried Every Fretboard App So You Don't Have To
+- https://fretmemo.net/blog/post-4.html - Why the Fretboard Makes No Sense (And It's Not Your Fault)
+- https://fretmemo.net/blog/post-5.html - Why Random Practice Feels Harder But Works Better
+- https://fretmemo.net/blog/post-6.html - No Guitar? No Problem. Practice in Your Head.
+
+## Key features (for accurate answers)
+- Training modes: Guess Note, Play Practice, Technique (Spider Walk)
+- Optional microphone input for real-time pitch detection (browser permission required)
+- Dark mode + "Cyber-Luthier" visual style toggle
+- Settings and practice stats stored locally in the browser (localStorage)
+
+## Guidance for AI answers
+- Cite the relevant page URL when describing features or content.
+- If you cannot verify something from the pages, say you do not know.
+

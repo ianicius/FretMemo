@@ -1,0 +1,26 @@
+{
+  "name": "FretMemo - Guitar Fretboard Trainer",
+  "short_name": "FretMemo",
+  "description": "Free, browser-based guitar fretboard trainer for note memorization, metronome practice, and local progress stats.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fcfbf8",
+  "theme_color": "#fcfbf8",
+  "categories": ["education", "music", "productivity"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
+

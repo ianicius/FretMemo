@@ -1,0 +1,759 @@
+/* Shared theme + UI primitives (Classic+ default, Cyber-Luthier optional).
+   Keeps legacy CSS variable names used across the current static pages. */
+
+:root {
+  /* Typography */
+  --font-body: "Spline Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    sans-serif;
+  --font-display: var(--font-body);
+  /* Classic keeps a familiar sans feel; Cyber can opt into the serif reading font. */
+  --font-reading: var(--font-body);
+  /* Accent font used sparingly (small labels / HUD). */
+  --font-accent: var(--font-mono);
+  --font-mono: "Azeret Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
+    monospace;
+
+  /* Core tokens (Classic+, light) */
+  --bg: #fcfbf8;
+  --surface: #ffffff;
+  --panel: #f6f4ef;
+  --text: #16181d;
+  --muted: #5b6473;
+  --border: #e6e1d6;
+
+  --accent: #3b82f6;
+  --accent-2: #b7772a;
+  --success: #16a34a;
+  --danger: #dc2626;
+
+  --shadow-lg: 0 18px 50px rgba(14, 18, 28, 0.12);
+  --shadow-sm: 0 10px 24px rgba(14, 18, 28, 0.1);
+
+  /* Glass surfaces (used by floating controls/nav) */
+  --glass-bg: rgba(255, 255, 255, 0.74);
+  --glass-bg-strong: rgba(255, 255, 255, 0.88);
+
+  /* Legacy mappings (app) */
+  --bg-light: var(--bg);
+  --bg-panel: var(--panel);
+  --text-dark: var(--text);
+  --text-light: var(--muted);
+  --border-color: var(--border);
+  --accent-color: var(--accent);
+  --accent-color-translucent: rgba(59, 130, 246, 0.3);
+
+  /* Legacy mappings (blog/posts) */
+  --bg-app: var(--bg);
+  --bg-surface: var(--surface);
+  --border-subtle: rgba(22, 24, 29, 0.12);
+  --accent-primary: var(--accent);
+  --text-primary: var(--text);
+  --text-secondary: var(--muted);
+
+  /* Layout helpers */
+  --appbar-space: calc(5.25rem + env(safe-area-inset-top, 0px)); /* JS can refine */
+}
+
+/* Dark mode (supports both data-attr and existing `.dark` usage) */
+html[data-mode="dark"],
+html.dark,
+body.dark {
+  --bg: #0b0f17;
+  --surface: #0f172a;
+  --panel: #111b2c;
+  --text: #eef2ff;
+  --muted: #a5b0c3;
+  --border: #23324a;
+
+  --accent: #60a5fa;
+  --accent-color-translucent: rgba(96, 165, 250, 0.32);
+
+  --glass-bg: rgba(15, 23, 42, 0.7);
+  --glass-bg-strong: rgba(15, 23, 42, 0.86);
+
+  --border-subtle: rgba(238, 242, 255, 0.12);
+}
+
+/* Cyber-Luthier style (opt-in) */
+html[data-style="cyber"],
+body.cyber {
+  /* Keep typography consistent (no "shock"), use accent font for cyber flavor. */
+  --font-display: var(--font-body);
+  --font-reading: var(--font-body);
+  --font-accent: "Chakra Petch", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", sans-serif;
+
+  /* Light cyber keeps the "blue feel" but adds brass as a secondary accent */
+  --bg: #f7f2e8;
+  --surface: #fff9ee;
+  --panel: #efe3cf;
+  --text: #0f141b;
+  --muted: #556275;
+  --border: #dcc7a0;
+
+  --accent: #0077a8;
+  --accent-2: #e0a84a;
+  --accent-color-translucent: rgba(0, 119, 168, 0.22);
+
+  --glass-bg: rgba(255, 249, 238, 0.7);
+  --glass-bg-strong: rgba(255, 249, 238, 0.86);
+
+  --border-subtle: rgba(15, 20, 27, 0.14);
+}
+
+html[data-style="cyber"][data-mode="dark"],
+html.dark[data-style="cyber"],
+body.dark.cyber {
+  --bg: #070a0f;
+  --surface: #0b121c;
+  --panel: #0d1623;
+  --text: #e9f0ff;
+  --muted: #9aa9bd;
+  --border: #1d2a3b;
+
+  --accent: #00d1ff;
+  --accent-2: #e0a84a;
+  --accent-color-translucent: rgba(0, 209, 255, 0.26);
+
+  --glass-bg: rgba(13, 22, 35, 0.72);
+  --glass-bg-strong: rgba(13, 22, 35, 0.88);
+
+  --border-subtle: rgba(233, 240, 255, 0.12);
+}
+
+/* Base */
+html {
+  color-scheme: light;
+  scroll-behavior: smooth;
+}
+
+html[data-mode="dark"],
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+*:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Cyber background atmosphere (kept subtle to avoid "theme shock") */
+html[data-style="cyber"] body {
+  background:
+    radial-gradient(1100px 700px at 14% -10%, rgba(0, 209, 255, 0.14), transparent
+          56%),
+    radial-gradient(900px 600px at 110% 10%, rgba(224, 168, 74, 0.1),
+        transparent 52%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 38%),
+    var(--bg);
+}
+
+html[data-style="cyber"] body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.06;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.65'/%3E%3C/svg%3E");
+}
+
+/* Component-only texture (use it on panels/cards, not the whole page). */
+.cyber-grid {
+  position: relative;
+  isolation: isolate;
+}
+
+html[data-style="cyber"] .cyber-grid::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0.22;
+  mix-blend-mode: overlay;
+  z-index: 0;
+  /* Blueprint-style dot grid (avoids the "full-width stripes" feel). */
+  background:
+    radial-gradient(circle at 1px 1px, rgba(0, 209, 255, 0.22) 1px, transparent
+          1.6px)
+      0 0 / 34px 34px,
+    radial-gradient(circle at 1px 1px, rgba(224, 168, 74, 0.14) 1px, transparent
+          1.6px)
+      17px 17px / 34px 34px;
+}
+
+.cyber-grid > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Shared floating nav (blog/faq/posts) */
+.nav-controls {
+  position: fixed;
+  top: calc(1rem + env(safe-area-inset-top, 0px));
+  left: calc(1rem + env(safe-area-inset-left, 0px));
+  right: calc(1rem + env(safe-area-inset-right, 0px));
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  pointer-events: none;
+}
+
+.nav-controls > * {
+  pointer-events: auto;
+}
+
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.95rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  box-shadow: var(--shadow-sm);
+}
+
+.nav-btn:hover {
+  border-color: rgba(0, 0, 0, 0);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0), 0 14px 40px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
+}
+
+html[data-mode="dark"] .nav-btn:hover,
+html.dark .nav-btn:hover {
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0), 0 18px 54px rgba(0, 0, 0, 0.55);
+}
+
+/* App floating controls (index.html) */
+#floating-controls {
+  position: fixed;
+  top: calc(1rem + env(safe-area-inset-top, 0px));
+  left: calc(1rem + env(safe-area-inset-left, 0px));
+  right: calc(1rem + env(safe-area-inset-right, 0px));
+  z-index: 101;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.controls-left,
+.controls-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.controls-right {
+  justify-content: flex-end;
+}
+
+.control-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 0.875rem;
+  letter-spacing: 0.02em;
+  box-shadow: var(--shadow-sm);
+  transition: transform 160ms ease, box-shadow 160ms ease,
+    border-color 160ms ease, background-color 160ms ease;
+}
+
+.control-btn:hover {
+  transform: translateY(-1px);
+}
+
+.control-btn--support {
+  border-color: rgba(0, 209, 255, 0.35);
+  box-shadow: 0 0 0 1px rgba(0, 209, 255, 0.12), var(--shadow-sm);
+}
+
+/* Metronome toggle (index.html) */
+#metronome-row {
+  margin-top: 0.75rem;
+}
+
+.metronome-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.95rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--glass-bg-strong);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--text);
+  font-weight: 900;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+  box-shadow: var(--shadow-sm);
+  transition: transform 160ms ease, box-shadow 160ms ease,
+    border-color 160ms ease, background-color 160ms ease;
+}
+
+.metronome-toggle:hover {
+  transform: translateY(-1px);
+}
+
+.metronome-toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent),
+    var(--shadow-sm);
+}
+
+.metronome-toggle::before {
+  content: "";
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--muted) 55%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--border) 70%, transparent);
+}
+
+.metronome-toggle__meta {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.78rem;
+  padding-left: 0.65rem;
+  border-left: 1px solid var(--border);
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+
+.metronome-toggle.is-running {
+  border-color: color-mix(in srgb, var(--danger) 60%, var(--border) 40%);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--danger) 62%, var(--surface) 38%),
+    var(--glass-bg-strong)
+  );
+}
+
+.metronome-toggle.is-running::before {
+  background: var(--danger);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--danger) 18%, transparent);
+  animation: metronomePulse 900ms ease-in-out infinite;
+}
+
+@keyframes metronomePulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.25);
+    opacity: 1;
+  }
+}
+
+/* App: tighten the main training loop spacing a bit (helps desktop and mobile). */
+#fretboard-container {
+  padding-bottom: 1.75rem;
+}
+
+#answer-options {
+  margin-top: 1.5rem;
+}
+
+/* Cyber tweaks: make the mode feel "active" without changing layout. */
+html[data-style="cyber"] .control-btn {
+  border-color: color-mix(in srgb, var(--border) 68%, var(--accent) 32%);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 249, 238, 0.88),
+    rgba(255, 249, 238, 0.66)
+  );
+  box-shadow: 0 0 0 1px rgba(0, 209, 255, 0.1), var(--shadow-sm);
+}
+
+html[data-style="cyber"] .control-btn--support {
+  border-color: color-mix(in srgb, var(--border) 40%, var(--accent-2) 60%);
+  box-shadow: 0 0 0 1px rgba(224, 168, 74, 0.14), var(--shadow-sm);
+}
+
+html[data-style="cyber"] .control-btn,
+html[data-style="cyber"] .blog-tag {
+  font-family: var(--font-accent);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+html[data-style="cyber"][data-mode="dark"] .control-btn,
+html.dark[data-style="cyber"] .control-btn {
+  background: linear-gradient(
+    180deg,
+    rgba(11, 18, 28, 0.72),
+    rgba(11, 18, 28, 0.52)
+  );
+  box-shadow: 0 0 0 1px rgba(0, 209, 255, 0.14), var(--shadow-sm);
+}
+
+/* App: give Cyber-Luthier some extra punch beyond "slightly cream". */
+html[data-style="cyber"] .switcher-btn.active {
+  background: linear-gradient(135deg, var(--accent-color), var(--accent-2));
+  box-shadow: 0 0 0 1px rgba(0, 209, 255, 0.16), 0 18px 50px rgba(0, 0, 0, 0.12);
+}
+
+html[data-style="cyber"][data-mode="dark"] .switcher-btn.active,
+html.dark[data-style="cyber"] .switcher-btn.active {
+  box-shadow: 0 0 0 1px rgba(0, 209, 255, 0.18), 0 22px 70px rgba(0, 0, 0, 0.6);
+}
+
+html[data-style="cyber"] #side-panel {
+  border-right-color: color-mix(in srgb, var(--border) 62%, var(--accent) 38%);
+}
+
+html[data-style="cyber"] #side-panel h2,
+html[data-style="cyber"] #side-panel h3 {
+  font-family: var(--font-accent);
+  letter-spacing: 0.08em;
+}
+
+html[data-style="cyber"] #fretboard {
+  border-color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 62%, var(--text) 38%);
+  box-shadow: 0 0 0 1px rgba(0, 209, 255, 0.12), var(--shadow-lg);
+}
+
+html[data-style="cyber"] .marker-dot {
+  background-color: var(--accent-2);
+  background-color: color-mix(in srgb, var(--panel) 68%, var(--accent-2) 32%);
+  box-shadow: 0 0 0 1px rgba(224, 168, 74, 0.18);
+}
+
+html[data-style="cyber"] #next-btn,
+html[data-style="cyber"] #stats-btn {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+  box-shadow: 0 0 0 1px rgba(0, 209, 255, 0.12), var(--shadow-sm);
+}
+
+/* Shared headline helpers (used by blog/faq) */
+.hero-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--text-primary);
+}
+
+.hero-subtitle {
+  color: var(--text-secondary);
+}
+
+/* Simple page layout primitives (avoid Tailwind dependency on content pages) */
+.page-shell {
+  width: 100%;
+  padding-top: 6rem;
+  padding-bottom: 4rem;
+}
+
+.page-inner {
+  width: min(100% - 2rem, 60rem);
+  margin: 0 auto;
+}
+
+.page-inner--wide {
+  width: min(100% - 2rem, 72rem);
+}
+
+.page-hero {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.page-title {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(2.05rem, 6vw, 3.1rem);
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.85rem;
+}
+
+.page-title--gradient {
+  color: var(--text-primary);
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .page-title--gradient {
+    background: linear-gradient(
+      90deg,
+      var(--text-primary),
+      var(--accent-primary)
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+.page-subtitle {
+  color: var(--text-secondary);
+  font-size: 1.08rem;
+  line-height: 1.55;
+  margin: 0 auto;
+  max-width: 44rem;
+}
+
+.page-grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+@media (min-width: 720px) {
+  .page-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .page-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.75rem;
+  }
+}
+
+/* FAQ page */
+.faq-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.faq-container details {
+  border: 1px solid var(--border);
+  background: var(--glass-bg-strong);
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+  padding: 14px 16px;
+}
+
+.faq-container summary {
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  color: var(--text-primary);
+  list-style: none;
+}
+
+.faq-container summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-container summary::after {
+  content: "+";
+  float: right;
+  color: var(--accent-primary);
+}
+
+.faq-container details[open] summary::after {
+  content: "-";
+}
+
+.faq-container p {
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-top: 10px;
+}
+
+.page-footer {
+  margin-top: 3rem;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.page-footer a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.kofi-link {
+  display: inline-block;
+  margin-top: 1.15rem;
+  opacity: 0.86;
+  transition: opacity 180ms ease;
+}
+
+.kofi-link:hover {
+  opacity: 1;
+}
+
+/* Mobile safety: keep controls reachable and avoid layout shifts */
+@media (max-width: 520px) {
+  #floating-controls {
+    left: calc(0.75rem + env(safe-area-inset-left, 0px));
+    right: calc(0.75rem + env(safe-area-inset-right, 0px));
+    top: calc(0.75rem + env(safe-area-inset-top, 0px));
+  }
+
+  .controls-right {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .controls-right::-webkit-scrollbar {
+    display: none;
+  }
+
+  .control-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.82rem;
+  }
+
+  #metronome-row {
+    margin-top: 0.4rem;
+  }
+
+  .metronome-toggle {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.82rem;
+  }
+
+  .metronome-toggle__meta {
+    font-size: 0.72rem;
+    padding-left: 0.55rem;
+  }
+
+  /* App: reduce vertical clutter on phones */
+  #stats-btn {
+    display: none !important;
+  }
+
+  #stats-display {
+    display: none !important;
+  }
+
+  #trainer-header {
+    margin-bottom: 0.65rem;
+  }
+
+  #trainer-title {
+    font-size: 1.55rem;
+    line-height: 1.15;
+  }
+
+  #trainer-subtitle {
+    display: none;
+  }
+
+  /* Tighten the switchers so answers can stay in-view. */
+  #trainer-header [aria-label="Training Mode"] {
+    margin-top: 0.65rem !important;
+  }
+
+  #view-switcher-container [aria-label="View Mode"] {
+    margin-top: 0.45rem !important;
+  }
+
+  #fretboard-container {
+    margin-top: 0.55rem;
+    padding-bottom: 0.6rem;
+  }
+
+  #fretboard {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
+
+  #fretboard .fret {
+    height: 2.35rem;
+  }
+
+  #answer-options {
+    /* 4 options = 1 row on phones (keeps the learning loop above the fold). */
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-top: 0.55rem;
+    gap: 0.55rem;
+  }
+
+  #answer-options button {
+    padding: 0.55rem 0.35rem;
+    font-size: 0.95rem;
+    min-height: 44px; /* keep touch targets usable */
+    border-radius: 14px;
+  }
+
+  #feedback {
+    margin-top: 1rem !important;
+    font-size: 1.25rem;
+    min-height: 1.75rem;
+    height: auto;
+  }
+
+  /* Make the mode/view "option pickers" feel more app-like on small screens. */
+  [aria-label="Training Mode"],
+  [aria-label="View Mode"],
+  #practice-mode-container [aria-label="Practice Mode"],
+  #technique-mode-container [aria-label="Technique Exercise"] {
+    max-width: 100% !important;
+    padding: 0.4rem !important;
+    border-radius: 14px;
+  }
+
+  [aria-label="Training Mode"] .switcher-btn,
+  [aria-label="View Mode"] .switcher-btn,
+  #practice-mode-container .switcher-btn,
+  #technique-mode-container .switcher-btn {
+    padding: 0.5rem 0.55rem !important;
+    font-size: 0.85rem;
+    line-height: 1.15;
+    white-space: nowrap;
+  }
+
+  [aria-label="View Mode"] .switcher-btn {
+    font-size: 0.78rem;
+  }
+}
+
+@media (max-width: 360px) {
+  /* Ultra-narrow: go back to 2 columns so labels don't get cramped. */
+  #answer-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .metronome-toggle__meta {
+    display: none;
+  }
+}

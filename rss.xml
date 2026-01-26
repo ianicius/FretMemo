@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>FretMemo Blog</title>
+    <link>https://fretmemo.net/blog.html</link>
+    <description>Insights on theory, practice, and the art of the guitar.</description>
+    <language>en</language>
+    <atom:link href="https://fretmemo.net/rss.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 25 Jan 2026 00:00:00 GMT</lastBuildDate>
+
+    <item>
+      <title>I Played Guitar for 8 Years Before I Actually Knew the Fretboard</title>
+      <link>https://fretmemo.net/blog/post-1.html</link>
+      <guid isPermaLink="true">https://fretmemo.net/blog/post-1.html</guid>
+      <pubDate>Sun, 25 Jan 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A personal story about overcoming the fear of the fretboard and finally learning the notes.]]></description>
+    </item>
+
+    <item>
+      <title>The Spider Walk Is Boring. Here's How to Make It Useful.</title>
+      <link>https://fretmemo.net/blog/post-2.html</link>
+      <guid isPermaLink="true">https://fretmemo.net/blog/post-2.html</guid>
+      <pubDate>Sun, 25 Jan 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Turn the most boring guitar exercise into a powerful fretboard learning tool with 3 levels of difficulty.]]></description>
+    </item>
+
+    <item>
+      <title>I Tried Every Fretboard App So You Don't Have To</title>
+      <link>https://fretmemo.net/blog/post-3.html</link>
+      <guid isPermaLink="true">https://fretmemo.net/blog/post-3.html</guid>
+      <pubDate>Sun, 25 Jan 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[An honest comparison of the most popular fretboard learning apps, from paid giants to free web tools.]]></description>
+    </item>
+
+    <item>
+      <title>Why the Fretboard Makes No Sense (And It's Not Your Fault)</title>
+      <link>https://fretmemo.net/blog/post-4.html</link>
+      <guid isPermaLink="true">https://fretmemo.net/blog/post-4.html</guid>
+      <pubDate>Sun, 25 Jan 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[The guitar is structurally confusing compared to other instruments. Here's why and how to deal with it.]]></description>
+    </item>
+
+    <item>
+      <title>Why Random Practice Feels Harder But Works Better</title>
+      <link>https://fretmemo.net/blog/post-5.html</link>
+      <guid isPermaLink="true">https://fretmemo.net/blog/post-5.html</guid>
+      <pubDate>Sun, 25 Jan 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[The science of interleaved practice and why struggling to find notes is actually a sign of deep learning.]]></description>
+    </item>
+
+    <item>
+      <title>No Guitar? No Problem. Practice in Your Head.</title>
+      <link>https://fretmemo.net/blog/post-6.html</link>
+      <guid isPermaLink="true">https://fretmemo.net/blog/post-6.html</guid>
+      <pubDate>Sun, 25 Jan 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Learn how to visualize the fretboard and practice anywhere: commute, boring meetings, or before bed.]]></description>
+    </item>
+  </channel>
+</rss>
+
