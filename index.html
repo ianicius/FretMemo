@@ -192,6 +192,211 @@
                 </div>
             </div>
 
+            <!-- Permutation Trainer Settings -->
+            <div id="permutation-settings-container" class="setting-group hidden">
+                <h3>🔀 Permutation Trainer</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label for="permutation-mode" class="block text-left font-medium mb-2">Mode</label>
+                        <select id="permutation-mode" class="w-full rounded-md">
+                            <option value="single">Single Permutation</option>
+                            <option value="daily">Daily Challenge</option>
+                            <option value="sequential">Sequential Trainer</option>
+                            <option value="random">Random Mode</option>
+                        </select>
+                    </div>
+                    <div id="permutation-select-container">
+                        <label for="permutation-tier" class="block text-left font-medium mb-2">Difficulty Tier</label>
+                        <select id="permutation-tier" class="w-full rounded-md mb-2">
+                            <option value="1">Tier 1 - Beginner</option>
+                            <option value="2">Tier 2 - Intermediate</option>
+                            <option value="3">Tier 3 - Advanced</option>
+                            <option value="all">All Tiers</option>
+                        </select>
+                        <label for="permutation-select" class="block text-left font-medium mb-2">Pattern</label>
+                        <select id="permutation-select" class="w-full rounded-md">
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+                    <div>
+                        <label for="permutation-direction" class="block text-left font-medium mb-2">Direction</label>
+                        <select id="permutation-direction" class="w-full rounded-md">
+                            <option value="ascending">Ascending</option>
+                            <option value="descending">Descending</option>
+                            <option value="both">Both</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" id="permutation-hold-fingers">
+                        <label for="permutation-hold-fingers" class="font-medium">Hold Fingers Down</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Linear Shifter Settings -->
+            <div id="linear-settings-container" class="setting-group hidden">
+                <h3>↔️ Linear Shifter</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label for="linear-string" class="block text-left font-medium mb-2">String</label>
+                        <select id="linear-string" class="w-full rounded-md">
+                            <option value="0">High E (1st)</option>
+                            <option value="1">B String (2nd)</option>
+                            <option value="2">G String (3rd)</option>
+                            <option value="3">D String (4th)</option>
+                            <option value="4">A String (5th)</option>
+                            <option value="5" selected>Low E (6th)</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label for="linear-start-fret" class="block text-left font-medium mb-2">Start Fret</label>
+                            <input type="number" id="linear-start-fret" value="1" min="1" max="12" class="w-full text-center">
+                        </div>
+                        <div>
+                            <label for="linear-end-fret" class="block text-left font-medium mb-2">End Fret</label>
+                            <input type="number" id="linear-end-fret" value="12" min="1" max="12" class="w-full text-center">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="linear-notes-per-shift" class="block text-left font-medium mb-2">Notes Before Shift</label>
+                        <select id="linear-notes-per-shift" class="w-full rounded-md">
+                            <option value="4">4 notes (standard)</option>
+                            <option value="5">5 notes</option>
+                            <option value="6">6 notes</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="linear-direction" class="block text-left font-medium mb-2">Direction</label>
+                        <select id="linear-direction" class="w-full rounded-md">
+                            <option value="ascending">Ascending</option>
+                            <option value="descending">Descending</option>
+                            <option value="roundTrip">Round Trip</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diagonal Patterns Settings -->
+            <div id="diagonal-settings-container" class="setting-group hidden">
+                <h3>↗️ Diagonal Patterns</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label for="diagonal-pattern" class="block text-left font-medium mb-2">Pattern</label>
+                        <select id="diagonal-pattern" class="w-full rounded-md">
+                            <option value="ascending">Ascending</option>
+                            <option value="descending">Descending</option>
+                            <option value="full">Full Diagonal</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="diagonal-start-fret" class="block text-left font-medium mb-2">Start Fret</label>
+                        <input type="number" id="diagonal-start-fret" value="3" min="1" max="9" class="w-full text-center">
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" id="diagonal-show-pick" checked>
+                        <label for="diagonal-show-pick" class="font-medium">Show Pick Direction</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- String Skipping Settings -->
+            <div id="stringskip-settings-container" class="setting-group hidden">
+                <h3>⏭️ String Skipping</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label for="skip-pattern" class="block text-left font-medium mb-2">Skip Pattern</label>
+                        <select id="skip-pattern" class="w-full rounded-md">
+                            <option value="single">Single Skip (6-4-5-3...)</option>
+                            <option value="octave">Octave Skip (6-4, 5-3...)</option>
+                            <option value="double">Double Skip (6-3, 5-2...)</option>
+                            <option value="wide">Wide Skip (6-1, 5-2...)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="skip-start-fret" class="block text-left font-medium mb-2">Start Fret</label>
+                        <input type="number" id="skip-start-fret" value="5" min="1" max="12" class="w-full text-center">
+                    </div>
+                    <div>
+                        <label for="skip-picking-focus" class="block text-left font-medium mb-2">Picking Focus</label>
+                        <select id="skip-picking-focus" class="w-full rounded-md">
+                            <option value="alternate">Alternate Picking</option>
+                            <option value="inside">Inside Picking</option>
+                            <option value="outside">Outside Picking</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" id="skip-show-pick" checked>
+                        <label for="skip-show-pick" class="font-medium">Show Pick Indicators</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Legato Builder Settings -->
+            <div id="legato-settings-container" class="setting-group hidden">
+                <h3>🎸 Legato Builder</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label for="legato-type" class="block text-left font-medium mb-2">Exercise Type</label>
+                        <select id="legato-type" class="w-full rounded-md">
+                            <option value="trill">Trill Exercise</option>
+                            <option value="hammerOnly">Hammer-On Only</option>
+                            <option value="pullOnly">Pull-Off Only</option>
+                            <option value="threeNote">3-Note Legato</option>
+                        </select>
+                    </div>
+                    <div id="trill-pair-container">
+                        <label for="trill-pair" class="block text-left font-medium mb-2">Finger Pair</label>
+                        <select id="trill-pair" class="w-full rounded-md">
+                            <option value="1-2">1-2 (Index-Middle)</option>
+                            <option value="1-3">1-3 (Index-Ring)</option>
+                            <option value="1-4">1-4 (Index-Pinky)</option>
+                            <option value="2-3">2-3 (Middle-Ring) - Hard</option>
+                            <option value="2-4">2-4 (Middle-Pinky)</option>
+                            <option value="3-4">3-4 (Ring-Pinky) - Hard</option>
+                        </select>
+                    </div>
+                    <div id="trill-duration-container">
+                        <label for="trill-duration" class="block text-left font-medium mb-2">Duration (seconds)</label>
+                        <input type="number" id="trill-duration" value="15" min="5" max="60" class="w-full text-center">
+                    </div>
+                    <div>
+                        <label for="legato-start-fret" class="block text-left font-medium mb-2">Start Fret</label>
+                        <input type="number" id="legato-start-fret" value="5" min="1" max="12" class="w-full text-center">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Burst Mode Settings (Cross-Exercise) -->
+            <div id="burst-settings-container" class="setting-group hidden">
+                <h3>⚡ Burst Mode</h3>
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" id="burst-mode-toggle">
+                        <label for="burst-mode-toggle" class="font-medium">Enable Burst Mode</label>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label for="burst-slow-beats" class="text-xs" style="color: var(--text-light);">Slow Beats</label>
+                            <input type="number" id="burst-slow-beats" value="4" min="1" max="16" class="w-full rounded-md text-center mt-1">
+                        </div>
+                        <div>
+                            <label for="burst-fast-beats" class="text-xs" style="color: var(--text-light);">Fast Beats</label>
+                            <input type="number" id="burst-fast-beats" value="2" min="1" max="8" class="w-full rounded-md text-center mt-1">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="burst-multiplier" class="block text-left font-medium mb-2">Speed Multiplier</label>
+                        <select id="burst-multiplier" class="w-full rounded-md">
+                            <option value="1.5">1.5x</option>
+                            <option value="2" selected>2x</option>
+                            <option value="2.5">2.5x</option>
+                            <option value="3">3x</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
             <div class="setting-group">
                 <h3>Note Settings</h3>
                 <div class="space-y-4">
@@ -299,6 +504,78 @@
                 </div>
             </div>
 
+            <!-- Exercise Selection Grid -->
+            <div id="exercise-selection-container" class="hidden">
+                <div class="exercise-grid">
+                    <div class="exercise-card active" data-exercise="spiderWalk">
+                        <div class="exercise-card__icon">🕷️</div>
+                        <div class="exercise-card__title">Spider Walk</div>
+                        <div class="exercise-card__desc">Baseline synchronization</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="permutation">
+                        <div class="exercise-card__icon">🔀</div>
+                        <div class="exercise-card__title">Permutation Trainer</div>
+                        <div class="exercise-card__desc">24 finger patterns</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="diagonal">
+                        <div class="exercise-card__icon">↗️</div>
+                        <div class="exercise-card__title">Diagonal Patterns</div>
+                        <div class="exercise-card__desc">Shape shifting</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="stringSkip">
+                        <div class="exercise-card__icon">⏭️</div>
+                        <div class="exercise-card__title">String Skipping</div>
+                        <div class="exercise-card__desc">Pick accuracy</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="legato">
+                        <div class="exercise-card__icon">🎸</div>
+                        <div class="exercise-card__title">Legato Builder</div>
+                        <div class="exercise-card__desc">Hammer-ons & pulls</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="linear">
+                        <div class="exercise-card__icon">↔️</div>
+                        <div class="exercise-card__title">Linear Shifter</div>
+                        <div class="exercise-card__desc">Position shifting</div>
+                    </div>
+                </div>
+
+                <!-- Daily Challenge Banner -->
+                <div id="daily-challenge-banner" class="daily-challenge-banner hidden">
+                    <div>
+                        <div class="daily-challenge-banner__label">📅 Daily Challenge</div>
+                        <div class="daily-challenge-banner__pattern" id="daily-challenge-pattern">1-3-2-4</div>
+                    </div>
+                    <button id="daily-challenge-btn" class="control-btn">Start Challenge</button>
+                </div>
+
+                <!-- Progress Indicator -->
+                <div id="progress-section" class="hidden max-w-md mx-auto mt-4 p-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm font-medium" style="color: var(--text-dark);">Permutation Progress</span>
+                        <span class="text-sm font-bold" style="color: var(--gold-600);" id="progress-text">0/24</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-bar__fill" id="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exercise View (shown when an exercise is active) -->
+            <div id="exercise-view-container" class="hidden">
+                <div class="flex items-center justify-between max-w-2xl mx-auto mb-4">
+                    <button id="back-to-exercises-btn" class="control-btn">← Back</button>
+                    <h2 id="current-exercise-title" class="text-xl font-bold" style="color: var(--text-dark);">Spider Walk</h2>
+                    <button id="exercise-settings-toggle" class="control-btn">⚙️ Settings</button>
+                </div>
+
+                <!-- Exercise Info Display -->
+                <div id="exercise-info" class="max-w-xl mx-auto mb-4 text-center">
+                    <div id="exercise-pattern-display" class="text-lg font-semibold mb-2" style="color: var(--text-dark);"></div>
+                    <div id="exercise-instruction" class="text-sm" style="color: var(--text-light);"></div>
+                </div>
+            </div>
+
+            <!-- Legacy container (will be hidden) -->
             <div id="technique-mode-container" class="hidden">
                 <div role="radiogroup" aria-label="Technique Exercise"
                     class="segmented-control mt-4 max-w-sm mx-auto">
@@ -308,12 +585,14 @@
                 </div>
             </div>
 
-            <div id="metronome-row" class="mt-3 flex justify-center">
+            <div id="metronome-row" class="mt-3 flex justify-center relative">
                 <button id="metronome-btn" type="button" class="metronome-toggle w-full max-w-xs"
                     aria-pressed="false">
                     <span class="metronome-toggle__label">Start Metronome</span>
                     <span id="metronome-mini-bpm" class="metronome-toggle__meta">60 BPM</span>
                 </button>
+                <!-- Burst Mode Indicator -->
+                <div id="burst-indicator" class="burst-indicator slow hidden">SLOW</div>
             </div>
 
             <div id="fretboard-container" class="relative w-full overflow-x-auto pb-8 mt-4">
