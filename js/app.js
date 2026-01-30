@@ -88,7 +88,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const tunerDisplay = document.getElementById('tuner-display');
             const detectedNoteEl = document.getElementById('detected-note');
             const darkModeToggle = document.getElementById('dark-mode-toggle');
-            const cyberStyleToggle = document.getElementById('cyber-style-toggle');
             const leftyToggle = document.getElementById('lefty-toggle');
             
             // --- Application State ---
@@ -298,13 +297,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 const gridTemplate = `5% repeat(${FRET_COUNT}, 1fr)`; 
                 fretboardEl.style.gridTemplateColumns = gridTemplate;
+                fretboardEl.style.gridTemplateRows = `repeat(${tuning.length}, var(--fret-row, 3rem))`;
                 fretNumbersEl.style.gridTemplateColumns = gridTemplate;
-                const stringThickness = [1, 1.2, 1.5, 1.8, 2.1, 2.4]; // Thin to Thick
+                const stringThickness = [1.4, 1.7, 2.0, 2.3, 2.6, 3.0]; // Thin to Thick (make strings clearly visible)
 
                 for (let i = 0; i < tuning.length; i++) {
                     for (let j = 0; j <= FRET_COUNT; j++) {
                         const fretEl = document.createElement('div');
-                        fretEl.classList.add('fret', 'relative', 'flex', 'items-center', 'justify-center', 'h-12');
+                        fretEl.classList.add('fret', 'fret-cell', 'relative', 'flex', 'items-center', 'justify-center');
                         fretEl.dataset.string = i;
                         fretEl.dataset.fret = j;
                         const stringLine = document.createElement('div');
@@ -543,10 +543,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         answerOptionsEl.innerHTML = '';
                         Array.from(options).sort(() => Math.random() - 0.5).forEach(note => {
                             const button = document.createElement('button');
+                            button.type = 'button';
                             button.textContent = note;
-                            button.classList.add('p-4', 'border', 'hover:bg-gray-100', 'rounded-lg', 'text-lg', 'font-semibold', 'transition-colors', 'duration-200');
-                            button.style.backgroundColor = 'var(--bg-light)';
-                            button.style.borderColor = 'var(--border-color)';
+                            button.classList.add('answer-option-btn');
                             button.dataset.note = note;
                             button.addEventListener('click', handleAnswer);
                             answerOptionsEl.appendChild(button);
@@ -582,10 +581,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         Array.from(options).sort(() => Math.random() - 0.5).forEach(pos => {
                             const [string, fret] = pos.split('-');
                             const button = document.createElement('button');
-                            button.innerHTML = `<span class="font-bold">${tuning[string]}</span> <span style="color:var(--text-light)">string</span> - <span class="font-bold">${fret}</span> <span style="color:var(--text-light)">fret</span>`;
-                            button.classList.add('p-4', 'border', 'hover:bg-gray-100', 'rounded-lg', 'text-lg', 'transition-colors', 'duration-200');
-                             button.style.backgroundColor = 'var(--bg-light)';
-                            button.style.borderColor = 'var(--border-color)';
+                            button.type = 'button';
+                            button.innerHTML = `<span class="answer-option__strong">${tuning[string]}</span> <span class="answer-option__hint">string</span> - <span class="answer-option__strong">${fret}</span> <span class="answer-option__hint">fret</span>`;
+                            button.classList.add('answer-option-btn');
                             button.dataset.position = pos;
                             button.addEventListener('click', handleAnswer);
                             answerOptionsEl.appendChild(button);
@@ -1155,12 +1153,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.documentElement.classList.toggle('dark', isDark);
 
                     const themeMeta = document.querySelector('meta[name=\"theme-color\"]');
-                    if (themeMeta) themeMeta.setAttribute('content', isDark ? '#0b0f17' : '#fcfbf8');
-
-                    const style = localStorage.getItem('visualStyle') === 'cyber' ? 'cyber' : 'classic';
-                    bodyEl.classList.toggle('cyber', style === 'cyber');
-                    cyberStyleToggle.checked = style === 'cyber';
-                    document.documentElement.dataset.style = style;
+                    if (themeMeta) themeMeta.setAttribute('content', isDark ? '#18181b' : '#fafafa');
 
                     const isLefty = localStorage.getItem('leftyMode') === 'true';
                     bodyEl.classList.toggle('lefty', isLefty);
@@ -1225,14 +1218,16 @@ document.addEventListener('DOMContentLoaded', () => {
             populateNoteSelection();
             applyStoredSettings();
             
-            naturalsOnlyToggle.addEventListener('change', () => {
-                const isChecked = naturalsOnlyToggle.checked;
-                document.querySelectorAll('.note-select-checkbox').forEach(cb => {
-                    cb.disabled = isChecked;
-                    cb.parentElement.classList.toggle('opacity-50', isChecked);
+            if (naturalsOnlyToggle) {
+                naturalsOnlyToggle.addEventListener('change', () => {
+                    const isChecked = naturalsOnlyToggle.checked;
+                    document.querySelectorAll('.note-select-checkbox').forEach(cb => {
+                        cb.disabled = isChecked;
+                        if (cb.parentElement) cb.parentElement.classList.toggle('opacity-50', isChecked);
+                    });
+                    if (!isMetronomeOn) newQuestion();
                 });
-                if (!isMetronomeOn) newQuestion();
-            });
+            }
 
             document.querySelectorAll('.note-select-checkbox').forEach(cb => {
                 cb.addEventListener('change', () => {
@@ -1240,13 +1235,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             });
 
-            settingsToggleBtn.addEventListener('click', () => {
-                bodyEl.classList.toggle('panel-visible');
-            });
+            if (settingsToggleBtn) {
+                settingsToggleBtn.addEventListener('click', () => {
+                    bodyEl.classList.toggle('panel-visible');
+                });
+            }
 
-            sidePanelOverlay.addEventListener('click', () => {
-                bodyEl.classList.remove('panel-visible');
-            });
+            if (sidePanelOverlay) {
+                sidePanelOverlay.addEventListener('click', () => {
+                    bodyEl.classList.remove('panel-visible');
+                });
+            }
             
             document.addEventListener('keydown', (e) => {
                 if (e.code === 'Space' && document.activeElement.tagName !== 'INPUT') {
@@ -1301,9 +1300,9 @@ document.addEventListener('DOMContentLoaded', () => {
             speedUpInterval.addEventListener('input', () => {
                 try { localStorage.setItem('speedUpInterval', speedUpInterval.value); } catch (err) {}
             });
-            metronomeBtn.addEventListener('click', toggleMetronome);
-            nextBtn.addEventListener('click', newQuestion);
-            statsBtn.addEventListener('click', displayDetailedStats);
+            if (metronomeBtn) metronomeBtn.addEventListener('click', toggleMetronome);
+            if (nextBtn) nextBtn.addEventListener('click', newQuestion);
+            if (statsBtn) statsBtn.addEventListener('click', displayDetailedStats);
             statsDisplay.addEventListener('click', () => {
                 if (!statsDisplay.classList.contains('hidden')) displayDetailedStats();
             });
@@ -1362,24 +1361,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.documentElement.dataset.mode = isDark ? 'dark' : 'light';
                 document.documentElement.classList.toggle('dark', isDark);
                 const themeMeta = document.querySelector('meta[name=\"theme-color\"]');
-                if (themeMeta) themeMeta.setAttribute('content', isDark ? '#0b0f17' : '#fcfbf8');
+                if (themeMeta) themeMeta.setAttribute('content', isDark ? '#18181b' : '#fafafa');
                 localStorage.setItem('darkMode', isDark);
-            });
-            cyberStyleToggle.addEventListener('change', (e) => {
-                const style = e.target.checked ? 'cyber' : 'classic';
-                bodyEl.classList.toggle('cyber', style === 'cyber');
-                document.documentElement.dataset.style = style;
-                localStorage.setItem('visualStyle', style);
             });
             leftyToggle.addEventListener('change', (e) => {
                 bodyEl.classList.toggle('lefty', e.target.checked);
                 localStorage.setItem('leftyMode', e.target.checked);
             });
-             spiderStartFretInput.addEventListener('input', () => {
-                if (!isMetronomeOn) {
-                    resetSpiderState();
-                }
-            });
+            if (spiderStartFretInput) {
+                spiderStartFretInput.addEventListener('input', () => {
+                    if (!isMetronomeOn) {
+                        resetSpiderState();
+                    }
+                });
+            }
             
             // Handle screen lock on visibility change
             const handleVisibilityChange = async () => {
@@ -1398,9 +1393,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 0);
 
             // --- PWA registration (tool only) ---
+            // Avoid service worker caching during local development (localhost).
+            const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
             if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('/sw.js').catch(() => {});
-                });
+                if (isLocalhost || location.protocol === 'file:') {
+                    navigator.serviceWorker.getRegistrations()
+                        .then((regs) => Promise.all(regs.map((r) => r.unregister())))
+                        .catch(() => { });
+                } else {
+                    window.addEventListener('load', () => {
+                        navigator.serviceWorker.register('/sw.js').catch(() => { });
+                    });
+                }
             }
         });
