@@ -85,7 +85,19 @@ Vanilla JavaScript (ES6+)
 Web Audio API (for metronome clicks and pitch detection)
 
 How to Use
-Simply download the index.html file and open it in any modern web browser.
+
+For best results, run it from a local web server (recommended). This avoids browser caching quirks and enables features that require an HTTP origin (PWA/service worker, consistent asset loading).
+
+**Option A (Python)**
+1) Open a terminal in the project folder (the one containing `index.html`).
+2) Run:
+   - `py -m http.server 8000` (Windows), or `python -m http.server 8000`
+3) Open: `http://localhost:8000/`
+
+**Option B (VS Code)**
+- Use the “Live Server” extension and open `index.html`.
+
+If you previously ran the app on `https://fretmemo.net/`, your browser may have a service worker cached. Do a hard refresh (Ctrl+F5) or clear site data if you’re not seeing updates.
 
 Contributing
 Contributions, issues, and feature requests are welcome! Feel free to check the issues page.

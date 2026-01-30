@@ -3,7 +3,7 @@
    - Uses navigation fallback to the app shell
    - Runtime-caches Tailwind CDN + Google Fonts so the tool still renders offline */
 
-const VERSION = "v1";
+const VERSION = "v2";
 const STATIC_CACHE = `fretmemo-static-${VERSION}`;
 const RUNTIME_CACHE = `fretmemo-runtime-${VERSION}`;
 
@@ -65,16 +65,13 @@ self.addEventListener("fetch", (event) => {
   // Same-origin assets: cache-first.
   if (url.origin === self.location.origin) {
     event.respondWith(
-      caches.match(req).then((cached) => {
-        if (cached) return cached;
-        return fetch(req)
-          .then((res) => {
-            const resClone = res.clone();
-            caches.open(STATIC_CACHE).then((cache) => cache.put(req, resClone)).catch(() => {});
-            return res;
-          })
-          .catch(() => cached || Response.error());
-      })
+      fetch(req)
+        .then((res) => {
+          const resClone = res.clone();
+          caches.open(STATIC_CACHE).then((cache) => cache.put(req, resClone)).catch(() => { });
+          return res;
+        })
+        .catch(() => caches.match(req))
     );
     return;
   }
@@ -86,7 +83,7 @@ self.addEventListener("fetch", (event) => {
         cache.match(req).then((cached) => {
           const fetchPromise = fetch(req)
             .then((res) => {
-              cache.put(req, res.clone()).catch(() => {});
+              cache.put(req, res.clone()).catch(() => { });
               return res;
             })
             .catch(() => cached);
