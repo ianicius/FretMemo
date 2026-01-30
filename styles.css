@@ -1,125 +1,158 @@
-/* Shared theme + UI primitives (Classic+ default, Cyber-Luthier optional).
-   Keeps legacy CSS variable names used across the current static pages. */
+/* Shared theme + UI primitives (Premium Standard).
+   Light Mode: "Clean Zinc" (Modern, Flat, High-DPI)
+   Dark Mode: "Deep Graphite" (Matte, Focused) */
 
 :root {
-  /* Typography */
-  --font-body: "Spline Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
-    sans-serif;
-  --font-display: var(--font-body);
-  /* Classic keeps a familiar sans feel; Cyber can opt into the serif reading font. */
-  --font-reading: var(--font-body);
-  /* Accent font used sparingly (small labels / HUD). */
-  --font-accent: var(--font-mono);
-  --font-mono: "Azeret Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
-    monospace;
+  /* Typography - Bespoke & Cinematic */
+  --font-body: "Spline Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Chakra Petch", var(--font-body);
+  /* Promoted Tech Font */
+  --font-accent: "Azeret Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-mono: var(--font-accent);
 
-  /* Core tokens (Classic+, light) */
-  --bg: #fcfbf8;
-  --surface: #ffffff;
-  --panel: #f6f4ef;
-  --text: #16181d;
-  --muted: #5b6473;
-  --border: #e6e1d6;
+  /* Radii */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-pill: 999px;
 
-  --accent: #3b82f6;
-  --accent-2: #b7772a;
-  --success: #16a34a;
-  --danger: #dc2626;
+  /* PREMIUM GOLD PALETTE */
+  --gold-50: #FFFBEB;
+  --gold-100: #FEF3C7;
+  --gold-200: #FDE68A;
+  --gold-300: #FCD34D;
+  --gold-400: #FBBF24;
+  --gold-500: #F59E0B;
+  --gold-600: #D97706;
+  --gold-700: #B45309;
+  --gold-800: #92400E;
+  --gold-900: #78350F;
 
-  --shadow-lg: 0 18px 50px rgba(14, 18, 28, 0.12);
-  --shadow-sm: 0 10px 24px rgba(14, 18, 28, 0.1);
+  /* PREMIUM GRAPHITE PALETTE */
+  --graphite-50: #FAFAF9;
+  --graphite-100: #F5F5F4;
+  --graphite-200: #E7E5E4;
+  --graphite-300: #D6D3D1;
+  --graphite-400: #A8A29E;
+  --graphite-500: #78716C;
+  --graphite-600: #57534E;
+  --graphite-700: #44403C;
+  --graphite-800: #292524;
+  --graphite-900: #1C1917;
+  --graphite-950: #0C0A09;
 
-  /* Glass surfaces (used by floating controls/nav) */
-  --glass-bg: rgba(255, 255, 255, 0.74);
-  --glass-bg-strong: rgba(255, 255, 255, 0.88);
+  /* Premium Accent Assignments */
+  --accent-gold: var(--gold-500);
+  --accent-gold-light: var(--gold-400);
+  --accent-gold-dark: var(--gold-600);
+  --accent-gold-glow: rgba(245, 158, 11, 0.35);
+  --accent-gold-subtle: rgba(245, 158, 11, 0.12);
+  --accent-gold-translucent: rgba(245, 158, 11, 0.2);
 
-  /* Legacy mappings (app) */
+  /* Component effects */
+  --control-highlight: rgba(255, 255, 255, 0.75);
+  --control-highlight-hover: rgba(255, 255, 255, 0.9);
+  --control-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 0 0 1px var(--border-subtle);
+  --control-shadow-hover: 0 14px 40px rgba(0, 0, 0, 0.14), 0 0 0 1px var(--border-subtle);
+  --control-shadow-pressed: inset 0 2px 10px rgba(0, 0, 0, 0.14), 0 0 0 1px var(--border-subtle);
+
+  /* PREMIUM LIGHT MODE - Warm Graphite & Gold */
+  --bg: var(--graphite-50);
+  --surface: #FFFFFF;
+  --panel: var(--graphite-100);
+  --text: var(--graphite-900);
+  --muted: var(--graphite-500);
+  --border: var(--graphite-200);
+
+  /* Accents: Premium Gold */
+  --accent: var(--gold-500);
+  --accent-2: var(--gold-600);
+  --accent-color-translucent: var(--accent-gold-subtle);
+
+  --success: #10b981;
+  --danger: #ef4444;
+
+  /* Shadows: Premium & Layered */
+  --shadow-lg: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.05),
+    0 10px 15px -3px rgba(0, 0, 0, 0.08),
+    0 24px 48px -12px rgba(0, 0, 0, 0.1);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-gold: 0 8px 24px rgba(245, 158, 11, 0.25);
+
+  /* Glass surfaces */
+  --glass-bg: rgba(255, 255, 255, 0.9);
+  --glass-bg-strong: #ffffff;
+
+  /* Legacy mappings */
   --bg-light: var(--bg);
   --bg-panel: var(--panel);
   --text-dark: var(--text);
   --text-light: var(--muted);
   --border-color: var(--border);
   --accent-color: var(--accent);
-  --accent-color-translucent: rgba(59, 130, 246, 0.3);
 
-  /* Legacy mappings (blog/posts) */
+  /* Blog/Posts Specific Mappings */
   --bg-app: var(--bg);
   --bg-surface: var(--surface);
-  --border-subtle: rgba(22, 24, 29, 0.12);
+  --border-subtle: rgba(28, 25, 23, 0.08);
   --accent-primary: var(--accent);
   --text-primary: var(--text);
   --text-secondary: var(--muted);
 
   /* Layout helpers */
-  --appbar-space: calc(5.25rem + env(safe-area-inset-top, 0px)); /* JS can refine */
+  --appbar-space: calc(5rem + env(safe-area-inset-top, 20px));
+  --fret-row: 3rem;
 }
 
-/* Dark mode (supports both data-attr and existing `.dark` usage) */
+/* PREMIUM DARK MODE - Deep Graphite with Gold Accents */
 html[data-mode="dark"],
 html.dark,
 body.dark {
-  --bg: #0b0f17;
-  --surface: #0f172a;
-  --panel: #111b2c;
-  --text: #eef2ff;
-  --muted: #a5b0c3;
-  --border: #23324a;
+  --bg: var(--graphite-950);
+  --surface: var(--graphite-900);
+  --panel: var(--graphite-800);
+  --text: var(--graphite-50);
+  --muted: var(--graphite-400);
+  --border: var(--graphite-700);
 
-  --accent: #60a5fa;
-  --accent-color-translucent: rgba(96, 165, 250, 0.32);
+  /* Premium Gold - Vibrant in Dark */
+  --accent: var(--gold-400);
+  --accent-2: var(--gold-500);
+  --accent-color-translucent: rgba(251, 191, 36, 0.2);
+  --accent-gold: var(--gold-400);
+  --accent-gold-light: var(--gold-300);
+  --accent-gold-dark: var(--gold-500);
+  --accent-gold-glow: rgba(251, 191, 36, 0.4);
+  --accent-gold-subtle: rgba(251, 191, 36, 0.15);
+  --accent-gold-translucent: rgba(251, 191, 36, 0.25);
 
-  --glass-bg: rgba(15, 23, 42, 0.7);
-  --glass-bg-strong: rgba(15, 23, 42, 0.86);
+  --glass-bg: var(--graphite-800);
+  --glass-bg-strong: var(--graphite-800);
 
-  --border-subtle: rgba(238, 242, 255, 0.12);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+
+  --control-highlight: rgba(255, 255, 255, 0.1);
+  --control-highlight-hover: rgba(255, 255, 255, 0.15);
+  --control-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--border-subtle);
+  --control-shadow-hover: 0 22px 70px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--border-subtle);
+  --control-shadow-pressed: inset 0 2px 12px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--border-subtle);
+
+  /* Premium Shadows - Dark Mode */
+  --shadow-lg: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.3),
+    0 10px 15px -3px rgba(0, 0, 0, 0.4),
+    0 24px 48px -12px rgba(0, 0, 0, 0.5);
+  --shadow-gold: 0 8px 32px rgba(251, 191, 36, 0.25);
+
+  /* Blog/Posts Specific Mappings (Dark Mode overrides) */
+  --bg-app: var(--bg);
+  --bg-surface: var(--surface);
+  --accent-primary: var(--accent);
+  --text-primary: var(--text);
+  --text-secondary: var(--muted);
 }
 
-/* Cyber-Luthier style (opt-in) */
-html[data-style="cyber"],
-body.cyber {
-  /* Keep typography consistent (no "shock"), use accent font for cyber flavor. */
-  --font-display: var(--font-body);
-  --font-reading: var(--font-body);
-  --font-accent: "Chakra Petch", ui-sans-serif, system-ui, -apple-system,
-    "Segoe UI", sans-serif;
-
-  /* Light cyber keeps the "blue feel" but adds brass as a secondary accent */
-  --bg: #f7f2e8;
-  --surface: #fff9ee;
-  --panel: #efe3cf;
-  --text: #0f141b;
-  --muted: #556275;
-  --border: #dcc7a0;
-
-  --accent: #0077a8;
-  --accent-2: #e0a84a;
-  --accent-color-translucent: rgba(0, 119, 168, 0.22);
-
-  --glass-bg: rgba(255, 249, 238, 0.7);
-  --glass-bg-strong: rgba(255, 249, 238, 0.86);
-
-  --border-subtle: rgba(15, 20, 27, 0.14);
-}
-
-html[data-style="cyber"][data-mode="dark"],
-html.dark[data-style="cyber"],
-body.dark.cyber {
-  --bg: #070a0f;
-  --surface: #0b121c;
-  --panel: #0d1623;
-  --text: #e9f0ff;
-  --muted: #9aa9bd;
-  --border: #1d2a3b;
-
-  --accent: #00d1ff;
-  --accent-2: #e0a84a;
-  --accent-color-translucent: rgba(0, 209, 255, 0.26);
-
-  --glass-bg: rgba(13, 22, 35, 0.72);
-  --glass-bg-strong: rgba(13, 22, 35, 0.88);
-
-  --border-subtle: rgba(233, 240, 255, 0.12);
-}
 
 /* Base */
 html {
@@ -137,7 +170,22 @@ body {
   background: var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
-  text-rendering: geometricPrecision;
+  text-rendering: optimizeLegibility;
+  line-height: 1.6;
+  /* Relaxed reading experience */
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  letter-spacing: -0.025em;
+  /* Cinematic tightness */
+  margin: 0;
+  font-weight: 700;
 }
 
 * {
@@ -148,57 +196,6 @@ body {
   outline: 3px solid var(--accent);
   outline-offset: 2px;
   border-radius: 6px;
-}
-
-/* Cyber background atmosphere (kept subtle to avoid "theme shock") */
-html[data-style="cyber"] body {
-  background:
-    radial-gradient(1100px 700px at 14% -10%, rgba(0, 209, 255, 0.14), transparent
-          56%),
-    radial-gradient(900px 600px at 110% 10%, rgba(224, 168, 74, 0.1),
-        transparent 52%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 38%),
-    var(--bg);
-}
-
-html[data-style="cyber"] body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.06;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.65'/%3E%3C/svg%3E");
-}
-
-/* Component-only texture (use it on panels/cards, not the whole page). */
-.cyber-grid {
-  position: relative;
-  isolation: isolate;
-}
-
-html[data-style="cyber"] .cyber-grid::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  border-radius: inherit;
-  opacity: 0.22;
-  mix-blend-mode: overlay;
-  z-index: 0;
-  /* Blueprint-style dot grid (avoids the "full-width stripes" feel). */
-  background:
-    radial-gradient(circle at 1px 1px, rgba(0, 209, 255, 0.22) 1px, transparent
-          1.6px)
-      0 0 / 34px 34px,
-    radial-gradient(circle at 1px 1px, rgba(224, 168, 74, 0.14) 1px, transparent
-          1.6px)
-      17px 17px / 34px 34px;
-}
-
-.cyber-grid > * {
-  position: relative;
-  z-index: 1;
 }
 
 /* Shared floating nav (blog/faq/posts) */
@@ -215,7 +212,7 @@ html[data-style="cyber"] .cyber-grid::after {
   pointer-events: none;
 }
 
-.nav-controls > * {
+.nav-controls>* {
   pointer-events: auto;
 }
 
@@ -272,76 +269,266 @@ html.dark .nav-btn:hover {
   justify-content: flex-end;
 }
 
+/* PREMIUM Control buttons (app + floating controls) */
 .control-btn {
   display: inline-flex;
+  appearance: none;
+  -webkit-appearance: none;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.55rem 0.85rem;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--glass-bg);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  color: var(--text);
+  justify-content: center;
+  gap: 0.55rem;
+  height: 46px;
+  padding: 0 1.25rem;
+  border-radius: var(--radius-md);
+
+  /* Premium Graphite Gradient */
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    var(--graphite-50) 50%,
+    var(--graphite-100) 100%
+  );
+  border: 1px solid var(--graphite-300);
+  border-bottom-width: 3px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 1px 2px rgba(0, 0, 0, 0.05);
+
+  color: var(--graphite-700);
   text-decoration: none;
-  font-weight: 800;
-  font-size: 0.875rem;
-  letter-spacing: 0.02em;
-  box-shadow: var(--shadow-sm);
-  transition: transform 160ms ease, box-shadow 160ms ease,
-    border-color 160ms ease, background-color 160ms ease;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.01em;
+  line-height: 1;
+
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: 
+    transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.15s ease,
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .control-btn:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  background: linear-gradient(
+    180deg,
+    #FFFBEB 0%,
+    rgba(255, 251, 235, 0.9) 50%,
+    var(--graphite-100) 100%
+  );
+  border-color: var(--gold-400);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 0 0 3px var(--accent-gold-subtle),
+    0 4px 12px rgba(245, 158, 11, 0.15);
 }
 
+.control-btn:active {
+  transform: translateY(1px);
+  border-bottom-width: 1px;
+  background: linear-gradient(
+    180deg,
+    var(--graphite-100) 0%,
+    var(--graphite-200) 100%
+  );
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.control-btn:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 3px var(--accent-gold-translucent),
+    0 0 0 5px rgba(245, 158, 11, 0.1);
+}
+
+.control-btn:disabled,
+.control-btn[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  background: var(--graphite-100);
+  border-color: var(--graphite-200);
+}
+
+#floating-controls .control-btn {
+  border-radius: var(--radius-pill);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(250, 250, 249, 0.9) 100%
+  );
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--graphite-300);
+  border-bottom-width: 2px;
+}
+
+#floating-controls .control-btn:hover {
+  background: linear-gradient(
+    180deg,
+    #FFFBEB 0%,
+    rgba(255, 251, 235, 0.9) 100%
+  );
+  border-color: var(--gold-400);
+}
+
+/* Premium Support Button */
 .control-btn--support {
-  border-color: rgba(0, 209, 255, 0.35);
-  box-shadow: 0 0 0 1px rgba(0, 209, 255, 0.12), var(--shadow-sm);
+  background: linear-gradient(
+    180deg,
+    #FFFBEB 0%,
+    #FEF3C7 50%,
+    #FDE68A 100%
+  );
+  border: 1px solid var(--gold-400);
+  border-bottom-width: 2px;
+  color: #92400E;
 }
 
-/* Metronome toggle (index.html) */
+.control-btn--support:hover {
+  background: linear-gradient(
+    180deg,
+    #FEF3C7 0%,
+    #FDE68A 50%,
+    #FCD34D 100%
+  );
+  border-color: var(--gold-500);
+  box-shadow: 0 0 20px var(--accent-gold-subtle);
+}
+
+/* PREMIUM Primary Action Button - 3D Beveled Gold */
+.control-btn--primary {
+  /* Rich 3D Gold Gradient */
+  background: linear-gradient(
+    180deg,
+    #FCD34D 0%,
+    #FBBF24 30%,
+    #F59E0B 70%,
+    #D97706 100%
+  );
+  
+  /* Premium Border with Depth */
+  border: 1px solid #B45309;
+  border-bottom-width: 4px;
+  border-radius: var(--radius-md);
+  
+  /* Luxury Shadow Stack */
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1),
+    0 4px 0 #92400E,
+    0 6px 12px rgba(146, 64, 14, 0.35),
+    0 8px 24px rgba(245, 158, 11, 0.25);
+  
+  /* Premium Typography */
+  color: #451A03;
+  font-weight: 800;
+  font-size: 0.95rem;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.02em;
+  
+  height: 48px;
+  padding: 0 1.5rem;
+  
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.control-btn--primary:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(
+    180deg,
+    #FDE68A 0%,
+    #FCD34D 30%,
+    #FBBF24 70%,
+    #F59E0B 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1),
+    0 6px 0 #92400E,
+    0 8px 16px rgba(146, 64, 14, 0.4),
+    0 12px 32px rgba(245, 158, 11, 0.35);
+}
+
+.control-btn--primary:active {
+  transform: translateY(3px);
+  border-bottom-width: 1px;
+  background: linear-gradient(
+    180deg,
+    #D97706 0%,
+    #B45309 100%
+  );
+  box-shadow:
+    inset 0 2px 8px rgba(0, 0, 0, 0.3),
+    0 1px 0 #92400E;
+}
+
+/* PREMIUM Metronome toggle */
 #metronome-row {
   margin-top: 0.75rem;
 }
 
 .metronome-toggle {
   display: inline-flex;
+  appearance: none;
+  -webkit-appearance: none;
   align-items: center;
   gap: 0.6rem;
-  padding: 0.55rem 0.95rem;
+  padding: 0.6rem 1.1rem;
   border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--glass-bg-strong);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  color: var(--text);
-  font-weight: 900;
+  border: 1px solid var(--graphite-300);
+  border-bottom-width: 2px;
+  background: linear-gradient(
+    180deg,
+    #FFFFFF 0%,
+    var(--graphite-50) 100%
+  );
+  color: var(--graphite-700);
+  font-weight: 800;
   font-size: 0.9rem;
   letter-spacing: 0.02em;
-  box-shadow: var(--shadow-sm);
-  transition: transform 160ms ease, box-shadow 160ms ease,
-    border-color 160ms ease, background-color 160ms ease;
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.05),
+    0 2px 4px rgba(0, 0, 0, 0.03);
+  transition: 
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    border-color 0.15s ease,
+    background 0.15s ease;
 }
 
 .metronome-toggle:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  border-color: var(--gold-400);
+  box-shadow: 
+    0 0 0 3px var(--accent-gold-subtle),
+    0 4px 12px rgba(245, 158, 11, 0.15);
+}
+
+.metronome-toggle:active {
+  transform: translateY(1px);
+  border-bottom-width: 1px;
 }
 
 .metronome-toggle:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent),
-    var(--shadow-sm);
+  box-shadow: 
+    0 0 0 3px var(--accent-gold-translucent),
+    0 0 0 5px rgba(245, 158, 11, 0.1);
 }
 
 .metronome-toggle::before {
   content: "";
-  width: 0.55rem;
-  height: 0.55rem;
+  width: 0.6rem;
+  height: 0.6rem;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--muted) 55%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--border) 70%, transparent);
+  background: var(--graphite-400);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
 }
 
 .metronome-toggle__meta {
@@ -349,32 +536,44 @@ html.dark .nav-btn:hover {
   font-weight: 700;
   font-size: 0.78rem;
   padding-left: 0.65rem;
-  border-left: 1px solid var(--border);
-  color: var(--muted);
+  border-left: 1px solid var(--graphite-300);
+  color: var(--graphite-500);
   letter-spacing: 0.05em;
 }
 
+/* Running State - Premium Gold */
 .metronome-toggle.is-running {
-  border-color: color-mix(in srgb, var(--danger) 60%, var(--border) 40%);
   background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--danger) 62%, var(--surface) 38%),
-    var(--glass-bg-strong)
+    180deg,
+    #FDE68A 0%,
+    #F59E0B 100%
   );
+  border-color: #B45309;
+  border-bottom-width: 2px;
+  color: #451A03;
 }
 
 .metronome-toggle.is-running::before {
-  background: var(--danger);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--danger) 18%, transparent);
+  background: #DC2626;
+  box-shadow: 
+    0 0 0 3px rgba(220, 38, 38, 0.3),
+    0 0 12px rgba(220, 38, 38, 0.5);
   animation: metronomePulse 900ms ease-in-out infinite;
 }
 
+.metronome-toggle.is-running .metronome-toggle__meta {
+  border-color: rgba(180, 83, 9, 0.4);
+  color: rgba(69, 26, 3, 0.7);
+}
+
 @keyframes metronomePulse {
+
   0%,
   100% {
     transform: scale(1);
     opacity: 0.85;
   }
+
   50% {
     transform: scale(1.25);
     opacity: 1;
@@ -390,76 +589,193 @@ html.dark .nav-btn:hover {
   margin-top: 1.5rem;
 }
 
-/* Cyber tweaks: make the mode feel "active" without changing layout. */
-html[data-style="cyber"] .control-btn {
-  border-color: color-mix(in srgb, var(--border) 68%, var(--accent) 32%);
+/* Premium Dark Mode Button Overrides */
+html[data-mode="dark"] .control-btn,
+html.dark .control-btn {
   background: linear-gradient(
     180deg,
-    rgba(255, 249, 238, 0.88),
-    rgba(255, 249, 238, 0.66)
+    rgba(68, 64, 60, 0.9) 0%,
+    rgba(41, 37, 36, 0.95) 100%
   );
-  box-shadow: 0 0 0 1px rgba(0, 209, 255, 0.1), var(--shadow-sm);
+  border-color: var(--graphite-600);
+  color: var(--graphite-200);
 }
 
-html[data-style="cyber"] .control-btn--support {
-  border-color: color-mix(in srgb, var(--border) 40%, var(--accent-2) 60%);
-  box-shadow: 0 0 0 1px rgba(224, 168, 74, 0.14), var(--shadow-sm);
-}
-
-html[data-style="cyber"] .control-btn,
-html[data-style="cyber"] .blog-tag {
-  font-family: var(--font-accent);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-html[data-style="cyber"][data-mode="dark"] .control-btn,
-html.dark[data-style="cyber"] .control-btn {
+html[data-mode="dark"] .control-btn:hover,
+html.dark .control-btn:hover {
   background: linear-gradient(
     180deg,
-    rgba(11, 18, 28, 0.72),
-    rgba(11, 18, 28, 0.52)
+    rgba(87, 83, 78, 0.9) 0%,
+    rgba(68, 64, 60, 0.95) 100%
   );
-  box-shadow: 0 0 0 1px rgba(0, 209, 255, 0.14), var(--shadow-sm);
+  border-color: var(--gold-400);
+  box-shadow: 0 0 0 3px var(--accent-gold-subtle);
 }
 
-/* App: give Cyber-Luthier some extra punch beyond "slightly cream". */
-html[data-style="cyber"] .switcher-btn.active {
-  background: linear-gradient(135deg, var(--accent-color), var(--accent-2));
-  box-shadow: 0 0 0 1px rgba(0, 209, 255, 0.16), 0 18px 50px rgba(0, 0, 0, 0.12);
+html[data-mode="dark"] .control-btn--primary,
+html.dark .control-btn--primary {
+  background: linear-gradient(
+    180deg,
+    #FCD34D 0%,
+    #FBBF24 30%,
+    #F59E0B 70%,
+    #D97706 100%
+  );
+  border-color: #B45309;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 4px 0 #92400E,
+    0 6px 12px rgba(245, 158, 11, 0.4),
+    0 0 40px rgba(245, 158, 11, 0.2);
 }
 
-html[data-style="cyber"][data-mode="dark"] .switcher-btn.active,
-html.dark[data-style="cyber"] .switcher-btn.active {
-  box-shadow: 0 0 0 1px rgba(0, 209, 255, 0.18), 0 22px 70px rgba(0, 0, 0, 0.6);
+html[data-mode="dark"] .control-btn--primary:hover,
+html.dark .control-btn--primary:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 6px 0 #92400E,
+    0 8px 16px rgba(245, 158, 11, 0.5),
+    0 0 60px rgba(245, 158, 11, 0.3);
 }
 
-html[data-style="cyber"] #side-panel {
-  border-right-color: color-mix(in srgb, var(--border) 62%, var(--accent) 38%);
+html[data-mode="dark"] .control-btn--support,
+html.dark .control-btn--support {
+  background: linear-gradient(
+    180deg,
+    #78350F 0%,
+    #92400E 100%
+  );
+  border-color: #B45309;
+  color: #FCD34D;
 }
 
-html[data-style="cyber"] #side-panel h2,
-html[data-style="cyber"] #side-panel h3 {
-  font-family: var(--font-accent);
-  letter-spacing: 0.08em;
+/* Dark mode for floating controls buttons */
+html[data-mode="dark"] #floating-controls .control-btn,
+html.dark #floating-controls .control-btn {
+  background: linear-gradient(
+    180deg,
+    rgba(68, 64, 60, 0.9) 0%,
+    rgba(41, 37, 36, 0.95) 100%
+  );
+  border-color: var(--graphite-600);
+  color: var(--graphite-200);
 }
 
-html[data-style="cyber"] #fretboard {
-  border-color: var(--accent);
-  border-color: color-mix(in srgb, var(--accent) 62%, var(--text) 38%);
-  box-shadow: 0 0 0 1px rgba(0, 209, 255, 0.12), var(--shadow-lg);
+html[data-mode="dark"] #floating-controls .control-btn:hover,
+html.dark #floating-controls .control-btn:hover {
+  background: linear-gradient(
+    180deg,
+    rgba(87, 83, 78, 0.9) 0%,
+    rgba(68, 64, 60, 0.95) 100%
+  );
+  border-color: var(--gold-400);
+  box-shadow: 0 0 0 3px var(--accent-gold-subtle);
 }
 
-html[data-style="cyber"] .marker-dot {
-  background-color: var(--accent-2);
-  background-color: color-mix(in srgb, var(--panel) 68%, var(--accent-2) 32%);
-  box-shadow: 0 0 0 1px rgba(224, 168, 74, 0.18);
+/* Dark mode for metronome toggle */
+html[data-mode="dark"] .metronome-toggle,
+html.dark .metronome-toggle {
+  background: linear-gradient(
+    180deg,
+    rgba(68, 64, 60, 0.9) 0%,
+    rgba(41, 37, 36, 0.95) 100%
+  );
+  border-color: var(--graphite-600);
+  color: var(--graphite-200);
 }
 
-html[data-style="cyber"] #next-btn,
-html[data-style="cyber"] #stats-btn {
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
-  box-shadow: 0 0 0 1px rgba(0, 209, 255, 0.12), var(--shadow-sm);
+html[data-mode="dark"] .metronome-toggle:hover,
+html.dark .metronome-toggle:hover {
+  background: linear-gradient(
+    180deg,
+    rgba(87, 83, 78, 0.9) 0%,
+    rgba(68, 64, 60, 0.95) 100%
+  );
+  border-color: var(--gold-400);
+  box-shadow: 0 0 0 3px var(--accent-gold-subtle);
+}
+
+html[data-mode="dark"] .metronome-toggle::before,
+html.dark .metronome-toggle::before {
+  background: var(--graphite-500);
+}
+
+html[data-mode="dark"] .metronome-toggle__meta,
+html.dark .metronome-toggle__meta {
+  border-color: var(--graphite-600);
+  color: var(--graphite-400);
+}
+
+/* Premium Fretboard with Gold Accents */
+#fretboard {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(245, 158, 11, 0.02) 0%,
+      transparent 50%,
+      rgba(245, 158, 11, 0.02) 100%
+    ),
+    linear-gradient(
+      180deg,
+      var(--surface) 0%,
+      var(--bg) 100%
+    );
+  border: 1px solid var(--graphite-300);
+  border-bottom-width: 3px;
+  border-radius: 16px;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.05),
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    0 12px 32px rgba(0, 0, 0, 0.06);
+}
+
+html[data-mode="dark"] #fretboard,
+html.dark #fretboard {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(251, 191, 36, 0.03) 0%,
+      transparent 50%,
+      rgba(251, 191, 36, 0.03) 100%
+    ),
+    linear-gradient(
+      180deg,
+      var(--surface) 0%,
+      var(--bg) 100%
+    );
+  border-color: var(--graphite-700);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.4),
+    0 0 60px rgba(245, 158, 11, 0.05);
+}
+
+/* Premium Gold Marker Dots */
+.marker-dot {
+  background: radial-gradient(
+    circle at 30% 30%,
+    var(--gold-300) 0%,
+    var(--gold-500) 50%,
+    var(--gold-700) 100%
+  );
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.4),
+    0 1px 2px rgba(0, 0, 0, 0.2);
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+html[data-mode="dark"] .marker-dot,
+html.dark .marker-dot {
+  background: radial-gradient(
+    circle at 30% 30%,
+    var(--gold-300) 0%,
+    var(--gold-400) 50%,
+    var(--gold-600) 100%
+  );
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.3),
+    0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 /* Shared headline helpers (used by blog/faq) */
@@ -497,37 +813,27 @@ html[data-style="cyber"] #stats-btn {
 
 .page-title {
   font-family: var(--font-display);
-  font-weight: 900;
-  font-size: clamp(2.05rem, 6vw, 3.1rem);
-  line-height: 1.06;
-  letter-spacing: -0.02em;
-  margin: 0 0 0.85rem;
+  font-weight: 800;
+  font-size: clamp(1.9rem, 4.6vw, 3.25rem);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  margin: 0 0 0.9rem;
+  text-transform: none;
 }
 
 .page-title--gradient {
   color: var(--text-primary);
 }
 
-@supports ((-webkit-background-clip: text) or (background-clip: text)) {
-  .page-title--gradient {
-    background: linear-gradient(
-      90deg,
-      var(--text-primary),
-      var(--accent-primary)
-    );
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    -webkit-text-fill-color: transparent;
-  }
-}
-
 .page-subtitle {
   color: var(--text-secondary);
-  font-size: 1.08rem;
-  line-height: 1.55;
+  font-size: 1.125rem;
+  line-height: 1.75;
   margin: 0 auto;
-  max-width: 44rem;
+  max-width: 38rem;
+  /* Narrower measure for readability */
+  font-weight: 400;
+  opacity: 0.9;
 }
 
 .page-grid {
@@ -621,6 +927,10 @@ html[data-style="cyber"] #stats-btn {
 
 /* Mobile safety: keep controls reachable and avoid layout shifts */
 @media (max-width: 520px) {
+  :root {
+    --fret-row: 2.35rem;
+  }
+
   #floating-controls {
     left: calc(0.75rem + env(safe-area-inset-left, 0px));
     right: calc(0.75rem + env(safe-area-inset-right, 0px));
@@ -697,10 +1007,6 @@ html[data-style="cyber"] #stats-btn {
     padding-bottom: 0.25rem;
   }
 
-  #fretboard .fret {
-    height: 2.35rem;
-  }
-
   #answer-options {
     /* 4 options = 1 row on phones (keeps the learning loop above the fold). */
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -711,7 +1017,8 @@ html[data-style="cyber"] #stats-btn {
   #answer-options button {
     padding: 0.55rem 0.35rem;
     font-size: 0.95rem;
-    min-height: 44px; /* keep touch targets usable */
+    min-height: 44px;
+    /* keep touch targets usable */
     border-radius: 14px;
   }
 
@@ -736,18 +1043,23 @@ html[data-style="cyber"] #stats-btn {
   [aria-label="View Mode"] .switcher-btn,
   #practice-mode-container .switcher-btn,
   #technique-mode-container .switcher-btn {
-    padding: 0.5rem 0.55rem !important;
-    font-size: 0.85rem;
-    line-height: 1.15;
-    white-space: nowrap;
+    padding: 0.45rem 0.55rem !important;
+    font-size: 0.82rem;
+    line-height: 1.1;
+    white-space: normal;
   }
 
   [aria-label="View Mode"] .switcher-btn {
-    font-size: 0.78rem;
+    font-size: 0.8rem;
+  }
+
+  .switcher-btn__meta {
+    font-size: 0.66rem;
   }
 }
 
 @media (max-width: 360px) {
+
   /* Ultra-narrow: go back to 2 columns so labels don't get cramped. */
   #answer-options {
     grid-template-columns: repeat(2, minmax(0, 1fr));
