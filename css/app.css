@@ -171,19 +171,33 @@ body.panel-visible #side-panel-overlay {
 #fretboard {
     background:
         linear-gradient(to right,
-            color-mix(in srgb, var(--text) 6%, transparent) 1px,
+            rgba(128, 128, 128, 0.15) 1px,
             transparent 1px) 0 0 / 40px 100% repeat,
         linear-gradient(180deg,
-            color-mix(in srgb, var(--surface) 96%, var(--panel) 4%),
-            color-mix(in srgb, var(--surface) 82%, var(--panel) 18%));
-    border: 1px solid color-mix(in srgb, var(--border) 60%, var(--text) 40%);
-    border-bottom: 4px solid color-mix(in srgb, var(--border) 60%, var(--text) 40%);
+            var(--surface, #ffffff),
+            var(--panel, #f5f5f4));
+    border: 1px solid var(--border, #e7e5e4);
+    border-bottom: 4px solid var(--border, #e7e5e4);
     display: grid;
     box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12), var(--shadow-lg);
     border-radius: 0.75rem;
     overflow: hidden;
     /* Contain strings */
     position: relative;
+    min-height: 200px;
+}
+
+/* Dark mode fallback for fretboard */
+html[data-mode="dark"] #fretboard,
+html.dark #fretboard {
+    background:
+        linear-gradient(to right,
+            rgba(255, 255, 255, 0.05) 1px,
+            transparent 1px) 0 0 / 40px 100% repeat,
+        linear-gradient(180deg,
+            var(--surface, #1c1917),
+            var(--panel, #292524));
+    border-color: var(--border, #44403c);
 }
 
 /* Lefty Mode */
@@ -197,11 +211,18 @@ body.lefty #fret-numbers>div>div {
 }
 
 .fret {
-    border-right: 2px solid color-mix(in srgb, var(--text) 40%, var(--border) 60%);
+    border-right: 2px solid var(--border);
 }
 
 .fret-cell {
     height: var(--fret-row, 3rem);
+    min-height: 40px;
+}
+
+/* Ensure fretboard grid cells are visible */
+.fret {
+    position: relative;
+    min-width: 20px;
 }
 
 .fret[data-fret="0"] {
@@ -218,8 +239,8 @@ body.lefty #fret-numbers>div>div {
     right: 0;
     top: 50%;
     transform: translateY(-50%);
-    background-color: color-mix(in srgb, var(--text) 65%, var(--border) 35%);
-    opacity: 0.9;
+    background-color: var(--text);
+    opacity: 0.6;
 }
 
 .marker-dot {
@@ -482,7 +503,7 @@ input[type="checkbox"]:focus-visible {
     font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.02em;
-    color: color-mix(in srgb, var(--muted) 82%, transparent);
+    color: var(--muted);
 }
 
 .switcher-btn.active .switcher-btn__meta {
@@ -499,7 +520,7 @@ input[type="checkbox"]:focus-visible {
 }
 
 .switcher-btn:focus-visible {
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent);
+    box-shadow: 0 0 0 3px var(--accent-gold-subtle);
     z-index: 1;
 }
 
@@ -553,7 +574,7 @@ input[type="checkbox"]:focus-visible {
 
 #stats-modal {
     background: var(--surface);
-    border-color: color-mix(in srgb, var(--border) 88%, transparent);
+    border-color: var(--border);
     border-radius: var(--radius-lg);
     box-shadow: 0 30px 90px rgba(0, 0, 0, 0.35);
 }
@@ -586,8 +607,8 @@ input[type="checkbox"]:focus-visible {
 
 #close-stats-btn:hover {
     transform: translateY(-1px);
-    background: color-mix(in srgb, var(--surface) 70%, transparent);
-    border-color: color-mix(in srgb, var(--border) 88%, transparent);
+    background: var(--surface);
+    border-color: var(--border);
     color: var(--text);
 }
 
@@ -597,7 +618,7 @@ input[type="checkbox"]:focus-visible {
 
 #close-stats-btn:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent);
+    box-shadow: 0 0 0 3px var(--accent-gold-subtle);
 }
 
 /* --- PREMIUM Answer Options ("Tactile Keycaps") --- */
@@ -771,17 +792,17 @@ input[type="checkbox"]:focus-visible {
 
 /* --- Tablature View --- */
 #tab-container {
-    border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+    border: 1px solid var(--border);
     background: linear-gradient(180deg,
-            color-mix(in srgb, var(--surface) 92%, var(--bg) 8%),
-            color-mix(in srgb, var(--surface) 78%, var(--bg) 22%));
+            var(--surface),
+            var(--panel));
     border-radius: var(--radius-lg);
     box-shadow: inset 0 1px 0 var(--control-highlight), var(--control-shadow);
 }
 
 .tab-string {
     height: 2.5rem;
-    border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, var(--text) 30%);
+    border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
 }
