@@ -36,14 +36,14 @@
 
     <script>
         // Inline theme init - prevent flash of wrong theme
-        (function() {
+        (function () {
             try {
                 const isDark = localStorage.getItem('darkMode') === 'true';
                 if (isDark) {
                     document.documentElement.dataset.mode = 'dark';
                     document.documentElement.classList.add('dark');
                 }
-            } catch (e) {}
+            } catch (e) { }
         })();
     </script>
 
@@ -184,8 +184,101 @@
                 </div>
             </div>
 
+            <!-- Instrument Settings -->
+            <div class="setting-group">
+                <h3>🎸 Instrument</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label for="tuning-select" class="block text-left font-medium mb-2">Tuning</label>
+                        <select id="tuning-select" class="w-full rounded-md">
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Focus Area Settings -->
+            <div id="focus-area-container" class="setting-group">
+                <h3>🎯 Focus Area</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-left font-medium mb-2">Fret Range</label>
+                        <div class="flex items-center gap-2">
+                            <input type="number" id="focus-min-fret" value="0" min="0" max="12"
+                                class="w-16 text-center rounded-md">
+                            <span style="color: var(--text-light);">to</span>
+                            <input type="number" id="focus-max-fret" value="12" min="0" max="24"
+                                class="w-16 text-center rounded-md">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-left font-medium mb-2">Strings to Practice</label>
+                        <div class="grid grid-cols-3 gap-2" id="focus-strings-grid">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" id="focus-string-0" checked class="focus-string-checkbox"
+                                    data-string="0">
+                                <span>e (1st)</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" id="focus-string-1" checked class="focus-string-checkbox"
+                                    data-string="1">
+                                <span>B (2nd)</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" id="focus-string-2" checked class="focus-string-checkbox"
+                                    data-string="2">
+                                <span>G (3rd)</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" id="focus-string-3" checked class="focus-string-checkbox"
+                                    data-string="3">
+                                <span>D (4th)</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" id="focus-string-4" checked class="focus-string-checkbox"
+                                    data-string="4">
+                                <span>A (5th)</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" id="focus-string-5" checked class="focus-string-checkbox"
+                                    data-string="5">
+                                <span>E (6th)</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 pt-2">
+                        <input type="checkbox" id="heat-map-toggle">
+                        <label for="heat-map-toggle" class="font-medium">Show Heat Map (Accuracy)</label>
+                    </div>
+                    <div id="heatmap-legend" class="text-xs mt-2" style="color: var(--text-light);">
+                        <span class="inline-block w-3 h-3 rounded-full mr-1"
+                            style="background: #22c55e;"></span>Mastered
+                        <span class="inline-block w-3 h-3 rounded-full mr-1 ml-2"
+                            style="background: #facc15;"></span>Learning
+                        <span class="inline-block w-3 h-3 rounded-full mr-1 ml-2"
+                            style="background: #ef4444;"></span>Focus
+                    </div>
+                    <button id="reset-heatmap-btn"
+                        class="mt-3 px-3 py-1 text-xs rounded-md bg-gray-200 hover:bg-gray-300 transition-colors"
+                        style="color: var(--text-dark);">
+                        Reset Heat Map
+                    </button>
+                </div>
+            </div>
+
             <div id="technique-settings-container" class="setting-group hidden">
                 <h3>Technique Settings</h3>
+                <div class="mb-4">
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" id="step-mode-toggle">
+                        <label for="step-mode-toggle" class="font-medium">Step-Through Mode</label>
+                    </div>
+                    <div id="audio-advance-setting" class="flex items-center gap-3 mt-2 ml-6 hidden">
+                        <input type="checkbox" id="audio-advance-toggle">
+                        <label for="audio-advance-toggle" class="text-sm">Audio Auto-Advance (Mic)</label>
+                    </div>
+                    <p class="text-xs mt-1" style="color: var(--text-light);">Manually advance notes (Spacebar)</p>
+                </div>
                 <div>
                     <label for="spider-start-fret" class="block text-left font-medium mb-2">Start Fret</label>
                     <input type="number" id="spider-start-fret" value="1" min="1" max="9" class="w-full text-center">
@@ -251,15 +344,18 @@
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label for="linear-start-fret" class="block text-left font-medium mb-2">Start Fret</label>
-                            <input type="number" id="linear-start-fret" value="1" min="1" max="12" class="w-full text-center">
+                            <input type="number" id="linear-start-fret" value="1" min="1" max="12"
+                                class="w-full text-center">
                         </div>
                         <div>
                             <label for="linear-end-fret" class="block text-left font-medium mb-2">End Fret</label>
-                            <input type="number" id="linear-end-fret" value="12" min="1" max="12" class="w-full text-center">
+                            <input type="number" id="linear-end-fret" value="12" min="1" max="12"
+                                class="w-full text-center">
                         </div>
                     </div>
                     <div>
-                        <label for="linear-notes-per-shift" class="block text-left font-medium mb-2">Notes Before Shift</label>
+                        <label for="linear-notes-per-shift" class="block text-left font-medium mb-2">Notes Before
+                            Shift</label>
                         <select id="linear-notes-per-shift" class="w-full rounded-md">
                             <option value="4">4 notes (standard)</option>
                             <option value="5">5 notes</option>
@@ -291,7 +387,8 @@
                     </div>
                     <div>
                         <label for="diagonal-start-fret" class="block text-left font-medium mb-2">Start Fret</label>
-                        <input type="number" id="diagonal-start-fret" value="3" min="1" max="9" class="w-full text-center">
+                        <input type="number" id="diagonal-start-fret" value="3" min="1" max="9"
+                            class="w-full text-center">
                     </div>
                     <div class="flex items-center gap-3">
                         <input type="checkbox" id="diagonal-show-pick" checked>
@@ -362,7 +459,8 @@
                     </div>
                     <div>
                         <label for="legato-start-fret" class="block text-left font-medium mb-2">Start Fret</label>
-                        <input type="number" id="legato-start-fret" value="5" min="1" max="12" class="w-full text-center">
+                        <input type="number" id="legato-start-fret" value="5" min="1" max="12"
+                            class="w-full text-center">
                     </div>
                 </div>
             </div>
@@ -377,12 +475,16 @@
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label for="burst-slow-beats" class="text-xs" style="color: var(--text-light);">Slow Beats</label>
-                            <input type="number" id="burst-slow-beats" value="4" min="1" max="16" class="w-full rounded-md text-center mt-1">
+                            <label for="burst-slow-beats" class="text-xs" style="color: var(--text-light);">Slow
+                                Beats</label>
+                            <input type="number" id="burst-slow-beats" value="4" min="1" max="16"
+                                class="w-full rounded-md text-center mt-1">
                         </div>
                         <div>
-                            <label for="burst-fast-beats" class="text-xs" style="color: var(--text-light);">Fast Beats</label>
-                            <input type="number" id="burst-fast-beats" value="2" min="1" max="8" class="w-full rounded-md text-center mt-1">
+                            <label for="burst-fast-beats" class="text-xs" style="color: var(--text-light);">Fast
+                                Beats</label>
+                            <input type="number" id="burst-fast-beats" value="2" min="1" max="8"
+                                class="w-full rounded-md text-center mt-1">
                         </div>
                     </div>
                     <div>
@@ -480,13 +582,11 @@
                         <span class="switcher-btn__main">Fretboard</span>
                         <span class="switcher-btn__meta">→ Note</span>
                     </button>
-                    <button role="tab" aria-selected="false" data-view="tab"
-                        class="switcher-btn view-switch-btn">
+                    <button role="tab" aria-selected="false" data-view="tab" class="switcher-btn view-switch-btn">
                         <span class="switcher-btn__main">Tab</span>
                         <span class="switcher-btn__meta">→ Note</span>
                     </button>
-                    <button role="tab" aria-selected="false" data-view="noteToTab"
-                        class="switcher-btn view-switch-btn">
+                    <button role="tab" aria-selected="false" data-view="noteToTab" class="switcher-btn view-switch-btn">
                         <span class="switcher-btn__main">Note</span>
                         <span class="switcher-btn__meta">→ Tab</span>
                     </button>
@@ -501,6 +601,19 @@
                     <button role="radio" aria-checked="false" data-practice-mode="tabSequence"
                         class="practice-mode-btn switcher-btn">Tab
                         Sequence</button>
+                </div>
+            </div>
+
+            <!-- Technique Tabs -->
+            <div id="technique-tabs" class="segmented-control mt-4 max-w-sm mx-auto hidden">
+                <button id="tab-exercises" class="switcher-btn active" data-tab="exercises">Exercises</button>
+                <button id="tab-workouts" class="switcher-btn" data-tab="workouts">Workouts</button>
+            </div>
+
+            <!-- Pre-Built Workouts Container -->
+            <div id="workout-selection-container" class="hidden">
+                <div class="exercise-grid" id="workouts-grid">
+                    <!-- Populated by JS -->
                 </div>
             </div>
 
@@ -564,21 +677,22 @@
             <div id="exercise-view-container" class="hidden">
                 <div class="flex items-center justify-between max-w-2xl mx-auto mb-4">
                     <button id="back-to-exercises-btn" class="control-btn">← Back</button>
-                    <h2 id="current-exercise-title" class="text-xl font-bold" style="color: var(--text-dark);">Spider Walk</h2>
+                    <h2 id="current-exercise-title" class="text-xl font-bold" style="color: var(--text-dark);">Spider
+                        Walk</h2>
                     <button id="exercise-settings-toggle" class="control-btn">⚙️ Settings</button>
                 </div>
 
                 <!-- Exercise Info Display -->
                 <div id="exercise-info" class="max-w-xl mx-auto mb-4 text-center">
-                    <div id="exercise-pattern-display" class="text-lg font-semibold mb-2" style="color: var(--text-dark);"></div>
+                    <div id="exercise-pattern-display" class="text-lg font-semibold mb-2"
+                        style="color: var(--text-dark);"></div>
                     <div id="exercise-instruction" class="text-sm" style="color: var(--text-light);"></div>
                 </div>
             </div>
 
             <!-- Legacy container (will be hidden) -->
             <div id="technique-mode-container" class="hidden">
-                <div role="radiogroup" aria-label="Technique Exercise"
-                    class="segmented-control mt-4 max-w-sm mx-auto">
+                <div role="radiogroup" aria-label="Technique Exercise" class="segmented-control mt-4 max-w-sm mx-auto">
                     <button role="radio" aria-checked="true" data-technique="spiderWalk"
                         class="technique-mode-btn switcher-btn active">Spider
                         Walk</button>
@@ -586,13 +700,23 @@
             </div>
 
             <div id="metronome-row" class="mt-3 flex justify-center relative">
-                <button id="metronome-btn" type="button" class="metronome-toggle w-full max-w-xs"
-                    aria-pressed="false">
+                <button id="metronome-btn" type="button" class="metronome-toggle w-full max-w-xs" aria-pressed="false">
                     <span class="metronome-toggle__label">Start Metronome</span>
                     <span id="metronome-mini-bpm" class="metronome-toggle__meta">60 BPM</span>
                 </button>
                 <!-- Burst Mode Indicator -->
                 <div id="burst-indicator" class="burst-indicator slow hidden">SLOW</div>
+            </div>
+            <div id="step-controls" class="mt-3 flex flex-col items-center gap-2 hidden">
+                <button id="next-step-btn"
+                    class="w-full max-w-xs bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors text-lg flex items-center justify-center gap-2">
+                    <span>Next Step</span>
+                    <span class="text-xs font-normal opacity-80">(Space)</span>
+                </button>
+                <div class="flex gap-4 text-sm font-medium" style="color: var(--text-main);">
+                    <div id="step-finger-info" class="bg-gray-200 px-3 py-1 rounded-full text-gray-800">Finger: -</div>
+                    <div id="step-pick-info" class="bg-gray-200 px-3 py-1 rounded-full text-gray-800">Pick: -</div>
+                </div>
             </div>
 
             <div id="fretboard-container" class="relative w-full overflow-x-auto pb-8 mt-4">

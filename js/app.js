@@ -1,7 +1,22 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- Data Model ---
     const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-    const tuning = ['E', 'B', 'G', 'D', 'A', 'E']; // Thin to Thick (Top to Bottom)
+
+    let currentTuningName = localStorage.getItem('fretmemoTuningName') || 'Standard';
+
+    const TUNINGS = {
+        'Standard': ['E', 'B', 'G', 'D', 'A', 'E'],
+        'Drop D': ['E', 'B', 'G', 'D', 'A', 'D'],
+        'DADGAD': ['D', 'A', 'G', 'D', 'A', 'D'],
+        'Open G': ['D', 'B', 'G', 'D', 'G', 'D'],
+        'Open D': ['D', 'A', 'F#', 'D', 'A', 'D'],
+        'Double Drop D': ['D', 'B', 'G', 'D', 'A', 'D'],
+        'E Flat': ['D#', 'A#', 'F#', 'C#', 'G#', 'D#']
+    };
+
+    // Initialize tuning from memory or default
+    let tuning = [...TUNINGS[currentTuningName]];
+
     const FRET_COUNT = 12;
     const SPIDER_FINGERS = 4;
     const scalePatterns = {
@@ -10,6 +25,37 @@ document.addEventListener('DOMContentLoaded', () => {
         majorPentatonic: [2, 2, 3, 2, 3],
         minorPentatonic: [3, 2, 2, 3, 2],
     };
+
+    // --- Tuning Logic ---
+    function setTuning(tuningName) {
+        if (!TUNINGS[tuningName]) return;
+        currentTuningName = tuningName;
+        // Update the global tuning array in place
+        const newEx = TUNINGS[tuningName];
+        for (let i = 0; i < 6; i++) {
+            tuning[i] = newEx[i];
+        }
+        localStorage.setItem('fretmemoTuningName', tuningName);
+
+        // Redraw components
+        createFretboard();
+        if (heatMapEnabled) updateHeatMap();
+
+        // Update pitch detection logic?
+        // No, noteFromPitch is chromatic. getNote() uses the updated 'tuning' array automatically.
+        // We just need to refresh the current practice note if it relied on position.
+        if (currentPracticeMode === 'noteNames' && currentPracticePos) {
+            // Refresh target note display
+            // This might happen naturally on next question
+            newQuestion();
+        }
+
+        console.log(`Tuning set to: ${tuningName}`, tuning);
+    }
+
+    // Expose for UI
+    window.setTuning = setTuning;
+
 
     // --- Exercise Data Models ---
     const EXERCISES = {
@@ -68,6 +114,32 @@ document.addEventListener('DOMContentLoaded', () => {
             category: 'linear'
         }
     };
+
+    // --- Pre-Built Workouts ---
+    const WORKOUTS = [
+        {
+            id: 'daily_warmup',
+            title: 'Daily Warmup',
+            description: 'Essential activation for all fingers.',
+            totalTime: '3 mins',
+            exercises: [
+                { type: 'spiderWalk', name: 'Spider Walk', duration: 60, settings: { bpm: 60 } },
+                { type: 'linear', name: 'Linear Shift', duration: 60, settings: { bpm: 60 } },
+                { type: 'permutation', name: 'Reverse Spider', duration: 60, settings: { permutationIndex: 23, bpm: 60 } }
+            ]
+        },
+        {
+            id: 'finger_independence',
+            title: 'Finger Independence',
+            description: 'Challenging patterns to break finger coupling.',
+            totalTime: '4 mins',
+            exercises: [
+                { type: 'permutation', name: 'Permutation 1-3-2-4', duration: 60, settings: { permutationIndex: 2, bpm: 60 } },
+                { type: 'permutation', name: 'Permutation 4-2-3-1', duration: 60, settings: { permutationIndex: 21, bpm: 60 } },
+                { type: 'stringSkip', name: 'String Skipping', duration: 120, settings: { bpm: 60 } }
+            ]
+        }
+    ];
 
     // --- 24 Finger Permutations (Appendix A) ---
     const PERMUTATIONS = [
@@ -131,7 +203,10 @@ document.addEventListener('DOMContentLoaded', () => {
             currentType: 'trill',
             trillPair: [1, 2],
             duration: 15
-        }
+        },
+        // Sequence tracking for all exercises
+        currentSequence: [],
+        sequenceIndex: 0
     };
 
     // --- User Progress ---
@@ -241,6 +316,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const burstFastBeatsInput = document.getElementById('burst-fast-beats');
     const burstMultiplierSelect = document.getElementById('burst-multiplier');
 
+    // --- Focus Area Elements ---
+    const focusMinFretInput = document.getElementById('focus-min-fret');
+    const focusMaxFretInput = document.getElementById('focus-max-fret');
+    const focusStringCheckboxes = document.querySelectorAll('.focus-string-checkbox');
+
     // --- Layout: keep content clear of the fixed top controls (mobile + wraps) ---
     const setAppbarSpace = () => {
         if (!floatingControls) return;
@@ -312,6 +392,21 @@ document.addEventListener('DOMContentLoaded', () => {
     let burstBeatCounter = 0;
     let burstPhase = 'slow'; // 'slow' or 'fast'
     let burstBaseTempo = 0; // Original tempo before burst
+
+    // --- Focus Area State ---
+    let focusArea = {
+        minFret: 0,
+        maxFret: 12,
+        strings: [true, true, true, true, true, true] // All 6 strings enabled
+    };
+
+    // --- Heat Map State ---
+    let positionStats = {}; // Key: "string-fret", Value: { correct, total }
+    let currentQuestionPos = null; // { string, fret } for tracking
+    let heatMapEnabled = false;
+    let isStepThroughMode = false;
+    let isAudioAdvanceEnabled = false;
+    let audioAdvanceCooldown = false;
 
     // --- Performance & UI Caching ---
     const highlightDot = document.createElement('div');
@@ -394,64 +489,126 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function runPitchDetection() {
-        if (!isPitchDetectionRunning) return;
+        if (!isPitchDetectionRunning && !isAudioAdvanceEnabled) return;
+
         const buffer = new Float32Array(analyser.fftSize);
         analyser.getFloatTimeDomainData(buffer);
-        const fundamental = autoCorrelate(buffer, audioCtx.sampleRate);
 
-        if (fundamental !== -1) {
-            const detectedNote = noteFromPitch(fundamental);
-            detectedNoteEl.textContent = detectedNote;
-            let targetNote;
-            if (currentPracticeMode === 'noteNames') {
-                targetNote = practiceNoteContainer.querySelector('.current-practice-note').textContent;
-            } else if (currentPracticePos) {
-                targetNote = getNote(currentPracticePos.string, currentPracticePos.fret);
+        // --- Audio Auto-Advance (Attack Detection) ---
+        if (isAudioAdvanceEnabled && isStepThroughMode && isMetronomeOn && currentModule === 'technique') {
+            let rms = 0;
+            for (let i = 0; i < buffer.length; i++) {
+                rms += buffer[i] * buffer[i]; // Sum of squares
             }
+            rms = Math.sqrt(rms / buffer.length);
 
-            if (targetNote && detectedNote === targetNote) {
-                tunerDisplay.classList.add('correct');
-                detectedNoteEl.textContent = "Correct!";
+            // Threshold: 0.05 seems reasonable for a clear pluck. Can be tuned.
+            if (rms > 0.05 && !audioAdvanceCooldown) {
+                audioAdvanceCooldown = true;
+                nextStep();
+                // Simple visual feedback on the step controls?
+                const nextBtn = document.getElementById('next-step-btn');
+                if (nextBtn) {
+                    nextBtn.classList.add('bg-green-600');
+                    setTimeout(() => nextBtn.classList.remove('bg-green-600'), 150);
+                }
+                setTimeout(() => { audioAdvanceCooldown = false; }, 250); // 250ms debounce
+            }
+        }
+
+        // --- Pitch Detection (Tuner) ---
+        if (isPitchDetectionRunning) {
+            const fundamental = autoCorrelate(buffer, audioCtx.sampleRate);
+            if (fundamental !== -1) {
+                const detectedNote = noteFromPitch(fundamental);
+                detectedNoteEl.textContent = detectedNote;
+                let targetNote;
+                if (currentPracticeMode === 'noteNames') {
+                    targetNote = practiceNoteContainer.querySelector('.current-practice-note').textContent;
+                } else if (currentPracticePos) {
+                    targetNote = getNote(currentPracticePos.string, currentPracticePos.fret);
+                }
+
+                if (targetNote && detectedNote === targetNote) {
+                    tunerDisplay.classList.add('correct');
+                    detectedNoteEl.textContent = "Correct!";
+                } else {
+                    tunerDisplay.classList.remove('correct');
+                }
+
             } else {
+                detectedNoteEl.textContent = "--";
                 tunerDisplay.classList.remove('correct');
             }
-
-        } else {
-            detectedNoteEl.textContent = "--";
-            tunerDisplay.classList.remove('correct');
         }
+
         pitchDetectionFrameId = requestAnimationFrame(runPitchDetection);
+    }
+
+    async function startMicStream() {
+        if (micStream && audioCtx && audioCtx.state === 'running') return true;
+        try {
+            if (!micStream) {
+                micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            }
+            setupAudio();
+            if (audioCtx.state === 'suspended') {
+                await audioCtx.resume();
+            }
+            if (!analyser) {
+                analyser = audioCtx.createAnalyser();
+                analyser.fftSize = 2048;
+                const source = audioCtx.createMediaStreamSource(micStream);
+                source.connect(analyser);
+            }
+            return true;
+        } catch (err) {
+            console.error("Microphone access error:", err);
+            alert("Microphone access denied. Please allow microphone access in your browser settings.");
+            if (micEnableToggle) micEnableToggle.checked = false;
+            const audioAdvToggle = document.getElementById('audio-advance-toggle');
+            if (audioAdvToggle) audioAdvToggle.checked = false;
+            return false;
+        }
+    }
+
+    function stopMicStream() {
+        if (isPitchDetectionRunning || isAudioAdvanceEnabled) return;
+
+        cancelAnimationFrame(pitchDetectionFrameId);
+        if (micStream) {
+            micStream.getTracks().forEach(track => track.stop());
+            micStream = null;
+        }
+        if (audioCtx && audioCtx.state !== 'closed') {
+            audioCtx.suspend();
+        }
+        analyser = null;
     }
 
     async function toggleMicInput(enable) {
         if (enable) {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                micStream = stream;
-                setupAudio();
-                analyser = audioCtx.createAnalyser();
-                analyser.fftSize = 2048;
-                const source = audioCtx.createMediaStreamSource(stream);
-                source.connect(analyser);
+            if (await startMicStream()) {
                 tunerDisplay.classList.remove('hidden');
                 isPitchDetectionRunning = true;
                 runPitchDetection();
-            } catch (err) {
-                console.error("Microphone access error:", err);
-                alert("Microphone access denied. Please allow microphone access in your browser settings.");
-                micEnableToggle.checked = false;
             }
         } else {
             isPitchDetectionRunning = false;
-            cancelAnimationFrame(pitchDetectionFrameId);
-            if (micStream) {
-                micStream.getTracks().forEach(track => track.stop());
-                micStream = null;
-            }
-            if (audioCtx && audioCtx.state !== 'closed') {
-                audioCtx.suspend();
-            }
             tunerDisplay.classList.add('hidden');
+            stopMicStream();
+        }
+    }
+
+    async function toggleAudioAdvance(enable) {
+        if (enable) {
+            if (await startMicStream()) {
+                isAudioAdvanceEnabled = true;
+                runPitchDetection();
+            }
+        } else {
+            isAudioAdvanceEnabled = false;
+            stopMicStream();
         }
     }
 
@@ -912,7 +1069,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const targetNote = activeNotes[Math.floor(Math.random() * activeNotes.length)];
                 const occurrences = [];
                 for (let i = 0; i < tuning.length; i++) {
-                    for (let j = 0; j <= FRET_COUNT; j++) {
+                    // Skip strings not in focus area
+                    if (!focusArea.strings[i]) continue;
+                    for (let j = focusArea.minFret; j <= Math.min(focusArea.maxFret, FRET_COUNT); j++) {
                         if (getNote(i, j) === targetNote) {
                             occurrences.push({ string: i, fret: j });
                         }
@@ -921,6 +1080,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (occurrences.length === 0) { newQuestion(); return; }
                 const { string: randomString, fret: randomFret } = occurrences[Math.floor(Math.random() * occurrences.length)];
                 correctAnswer = targetNote;
+                currentQuestionPos = { string: randomString, fret: randomFret }; // Track for heat map
 
                 if (currentView === 'fretboard') {
                     displayDotAt(highlightDot, randomString, randomFret);
@@ -953,7 +1113,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const occurrences = [];
                 for (let i = 0; i < tuning.length; i++) {
-                    for (let j = 1; j < FRET_COUNT; j++) {
+                    // Skip strings not in focus area
+                    if (!focusArea.strings[i]) continue;
+                    const minFret = Math.max(1, focusArea.minFret); // noteToTab starts at fret 1
+                    for (let j = minFret; j <= Math.min(focusArea.maxFret, FRET_COUNT); j++) {
                         if (getNote(i, j) === targetNote) {
                             occurrences.push({ string: i, fret: j });
                         }
@@ -962,6 +1125,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (occurrences.length === 0) { newQuestion(); return; }
                 const correctOccurrence = occurrences[Math.floor(Math.random() * occurrences.length)];
                 correctAnswer = `${correctOccurrence.string}-${correctOccurrence.fret}`;
+                currentQuestionPos = { string: correctOccurrence.string, fret: correctOccurrence.fret }; // Track for heat map
 
                 const options = new Set([correctAnswer]);
                 while (options.size < 4) {
@@ -1117,6 +1281,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        // Record position accuracy for heat map
+        if (currentQuestionPos) {
+            const key = `${currentQuestionPos.string}-${currentQuestionPos.fret}`;
+            if (!positionStats[key]) {
+                positionStats[key] = { correct: 0, total: 0 };
+            }
+            positionStats[key].total++;
+            if ((currentView === 'noteToTab' && e.currentTarget.dataset.position === correctAnswer) ||
+                (currentView !== 'noteToTab' && e.currentTarget.dataset.note === correctAnswer)) {
+                positionStats[key].correct++;
+            }
+            savePositionStats();
+            if (heatMapEnabled) updateHeatMap();
+        }
+
         updateStatsDisplay();
         if (!isMetronomeOn) {
             setTimeout(newQuestion, 1200);
@@ -1125,6 +1304,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Metronome Logic ---
     function metronomeTick() {
+        // --- Workout Timer Check ---
+        if (workoutState.active) {
+            if (workoutState.stepStartTime === 0) workoutState.stepStartTime = Date.now();
+            const accum = workoutState.accumulatedTime || 0;
+            const elapsed = ((Date.now() - workoutState.stepStartTime) + accum) / 1000;
+            const workout = WORKOUTS.find(w => w.id === workoutState.id);
+            // Ensure workout/step validity
+            if (workout && workout.exercises[workoutState.currentStep]) {
+                const stepDuration = workout.exercises[workoutState.currentStep].duration;
+                if (metronomeBtnLabel) metronomeBtnLabel.textContent = `Time Remaining: ${Math.ceil(stepDuration - elapsed)}s`;
+
+                if (elapsed >= stepDuration) {
+                    stopMetronome();
+                    const nextIndex = workoutState.currentStep + 1;
+                    if (nextIndex < workout.exercises.length) {
+                        loadWorkoutStep(nextIndex);
+                        // Optional: Play a completion sound here
+                    } else {
+                        finishWorkout();
+                    }
+                    return;
+                }
+            }
+        }
+
         if (isCountingIn) {
             playTick(true);
             feedbackEl.textContent = `Starting in ${COUNT_IN_BEATS - countInCounter}...`;
@@ -1258,6 +1462,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function stopMetronome() {
         if (!isMetronomeOn) return;
 
+        // Handle Workout Pause
+        if (typeof workoutState !== 'undefined' && workoutState.active && workoutState.stepStartTime > 0) {
+            const now = Date.now();
+            if (!workoutState.accumulatedTime) workoutState.accumulatedTime = 0;
+            workoutState.accumulatedTime += (now - workoutState.stepStartTime);
+            workoutState.stepStartTime = 0; // Paused
+        }
+
         isMetronomeOn = false;
         releaseWakeLock();
 
@@ -1285,6 +1497,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         feedbackEl.textContent = '';
 
+        // Hide step controls if active
+        const stepControls = document.getElementById('step-controls');
+        if (stepControls) stepControls.classList.add('hidden');
+        if (metronomeBtn) metronomeBtn.classList.remove('hidden');
+        if (metronomeBtnLabel) metronomeBtnLabel.textContent = isStepThroughMode ? 'Start Step Mode' : 'Start Metronome';
+
         if (currentModule === 'playPractice') {
             updateActiveDot(-1);
         }
@@ -1295,6 +1513,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function startMetronome() {
         if (isMetronomeOn) return;
+
+        // Resume Workout Timer
+        if (typeof workoutState !== 'undefined' && workoutState.active) {
+            if (workoutState.stepStartTime === 0) {
+                workoutState.stepStartTime = Date.now();
+            }
+        }
 
         isMetronomeOn = true;
         requestWakeLock();
@@ -1331,8 +1556,362 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isMetronomeOn) {
             stopMetronome();
         } else {
-            startMetronome();
+            if (isStepThroughMode && currentModule === 'technique') {
+                startStepMode();
+            } else {
+                startMetronome();
+            }
         }
+    }
+
+    function startStepMode() {
+        if (isMetronomeOn) return;
+
+        isMetronomeOn = true;
+        setMetronomeButtonUi(true); // Updates is-running state
+
+        // UI Swap
+        if (metronomeBtn) metronomeBtn.classList.add('hidden');
+        const stepControls = document.getElementById('step-controls');
+        if (stepControls) stepControls.classList.remove('hidden');
+
+        // Reset and Tick Once
+        resetSpiderState();
+        techniqueTick();
+        updateStepInfo();
+    }
+
+    function nextStep() {
+        if (!isMetronomeOn || !isStepThroughMode) return;
+        techniqueTick();
+        updateStepInfo();
+    }
+
+    function updateStepInfo() {
+        const fingerEl = document.getElementById('step-finger-info');
+        const pickEl = document.getElementById('step-pick-info');
+
+        // Try to get info from active dot in DOM
+        // This is a robust way without calculating state logic duplication
+        const visibleDots = Array.from(document.querySelectorAll('.spider-dot')).filter(d => d.style.display !== 'none');
+
+        if (visibleDots.length > 0) {
+            // Find the one that was just added/moved? 
+            // In single note exercises (Spider, Linear), usually 1 dot active or last one moved.
+            // spiderDots array order?
+            // Let's just take the last one visible (often the newest)
+            const dot = visibleDots[visibleDots.length - 1];
+
+            // Extract finger from class
+            let finger = '-';
+            if (dot.classList.contains('finger-1')) finger = '1 (Index)';
+            else if (dot.classList.contains('finger-2')) finger = '2 (Middle)';
+            else if (dot.classList.contains('finger-3')) finger = '3 (Ring)';
+            else if (dot.classList.contains('finger-4')) finger = '4 (Pinky)';
+
+            if (fingerEl) fingerEl.textContent = `Finger: ${finger}`;
+        }
+
+        // Pick direction estimation (parity of step)
+        if (pickEl && spiderState) {
+            const step = spiderState.step || 0;
+            // step is incremented AFTER tick usually?
+            // techniqueTick -> calls *Tick -> increments step at end?
+            // If so, current step-1 was the one shown.
+            // But resetSpiderState sets step=0. techniqueTick runs (uses step 0, then increments to 1).
+            // So displayed note corresponds to step-1.
+            // Parity: 0=Down, 1=Up for Alternating.
+            const currentDisplayedStep = step > 0 ? step - 1 : 0;
+            const direction = currentDisplayedStep % 2 === 0 ? 'Down' : 'Up';
+            pickEl.textContent = `Pick: ${direction}`;
+        }
+    }
+
+    // --- Sequence Generator Functions ---
+    // Pre-computes exercise sequences for visualization and progress tracking
+
+    function getPickDirection(index, startWith = 'down') {
+        const directions = startWith === 'down' ? ['down', 'up'] : ['up', 'down'];
+        return directions[index % 2];
+    }
+
+    function generateExerciseSequence(config) {
+        const { exerciseType, ...params } = config;
+
+        switch (exerciseType) {
+            case 'spider':
+            case 'spiderWalk':
+                return generateSpiderSequence(params);
+            case 'permutation':
+                return generatePermutationSequence(params);
+            case 'linear':
+                return generateLinearSequence(params);
+            case 'diagonal':
+                return generateDiagonalSequence(params);
+            case 'stringSkip':
+                return generateStringSkipSequence(params);
+            case 'legato':
+                return generateLegatoSequence(params);
+            default:
+                return generateSpiderSequence(params);
+        }
+    }
+
+    function generateSpiderSequence({ startFret = 5, direction = 'both', strings = 6 }) {
+        const sequence = [];
+        const fingerPattern = [1, 2, 3, 4];
+        const stringOrder = direction === 'descending'
+            ? Array.from({ length: strings }, (_, i) => i)  // 0,1,2,3,4,5 (high to low)
+            : Array.from({ length: strings }, (_, i) => strings - 1 - i);  // 5,4,3,2,1,0 (low to high)
+
+        let noteIndex = 0;
+        stringOrder.forEach(string => {
+            fingerPattern.forEach(finger => {
+                sequence.push({
+                    string,
+                    fret: startFret + (finger - 1),
+                    finger,
+                    pickDirection: getPickDirection(noteIndex++)
+                });
+            });
+        });
+
+        // If direction is 'both', add descending
+        if (direction === 'both') {
+            const descendingStrings = Array.from({ length: strings }, (_, i) => i);
+            descendingStrings.forEach(string => {
+                [...fingerPattern].reverse().forEach(finger => {
+                    sequence.push({
+                        string,
+                        fret: startFret + (finger - 1),
+                        finger,
+                        pickDirection: getPickDirection(noteIndex++)
+                    });
+                });
+            });
+        }
+
+        return sequence;
+    }
+
+    function generatePermutationSequence({ pattern = [1, 2, 3, 4], startFret = 5, direction = 'both', strings = 6 }) {
+        const sequence = [];
+        const stringOrder = direction === 'descending'
+            ? Array.from({ length: strings }, (_, i) => i)
+            : Array.from({ length: strings }, (_, i) => strings - 1 - i);
+
+        let noteIndex = 0;
+        stringOrder.forEach(string => {
+            pattern.forEach(finger => {
+                sequence.push({
+                    string,
+                    fret: startFret + (finger - 1),
+                    finger,
+                    pickDirection: getPickDirection(noteIndex++)
+                });
+            });
+        });
+
+        if (direction === 'both') {
+            const descendingStrings = Array.from({ length: strings }, (_, i) => i);
+            descendingStrings.forEach(string => {
+                [...pattern].reverse().forEach(finger => {
+                    sequence.push({
+                        string,
+                        fret: startFret + (finger - 1),
+                        finger,
+                        pickDirection: getPickDirection(noteIndex++)
+                    });
+                });
+            });
+        }
+
+        return sequence;
+    }
+
+    function generateLinearSequence({ string = 5, startFret = 1, endFret = 12, notesPerShift = 4 }) {
+        const sequence = [];
+        const fingerPattern = [1, 2, 3, 4];
+        let noteIndex = 0;
+
+        // Ascending
+        for (let baseFret = startFret; baseFret <= endFret - 3; baseFret++) {
+            for (let i = 0; i < notesPerShift && i < fingerPattern.length; i++) {
+                const finger = fingerPattern[i];
+                sequence.push({
+                    string,
+                    fret: baseFret + (finger - 1),
+                    finger,
+                    pickDirection: getPickDirection(noteIndex++)
+                });
+            }
+        }
+
+        // Descending
+        for (let baseFret = endFret - 3; baseFret >= startFret; baseFret--) {
+            for (let i = notesPerShift - 1; i >= 0 && i < fingerPattern.length; i--) {
+                const finger = fingerPattern[i];
+                sequence.push({
+                    string,
+                    fret: baseFret + (finger - 1),
+                    finger,
+                    pickDirection: getPickDirection(noteIndex++)
+                });
+            }
+        }
+
+        return sequence;
+    }
+
+    function generateDiagonalSequence({ startFret = 3, pattern = 'ascending', strings = 6 }) {
+        const sequence = [];
+        let noteIndex = 0;
+        const fingerPattern = [1, 2, 3, 4];
+
+        if (pattern === 'ascending' || pattern === 'full') {
+            // Start from low E (5), move up strings while fret increases
+            for (let i = 0; i < strings; i++) {
+                const string = strings - 1 - i; // 5,4,3,2,1,0
+                fingerPattern.forEach(finger => {
+                    sequence.push({
+                        string,
+                        fret: startFret + i + (finger - 1),
+                        finger,
+                        pickDirection: getPickDirection(noteIndex++)
+                    });
+                });
+            }
+        }
+
+        if (pattern === 'descending' || pattern === 'full') {
+            // Start from high e (0), move down strings while fret decreases
+            const descendStartFret = pattern === 'full' ? startFret + strings - 1 : startFret + strings - 1;
+            for (let i = 0; i < strings; i++) {
+                const string = i; // 0,1,2,3,4,5
+                [...fingerPattern].reverse().forEach(finger => {
+                    sequence.push({
+                        string,
+                        fret: descendStartFret - i + (4 - finger),
+                        finger,
+                        pickDirection: getPickDirection(noteIndex++)
+                    });
+                });
+            }
+        }
+
+        return sequence;
+    }
+
+    function generateStringSkipSequence({ skipPattern = 'single', startFret = 5, fingerPattern = [1, 2, 3, 4] }) {
+        const sequence = [];
+        const patternData = SKIP_PATTERNS[skipPattern] || SKIP_PATTERNS.single;
+        const stringSequence = patternData.sequence;
+        let noteIndex = 0;
+
+        stringSequence.forEach(string => {
+            fingerPattern.forEach(finger => {
+                sequence.push({
+                    string,
+                    fret: startFret + (finger - 1),
+                    finger,
+                    pickDirection: getPickDirection(noteIndex++)
+                });
+            });
+        });
+
+        return sequence;
+    }
+
+    function generateLegatoSequence({ type = 'trill', startFret = 5, trillPair = [1, 2], strings = 6 }) {
+        const sequence = [];
+        const stringOrder = Array.from({ length: strings }, (_, i) => strings - 1 - i);
+        let noteIndex = 0;
+
+        if (type === 'trill') {
+            // Trill between two fingers
+            stringOrder.forEach(string => {
+                for (let rep = 0; rep < 4; rep++) {
+                    trillPair.forEach(finger => {
+                        sequence.push({
+                            string,
+                            fret: startFret + (finger - 1),
+                            finger,
+                            pickDirection: rep === 0 && finger === trillPair[0] ? 'down' : null,
+                            legato: finger === trillPair[0] ? null : 'tr'
+                        });
+                    });
+                }
+            });
+        } else if (type === 'hammerOnly') {
+            // Ascending 1-2-3-4, hammer-ons
+            stringOrder.forEach(string => {
+                [1, 2, 3, 4].forEach((finger, i) => {
+                    sequence.push({
+                        string,
+                        fret: startFret + (finger - 1),
+                        finger,
+                        pickDirection: i === 0 ? 'down' : null,
+                        legato: i === 0 ? null : 'H'
+                    });
+                });
+            });
+        } else if (type === 'pullOnly') {
+            // Descending 4-3-2-1, pull-offs
+            stringOrder.forEach(string => {
+                [4, 3, 2, 1].forEach((finger, i) => {
+                    sequence.push({
+                        string,
+                        fret: startFret + (finger - 1),
+                        finger,
+                        pickDirection: i === 0 ? 'down' : null,
+                        legato: i === 0 ? null : 'P'
+                    });
+                });
+            });
+        } else if (type === 'threeNote') {
+            // 3-note pattern: 1-2-4 ascending, 4-2-1 descending
+            const patternAsc = [1, 2, 4];
+            const patternDesc = [4, 2, 1];
+            const fretsAsc = [0, 1, 3];
+            const fretsDesc = [3, 1, 0];
+
+            stringOrder.forEach(string => {
+                // Ascending (H-H)
+                patternAsc.forEach((finger, i) => {
+                    sequence.push({
+                        string,
+                        fret: startFret + fretsAsc[i],
+                        finger,
+                        pickDirection: i === 0 ? 'down' : null,
+                        legato: i === 0 ? null : 'H'
+                    });
+                });
+                // Descending (P-P)
+                patternDesc.forEach((finger, i) => {
+                    sequence.push({
+                        string,
+                        fret: startFret + fretsDesc[i],
+                        finger,
+                        pickDirection: null,
+                        legato: i === 0 ? null : 'P'
+                    });
+                });
+            });
+        }
+
+        return sequence;
+    }
+
+    function resetExerciseSequence() {
+        exerciseState.currentSequence = [];
+        exerciseState.sequenceIndex = 0;
+    }
+
+    function initializeExerciseSequence(exerciseType, config = {}) {
+        const sequence = generateExerciseSequence({ exerciseType, ...config });
+        exerciseState.currentSequence = sequence;
+        exerciseState.sequenceIndex = 0;
+        return sequence;
     }
 
     // --- Technique Trainer Logic ---
@@ -2054,6 +2633,11 @@ document.addEventListener('DOMContentLoaded', () => {
         viewSwitcherContainer.classList.toggle('hidden', !isGuessNote);
         practiceModeContainer.classList.toggle('hidden', !isPlayPractice);
         techniqueModeContainer.classList.toggle('hidden', true); // Legacy
+        if (isTechnique) {
+            clearHeatMap();
+        } else if (heatMapEnabled) {
+            updateHeatMap();
+        }
 
         statsDisplay.classList.toggle('hidden', isTechnique);
         statsBtn.classList.toggle('hidden', isTechnique);
@@ -2062,7 +2646,17 @@ document.addEventListener('DOMContentLoaded', () => {
         nextBtn.classList.toggle('hidden', isTechnique);
 
         // Exercise system visibility
-        exerciseSelectionContainer.classList.toggle('hidden', !isTechnique);
+        const techTabs = document.getElementById('technique-tabs');
+        if (techTabs) techTabs.classList.toggle('hidden', !isTechnique);
+        const workCont = document.getElementById('workout-selection-container');
+        if (workCont) workCont.classList.add('hidden'); // Default hidden, managed by tabs
+
+        if (!isTechnique) {
+            exerciseSelectionContainer.classList.add('hidden');
+        } else {
+            // If entering technique, default to exercises tab
+            showExerciseSelection();
+        }
         exerciseViewContainer.classList.add('hidden');
 
         practiceNoteContainer.classList.add('hidden');
@@ -2102,9 +2696,49 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Exercise Management Functions ---
+    let areWorkoutsRendered = false;
+    let currentTechniqueTab = 'exercises';
+
+    function renderWorkouts() {
+        const grid = document.getElementById('workouts-grid');
+        if (!grid) return;
+
+        grid.innerHTML = WORKOUTS.map(workout => `
+            <div class="exercise-card" data-workout="${workout.id}">
+                <div class="exercise-card__icon">🏋️</div>
+                <div class="exercise-card__title">${workout.title}</div>
+                <div class="exercise-card__desc">${workout.totalTime} • ${workout.exercises.length} Exercises</div>
+            </div>
+        `).join('');
+    }
+
+    function switchTechniqueTab(tab) {
+        currentTechniqueTab = tab;
+        const exercisesTab = document.getElementById('tab-exercises');
+        const workoutsTab = document.getElementById('tab-workouts');
+        const exerciseContainer = document.getElementById('exercise-selection-container');
+        const workoutContainer = document.getElementById('workout-selection-container');
+
+        if (exercisesTab) exercisesTab.classList.toggle('active', tab === 'exercises');
+        if (workoutsTab) workoutsTab.classList.toggle('active', tab === 'workouts');
+
+        if (exerciseContainer) exerciseContainer.classList.toggle('hidden', tab !== 'exercises');
+        if (workoutContainer) workoutContainer.classList.toggle('hidden', tab !== 'workouts');
+
+        if (tab === 'workouts' && !areWorkoutsRendered) {
+            renderWorkouts();
+            areWorkoutsRendered = true;
+        }
+    }
+
     function showExerciseSelection() {
-        stopMetronome(); // Stop metronome when returning to exercise selection
-        exerciseSelectionContainer.classList.remove('hidden');
+        stopMetronome();
+
+        const tabs = document.getElementById('technique-tabs');
+        if (tabs) tabs.classList.remove('hidden');
+
+        switchTechniqueTab(currentTechniqueTab);
+
         exerciseViewContainer.classList.add('hidden');
 
         // Hide fretboard and metronome on selection screen
@@ -2161,6 +2795,79 @@ document.addEventListener('DOMContentLoaded', () => {
         updateExerciseDisplay();
     }
 
+    // --- Workout Runner ---
+    let workoutState = {
+        active: false,
+        id: null,
+        currentStep: 0,
+        stepStartTime: 0
+    };
+
+    function startWorkout(workoutId) {
+        const workout = WORKOUTS.find(w => w.id === workoutId);
+        if (!workout) return;
+
+        workoutState = {
+            active: true,
+            id: workoutId,
+            currentStep: 0,
+            stepStartTime: 0,
+            accumulatedTime: 0
+        };
+
+        loadWorkoutStep(0);
+    }
+
+    function loadWorkoutStep(index) {
+        const workout = WORKOUTS.find(w => w.id === workoutState.id);
+        if (!workout || index >= workout.exercises.length) {
+            finishWorkout();
+            return;
+        }
+
+        workoutState.currentStep = index;
+        workoutState.stepStartTime = 0;
+        workoutState.accumulatedTime = 0;
+        const step = workout.exercises[index];
+
+        // Hide selection containers explicitly
+        document.getElementById('workout-selection-container').classList.add('hidden');
+        document.getElementById('exercise-selection-container').classList.add('hidden');
+
+        // Load exercise engine
+        selectExercise(step.type);
+
+        // Override UI
+        if (currentExerciseTitle) {
+            currentExerciseTitle.textContent = `${workout.title}: ${step.name} (${index + 1}/${workout.exercises.length})`;
+        }
+
+        // Update Metronome Button
+        if (metronomeBtnLabel) metronomeBtnLabel.textContent = `Start Step ${index + 1} (${step.duration}s)`;
+
+        // Apply Settings
+        if (step.settings && step.settings.bpm) {
+            bpm = step.settings.bpm;
+            bpmDisplay.textContent = bpm;
+        }
+
+        // Set specific permutation if needed
+        if (step.settings && step.settings.permutationIndex !== undefined) {
+            currentPermutationIndex = step.settings.permutationIndex;
+            resetExerciseState(); // Re-init with new permutation
+            // Note: updateVisibleSettings might need to refresh
+            const permSelect = document.getElementById('permutation-select');
+            if (permSelect) permSelect.value = currentPermutationIndex;
+            updateExerciseDisplay();
+        }
+    }
+
+    function finishWorkout() {
+        workoutState.active = false;
+        alert("🎉 Workout Complete!");
+        showExerciseSelection();
+    }
+
     function updateVisibleSettings() {
         // Hide all exercise settings first
         if (permutationSettingsContainer) permutationSettingsContainer.classList.add('hidden');
@@ -2197,24 +2904,59 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function resetExerciseState() {
+        // Reset sequence tracking
+        resetExerciseSequence();
+
         switch (currentExercise) {
             case 'spiderWalk':
                 resetSpiderState();
+                initializeExerciseSequence('spider', {
+                    startFret: parseInt(spiderStartFretInput?.value || 5),
+                    direction: 'both'
+                });
                 break;
             case 'permutation':
                 resetPermutationState();
+                const perm = PERMUTATIONS[exerciseState.permutation.currentPermutationIndex];
+                initializeExerciseSequence('permutation', {
+                    pattern: perm?.pattern || [1, 2, 3, 4],
+                    startFret: parseInt(spiderStartFretInput?.value || 5),
+                    direction: 'both'
+                });
                 break;
             case 'linear':
                 resetLinearState();
+                initializeExerciseSequence('linear', {
+                    string: parseInt(linearStringSelect?.value || 5),
+                    startFret: parseInt(linearStartFretInput?.value || 1),
+                    endFret: parseInt(linearEndFretInput?.value || 12),
+                    notesPerShift: parseInt(linearNotesPerShiftInput?.value || 4)
+                });
                 break;
             case 'diagonal':
                 resetDiagonalState();
+                initializeExerciseSequence('diagonal', {
+                    startFret: parseInt(diagonalStartFretInput?.value || 3),
+                    pattern: diagonalPatternSelect?.value || 'ascending'
+                });
                 break;
             case 'stringSkip':
                 resetStringSkipState();
+                initializeExerciseSequence('stringSkip', {
+                    skipPattern: skipPatternSelect?.value || 'single',
+                    startFret: parseInt(skipStartFretInput?.value || 5)
+                });
                 break;
             case 'legato':
                 resetLegatoState();
+                initializeExerciseSequence('legato', {
+                    type: legatoTypeSelect?.value || 'trill',
+                    startFret: parseInt(legatoStartFretInput?.value || 5),
+                    trillPair: [
+                        parseInt(legatoFinger1Select?.value || 1),
+                        parseInt(legatoFinger2Select?.value || 2)
+                    ]
+                });
                 break;
         }
     }
@@ -2544,7 +3286,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', (e) => {
         if (e.code === 'Space' && document.activeElement.tagName !== 'INPUT') {
             e.preventDefault();
-            toggleMetronome();
+            if (isStepThroughMode && isMetronomeOn && currentModule === 'technique') {
+                nextStep();
+            } else {
+                toggleMetronome();
+            }
         }
 
         if (['1', '2', '3', '4'].includes(e.key) && document.activeElement.tagName !== 'INPUT') {
@@ -2596,6 +3342,41 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     if (metronomeBtn) metronomeBtn.addEventListener('click', toggleMetronome);
     if (nextBtn) nextBtn.addEventListener('click', newQuestion);
+
+    const stepModeToggle = document.getElementById('step-mode-toggle');
+    const audioAdvanceSetting = document.getElementById('audio-advance-setting');
+    const audioAdvanceToggle = document.getElementById('audio-advance-toggle');
+
+    if (stepModeToggle) {
+        stepModeToggle.addEventListener('change', () => {
+            isStepThroughMode = stepModeToggle.checked;
+            if (isMetronomeOn) {
+                stopMetronome();
+            }
+            if (metronomeBtnLabel) metronomeBtnLabel.textContent = isStepThroughMode ? 'Start Step Mode' : 'Start Metronome';
+
+            if (audioAdvanceSetting) {
+                audioAdvanceSetting.classList.toggle('hidden', !isStepThroughMode);
+            }
+
+            // Force disable audio advance if step mode is off
+            if (!isStepThroughMode && audioAdvanceToggle && audioAdvanceToggle.checked) {
+                audioAdvanceToggle.checked = false;
+                toggleAudioAdvance(false);
+            }
+        });
+    }
+
+    if (audioAdvanceToggle) {
+        audioAdvanceToggle.addEventListener('change', () => {
+            toggleAudioAdvance(audioAdvanceToggle.checked);
+        });
+    }
+
+    const nextStepBtn = document.getElementById('next-step-btn');
+    if (nextStepBtn) {
+        nextStepBtn.addEventListener('click', nextStep);
+    }
     if (statsBtn) statsBtn.addEventListener('click', displayDetailedStats);
     statsDisplay.addEventListener('click', () => {
         if (!statsDisplay.classList.contains('hidden')) displayDetailedStats();
@@ -2820,15 +3601,199 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- Focus Area Settings ---
+    function saveFocusArea() {
+        try {
+            localStorage.setItem('fretmemoFocusArea', JSON.stringify(focusArea));
+        } catch (e) {
+            console.error('Failed to save focus area:', e);
+        }
+    }
+
+    function loadFocusArea() {
+        try {
+            const stored = localStorage.getItem('fretmemoFocusArea');
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                focusArea.minFret = parsed.minFret ?? 0;
+                focusArea.maxFret = parsed.maxFret ?? 12;
+                focusArea.strings = parsed.strings ?? [true, true, true, true, true, true];
+
+                // Update UI to reflect loaded values
+                if (focusMinFretInput) focusMinFretInput.value = focusArea.minFret;
+                if (focusMaxFretInput) focusMaxFretInput.value = focusArea.maxFret;
+                focusStringCheckboxes.forEach(cb => {
+                    const stringIndex = parseInt(cb.dataset.string, 10);
+                    cb.checked = focusArea.strings[stringIndex];
+                });
+            }
+        } catch (e) {
+            console.error('Failed to load focus area:', e);
+        }
+    }
+
+    if (focusMinFretInput) {
+        focusMinFretInput.addEventListener('change', () => {
+            focusArea.minFret = Math.max(0, Math.min(parseInt(focusMinFretInput.value, 10) || 0, focusArea.maxFret));
+            focusMinFretInput.value = focusArea.minFret;
+            saveFocusArea();
+        });
+    }
+
+    if (focusMaxFretInput) {
+        focusMaxFretInput.addEventListener('change', () => {
+            focusArea.maxFret = Math.max(focusArea.minFret, parseInt(focusMaxFretInput.value, 10) || 12);
+            focusMaxFretInput.value = focusArea.maxFret;
+            saveFocusArea();
+        });
+    }
+
+    focusStringCheckboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+            const stringIndex = parseInt(cb.dataset.string, 10);
+            focusArea.strings[stringIndex] = cb.checked;
+
+            // Ensure at least one string is always selected
+            const anySelected = focusArea.strings.some(s => s);
+            if (!anySelected) {
+                focusArea.strings[stringIndex] = true;
+                cb.checked = true;
+            }
+            saveFocusArea();
+        });
+    });
+
+    // --- Heat Map Functions ---
+    function savePositionStats() {
+        try {
+            localStorage.setItem('fretmemoPositionStats', JSON.stringify(positionStats));
+        } catch (e) {
+            console.error('Failed to save position stats:', e);
+        }
+    }
+
+    function loadPositionStats() {
+        try {
+            const stored = localStorage.getItem('fretmemoPositionStats');
+            if (stored) {
+                positionStats = JSON.parse(stored);
+            }
+        } catch (e) {
+            console.error('Failed to load position stats:', e);
+        }
+    }
+
+    function getPositionAccuracy(string, fret) {
+        const key = `${string}-${fret}`;
+        const stats = positionStats[key];
+        if (!stats || stats.total === 0) return null; // No data
+        return stats.correct / stats.total;
+    }
+
+    function getHeatMapClass(accuracy) {
+        if (accuracy === null) return ''; // No data
+        if (accuracy >= 0.85) return 'heatmap-mastered'; // Green
+        if (accuracy >= 0.60) return 'heatmap-learning'; // Yellow
+        return 'heatmap-focus'; // Red
+    }
+
+    function updateHeatMap() {
+        if (!heatMapEnabled) return;
+        const cells = fretboardEl.querySelectorAll('.fret-cell');
+        cells.forEach(cell => {
+            const string = parseInt(cell.dataset.string, 10);
+            const fret = parseInt(cell.dataset.fret, 10);
+            // Remove old heat map classes
+            cell.classList.remove('heatmap-mastered', 'heatmap-learning', 'heatmap-focus');
+            const accuracy = getPositionAccuracy(string, fret);
+            const heatClass = getHeatMapClass(accuracy);
+            if (heatClass) {
+                cell.classList.add(heatClass);
+            }
+        });
+    }
+
+    function clearHeatMap() {
+        const cells = fretboardEl.querySelectorAll('.fret-cell');
+        cells.forEach(cell => {
+            cell.classList.remove('heatmap-mastered', 'heatmap-learning', 'heatmap-focus');
+        });
+    }
+
+    const heatMapToggle = document.getElementById('heat-map-toggle');
+    if (heatMapToggle) {
+        heatMapToggle.addEventListener('change', () => {
+            heatMapEnabled = heatMapToggle.checked;
+            localStorage.setItem('fretmemoHeatMapEnabled', heatMapEnabled);
+            if (heatMapEnabled) {
+                updateHeatMap();
+            } else {
+                clearHeatMap();
+            }
+        });
+        // Load saved state
+        const savedEnabled = localStorage.getItem('fretmemoHeatMapEnabled');
+        if (savedEnabled === 'true') {
+            heatMapEnabled = true;
+            heatMapToggle.checked = true;
+        }
+    }
+
+    const resetHeatmapBtn = document.getElementById('reset-heatmap-btn');
+    if (resetHeatmapBtn) {
+        resetHeatmapBtn.addEventListener('click', () => {
+            if (confirm('Clear all heat map data? This cannot be undone.')) {
+                positionStats = {};
+                localStorage.removeItem('fretmemoPositionStats');
+                clearHeatMap();
+            }
+        });
+    }
+
+    loadPositionStats();
+    loadFocusArea();
     createFretboard();
     createTabView();
     loadProgress();
     populatePermutationSelect();
+    if (heatMapEnabled) updateHeatMap(); // Apply heat map on load
 
     // Defer initial question to prevent race condition on load
     setTimeout(() => {
         setModule(currentModule); // Restore last mode (fallbacks to defaults)
     }, 0);
+
+    // --- Pre-Built Workouts Listeners ---
+    document.querySelectorAll('.switcher-btn[data-tab]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            switchTechniqueTab(e.target.dataset.tab);
+        });
+    });
+
+    const workoutsGrid = document.getElementById('workouts-grid');
+    if (workoutsGrid) {
+        workoutsGrid.addEventListener('click', (e) => {
+            const card = e.target.closest('[data-workout]');
+            if (card) {
+                startWorkout(card.dataset.workout);
+            }
+        });
+    }
+
+    // --- Tuning Selector ---
+    const tuningSelect = document.getElementById('tuning-select');
+    if (tuningSelect) {
+        Object.keys(TUNINGS).forEach(tName => {
+            const opt = document.createElement('option');
+            opt.value = tName;
+            opt.textContent = tName;
+            tuningSelect.appendChild(opt);
+        });
+        tuningSelect.value = currentTuningName;
+        tuningSelect.addEventListener('change', (e) => {
+            setTuning(e.target.value);
+        });
+    }
 
     // --- PWA registration (tool only) ---
     // Avoid service worker caching during local development (localhost).
