@@ -28,6 +28,39 @@
   /* Burst mode colors */
   --burst-slow: #22C55E;
   --burst-fast: #EF4444;
+
+  /* Heat map colors */
+  --heatmap-mastered: #22C55E;
+  --heatmap-learning: #FACC15;
+  --heatmap-focus: #EF4444;
+}
+
+/* --- Heat Map Styling (Rounded Opacity Dots) --- */
+.fret-cell.heatmap-mastered::after,
+.fret-cell.heatmap-learning::after,
+.fret-cell.heatmap-focus::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.fret-cell.heatmap-mastered::after {
+  background: rgba(34, 197, 94, 0.6);
+}
+
+.fret-cell.heatmap-learning::after {
+  background: rgba(250, 204, 21, 0.65);
+}
+
+.fret-cell.heatmap-focus::after {
+  background: rgba(239, 68, 68, 0.6);
 }
 
 /* --- PREMIUM Side Panel --- */
@@ -1620,6 +1653,9 @@ html.dark #stats-display:hover {
   max-width: 600px;
   margin: 1rem auto;
   padding: 0 1rem;
+  min-height: 460px;
+  /* Aggressive stability buffer */
+  align-content: start;
 }
 
 @media (max-width: 600px) {
