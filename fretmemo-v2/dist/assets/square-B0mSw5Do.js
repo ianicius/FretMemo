@@ -1,0 +1,1 @@
+import{e}from"./index-DeqRbqpk.js";const c=[["path",{d:"M14 17H5",key:"gfn3mx"}],["path",{d:"M19 7h-9",key:"6i9tg"}],["circle",{cx:"17",cy:"17",r:"3",key:"18b49y"}],["circle",{cx:"7",cy:"7",r:"3",key:"dfmy0x"}]],o=e("settings-2",c);const t=[["rect",{width:"18",height:"18",x:"3",y:"3",rx:"2",key:"afitv7"}]],r=e("square",t);export{o as S,r as a};
