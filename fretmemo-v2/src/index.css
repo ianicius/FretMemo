@@ -1,0 +1,523 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Typography - Bespoke & Cinematic (matching original) */
+    --font-heading: "Chakra Petch", ui-sans-serif, system-ui, sans-serif;
+    --font-body: "Spline Sans", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "Azeret Mono", ui-monospace, monospace;
+
+    /* PREMIUM GOLD PALETTE (from original) */
+    --gold-50: #FFFBEB;
+    --gold-100: #FEF3C7;
+    --gold-200: #FDE68A;
+    --gold-300: #FCD34D;
+    --gold-400: #FBBF24;
+    --gold-500: #F59E0B;
+    --gold-600: #D97706;
+    --gold-700: #B45309;
+    --gold-800: #92400E;
+    --gold-900: #78350F;
+
+    /* PREMIUM GRAPHITE PALETTE (from original) */
+    --graphite-50: #FAFAF9;
+    --graphite-100: #F5F5F4;
+    --graphite-200: #E7E5E4;
+    --graphite-300: #D6D3D1;
+    --graphite-400: #A8A29E;
+    --graphite-500: #78716C;
+    --graphite-600: #57534E;
+    --graphite-700: #44403C;
+    --graphite-800: #292524;
+    --graphite-900: #1C1917;
+    --graphite-950: #0C0A09;
+
+    /* Shadcn/ui Theme Mappings - Light Mode */
+    --background: 30 14% 98%; /* Graphite-50 */
+    --foreground: 24 10% 10%; /* Graphite-900 */
+
+    --card: 60 5% 96%; /* Graphite-100 */
+    --card-foreground: 24 10% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 24 10% 10%;
+
+    --primary: 27 81% 37%; /* Accessible amber text/action base */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 60 5% 96%;
+    --secondary-foreground: 24 10% 10%;
+
+    --muted: 24 5% 64%;
+    --muted-foreground: 24 4% 46%;
+
+    --accent: 42 87% 91%; /* Gold-100 */
+    --accent-foreground: 24 10% 10%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 24 6% 88%; /* Graphite-200 */
+    --input: 24 6% 88%;
+    --ring: 38 92% 50%; /* Gold-500 */
+
+    --radius: 0.75rem;
+
+    /* Semantic tokens */
+    --color-action: #F59E0B;
+    --color-action-soft: #FEF3C7;
+    --color-correct: #10B981;
+    --color-learning: #FBBF24;
+    --color-weak: #FB7185;
+    --color-neutral: #94A3B8;
+    --surface-0: #FFFFFF;
+    --surface-1: #F8FAFC;
+    --surface-2: #F1F5F9;
+
+    /* Custom Fretboard Variables */
+    --fretboard-bg-light: radial-gradient(1200px 260px at 50% -120px, rgba(245, 158, 11, 0.18) 0%, transparent 70%), linear-gradient(90deg, rgba(245, 158, 11, 0.05) 0%, transparent 50%, rgba(245, 158, 11, 0.05) 100%), linear-gradient(180deg, #FFFFFF 0%, #FAFAF9 100%);
+    --fretboard-bg-dark: radial-gradient(1000px 260px at 50% -120px, rgba(251, 191, 36, 0.10) 0%, transparent 70%), linear-gradient(90deg, rgba(251, 191, 36, 0.05) 0%, transparent 50%, rgba(251, 191, 36, 0.05) 100%), linear-gradient(180deg, #1C1917 0%, #0C0A09 100%);
+    --marker-gold: radial-gradient(circle at 30% 30%, rgba(252, 211, 77, 0.95) 0%, rgba(245, 158, 11, 0.95) 55%, rgba(180, 83, 9, 0.95) 100%);
+    
+    /* String colors */
+    --string-color-light: rgba(41, 37, 36, 0.42);
+    --string-color-dark: rgba(214, 211, 209, 0.32);
+    
+    /* Fret wire color */
+    --fret-wire-light: rgba(120, 113, 108, 0.28);
+    --fret-wire-dark: rgba(68, 64, 60, 0.75);
+    
+    /* Nut color */
+    --nut-color-light: rgba(28, 25, 23, 0.88);
+    --nut-color-dark: rgba(250, 250, 249, 0.90);
+  }
+
+  .dark {
+    /* Shadcn/ui Theme Mappings - Dark Mode */
+    --background: 24 10% 4%; /* Graphite-950 */
+    --foreground: 60 5% 96%; /* Graphite-50 */
+
+    --card: 24 6% 10%; /* Graphite-800 */
+    --card-foreground: 60 5% 96%;
+
+    --popover: 24 10% 4%;
+    --popover-foreground: 60 5% 96%;
+
+    --primary: 45 93% 47%; /* Gold-400 for dark mode */
+    --primary-foreground: 24 10% 4%;
+
+    --secondary: 24 6% 16%;
+    --secondary-foreground: 60 5% 96%;
+
+    --muted: 24 6% 16%;
+    --muted-foreground: 24 5% 64%;
+
+    --accent: 42 87% 20%;
+    --accent-foreground: 60 5% 96%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 24 6% 22%;
+    --input: 24 6% 22%;
+    --ring: 45 93% 47%; /* Gold-400 */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    font-family: var(--font-body);
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    letter-spacing: -0.025em;
+    font-weight: 700;
+  }
+}
+
+@layer components {
+  /* Premium Control Buttons (matching original) */
+  .control-btn {
+    @apply inline-flex items-center justify-center gap-2 h-11 px-5 rounded-lg font-bold text-sm transition-all duration-150;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, var(--graphite-50) 50%, var(--graphite-100) 100%);
+    border: 1px solid var(--graphite-300);
+    border-bottom-width: 3px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 1px 2px rgba(0, 0, 0, 0.05);
+    color: var(--graphite-700) !important;
+  }
+
+  .control-btn:hover {
+    transform: translateY(-2px);
+    background: linear-gradient(180deg, #FFFBEB 0%, rgba(255, 251, 235, 0.9) 50%, var(--graphite-100) 100%);
+    border-color: var(--gold-400);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 0 0 3px rgba(245, 158, 11, 0.12), 0 4px 12px rgba(245, 158, 11, 0.15);
+  }
+
+  .control-btn:active {
+    transform: translateY(1px);
+    border-bottom-width: 1px;
+    background: linear-gradient(180deg, var(--graphite-100) 0%, var(--graphite-200) 100%);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Primary Action Button - 3D Beveled Gold */
+  .control-btn--primary {
+    background: linear-gradient(180deg, #FCD34D 0%, #FBBF24 30%, #F59E0B 70%, #D97706 100%);
+    border: 1px solid #B45309;
+    border-bottom-width: 4px;
+    color: #451A03 !important;
+    font-weight: 800;
+    font-size: 0.95rem;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 -1px 0 rgba(0, 0, 0, 0.1), 0 4px 0 #92400E, 0 6px 12px rgba(146, 64, 14, 0.35), 0 8px 24px rgba(245, 158, 11, 0.25);
+  }
+
+  .control-btn--primary:hover {
+    transform: translateY(-2px);
+    background: linear-gradient(180deg, #FDE68A 0%, #FCD34D 30%, #FBBF24 70%, #F59E0B 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 -1px 0 rgba(0, 0, 0, 0.1), 0 6px 0 #92400E, 0 8px 16px rgba(146, 64, 14, 0.4), 0 12px 32px rgba(245, 158, 11, 0.35);
+  }
+
+  .control-btn--primary:active {
+    transform: translateY(3px);
+    border-bottom-width: 1px;
+    background: linear-gradient(180deg, #D97706 0%, #B45309 100%);
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 0 #92400E;
+  }
+
+  .control-btn--primary:focus-visible {
+    outline: none;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 0 0 3px rgba(245, 158, 11, 0.4), 0 4px 0 #92400E, 0 6px 12px rgba(146, 64, 14, 0.35);
+  }
+
+  /* Dark mode button overrides */
+  .dark .control-btn {
+    background: linear-gradient(180deg, #44403C 0%, #292524 100%);
+    border-color: #57534E;
+    color: #FAFAF9 !important;
+  }
+
+  .dark .control-btn:hover {
+    background: linear-gradient(180deg, #525152 0%, #353230 100%);
+    border-color: var(--gold-400);
+    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.15);
+  }
+
+  .dark .control-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.3), 0 0 0 5px rgba(251, 191, 36, 0.1);
+  }
+
+  /* Fretboard Styles */
+  .fretboard-container {
+    background: var(--fretboard-bg-light);
+    border: 1px solid var(--graphite-300);
+    border-bottom-width: 3px;
+    border-radius: 16px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75), 0 1px 3px rgba(0, 0, 0, 0.05), 0 8px 20px rgba(0, 0, 0, 0.10), 0 16px 40px rgba(0, 0, 0, 0.06);
+  }
+
+  .dark .fretboard-container {
+    background: var(--fretboard-bg-dark);
+    border-color: var(--graphite-700);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 60px rgba(245, 158, 11, 0.05);
+  }
+
+  /* Fret wires - enhanced visibility to match original */
+  .fret-wire {
+    border-right: 1px solid rgba(120, 113, 108, 0.55);
+    box-shadow: 1px 0 0 rgba(255, 255, 255, 0.08);
+  }
+
+  .dark .fret-wire {
+    border-right-color: rgba(168, 162, 158, 0.60);
+    box-shadow: 1px 0 0 rgba(0, 0, 0, 0.25);
+  }
+
+  .fret-wire--last {
+    border-right: none;
+  }
+
+  .fret-nut {
+    border-right-width: 6px;
+    border-right-color: var(--nut-color-light);
+  }
+
+  .dark .fret-nut {
+    border-right-color: var(--nut-color-dark);
+  }
+
+  /* String lines */
+  .string-line {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.22) 0%,
+      var(--string-color-light) 45%,
+      var(--string-color-light) 55%,
+      rgba(0, 0, 0, 0.18) 100%
+    );
+  }
+
+  .dark .string-line {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.10) 0%,
+      var(--string-color-dark) 45%,
+      var(--string-color-dark) 55%,
+      rgba(0, 0, 0, 0.48) 100%
+    );
+  }
+
+  .fret-cell {
+    min-height: 40px;
+  }
+
+  /* Marker dots */
+  .marker-dot {
+    background: var(--marker-gold);
+    opacity: 0.78;
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.35), 0 1px 2px rgba(0, 0, 0, 0.18);
+  }
+
+  .dark .marker-dot {
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.3), 0 1px 3px rgba(0, 0, 0, 0.4);
+  }
+
+  /* Heat map colors */
+  .heatmap-mastered {
+    background-color: rgba(34, 197, 94, 0.4) !important;
+  }
+
+  .heatmap-learning {
+    background-color: rgba(250, 204, 21, 0.4) !important;
+  }
+
+  .heatmap-focus {
+    background-color: rgba(239, 68, 68, 0.4) !important;
+  }
+
+  /* Note dot styles */
+  .note-dot {
+    @apply rounded-full flex items-center justify-center text-[11px] md:text-xs font-bold transition-all duration-200 border border-transparent shadow-sm;
+    width: clamp(16px, 4.6vw, 34px);
+    height: clamp(16px, 4.6vw, 34px);
+  }
+
+  .note-dot--active {
+    background-color: rgba(245, 158, 11, 0.15);
+    border-color: rgba(245, 158, 11, 0.95);
+    border-width: 3px;
+    color: rgba(69, 26, 3, 0.9);
+    box-shadow:
+      0 0 0 4px rgba(245, 158, 11, 0.12),
+      0 0 24px rgba(245, 158, 11, 0.35),
+      inset 0 0 12px rgba(245, 158, 11, 0.15);
+  }
+
+  .dark .note-dot--active {
+    background-color: rgba(251, 191, 36, 0.28);
+    border-color: #FCD34D;
+    color: #FFFFFF;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+    box-shadow:
+      0 0 0 4px rgba(251, 191, 36, 0.15),
+      0 0 28px rgba(251, 191, 36, 0.45),
+      inset 0 0 14px rgba(251, 191, 36, 0.2);
+  }
+
+  .note-dot--active-strong {
+    border-width: 3px;
+    animation: note-active-pulse 1.35s ease-in-out infinite;
+  }
+
+  .note-dot--correct {
+    background-color: #22c55e;
+    color: white;
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.6);
+  }
+
+  .note-dot--incorrect {
+    background-color: #ef4444;
+    color: white;
+  }
+
+  .note-dot--idle {
+    background-color: rgba(245, 158, 11, 0.2);
+  }
+
+  .note-dot--idle:hover {
+    background-color: rgba(245, 158, 11, 0.4);
+  }
+
+  /* Typography scale tokens */
+  .type-display {
+    font-size: 28px;
+    line-height: 1.15;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .type-h1 {
+    font-size: 22px;
+    line-height: 1.25;
+    font-weight: 600;
+  }
+
+  .type-h2 {
+    font-size: 18px;
+    line-height: 1.3;
+    font-weight: 600;
+  }
+
+  .type-body-lg {
+    font-size: 16px;
+    line-height: 1.5;
+    font-weight: 400;
+  }
+
+  .type-body {
+    font-size: 14px;
+    line-height: 1.5;
+    font-weight: 400;
+  }
+
+  .type-caption {
+    font-size: 12px;
+    line-height: 1.4;
+    font-weight: 500;
+  }
+
+  .type-mono {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.4;
+    font-weight: 500;
+  }
+}
+
+/* Animation keyframes */
+@keyframes metronome-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.25);
+    opacity: 1;
+  }
+}
+
+.animate-metronome-pulse {
+  animation: metronome-pulse 900ms ease-in-out infinite;
+}
+
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.72;
+  }
+}
+
+@keyframes note-active-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 4px rgba(245, 158, 11, 0.10),
+      0 0 24px rgba(245, 158, 11, 0.35),
+      inset 0 0 12px rgba(245, 158, 11, 0.12);
+  }
+  50% {
+    box-shadow:
+      0 0 0 6px rgba(245, 158, 11, 0.12),
+      0 0 30px rgba(245, 158, 11, 0.48),
+      inset 0 0 14px rgba(245, 158, 11, 0.16);
+  }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2.4s ease-in-out infinite;
+}
+
+/* Safe area support for mobile */
+.safe-area-inset {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .animate-metronome-pulse,
+  .animate-pulse-subtle,
+  .note-dot--active-strong {
+    animation: none !important;
+  }
+  
+  .control-btn:hover,
+  .control-btn--primary:hover {
+    transform: none !important;
+  }
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted) / 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.4);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.6);
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: rgba(68, 64, 60, 0.4);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(168, 162, 158, 0.4);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(168, 162, 158, 0.6);
+}
