@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guitar Fretboard Trainer - Fretboard Memorization & Note Learning Tool | FretMemo</title>
+  <meta
+    name="description"
+    content="Master the guitar fretboard with an interactive trainer. Test your note knowledge with quizzes, practice with a metronome, and track your progress. Perfect for all guitar players."
+  />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <link rel="canonical" href="https://fretmemo.net/" />
+
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="apple-touch-icon" href="/icon.svg" />
+  <meta name="application-name" content="FretMemo" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="FretMemo" />
+  <meta name="theme-color" content="#fcfbf8" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="FretMemo" />
+  <meta property="og:url" content="https://fretmemo.net/" />
+  <meta property="og:title" content="Guitar Fretboard Trainer - FretMemo" />
+  <meta
+    property="og:description"
+    content="Master the guitar fretboard with an interactive trainer. Test your note knowledge with quizzes, practice with a metronome, and track your progress."
+  />
+  <meta property="og:image" content="https://fretmemo.net/fretmemo-preview.jpg" />
+
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content="https://fretmemo.net/" />
+  <meta property="twitter:title" content="Guitar Fretboard Trainer - FretMemo" />
+  <meta
+    property="twitter:description"
+    content="Master the guitar fretboard with an interactive trainer. Test your note knowledge with quizzes, practice with a metronome, and track your progress."
+  />
+  <meta property="twitter:image" content="https://fretmemo.net/fretmemo-preview.jpg" />
+
+  <script>
+    // Apply saved theme early to avoid flash.
+    (function () {
+      var theme = "dark"; // Matches app default
+      try {
+        var raw = localStorage.getItem("fretmemo-settings-v2");
+        if (raw) {
+          var persisted = JSON.parse(raw);
+          var persistedTheme = persisted && persisted.state && persisted.state.full && persisted.state.full.display
+            ? persisted.state.full.display.theme
+            : null;
+          if (persistedTheme === "light" || persistedTheme === "dark" || persistedTheme === "system") {
+            theme = persistedTheme;
+          }
+        }
+      } catch (error) {
+        // No-op: keep default theme when local storage data is unavailable.
+      }
+      var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      var isDark = theme === "dark" || (theme === "system" && prefersDark);
+      document.documentElement.classList.toggle("dark", isDark);
+    })();
+  </script>
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Guitar Fretboard Trainer - FretMemo",
+      "description": "Master the guitar fretboard with an interactive trainer. Test your note knowledge with quizzes, practice with a metronome, and track your progress.",
+      "url": "https://fretmemo.net/",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Any",
+      "browserRequirements": "Requires modern HTML5 support",
+      "image": "https://fretmemo.net/fretmemo-preview.jpg",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@400;600&family=Chakra+Petch:wght@400;600;700&family=Literata:opsz,wght@7..72,400..700&family=Spline+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+</html>
