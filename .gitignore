@@ -5,7 +5,7 @@ node_modules/
 astro/
 
 # Build output
-dist/
+/dist/
 
 # IDE
 .vscode/
