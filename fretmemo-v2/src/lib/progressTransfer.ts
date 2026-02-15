@@ -1,4 +1,9 @@
-import type { Achievement, PositionStats, SessionRecord } from '@/stores/useProgressStore';
+import type {
+    Achievement,
+    FunctionalDegreeStats,
+    PositionStats,
+    SessionRecord,
+} from '@/stores/useProgressStore';
 
 export interface ProgressSnapshotSource {
     positionStats: Record<string, PositionStats>;
@@ -12,6 +17,7 @@ export interface ProgressSnapshotSource {
     totalIncorrect: number;
     sessionHistory: SessionRecord[];
     achievements: Achievement[];
+    functionalEarStats: Record<string, FunctionalDegreeStats>;
 }
 
 export interface ProgressExportPayload {
@@ -41,6 +47,7 @@ export function createProgressExportPayload(
             totalIncorrect: source.totalIncorrect,
             sessionHistory: source.sessionHistory,
             achievements: source.achievements,
+            functionalEarStats: source.functionalEarStats,
         },
     };
 }

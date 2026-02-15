@@ -19,6 +19,19 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@400;600&family=Chakra+Petch:wght@400;600;700&family=Literata:opsz,wght@7..72,400..700&family=Spline+Sans:wght@400;500;600;700&display=swap"
         rel="stylesheet">
+
+    <!-- Amplitude Analytics -->
+    <script src="https://cdn.amplitude.com/libs/analytics-browser-2.11.1-min.js.gz"></script>
+    <script src="https://cdn.amplitude.com/libs/plugin-session-replay-browser-1.25.0-min.js.gz"></script>
+    <script>
+        (function () {
+            if (!window.amplitude || !window.sessionReplay) return;
+            window.amplitude.add(window.sessionReplay.plugin({ sampleRate: 1 }));
+            window.amplitude.init('1255f59dc08d681f1d7d257f2a82e84c', {
+                autocapture: { elementInteractions: true }
+            });
+        })();
+    </script>
 </head>
 
 <body class="min-h-screen">
@@ -149,6 +162,8 @@
             </footer>
         </div>
     </main>
+
+    <script src="js/analytics.js"></script>
 </body>
 
 </html>

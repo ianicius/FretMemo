@@ -5,6 +5,7 @@ import type { Position, NoteName } from '@/types/fretboard';
 import type { PracticeScaleType } from '@/types/settings';
 import { useSettingsStore } from './useSettingsStore';
 import { normalizeTuning } from '@/lib/tuning';
+import { trackEvent } from '@/lib/analytics';
 
 type PracticeMode = 'fretboardToNote' | 'tabToNote' | 'noteToTab' | 'playNotes' | 'playTab';
 export type NoteFilter = 'all' | 'naturals';
@@ -53,6 +54,7 @@ interface GameState {
     mode: PracticeMode;
     targetNote: NoteName | null;
     targetPosition: Position | null;
+    targetPresentedAt: number | null;
     lastAnswer: { position: Position; correct: boolean; selectedNote?: NoteName } | null;
     noteOptions: NoteName[];
     noteToTabOptions: Position[];
@@ -206,44 +208,32 @@ function pickNoteByLearningPriority(
         return pool[Math.floor(Math.random() * pool.length)];
     }
 
-    const stats = useProgressStore.getState().positionStats;
+    const srData = useProgressStore.getState().spacedRepetition;
     const options = getOccurrenceOptions(constraints, 12);
-    const now = Date.now();
 
     const weights = pool.map((note) => {
         const occurrences = getAllOccurrences(note, 12, options, tuning);
         if (occurrences.length === 0) return 0;
 
-        let practicedCount = 0;
-        let accuracySum = 0;
-        let latestPracticeAgeDays = 30;
-        let hasLastPractice = false;
+        let weightSum = 0;
 
         for (const occurrence of occurrences) {
             const key = `${occurrence.stringIndex}-${occurrence.fret}`;
-            const positionStats = stats[key];
-            if (!positionStats || positionStats.total <= 0) continue;
+            const entry = srData[key];
 
-            practicedCount += 1;
-            accuracySum += positionStats.correct / positionStats.total;
-
-            if (positionStats.lastPracticed) {
-                const ageMs = Math.max(0, now - Date.parse(positionStats.lastPracticed));
-                const ageDays = ageMs / (1000 * 60 * 60 * 24);
-                if (!hasLastPractice || ageDays < latestPracticeAgeDays) {
-                    latestPracticeAgeDays = ageDays;
-                }
-                hasLastPractice = true;
+            if (!entry) {
+                // Never reviewed — high exploration weight
+                weightSum += 2.0;
+            } else if (entry.nextReviewDate <= new Date().toLocaleDateString('en-CA')) {
+                // Due for review — highest priority
+                weightSum += 3.0;
+            } else {
+                // Not yet due — low weight (still gets occasional practice)
+                weightSum += 0.3;
             }
         }
 
-        const unpracticedRatio = 1 - practicedCount / occurrences.length;
-        const avgAccuracy = practicedCount > 0 ? accuracySum / practicedCount : 0.5;
-        const weakness = 1 - avgAccuracy;
-        const recencyBoost = hasLastPractice ? Math.min(1, latestPracticeAgeDays / 7) * 0.4 : 0.6;
-        const explorationBoost = practicedCount === 0 ? 0.5 : 0;
-
-        return Math.max(0.1, 0.5 + weakness * 1.6 + unpracticedRatio * 0.8 + recencyBoost + explorationBoost);
+        return weightSum / occurrences.length;
     });
 
     return pickWeighted(pool, weights);
@@ -376,6 +366,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     mode: 'fretboardToNote',
     targetNote: null,
     targetPosition: null,
+    targetPresentedAt: null,
     lastAnswer: null,
     noteOptions: [],
     noteToTabOptions: [],
@@ -402,6 +393,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         streak: 0,
         targetNote: null,
         targetPosition: null,
+        targetPresentedAt: null,
         noteOptions: [],
         noteToTabOptions: [],
         nextNote: null,
@@ -460,7 +452,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         }),
 
     startGame: () => {
-        const { mode, isMetronomeArmed } = get();
+        const { mode, isMetronomeArmed, bpm, noteDuration, practiceConstraints } = get();
         const isPlayMode = mode === 'playNotes' || mode === 'playTab';
         const deferPlayTargetToFirstBeat = isMetronomeArmed && isPlayMode;
 
@@ -481,6 +473,17 @@ export const useGameStore = create<GameState>((set, get) => ({
             playCycleAnswered: false,
         });
 
+        trackEvent('fm_v2_practice_session_started', {
+            mode,
+            bpm,
+            note_duration_beats: noteDuration,
+            metronome_armed: isMetronomeArmed,
+            fret_min: practiceConstraints.fretRange.min,
+            fret_max: practiceConstraints.fretRange.max,
+            enabled_strings_count: practiceConstraints.enabledStrings.filter(Boolean).length,
+            note_filter: practiceConstraints.noteFilter,
+        });
+
         // Start metronome only if it was armed
         if (isMetronomeArmed) {
             set({ isMetronomeOn: true });
@@ -495,11 +498,14 @@ export const useGameStore = create<GameState>((set, get) => ({
 
     stopGame: () => {
         const {
+            mode,
             sessionStartTime,
             sessionCorrect,
             sessionIncorrect,
         } = get();
         const durationSeconds = sessionStartTime ? Math.floor((Date.now() - sessionStartTime) / 1000) : 0;
+        const totalAnswers = sessionCorrect + sessionIncorrect;
+        const accuracy = totalAnswers > 0 ? Math.round((sessionCorrect / totalAnswers) * 100) : 0;
 
         // Update practice time
         if (sessionStartTime) {
@@ -514,6 +520,14 @@ export const useGameStore = create<GameState>((set, get) => ({
             correct: sessionCorrect,
             incorrect: sessionIncorrect,
             durationSeconds,
+        });
+
+        trackEvent('fm_v2_practice_session_ended', {
+            mode,
+            duration_seconds: durationSeconds,
+            correct: sessionCorrect,
+            incorrect: sessionIncorrect,
+            accuracy,
         });
 
         // Clear metronome interval if running
@@ -635,6 +649,7 @@ export const useGameStore = create<GameState>((set, get) => ({
             const unanswered = !lastAnswer;
             if (unanswered && targetPosition) {
                 useProgressStore.getState().recordAnswer(targetPosition, false);
+                useProgressStore.getState().updateSR(targetPosition, false, 10_000);
                 set({
                     streak: 0,
                     sessionIncorrect: sessionIncorrect + 1,
@@ -708,6 +723,7 @@ export const useGameStore = create<GameState>((set, get) => ({
             set({
                 targetPosition: chosen,
                 targetNote: correctNote,
+                targetPresentedAt: Date.now(),
                 noteOptions: shuffle(Array.from(opts)),
                 noteToTabOptions: [],
                 nextNote: null,
@@ -770,6 +786,7 @@ export const useGameStore = create<GameState>((set, get) => ({
             set({
                 targetNote: target,
                 targetPosition: correct,
+                targetPresentedAt: Date.now(),
                 noteOptions: [],
                 noteToTabOptions: shuffle(options),
                 nextNote: null,
@@ -838,6 +855,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         set({
             targetPosition: newCurrent,
             targetNote: newCurrent.note,
+            targetPresentedAt: Date.now(),
             nextPosition: newNext,
             nextNote: newNext.note,
             noteOptions: [],
@@ -873,6 +891,8 @@ export const useGameStore = create<GameState>((set, get) => ({
 
         // Record to progress store
         useProgressStore.getState().recordAnswer(targetPosition, isCorrect);
+        const responseTimeMs = get().targetPresentedAt ? Date.now() - get().targetPresentedAt! : 5_000;
+        useProgressStore.getState().updateSR(targetPosition, isCorrect, responseTimeMs);
 
         if (isCorrect) {
             const newStreak = streak + 1;
@@ -932,6 +952,8 @@ export const useGameStore = create<GameState>((set, get) => ({
 
         // Record to progress store using the *target* position (consistent with other identify-style modes)
         useProgressStore.getState().recordAnswer(targetPosition, isCorrect);
+        const responseTimeMs = get().targetPresentedAt ? Date.now() - get().targetPresentedAt! : 5_000;
+        useProgressStore.getState().updateSR(targetPosition, isCorrect, responseTimeMs);
 
         if (isCorrect) {
             const newStreak = streak + 1;

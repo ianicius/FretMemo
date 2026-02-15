@@ -4,6 +4,7 @@ import type { Position } from '@/types/fretboard';
 import { getNoteAt, STANDARD_TUNING } from '@/lib/constants';
 import { useSettingsStore } from './useSettingsStore';
 import { normalizeTuning } from '@/lib/tuning';
+import { calculateNextReview, gradeAnswer, isDueForReview, type SpacedRepetitionEntry, type SM2Result } from '@/lib/sm2';
 
 export interface PositionStats {
     correct: number;
@@ -29,6 +30,14 @@ export interface SessionRecord {
     accuracy: number;
 }
 
+export interface FunctionalDegreeStats {
+    correct: number;
+    wrong: number;
+    samples: number;
+    avgResponseMs: number;
+    lastPracticed: string | null;
+}
+
 type ImportMode = 'merge' | 'replace';
 
 interface NormalizedProgressData {
@@ -43,6 +52,7 @@ interface NormalizedProgressData {
     totalIncorrect: number;
     sessionHistory: SessionRecord[];
     achievements: Achievement[];
+    functionalEarStats: Record<string, FunctionalDegreeStats>;
 }
 
 export interface ProgressImportResult {
@@ -64,9 +74,13 @@ interface ProgressState {
     totalCorrect: number;
     totalIncorrect: number;
     sessionHistory: SessionRecord[];
+    functionalEarStats: Record<string, FunctionalDegreeStats>;
 
     // Achievements
     achievements: Achievement[];
+
+    // Spaced Repetition (SM-2)
+    spacedRepetition: Record<string, SpacedRepetitionEntry>; // key: "string-fret"
 
     // Actions
     recordAnswer: (position: Position, isCorrect: boolean) => void;
@@ -84,8 +98,12 @@ interface ProgressState {
         incorrect: number;
         durationSeconds: number;
     }) => void;
+    recordFunctionalEarAnswer: (degree: string, isCorrect: boolean, responseTimeMs: number) => void;
     importProgressData: (payload: unknown, mode?: ImportMode) => ProgressImportResult;
     resetProgressData: () => void;
+    updateSR: (position: Position, isCorrect: boolean, responseTimeMs: number) => SM2Result;
+    getSREntry: (stringIndex: number, fret: number) => SpacedRepetitionEntry | null;
+    isDueForReview: (stringIndex: number, fret: number) => boolean;
 }
 
 const DEFAULT_ACHIEVEMENTS: Achievement[] = [
@@ -110,6 +128,8 @@ type ProgressSnapshot = Pick<
     | 'totalIncorrect'
     | 'sessionHistory'
     | 'achievements'
+    | 'functionalEarStats'
+    | 'spacedRepetition'
 >;
 
 function createDefaultAchievements(): Achievement[] {
@@ -129,6 +149,8 @@ function createInitialProgressSnapshot(): ProgressSnapshot {
         totalIncorrect: 0,
         sessionHistory: [],
         achievements: createDefaultAchievements(),
+        functionalEarStats: {},
+        spacedRepetition: {},
     };
 }
 
@@ -216,6 +238,38 @@ function normalizeSessionHistory(raw: unknown): SessionRecord[] {
     return normalized.slice(-200);
 }
 
+function normalizeFunctionalEarStats(raw: unknown): Record<string, FunctionalDegreeStats> {
+    const source = asRecord(raw);
+    if (!source) return {};
+
+    const normalized: Record<string, FunctionalDegreeStats> = {};
+    for (const [degreeKey, value] of Object.entries(source)) {
+        const degree = degreeKey.trim();
+        if (!degree) continue;
+
+        const item = asRecord(value);
+        if (!item) continue;
+
+        const correct = toNonNegativeInt(item.correct);
+        const wrong = toNonNegativeInt(item.wrong);
+        const samples = Math.max(toNonNegativeInt(item.samples), correct + wrong);
+        const avgResponseMsRaw =
+            typeof item.avgResponseMs === 'number' && Number.isFinite(item.avgResponseMs)
+                ? Math.max(0, Math.round(item.avgResponseMs))
+                : 0;
+
+        normalized[degree] = {
+            correct,
+            wrong,
+            samples,
+            avgResponseMs: avgResponseMsRaw,
+            lastPracticed: toIsoOrNull(item.lastPracticed),
+        };
+    }
+
+    return normalized;
+}
+
 function normalizeAchievements(raw: unknown): Achievement[] {
     const map = new Map<string, Achievement>(
         DEFAULT_ACHIEVEMENTS.map((achievement) => [achievement.id, { ...achievement }])
@@ -281,6 +335,7 @@ function normalizeImportedProgress(payload: unknown): NormalizedProgressData | n
         totalIncorrect: toNonNegativeInt(source.totalIncorrect),
         sessionHistory: normalizeSessionHistory(source.sessionHistory),
         achievements: normalizeAchievements(source.achievements),
+        functionalEarStats: normalizeFunctionalEarStats(source.functionalEarStats),
     };
 }
 
@@ -350,6 +405,39 @@ function mergeAchievements(current: Achievement[], incoming: Achievement[]): Ach
     }
 
     return Array.from(merged.values());
+}
+
+function mergeFunctionalEarStats(
+    current: Record<string, FunctionalDegreeStats>,
+    incoming: Record<string, FunctionalDegreeStats>
+): Record<string, FunctionalDegreeStats> {
+    const merged: Record<string, FunctionalDegreeStats> = { ...current };
+
+    for (const [degree, nextValue] of Object.entries(incoming)) {
+        const prevValue = merged[degree];
+        if (!prevValue) {
+            merged[degree] = nextValue;
+            continue;
+        }
+
+        const totalSamples = prevValue.samples + nextValue.samples;
+        const weightedAvg = totalSamples > 0
+            ? Math.round(
+                ((prevValue.avgResponseMs * prevValue.samples) + (nextValue.avgResponseMs * nextValue.samples)) /
+                totalSamples
+            )
+            : 0;
+
+        merged[degree] = {
+            correct: prevValue.correct + nextValue.correct,
+            wrong: prevValue.wrong + nextValue.wrong,
+            samples: totalSamples,
+            avgResponseMs: weightedAvg,
+            lastPracticed: pickLatestIso(prevValue.lastPracticed, nextValue.lastPracticed),
+        };
+    }
+
+    return merged;
 }
 
 export const useProgressStore = create<ProgressState>()(
@@ -510,6 +598,40 @@ export const useProgressStore = create<ProgressState>()(
                 }));
             },
 
+            recordFunctionalEarAnswer: (degree, isCorrect, responseTimeMs) => {
+                const normalizedDegree = degree.trim();
+                if (!normalizedDegree) return;
+
+                const safeResponseMs = Math.max(0, Math.round(responseTimeMs));
+
+                set((state) => {
+                    const previous = state.functionalEarStats[normalizedDegree] ?? {
+                        correct: 0,
+                        wrong: 0,
+                        samples: 0,
+                        avgResponseMs: 0,
+                        lastPracticed: null,
+                    };
+
+                    const nextSamples = previous.samples + 1;
+                    const nextAvg =
+                        previous.avgResponseMs + (safeResponseMs - previous.avgResponseMs) / nextSamples;
+
+                    return {
+                        functionalEarStats: {
+                            ...state.functionalEarStats,
+                            [normalizedDegree]: {
+                                correct: previous.correct + (isCorrect ? 1 : 0),
+                                wrong: previous.wrong + (isCorrect ? 0 : 1),
+                                samples: nextSamples,
+                                avgResponseMs: Math.max(0, Math.round(nextAvg)),
+                                lastPracticed: new Date().toISOString(),
+                            },
+                        },
+                    };
+                });
+            },
+
             importProgressData: (payload, mode = 'merge') => {
                 const normalized = normalizeImportedProgress(payload);
                 if (!normalized) {
@@ -532,6 +654,8 @@ export const useProgressStore = create<ProgressState>()(
                         totalIncorrect: normalized.totalIncorrect,
                         sessionHistory: normalized.sessionHistory,
                         achievements: normalized.achievements,
+                        functionalEarStats: normalized.functionalEarStats,
+                        spacedRepetition: {},
                     });
 
                     return {
@@ -552,6 +676,7 @@ export const useProgressStore = create<ProgressState>()(
                     totalIncorrect: state.totalIncorrect + normalized.totalIncorrect,
                     sessionHistory: mergeSessionHistory(state.sessionHistory, normalized.sessionHistory),
                     achievements: mergeAchievements(state.achievements, normalized.achievements),
+                    functionalEarStats: mergeFunctionalEarStats(state.functionalEarStats, normalized.functionalEarStats),
                 }));
 
                 return {
@@ -562,6 +687,42 @@ export const useProgressStore = create<ProgressState>()(
 
             resetProgressData: () => {
                 set(createInitialProgressSnapshot());
+            },
+
+            updateSR: (position: Position, isCorrect: boolean, responseTimeMs: number): SM2Result => {
+                const key = `${position.stringIndex}-${position.fret}`;
+                const current = get().spacedRepetition[key] ?? null;
+                const quality = gradeAnswer(isCorrect, responseTimeMs);
+                const result = calculateNextReview(quality, current);
+
+                const entry: SpacedRepetitionEntry = {
+                    easeFactor: result.easeFactor,
+                    interval: result.interval,
+                    repetitions: result.repetitions,
+                    nextReviewDate: result.nextReviewDate,
+                    lastQuality: result.lastQuality,
+                };
+
+                set((state) => ({
+                    spacedRepetition: {
+                        ...state.spacedRepetition,
+                        [key]: entry,
+                    },
+                }));
+
+                return result;
+            },
+
+            getSREntry: (stringIndex: number, fret: number): SpacedRepetitionEntry | null => {
+                const key = `${stringIndex}-${fret}`;
+                return get().spacedRepetition[key] ?? null;
+            },
+
+            isDueForReview: (stringIndex: number, fret: number): boolean => {
+                const key = `${stringIndex}-${fret}`;
+                const entry = get().spacedRepetition[key];
+                if (!entry) return true; // Never reviewed = due
+                return isDueForReview(entry);
             },
         }),
         {
@@ -578,6 +739,8 @@ export const useProgressStore = create<ProgressState>()(
                 totalIncorrect: state.totalIncorrect,
                 sessionHistory: state.sessionHistory,
                 achievements: state.achievements,
+                functionalEarStats: state.functionalEarStats,
+                spacedRepetition: state.spacedRepetition,
             }),
         }
     )

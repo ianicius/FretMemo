@@ -14,7 +14,7 @@ import type { NoteStatus } from "@/types/fretboard";
 import { getNoteAt } from "@/lib/constants";
 import { normalizeTuning } from "@/lib/tuning";
 import { cn } from "@/lib/utils";
-import { Award, BarChart3, Clock, Flame, RotateCcw, Target, TrendingUp } from "lucide-react";
+import { Award, BarChart3, Clock, Flame, Music2, RotateCcw, Target, TrendingUp } from "lucide-react";
 
 const ACHIEVEMENT_ICONS: Record<string, React.ElementType> = {
     first_note: Target,
@@ -38,6 +38,7 @@ export default function ProgressPage() {
         totalCorrect,
         totalIncorrect,
         achievements,
+        functionalEarStats,
         getAccuracyForFretboard,
         sessionHistory,
     } = useProgressStore();
@@ -112,6 +113,28 @@ export default function ProgressPage() {
     const fretboardNotes = stats.positionsPracticed === 0 ? ghostNotes : heatmapNotes;
 
     const unlockedAchievements = achievements.filter((achievement) => achievement.unlockedAt);
+    const functionalDegreeStats = useMemo(() => {
+        return Object.entries(functionalEarStats)
+            .map(([degree, stats]) => {
+                const samples = Math.max(stats.samples, stats.correct + stats.wrong);
+                const accuracy = samples > 0 ? Math.round((stats.correct / samples) * 100) : 0;
+                return {
+                    degree,
+                    samples,
+                    accuracy,
+                    avgResponseMs: stats.avgResponseMs,
+                };
+            })
+            .filter((item) => item.samples > 0)
+            .sort((a, b) => {
+                const left = Number(a.degree);
+                const right = Number(b.degree);
+                if (Number.isNaN(left) || Number.isNaN(right)) {
+                    return a.degree.localeCompare(b.degree);
+                }
+                return left - right;
+            });
+    }, [functionalEarStats]);
     const chartData: AccuracyChartPoint[] = useMemo(() => {
         const dailyTotals = new Map<string, { correct: number; incorrect: number; total: number }>();
 
@@ -260,6 +283,46 @@ export default function ProgressPage() {
                 </CardHeader>
                 <CardContent>
                     <AccuracyChart data={chartData} />
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle className="text-xl flex items-center gap-2">
+                        <Music2 className="h-5 w-5" />
+                        Functional Ear
+                    </CardTitle>
+                    <CardDescription>Lifetime scale-degree recognition stats.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    {functionalDegreeStats.length === 0 ? (
+                        <EmptyState
+                            title="No Functional Ear stats yet"
+                            description="Complete a session in Functional Ear Training to populate degree accuracy."
+                            ctaLabel="Start Functional Ear"
+                            onCtaClick={() => navigate("/ear-training/functional")}
+                        />
+                    ) : (
+                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
+                            {functionalDegreeStats.map((item) => (
+                                <div key={item.degree} className="rounded-lg border border-border bg-card p-3 text-xs">
+                                    <p className="text-sm font-bold">Degree {item.degree}</p>
+                                    <p className={cn(
+                                        "font-semibold",
+                                        item.accuracy >= 75
+                                            ? "text-emerald-600 dark:text-emerald-400"
+                                            : item.accuracy >= 50
+                                                ? "text-amber-600 dark:text-amber-400"
+                                                : "text-rose-600 dark:text-rose-400",
+                                    )}>
+                                        {item.accuracy}% accuracy
+                                    </p>
+                                    <p className="text-muted-foreground">{item.samples} answers</p>
+                                    <p className="text-muted-foreground">Avg {item.avgResponseMs} ms</p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </CardContent>
             </Card>
 
