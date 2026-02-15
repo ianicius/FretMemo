@@ -57,42 +57,42 @@ const DRILLS: Array<{
     priority: number;
     source: string;
 }> = [
-    {
-        id: "fretboardToNote",
-        title: "Fretboard → Note",
-        difficulty: "beginner",
-        priority: 1,
-        source: "train-drills-fretboard-to-note",
-    },
-    {
-        id: "playNotes",
-        title: "Note Names",
-        difficulty: "beginner",
-        priority: 2,
-        source: "train-drills-play-note-names",
-    },
-    {
-        id: "noteToTab",
-        title: "Note → Tab",
-        difficulty: "intermediate",
-        priority: 3,
-        source: "train-drills-note-to-tab",
-    },
-    {
-        id: "tabToNote",
-        title: "Tab → Note",
-        difficulty: "intermediate",
-        priority: 4,
-        source: "train-drills-tab-to-note",
-    },
-    {
-        id: "playTab",
-        title: "Tab Sequence",
-        difficulty: "advanced",
-        priority: 5,
-        source: "train-drills-play-tab-sequence",
-    },
-];
+        {
+            id: "fretboardToNote",
+            title: "Fretboard → Note",
+            difficulty: "beginner",
+            priority: 1,
+            source: "train-drills-fretboard-to-note",
+        },
+        {
+            id: "playNotes",
+            title: "Note Names",
+            difficulty: "beginner",
+            priority: 2,
+            source: "train-drills-play-note-names",
+        },
+        {
+            id: "noteToTab",
+            title: "Note → Tab",
+            difficulty: "intermediate",
+            priority: 3,
+            source: "train-drills-note-to-tab",
+        },
+        {
+            id: "tabToNote",
+            title: "Tab → Note",
+            difficulty: "intermediate",
+            priority: 4,
+            source: "train-drills-tab-to-note",
+        },
+        {
+            id: "playTab",
+            title: "Tab Sequence",
+            difficulty: "advanced",
+            priority: 5,
+            source: "train-drills-play-tab-sequence",
+        },
+    ];
 
 const TRAIN_UI_STATE_KEY = "fretmemo.train.ui";
 
@@ -497,28 +497,102 @@ export default function Library() {
 
             <SectionCollapse
                 title="Theory"
-                summary="coming soon"
+                summary="6 tools"
                 open={sectionsOpen.theory}
                 onOpenChange={(nextOpen) => handleSectionOpenChange("theory", nextOpen)}
             >
-                <EmptyState
-                    title="Theory Tools In Progress"
-                    description="Scale explorer, chord maps, and fretboard theory visuals are on the roadmap."
-                    icon={Music2}
-                />
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <ExerciseCard
+                        title="Scale Explorer"
+                        difficulty="beginner"
+                        mastery={0}
+                        icon={Music2}
+                        variant="catalog"
+                        onClick={() => navigate("/theory/scales")}
+                    />
+                    <ExerciseCard
+                        title="Circle of Fifths"
+                        difficulty="intermediate"
+                        mastery={0}
+                        icon={Compass}
+                        variant="catalog"
+                        onClick={() => navigate("/theory/circle")}
+                    />
+                    <ExerciseCard
+                        title="CAGED System"
+                        difficulty="intermediate"
+                        mastery={0}
+                        icon={Guitar}
+                        variant="catalog"
+                        onClick={() => navigate("/theory/caged")}
+                    />
+                    <ExerciseCard
+                        title="Triads"
+                        difficulty="intermediate"
+                        mastery={0}
+                        icon={Guitar}
+                        variant="catalog"
+                        onClick={() => navigate("/theory/triads")}
+                    />
+                    <ExerciseCard
+                        title="Chord Library"
+                        difficulty="beginner"
+                        mastery={0}
+                        icon={Music2}
+                        variant="catalog"
+                        onClick={() => navigate("/theory/chords")}
+                    />
+                    <ExerciseCard
+                        title="Interval Trainer"
+                        difficulty="intermediate"
+                        mastery={0}
+                        icon={Target}
+                        variant="catalog"
+                        onClick={() => navigate("/theory/intervals")}
+                    />
+                </div>
             </SectionCollapse>
 
             <SectionCollapse
                 title="Ear Training"
-                summary="coming soon"
+                summary="4 modes"
                 open={sectionsOpen.ear}
                 onOpenChange={(nextOpen) => handleSectionOpenChange("ear", nextOpen)}
             >
-                <EmptyState
-                    title="Ear Training In Progress"
-                    description="Interval and chord recognition modules will appear here as soon as they are ready."
-                    icon={Ear}
-                />
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <ExerciseCard
+                        title="Sound → Fretboard"
+                        difficulty="beginner"
+                        mastery={0}
+                        icon={Ear}
+                        variant="catalog"
+                        onClick={() => navigate("/ear-training/sound-to-fret")}
+                    />
+                    <ExerciseCard
+                        title="Interval Recognition"
+                        difficulty="intermediate"
+                        mastery={0}
+                        icon={Ear}
+                        variant="catalog"
+                        onClick={() => navigate("/ear-training/intervals")}
+                    />
+                    <ExerciseCard
+                        title="Chord Quality"
+                        difficulty="intermediate"
+                        mastery={0}
+                        icon={Ear}
+                        variant="catalog"
+                        onClick={() => navigate("/ear-training/chord-quality")}
+                    />
+                    <ExerciseCard
+                        title="Functional Ear"
+                        difficulty="intermediate"
+                        mastery={0}
+                        icon={Ear}
+                        variant="catalog"
+                        onClick={() => navigate("/ear-training/functional")}
+                    />
+                </div>
             </SectionCollapse>
 
             <div className="rounded-xl border border-border bg-muted/40 p-4 text-sm text-muted-foreground">

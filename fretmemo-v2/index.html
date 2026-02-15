@@ -9,7 +9,7 @@
     content="Master the guitar fretboard with an interactive trainer. Test your note knowledge with quizzes, practice with a metronome, and track your progress. Perfect for all guitar players."
   />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-  <link rel="canonical" href="https://fretmemo.net/" />
+  <link rel="canonical" href="https://fretmemo.net/v2/" />
 
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -21,7 +21,7 @@
 
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="FretMemo" />
-  <meta property="og:url" content="https://fretmemo.net/" />
+  <meta property="og:url" content="https://fretmemo.net/v2/" />
   <meta property="og:title" content="Guitar Fretboard Trainer - FretMemo" />
   <meta
     property="og:description"
@@ -30,7 +30,7 @@
   <meta property="og:image" content="https://fretmemo.net/fretmemo-preview.jpg" />
 
   <meta property="twitter:card" content="summary_large_image" />
-  <meta property="twitter:url" content="https://fretmemo.net/" />
+  <meta property="twitter:url" content="https://fretmemo.net/v2/" />
   <meta property="twitter:title" content="Guitar Fretboard Trainer - FretMemo" />
   <meta
     property="twitter:description"
@@ -59,6 +59,19 @@
       var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
       var isDark = theme === "dark" || (theme === "system" && prefersDark);
       document.documentElement.classList.toggle("dark", isDark);
+    })();
+  </script>
+
+  <!-- Amplitude Analytics -->
+  <script src="https://cdn.amplitude.com/libs/analytics-browser-2.11.1-min.js.gz"></script>
+  <script src="https://cdn.amplitude.com/libs/plugin-session-replay-browser-1.25.0-min.js.gz"></script>
+  <script>
+    (function () {
+      if (!window.amplitude || !window.sessionReplay) return;
+      window.amplitude.add(window.sessionReplay.plugin({ sampleRate: 1 }));
+      window.amplitude.init("1255f59dc08d681f1d7d257f2a82e84c", {
+        autocapture: { elementInteractions: true }
+      });
     })();
   </script>
 

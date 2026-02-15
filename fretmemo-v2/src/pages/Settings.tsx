@@ -4,6 +4,7 @@ import { useFeedbackStore, type AppFeedbackTone } from "@/stores/useFeedbackStor
 import { useProgressStore } from "@/stores/useProgressStore";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { downloadProgressExport, parseJsonFile } from "@/lib/progressTransfer";
+import { trackEvent } from "@/lib/analytics";
 import {
     INSTRUMENT_LABELS,
     getDefaultTuningForInstrument,
@@ -53,10 +54,12 @@ export default function Settings() {
     const handleExportProgress = () => {
         try {
             downloadProgressExport(useProgressStore.getState());
+            trackEvent("fm_v2_progress_export_clicked");
             showFeedback("Progress data exported.", "success");
         } catch (error) {
             console.error("Failed to export progress data", error);
             showFeedback("Could not export progress data. Please try again.", "error");
+            trackEvent("fm_v2_progress_export_failed");
         }
     };
 
@@ -77,9 +80,16 @@ export default function Settings() {
             const parsed = await parseJsonFile(file);
             const result = importProgressData(parsed, importModeRef.current);
             showFeedback(result.message, result.success ? "success" : "error");
+            trackEvent("fm_v2_progress_import_completed", {
+                mode: importModeRef.current,
+                success: result.success,
+            });
         } catch (error) {
             console.error("Failed to import progress data", error);
             showFeedback("Could not import progress data. Make sure the file is valid JSON.", "error");
+            trackEvent("fm_v2_progress_import_failed", {
+                mode: importModeRef.current,
+            });
         } finally {
             input.value = "";
         }
@@ -102,6 +112,7 @@ export default function Settings() {
         if (confirmAction === "reset-progress") {
             resetProgressData();
             showFeedback("All progress data has been reset.", "success");
+            trackEvent("fm_v2_progress_reset_confirmed");
         }
     };
 
@@ -251,6 +262,34 @@ export default function Settings() {
                                 checked={full.instrument.showFretNumbers}
                                 onCheckedChange={(checked) => updateFullSettings({ instrument: { ...full.instrument, showFretNumbers: checked } })}
                             />
+                        </div>
+
+                        <div className="space-y-2">
+                            <div className="space-y-0.5">
+                                <Label>Note Naming</Label>
+                                <p className="text-sm text-muted-foreground">Choose whether notes are displayed as sharps or flats.</p>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2 sm:w-56">
+                                {[
+                                    { id: "sharps", label: "Sharps (#)" },
+                                    { id: "flats", label: "Flats (b)" },
+                                ].map((notationOption) => (
+                                    <Button
+                                        key={notationOption.id}
+                                        type="button"
+                                        size="sm"
+                                        variant={full.instrument.notation === notationOption.id ? "secondary" : "outline"}
+                                        onClick={() => updateFullSettings({
+                                            instrument: {
+                                                ...full.instrument,
+                                                notation: notationOption.id as typeof full.instrument.notation,
+                                            },
+                                        })}
+                                    >
+                                        {notationOption.label}
+                                    </Button>
+                                ))}
+                            </div>
                         </div>
                     </CardContent>
                 </Card>

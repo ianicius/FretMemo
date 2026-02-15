@@ -1,4 +1,4 @@
-import { Flame, Star, Menu, Sun, Moon, CircleHelp, Newspaper, Coffee, Mail } from 'lucide-react';
+import { Flame, Snowflake, Star, Menu, Sun, Moon, CircleHelp, Newspaper, Coffee, Mail } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useProgressStore } from '@/stores/useProgressStore';
 import { useSettingsStore } from '@/stores/useSettingsStore';
@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 
 export function Header() {
     const navigate = useNavigate();
-    const { streakDays, totalCorrect } = useProgressStore();
+    const { streakDays, streakFreezes, totalCorrect } = useProgressStore();
     const { full, updateFullSettings } = useSettingsStore();
     const isDark =
         full.display.theme === 'dark' ||
@@ -37,6 +37,13 @@ export function Header() {
                         <Flame className="w-5 h-5 fill-current" />
                         <span className="font-bold text-sm">{streakDays}</span>
                     </div>
+
+                    {streakFreezes > 0 && (
+                        <div className="hidden min-[360px]:flex items-center gap-1 text-sky-600 dark:text-sky-300" title={`${streakFreezes} streak freeze${streakFreezes !== 1 ? 's' : ''} available`}>
+                            <Snowflake className="w-4 h-4" />
+                            <span className="font-bold text-xs">{streakFreezes}</span>
+                        </div>
+                    )}
 
                     <div className="flex items-center gap-1 text-primary" title="Total XP">
                         <Star className="w-5 h-5 fill-current" />

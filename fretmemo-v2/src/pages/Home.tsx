@@ -123,28 +123,38 @@ export default function Home() {
     const momentumLabel = streakDays > 1 ? `${streakDays} days` : streakDays === 1 ? "1 day" : "start";
 
     const weakAreas = useMemo(() => {
-        const now = Date.now();
-
-        return Object.entries(positionStats)
+        const candidates = Object.entries(positionStats)
             .filter(([, stats]) => stats.total >= 2)
             .map(([key, stats]) => {
+                const parsedLastPracticed = stats.lastPracticed ? Date.parse(stats.lastPracticed) : Number.NaN;
+                return {
+                    key,
+                    stats,
+                    lastPracticedTs: Number.isNaN(parsedLastPracticed) ? null : parsedLastPracticed,
+                };
+            });
+
+        const latestPracticeTs = candidates.reduce((maxTs, item) => {
+            if (item.lastPracticedTs === null) return maxTs;
+            return Math.max(maxTs, item.lastPracticedTs);
+        }, 0);
+
+        return candidates
+            .map(({ key, stats, lastPracticedTs }) => {
                 const accuracy = stats.correct / stats.total;
-                // Weight accuracy more heavily for positions with more data
+                // Weight accuracy more heavily for positions with more data.
                 const sampleWeight = Math.min(1, stats.total / 10); // max weight at 10+ attempts
 
-                // Recency penalty: positions practiced recently get a boost (deprioritized as weak)
-                // This helps suggest different positions over time
+                // Recency penalty anchored to the latest recorded practice timestamp in local data.
+                // Recently practiced areas get deprioritized as weak spots.
                 let recencyBonus = 0;
-                if (stats.lastPracticed) {
-                    const hoursSince = (now - Date.parse(stats.lastPracticed)) / (60 * 60 * 1000);
-                    // Recent practice (< 1 hour) = full bonus, decays over 24 hours
+                if (lastPracticedTs !== null && latestPracticeTs > 0) {
+                    const hoursSince = (latestPracticeTs - lastPracticedTs) / (60 * 60 * 1000);
                     recencyBonus = Math.max(0, 1 - hoursSince / 24) * 0.3;
                 }
 
-                // Lower score = more likely to be suggested
-                // Base: accuracy (0-1), weighted by sample size, with recency bonus
+                // Lower score = more likely to be suggested.
                 const weaknessScore = (accuracy * sampleWeight) + recencyBonus;
-
                 return { key, stats, score: weaknessScore };
             })
             .sort((a, b) => a.score - b.score)
