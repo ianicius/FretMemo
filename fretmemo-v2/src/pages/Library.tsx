@@ -3,15 +3,16 @@ import { useLocation, useNavigate, useNavigationType } from "react-router-dom";
 import { useProgressStore } from "@/stores/useProgressStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { usePinnedExercisesStore, type PinnedExerciseId } from "@/stores/usePinnedExercisesStore";
+import { useRhythmDojoStore, type RhythmModeId } from "@/stores/useRhythmDojoStore";
 import { SectionCollapse } from "@/components/ui/section-collapse";
 import { ExerciseCard } from "@/components/ui/exercise-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
-import { Compass, Ear, Guitar, Music2, Sparkles, Star, Target } from "lucide-react";
+import { Compass, Drum, Ear, Guitar, Music2, Sparkles, Star, Target } from "lucide-react";
 
 type TechniqueDifficulty = "beginner" | "intermediate" | "advanced";
 type PracticeMode = "fretboardToNote" | "tabToNote" | "noteToTab" | "playNotes" | "playTab";
-type TrainSectionKey = "pinned" | "drills" | "technique" | "theory" | "ear";
+type TrainSectionKey = "pinned" | "drills" | "technique" | "theory" | "ear" | "rhythm";
 type TrainSectionsOpenState = Record<TrainSectionKey, boolean>;
 
 type CatalogCard = {
@@ -28,6 +29,14 @@ interface TechniqueExerciseItem {
     id: string;
     title: string;
     difficulty: TechniqueDifficulty;
+}
+
+interface RhythmExerciseItem {
+    id: RhythmModeId;
+    title: string;
+    difficulty: TechniqueDifficulty;
+    priority: number;
+    status: "active" | "coming-soon";
 }
 
 interface TrainUiStateSnapshot {
@@ -102,6 +111,7 @@ const DEFAULT_SECTIONS_OPEN: TrainSectionsOpenState = {
     technique: false,
     theory: false,
     ear: false,
+    rhythm: false,
 };
 
 function normalizeSectionsOpen(
@@ -114,6 +124,7 @@ function normalizeSectionsOpen(
         technique: typeof sectionsOpen?.technique === "boolean" ? sectionsOpen.technique : DEFAULT_SECTIONS_OPEN.technique,
         theory: typeof sectionsOpen?.theory === "boolean" ? sectionsOpen.theory : DEFAULT_SECTIONS_OPEN.theory,
         ear: typeof sectionsOpen?.ear === "boolean" ? sectionsOpen.ear : DEFAULT_SECTIONS_OPEN.ear,
+        rhythm: typeof sectionsOpen?.rhythm === "boolean" ? sectionsOpen.rhythm : DEFAULT_SECTIONS_OPEN.rhythm,
     };
 }
 
@@ -155,6 +166,13 @@ const TECHNIQUE_EXERCISES: TechniqueExerciseItem[] = [
     { id: "legato", title: "Legato Builder", difficulty: "intermediate" },
 ];
 
+const RHYTHM_EXERCISES: RhythmExerciseItem[] = [
+    { id: "tap-beat", title: "Tap the Beat", difficulty: "beginner", priority: 1, status: "active" },
+    { id: "strum-patterns", title: "Strum Patterns", difficulty: "beginner", priority: 2, status: "active" },
+    { id: "rhythm-reading", title: "Rhythm Reading", difficulty: "intermediate", priority: 3, status: "active" },
+    { id: "groove-lab", title: "Groove Lab", difficulty: "intermediate", priority: 4, status: "active" },
+];
+
 function getMasteryTargetBpm(exerciseId: string, difficulty: TechniqueDifficulty): number {
     if (EXERCISE_MASTERY_TARGET_BPM[exerciseId]) {
         return EXERCISE_MASTERY_TARGET_BPM[exerciseId];
@@ -186,6 +204,8 @@ export default function Library() {
     const location = useLocation();
     const navigationType = useNavigationType();
     const techniqueSettings = useSettingsStore((state) => state.modules.technique);
+    const rhythmModeStats = useRhythmDojoStore((state) => state.modeStats);
+    const getRhythmModeMastery = useRhythmDojoStore((state) => state.getModeMastery);
     const { totalCorrect, totalIncorrect, sessionHistory } = useProgressStore();
     const pinnedIds = usePinnedExercisesStore((state) => state.pinnedIds);
     const maxPins = usePinnedExercisesStore((state) => state.maxPins);
@@ -316,12 +336,31 @@ export default function Library() {
         return sortCatalogCards(cards);
     }, [techniqueSettings.bestBpm, techniqueSettings.sessionsCompleted]);
 
+    const rhythmCards = useMemo(() => {
+        const cards = RHYTHM_EXERCISES.map((mode) => {
+            const modeStats = rhythmModeStats[mode.id];
+            const sessions = modeStats?.sessions ?? 0;
+            const modeMastery = getRhythmModeMastery(mode.id);
+            const title = mode.status === "coming-soon" ? `${mode.title} (Soon)` : mode.title;
+
+            return {
+                ...mode,
+                title,
+                mastery: modeMastery,
+                isNew: sessions === 0,
+            };
+        });
+
+        return sortCatalogCards(cards);
+    }, [getRhythmModeMastery, rhythmModeStats]);
+
     const pinnedSet = useMemo(() => new Set(pinnedIds), [pinnedIds]);
     const isPinLimitReached = pinnedIds.length >= maxPins;
 
     const pinnedCards = useMemo(() => {
         const drillById = new Map(drillCards.map((drill) => [drill.id as PinnedExerciseId, drill]));
         const techniqueById = new Map(techniqueCards.map((exercise) => [exercise.id as PinnedExerciseId, exercise]));
+        const rhythmById = new Map(rhythmCards.map((mode) => [mode.id as PinnedExerciseId, mode]));
 
         return pinnedIds
             .map((id) => {
@@ -350,10 +389,22 @@ export default function Library() {
                     };
                 }
 
+                const rhythm = rhythmById.get(id);
+                if (rhythm) {
+                    return {
+                        id,
+                        kind: "rhythm" as const,
+                        title: rhythm.title,
+                        difficulty: rhythm.difficulty,
+                        mastery: rhythm.mastery,
+                        isNew: rhythm.isNew,
+                    };
+                }
+
                 return null;
             })
             .filter((card): card is NonNullable<typeof card> => Boolean(card));
-    }, [drillCards, pinnedIds, techniqueCards]);
+    }, [drillCards, pinnedIds, rhythmCards, techniqueCards]);
 
     const openPracticeSetup = (mode: PracticeMode, source: string) => {
         navigate("/practice", {
@@ -370,7 +421,7 @@ export default function Library() {
             <div>
                 <h1 className="type-display">Train</h1>
                 <p className="mt-1 text-muted-foreground">
-                    One catalog for fretboard drills, technique, theory, and ear training.
+                    One catalog for fretboard drills, technique, theory, ear training, and rhythm.
                 </p>
             </div>
 
@@ -402,13 +453,15 @@ export default function Library() {
                                     title={card.title}
                                     difficulty={card.difficulty}
                                     mastery={card.mastery}
-                                    icon={card.kind === "drill" ? Target : Guitar}
+                                    icon={card.kind === "drill" ? Target : card.kind === "technique" ? Guitar : Drum}
                                     variant="catalog"
                                     isNew={card.isNew}
                                     onClick={() =>
                                         card.kind === "drill"
                                             ? openPracticeSetup(card.id as PracticeMode, card.source)
-                                            : navigate(`/technique/${card.id}`, { state: { fromTrain: true } })
+                                            : card.kind === "technique"
+                                                ? navigate(`/technique/${card.id}`, { state: { fromTrain: true } })
+                                                : navigate(`/rhythm/${card.id}`, { state: { fromTrain: true } })
                                     }
                                 />
                             </div>
@@ -592,6 +645,45 @@ export default function Library() {
                         variant="catalog"
                         onClick={() => navigate("/ear-training/functional")}
                     />
+                </div>
+            </SectionCollapse>
+
+            <SectionCollapse
+                title="Rhythm Dojo"
+                summary={`${rhythmCards.length} modes`}
+                open={sectionsOpen.rhythm}
+                onOpenChange={(nextOpen) => handleSectionOpenChange("rhythm", nextOpen)}
+            >
+                <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 min-[390px]:gap-2.5 min-[412px]:gap-3 lg:grid-cols-3">
+                    {rhythmCards.map((mode) => (
+                        <div key={mode.id} className="relative">
+                            <button
+                                type="button"
+                                className="absolute right-2 top-2 z-10 inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-background/95 text-muted-foreground shadow-sm transition hover:border-primary/40 hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
+                                onClick={() => togglePinned(mode.id as PinnedExerciseId)}
+                                disabled={!pinnedSet.has(mode.id as PinnedExerciseId) && isPinLimitReached}
+                                aria-label={pinnedSet.has(mode.id as PinnedExerciseId) ? `Unpin ${mode.title}` : `Pin ${mode.title}`}
+                                title={
+                                    !pinnedSet.has(mode.id as PinnedExerciseId) && isPinLimitReached
+                                        ? `Pin limit reached (${maxPins})`
+                                        : pinnedSet.has(mode.id as PinnedExerciseId)
+                                            ? "Unpin"
+                                            : "Pin"
+                                }
+                            >
+                                <Star className={cn("h-3.5 w-3.5", pinnedSet.has(mode.id as PinnedExerciseId) && "fill-current text-primary")} />
+                            </button>
+                            <ExerciseCard
+                                title={mode.title}
+                                difficulty={mode.difficulty}
+                                mastery={mode.mastery}
+                                icon={Drum}
+                                variant="catalog"
+                                isNew={mode.isNew}
+                                onClick={() => navigate(`/rhythm/${mode.id}`, { state: { fromTrain: true } })}
+                            />
+                        </div>
+                    ))}
                 </div>
             </SectionCollapse>
 

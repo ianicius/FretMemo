@@ -12,7 +12,11 @@ export type PinnedExerciseId =
     | "linear"
     | "diagonal"
     | "stringskip"
-    | "legato";
+    | "legato"
+    | "tap-beat"
+    | "strum-patterns"
+    | "rhythm-reading"
+    | "groove-lab";
 
 interface PinnedExercisesState {
     pinnedIds: PinnedExerciseId[];
@@ -92,4 +96,3 @@ export const usePinnedExercisesStore = create<PinnedExercisesState>()(
         }
     )
 );
-
