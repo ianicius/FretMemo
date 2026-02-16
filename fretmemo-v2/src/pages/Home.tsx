@@ -6,12 +6,13 @@ import { useProgressStore } from "@/stores/useProgressStore";
 import { useGameStore } from "@/stores/useGameStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { usePinnedExercisesStore, type PinnedExerciseId } from "@/stores/usePinnedExercisesStore";
+import { useRhythmDojoStore, type RhythmModeId } from "@/stores/useRhythmDojoStore";
 import { normalizeTuning } from "@/lib/tuning";
 import { ExerciseCard } from "@/components/ui/exercise-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { MasteryBar } from "@/components/ui/mastery-bar";
 import { StatLine } from "@/components/ui/stat-line";
-import { ArrowRight, Compass, Flame, Play, Sparkles, Star, Target, Trophy } from "lucide-react";
+import { ArrowRight, Compass, Flame, Music2, Play, Sparkles, Star, Target, Trophy } from "lucide-react";
 
 type PracticeMode = "fretboardToNote" | "tabToNote" | "noteToTab" | "playNotes" | "playTab";
 type ExerciseDifficulty = "beginner" | "intermediate" | "advanced";
@@ -67,6 +68,13 @@ const TECHNIQUE_META: Record<string, { title: string; difficulty: ExerciseDiffic
     legato: { title: "Legato Builder", difficulty: "intermediate" },
 };
 
+const RHYTHM_META: Record<RhythmModeId, { title: string; difficulty: ExerciseDifficulty }> = {
+    "tap-beat": { title: "Tap the Beat", difficulty: "beginner" },
+    "strum-patterns": { title: "Strum Patterns", difficulty: "beginner" },
+    "rhythm-reading": { title: "Rhythm Reading", difficulty: "intermediate" },
+    "groove-lab": { title: "Groove Lab", difficulty: "intermediate" },
+};
+
 const TECHNIQUE_MASTERY_TARGET_BPM: Record<string, number> = {
     spider: 120,
     permutation: 140,
@@ -106,6 +114,8 @@ export default function Home() {
     const pinnedIds = usePinnedExercisesStore((state) => state.pinnedIds);
     const maxPins = usePinnedExercisesStore((state) => state.maxPins);
     const unpin = usePinnedExercisesStore((state) => state.unpin);
+    const rhythmModeStats = useRhythmDojoStore((state) => state.modeStats);
+    const getRhythmModeMastery = useRhythmDojoStore((state) => state.getModeMastery);
 
     const tuning = useMemo(() => normalizeTuning(quickTuning), [quickTuning]);
     const positionsPracticed = Object.keys(positionStats).length;
@@ -204,6 +214,20 @@ export default function Home() {
                     };
                 }
 
+                if (id in RHYTHM_META) {
+                    const rhythmId = id as RhythmModeId;
+                    const rhythmMeta = RHYTHM_META[rhythmId];
+                    const rhythmSessions = rhythmModeStats[rhythmId]?.sessions ?? 0;
+                    return {
+                        id,
+                        title: rhythmMeta.title,
+                        difficulty: rhythmMeta.difficulty,
+                        kind: "rhythm" as const,
+                        mastery: getRhythmModeMastery(rhythmId),
+                        isNew: rhythmSessions === 0,
+                    };
+                }
+
                 const technique = TECHNIQUE_META[id];
                 if (!technique) return null;
                 const bestBpm = techniqueSettings.bestBpm?.[id] ?? 0;
@@ -220,7 +244,7 @@ export default function Home() {
                 };
             })
             .filter((item): item is NonNullable<typeof item> => Boolean(item));
-    }, [overallAccuracy, pinnedIds, techniqueSettings.bestBpm]);
+    }, [getRhythmModeMastery, overallAccuracy, pinnedIds, rhythmModeStats, techniqueSettings.bestBpm]);
 
     const applyWeakAreaPracticePreset = (stringIndex: number, fret: number) => {
         // Expand fret range: 4 frets centered on weak spot
@@ -369,11 +393,13 @@ export default function Home() {
                                     description="Pinned quick launch."
                                     difficulty={exercise.difficulty}
                                     mastery={exercise.mastery}
-                                    icon={exercise.kind === "drill" ? Target : Trophy}
+                                    icon={exercise.kind === "drill" ? Target : exercise.kind === "technique" ? Trophy : Music2}
                                     onClick={() =>
                                         exercise.kind === "drill"
                                             ? openPracticeSetup(exercise.id as PracticeMode, exercise.source)
-                                            : navigate(`/technique/${exercise.id}`)
+                                            : exercise.kind === "technique"
+                                                ? navigate(`/technique/${exercise.id}`)
+                                                : navigate(`/rhythm/${exercise.id}`)
                                     }
                                 />
                             </div>
