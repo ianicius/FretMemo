@@ -17,17 +17,18 @@ export function PlayModeMicControls({ micEnabled, onMicChange }: PlayModeMicCont
         <div className="flex items-center justify-center gap-4">
             <div
                 className={cn(
-                    "flex items-center gap-4 px-6 py-4 rounded-full border-2 transition-all duration-300",
-                    micEnabled ? "bg-primary/5 border-primary/30" : "bg-muted/30 border-border/50"
+                    "flex w-full max-w-md items-center justify-between gap-3 rounded-lg border px-3 py-2 transition-colors",
+                    micEnabled ? "border-primary/35 bg-primary/5" : "border-border/60 bg-card/50"
                 )}
-                style={micEnabled ? { boxShadow: "0 0 20px hsl(var(--primary) / 0.1)" } : undefined}
             >
-                <Mic className={cn("w-6 h-6 transition-colors", micEnabled ? "text-primary animate-pulse" : "text-muted-foreground")} />
-                <div className="flex flex-col">
-                    <Label htmlFor="mic-toggle-focus" className="text-sm font-bold cursor-pointer">Microphone Input</Label>
-                    <span className="text-xs text-muted-foreground">{micEnabled ? "Listening..." : "Click to enable"}</span>
+                <div className="flex items-center gap-2">
+                    <Mic className={cn("h-5 w-5 transition-colors", micEnabled ? "text-primary" : "text-muted-foreground")} />
+                    <div className="flex flex-col">
+                        <Label htmlFor="mic-toggle-focus" className="cursor-pointer text-sm font-semibold">Microphone</Label>
+                        <span className="text-[11px] text-muted-foreground">{micEnabled ? "Input active" : "Input disabled"}</span>
+                    </div>
                 </div>
-                <Switch id="mic-toggle-focus" checked={micEnabled} onCheckedChange={onMicChange} className="ml-2 scale-110" />
+                <Switch id="mic-toggle-focus" checked={micEnabled} onCheckedChange={onMicChange} />
             </div>
         </div>
     );

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { initAudio, playCadence, playFunctionalPrompt, playTone } from "@/lib/audio";
@@ -317,17 +318,17 @@ export default function FunctionalEarTrainer() {
                             </button>
                         </div>
                         {keyMode === "fixed" && (
-                            <select
+                            <Select
                                 value={fixedKey}
                                 onChange={(event) => setFixedKey(event.target.value as NoteName)}
-                                className="mt-2 block w-28 rounded-lg border border-border bg-card px-3 py-2 text-sm font-bold"
+                                className="mt-2 w-28 rounded-lg py-2 font-bold"
                             >
                                 {NOTES.map((note) => (
                                     <option key={note} value={note}>
                                         {formatPitchClass(note, notation)}
                                     </option>
                                 ))}
-                            </select>
+                            </Select>
                         )}
                     </div>
 

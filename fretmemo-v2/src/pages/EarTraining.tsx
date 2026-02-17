@@ -27,8 +27,8 @@ export default function EarTraining() {
     if (!tool) {
         return (
             <div className="flex flex-col items-center gap-4 py-16 text-center">
-                <h2 className="text-xl font-bold">Mode Not Found</h2>
-                <p className="text-sm text-muted-foreground">
+                <h2 className="type-h1">Mode Not Found</h2>
+                <p className="type-body text-muted-foreground">
                     The ear training mode &ldquo;{mode}&rdquo; doesn&apos;t exist.
                 </p>
                 <Button variant="outline" onClick={() => navigate("/train")}>
@@ -46,7 +46,7 @@ export default function EarTraining() {
                 <Button variant="ghost" size="icon" onClick={() => navigate("/train")} className="shrink-0">
                     <ArrowLeft className="w-5 h-5" />
                 </Button>
-                <h1 className="text-lg font-bold">{tool.title}</h1>
+                <h1 className="type-h1">{tool.title}</h1>
             </div>
 
             <Suspense fallback={<PageSkeleton />}>

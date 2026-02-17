@@ -1,10 +1,14 @@
 import { useMemo, useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { FormField } from "@/components/ui/form-field";
 import { Label } from "@/components/ui/label";
+import { NumberInput } from "@/components/ui/number-input";
+import { Select } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
+import { SessionModeToggle } from "@/components/session-setup/session-mode-toggle";
+import { SessionSetupDialogShell } from "@/components/session-setup/session-setup-dialog-shell";
 import { cn } from "@/lib/utils";
 import { NOTES } from "@/lib/constants";
 import { useGameStore, type NoteFilter, type NoteSequence, type ScaleType } from "@/stores/useGameStore";
@@ -214,20 +218,29 @@ export function PreFlightModal({
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="flex max-h-[90vh] flex-col overflow-hidden p-0 sm:max-w-md">
-                <DialogHeader className="shrink-0 border-b border-border/50 px-6 py-4 pr-12">
-                    <DialogTitle className="text-left">
-                        <div className="text-base font-semibold">Session Setup</div>
-                        <div className="mt-1 flex items-center gap-2">
-                            <Badge variant="secondary">{config.label}</Badge>
-                            <span className="text-xs font-normal text-muted-foreground">{config.description}</span>
-                        </div>
-                    </DialogTitle>
-                </DialogHeader>
-
-                <div className="flex-1 space-y-6 overflow-y-auto px-6 py-4">
-                    <section className="space-y-3 rounded-lg border border-border/50 p-3">
+        <SessionSetupDialogShell
+            isOpen={isOpen}
+            onOpenChange={(open) => {
+                if (!open) onClose();
+            }}
+            title="Session Setup"
+            badgeLabel={config.label}
+            description={config.description}
+            bodyClassName="space-y-6"
+            footer={
+                <DialogFooter className="shrink-0 gap-2 border-t border-border/50 bg-background px-6 py-4">
+                    <Button variant="outline" onClick={onClose} className="flex-1">
+                        <X className="mr-2 h-4 w-4" />
+                        Cancel
+                    </Button>
+                    <Button onClick={onStart} className="flex-1 control-btn--primary">
+                        <Play className="mr-2 h-4 w-4" />
+                        Start
+                    </Button>
+                </DialogFooter>
+            }
+        >
+            <section className="space-y-3 rounded-lg border border-border/50 p-3">
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
                                 <Label className="text-sm">Tempo</Label>
@@ -265,15 +278,18 @@ export function PreFlightModal({
                                 {Boolean(micEnabled) && onAudioInputChange && (
                                     <div className="space-y-2">
                                         <div className="flex items-center justify-between">
-                                            <Label className="text-xs">Input Device</Label>
+                                            <Label className="text-xs" htmlFor="preflight-audio-input">
+                                                Input Device
+                                            </Label>
                                             {onRefreshAudioInputs && (
                                                 <Button type="button" variant="ghost" size="sm" className="h-6 px-2 text-[11px]" onClick={onRefreshAudioInputs}>
                                                     Refresh
                                                 </Button>
                                             )}
                                         </div>
-                                        <select
-                                            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
+                                        <Select
+                                            id="preflight-audio-input"
+                                            className="h-9 py-1"
                                             value={selectedAudioInputId ?? ""}
                                             onChange={(event) => onAudioInputChange(event.target.value)}
                                         >
@@ -283,7 +299,7 @@ export function PreFlightModal({
                                                     {device.label}
                                                 </option>
                                             ))}
-                                        </select>
+                                        </Select>
                                     </div>
                                 )}
 
@@ -292,41 +308,32 @@ export function PreFlightModal({
                         )}
 
                         {isPlayMode && onSessionModeChange && (
-                            <div className="space-y-2 rounded-lg border border-border/50 p-3">
-                                <Label className="text-sm">Session Mode</Label>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <Button
-                                        type="button"
-                                        size="sm"
-                                        variant={(sessionMode ?? "scored") === "scored" ? "secondary" : "outline"}
-                                        className="h-8 text-xs"
-                                        onClick={() => onSessionModeChange("scored")}
-                                    >
-                                        Scored Session
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        size="sm"
-                                        variant={(sessionMode ?? "scored") === "guitar" ? "secondary" : "outline"}
-                                        className="h-8 text-xs"
-                                        onClick={() => onSessionModeChange("guitar")}
-                                    >
-                                        Guitar Mode
-                                    </Button>
-                                </div>
-                                <p className="text-xs text-muted-foreground">
-                                    {(sessionMode ?? "scored") === "guitar"
-                                        ? "No session limit. Keep playing until you stop manually."
-                                        : "Auto-finishes after target count and shows summary."}
-                                </p>
-                            </div>
+                            <SessionModeToggle
+                                value={sessionMode ?? "scored"}
+                                onChange={onSessionModeChange}
+                                options={[
+                                    {
+                                        value: "scored",
+                                        label: "Scored Session",
+                                        description: "Auto-finishes after target count and shows summary.",
+                                    },
+                                    {
+                                        value: "guitar",
+                                        label: "Guitar Mode",
+                                        description: "No session limit. Keep playing until you stop manually.",
+                                    },
+                                ]}
+                            />
                         )}
 
                         {isPlayMode && (
-                            <div className="space-y-2 rounded-lg border border-border/50 p-3">
-                                <Label className="text-sm">Note Sequence</Label>
-                                <select
-                                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
+                            <FormField
+                                label="Note Sequence"
+                                labelClassName="text-sm"
+                                className="space-y-2 rounded-lg border border-border/50 p-3"
+                            >
+                                <Select
+                                    className="h-9 py-1"
                                     value={noteSequence}
                                     onChange={(event) => onNoteSequenceChange(event.target.value as NoteSequence)}
                                 >
@@ -339,8 +346,8 @@ export function PreFlightModal({
                                             ))}
                                         </optgroup>
                                     ))}
-                                </select>
-                            </div>
+                                </Select>
+                            </FormField>
                         )}
 
                         <div className="space-y-2">
@@ -452,18 +459,19 @@ export function PreFlightModal({
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label className="text-sm">Root Note</Label>
-                                    <select
-                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
-                                        value={rootNote}
-                                        onChange={(event) => onRootNoteChange(event.target.value as NoteName)}
-                                    >
-                                        {NOTES.map((note) => (
-                                            <option key={note} value={note}>
-                                                {note}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    <FormField label="Root Note" labelClassName="text-sm">
+                                        <Select
+                                            className="h-9 py-1"
+                                            value={rootNote}
+                                            onChange={(event) => onRootNoteChange(event.target.value as NoteName)}
+                                        >
+                                            {NOTES.map((note) => (
+                                                <option key={note} value={note}>
+                                                    {note}
+                                                </option>
+                                            ))}
+                                        </Select>
+                                    </FormField>
                                 </div>
 
                                 <div className="space-y-2">
@@ -495,48 +503,35 @@ export function PreFlightModal({
                                         </div>
                                         {speedUpEnabled && (
                                             <div className="grid grid-cols-2 gap-3">
-                                                <div className="space-y-1">
-                                                    <Label className="text-xs">Increase</Label>
-                                                    <input
-                                                        type="number"
+                                                <FormField label="Increase" labelClassName="text-xs">
+                                                    <NumberInput
                                                         value={speedUpAmount}
-                                                        onChange={(event) => setSpeedUpAmount(parseInt(event.target.value, 10) || 5)}
                                                         min={1}
                                                         max={20}
-                                                        className="h-8 w-full rounded-md border border-input bg-background px-2 text-center text-sm"
+                                                        step={1}
+                                                        onValueChange={setSpeedUpAmount}
+                                                        className="gap-1"
+                                                        inputClassName="h-8 px-2 text-sm"
                                                     />
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <Label className="text-xs">Every X beats</Label>
-                                                    <input
-                                                        type="number"
+                                                </FormField>
+                                                <FormField label="Every X beats" labelClassName="text-xs">
+                                                    <NumberInput
                                                         value={speedUpInterval}
-                                                        onChange={(event) => setSpeedUpInterval(parseInt(event.target.value, 10) || 8)}
                                                         min={1}
                                                         max={32}
-                                                        className="h-8 w-full rounded-md border border-input bg-background px-2 text-center text-sm"
+                                                        step={1}
+                                                        onValueChange={setSpeedUpInterval}
+                                                        className="gap-1"
+                                                        inputClassName="h-8 px-2 text-sm"
                                                     />
-                                                </div>
+                                                </FormField>
                                             </div>
                                         )}
                                     </div>
                                 )}
                             </div>
                         )}
-                    </section>
-                </div>
-
-                <DialogFooter className="shrink-0 gap-2 border-t border-border/50 bg-background px-6 py-4">
-                    <Button variant="outline" onClick={onClose} className="flex-1">
-                        <X className="mr-2 h-4 w-4" />
-                        Cancel
-                    </Button>
-                    <Button onClick={onStart} className="flex-1 control-btn--primary">
-                        <Play className="mr-2 h-4 w-4" />
-                        Start
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+            </section>
+        </SessionSetupDialogShell>
     );
 }

@@ -4,6 +4,7 @@ import { normalizeTuning } from "@/lib/tuning";
 import { getNoteAt, NOTES } from "@/lib/constants";
 import { areEnharmonic, formatPitchClass } from "@/lib/noteNotation";
 import { Fretboard } from "@/components/fretboard/Fretboard";
+import { Select } from "@/components/ui/select";
 import type { NoteStatus, NoteName } from "@/types/fretboard";
 
 const ROOTS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"] as const;
@@ -102,15 +103,15 @@ export default function CagedVisualizer() {
             <div className="flex flex-wrap items-center gap-3">
                 <div className="space-y-1">
                     <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Root</label>
-                    <select
+                    <Select
                         value={root}
                         onChange={(e) => setRoot(e.target.value as NoteName)}
-                        className="block w-20 rounded-lg border border-border bg-card px-3 py-2 text-sm font-bold"
+                        className="w-20 rounded-lg py-2 font-bold"
                     >
                         {ROOTS.map((r) => (
                             <option key={r} value={r}>{formatPitchClass(r, notation)}</option>
                         ))}
-                    </select>
+                    </Select>
                 </div>
 
                 <div className="space-y-1 flex-1">

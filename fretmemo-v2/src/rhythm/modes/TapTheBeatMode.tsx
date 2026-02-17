@@ -1,11 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
+import { FormField } from "@/components/ui/form-field";
+import { Select } from "@/components/ui/select";
 import { BeatVisualizer } from "@/rhythm/ui/BeatVisualizer";
 import { LatencyCompensationControl } from "@/rhythm/ui/LatencyCompensationControl";
 import { TapZone } from "@/rhythm/ui/TapZone";
 import { TimingFeedback } from "@/rhythm/ui/TimingFeedback";
+import { SessionModeToggle } from "@/components/session-setup/session-mode-toggle";
+import { SessionStartActions } from "@/components/session-setup/session-start-actions";
+import { SessionStopButton } from "@/components/session-setup/session-stop-button";
+import { SessionSummaryCard } from "@/components/session-setup/session-summary-card";
+import { TempoNumberField } from "@/components/session-setup/tempo-number-field";
 import { RhythmClock } from "@/rhythm/engine/RhythmClock";
 import { MetronomeScheduler } from "@/rhythm/engine/MetronomeScheduler";
 import type { TapEvaluation } from "@/rhythm/engine/InputEvaluator";
@@ -317,29 +322,20 @@ export function TapTheBeatMode() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid gap-3 sm:grid-cols-3">
-                            <div className="space-y-1.5">
-                                <Label htmlFor="tap-beat-bpm">Tempo</Label>
-                                <input
-                                    id="tap-beat-bpm"
-                                    type="number"
-                                    min={40}
-                                    max={200}
-                                    value={settings.bpm}
-                                    onChange={(event) => {
-                                        const value = Number(event.target.value);
-                                        if (Number.isNaN(value)) return;
-                                        setSettings((prev) => ({
-                                            ...prev,
-                                            bpm: Math.max(40, Math.min(200, Math.round(value))),
-                                        }));
-                                    }}
-                                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                                />
-                            </div>
-                            <div className="space-y-1.5">
-                                <Label htmlFor="tap-beat-time-signature">Time Signature</Label>
-                                <select
-                                    id="tap-beat-time-signature"
+                            <TempoNumberField
+                                id="tap-beat-bpm"
+                                value={settings.bpm}
+                                min={40}
+                                max={200}
+                                onChange={(nextBpm) =>
+                                    setSettings((prev) => ({
+                                        ...prev,
+                                        bpm: Math.max(40, Math.min(200, Math.round(nextBpm))),
+                                    }))
+                                }
+                            />
+                            <FormField id="tap-beat-time-signature" label="Time Signature">
+                                <Select
                                     value={settings.timeSignatureTop}
                                     onChange={(event) =>
                                         setSettings((prev) => ({
@@ -347,17 +343,14 @@ export function TapTheBeatMode() {
                                             timeSignatureTop: Number(event.target.value) as TapTheBeatSettings["timeSignatureTop"],
                                         }))
                                     }
-                                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                                 >
                                     <option value={4}>4/4</option>
                                     <option value={3}>3/4</option>
                                     <option value={6}>6/8 (pulse)</option>
-                                </select>
-                            </div>
-                            <div className="space-y-1.5">
-                                <Label htmlFor="tap-beat-bars">Bars</Label>
-                                <select
-                                    id="tap-beat-bars"
+                                </Select>
+                            </FormField>
+                            <FormField id="tap-beat-bars" label="Bars">
+                                <Select
                                     value={settings.bars}
                                     onChange={(event) =>
                                         setSettings((prev) => ({
@@ -365,14 +358,13 @@ export function TapTheBeatMode() {
                                             bars: Math.max(2, Math.min(16, Number(event.target.value))),
                                         }))
                                     }
-                                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                                 >
                                     <option value={4}>4</option>
                                     <option value={8}>8</option>
                                     <option value={12}>12</option>
                                     <option value={16}>16</option>
-                                </select>
-                            </div>
+                                </Select>
+                            </FormField>
                         </div>
 
                         <LatencyCompensationControl
@@ -380,18 +372,26 @@ export function TapTheBeatMode() {
                             onChange={setInputLatencyMs}
                         />
 
-                        <div className="flex flex-wrap gap-2">
-                            <Button onClick={() => void startSessionWithMode("scored")} className="w-full sm:w-auto">
-                                Start Scored Session
-                            </Button>
-                            <Button
-                                variant="outline"
-                                onClick={() => void startSessionWithMode("practice")}
-                                className="w-full sm:w-auto"
-                            >
-                                Practice with Guitar
-                            </Button>
-                        </div>
+                        <SessionModeToggle
+                            value={sessionMode}
+                            onChange={setSessionMode}
+                            options={[
+                                {
+                                    value: "scored",
+                                    label: "Scored",
+                                    description: "Auto-ends after configured bars and shows summary.",
+                                },
+                                {
+                                    value: "practice",
+                                    label: "Practice",
+                                    description: "Continuous groove. Stop manually when finished.",
+                                },
+                            ]}
+                        />
+                        <SessionStartActions
+                            primaryLabel={sessionMode === "scored" ? "Start Scored Session" : "Practice with Guitar"}
+                            onPrimary={() => void startSessionWithMode(sessionMode)}
+                        />
                     </CardContent>
                 </Card>
             </div>
@@ -428,53 +428,29 @@ export function TapTheBeatMode() {
             )}
 
             {sessionMode === "scored" && summary && (
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Session Summary</CardTitle>
-                        <CardDescription>
-                            Score {summary.score} · Accuracy {summary.accuracy}%
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-                        <div className="rounded-md border border-border bg-muted/20 p-2">
-                            <p className="text-xs text-muted-foreground">Hits</p>
-                            <p className="text-lg font-bold">{summary.hits}</p>
-                        </div>
-                        <div className="rounded-md border border-border bg-muted/20 p-2">
-                            <p className="text-xs text-muted-foreground">Misses</p>
-                            <p className="text-lg font-bold">{summary.misses}</p>
-                        </div>
-                        <div className="rounded-md border border-border bg-muted/20 p-2">
-                            <p className="text-xs text-muted-foreground">Extras</p>
-                            <p className="text-lg font-bold">{summary.extras}</p>
-                        </div>
-                        <div className="rounded-md border border-border bg-muted/20 p-2">
-                            <p className="text-xs text-muted-foreground">Avg offset</p>
-                            <p className="text-lg font-bold">{summary.avgOffsetMs}ms</p>
-                        </div>
-                        <div className="col-span-2 sm:col-span-4 pt-2">
-                            <Button
-                                onClick={() => {
-                                    setStatus("idle");
-                                    statusRef.current = "idle";
-                                }}
-                                className="w-full sm:w-auto"
-                            >
-                                New Session
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
+                <SessionSummaryCard
+                    description={`Score ${summary.score} · Accuracy ${summary.accuracy}%`}
+                    metrics={[
+                        { label: "Hits", value: summary.hits },
+                        { label: "Misses", value: summary.misses },
+                        { label: "Extras", value: summary.extras },
+                        { label: "Avg offset", value: `${summary.avgOffsetMs}ms` },
+                    ]}
+                    primaryAction={{
+                        label: "New Session",
+                        onClick: () => {
+                            setStatus("idle");
+                            statusRef.current = "idle";
+                        },
+                    }}
+                />
             )}
 
             {status === "running" && (
-                <Button
-                    variant="outline"
-                    onClick={sessionMode === "scored" ? finalizeSession : stopPracticeSession}
-                    className="w-full sm:w-auto"
-                >
-                    Stop
-                </Button>
+                <SessionStopButton
+                    onStop={sessionMode === "scored" ? finalizeSession : stopPracticeSession}
+                    label={sessionMode === "scored" ? "Stop" : "Stop Practice"}
+                />
             )}
         </div>
     );

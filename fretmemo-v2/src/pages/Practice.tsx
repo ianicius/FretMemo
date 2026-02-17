@@ -11,12 +11,11 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { NOTES, getNoteAt } from "@/lib/constants";
 import { getStringLabels, normalizeTuning } from "@/lib/tuning";
 import { usePitchDetector } from "@/services/pitch";
-import { Flame, Map as MapIcon, Mic, Play, Target, Clock } from "lucide-react";
+import { Flame, Map as MapIcon, Mic, Target, Clock } from "lucide-react";
 
 // Focus Mode Components
 import { PreFlightModal } from "@/components/practice/PreFlightModal";
@@ -26,6 +25,8 @@ import { XPToast } from "@/components/practice/XPToast";
 import { AriaLiveAnnouncer } from "@/components/ui/aria-live-announcer";
 import { NoteAnswerButtons, PositionAnswerButtons } from "@/components/practice/AnswerButtons";
 import { PlayModeMicControls, HintButton, NextButton } from "@/components/practice/PracticeControls";
+import { SessionModeToggle } from "@/components/session-setup/session-mode-toggle";
+import { SessionStartActions } from "@/components/session-setup/session-start-actions";
 import { useXPToast } from "@/hooks/useXPToast";
 
 type GuessMode = "fretboardToNote" | "tabToNote" | "noteToTab";
@@ -790,7 +791,6 @@ export default function Practice() {
                     correct={sessionCorrect}
                     incorrect={sessionIncorrect}
                     bpm={bpm}
-                    noteDuration={noteDuration}
                     modeLabel={hudModeLabel}
                     sessionStartTime={sessionStartTime}
                     onPause={handlePause}
@@ -800,6 +800,7 @@ export default function Practice() {
                     progressCurrent={sessionTotal}
                     progressTarget={progressTarget ?? undefined}
                     onHeightChange={setHudHeight}
+                    showTempo={isMetronomeOn}
                 />
                 <XPToast
                     xp={toast.xp}
@@ -943,16 +944,17 @@ export default function Practice() {
                     <div className="shrink-0 w-full bg-gradient-to-t from-background via-background/95 to-transparent pt-3 md:pt-8 pb-16 md:pb-8 px-4 z-20">
                         <div className="max-w-4xl mx-auto space-y-4 md:space-y-6">
                             {/* Feedback Text */}
-                            <div className="h-7 flex items-center justify-center text-lg md:text-xl font-medium tracking-tight" aria-live="polite">
-                                <span className={cn(
-                                    "transition-all duration-300",
-                                    feedbackMessage?.includes("Correct") && "text-emerald-500 font-bold scale-110",
-                                    feedbackMessage?.includes("Incorrect") && "text-rose-500 font-bold shake",
-                                    feedbackMessage?.includes("Too slow") && "text-rose-500 font-bold animate-pulse-subtle",
-                                    !feedbackMessage?.includes("Correct") && !feedbackMessage?.includes("Incorrect") && !feedbackMessage?.includes("Too slow") && "text-muted-foreground/60"
-                                )}>
-                                    {feedbackMessage ?? "Identify the note!"}
-                                </span>
+                            <div className="flex items-center justify-center" aria-live="polite">
+                                <div
+                                    className={cn(
+                                        "min-h-8 rounded-full border px-3 py-1 text-sm font-medium backdrop-blur-sm transition-colors",
+                                        feedbackMessage?.includes("Correct") && "border-emerald-500/45 bg-emerald-500/10 text-emerald-400",
+                                        (feedbackMessage?.includes("Incorrect") || feedbackMessage?.includes("Too slow")) && "border-rose-500/45 bg-rose-500/10 text-rose-300",
+                                        !feedbackMessage && "border-border/50 bg-card/50 text-muted-foreground"
+                                    )}
+                                >
+                                    {feedbackMessage ?? (moduleTab === "play" ? "Play the prompt." : "Identify the note.")}
+                                </div>
                             </div>
 
                             {/* Controls */}
@@ -1002,8 +1004,8 @@ export default function Practice() {
         <div className="space-y-6 pb-8">
             {/* Header */}
             <div>
-                <h1 className="text-3xl font-bold tracking-tight">Practice</h1>
-                <p className="text-muted-foreground mt-1">
+                <h1 className="type-display">Practice</h1>
+                <p className="mt-1 type-body text-muted-foreground">
                     Select a mode and configure your session
                 </p>
             </div>
@@ -1012,30 +1014,68 @@ export default function Practice() {
                 {/* Main Workspace - Col Span 2 */}
                 <div className="lg:col-span-2 space-y-6">
                     {/* Mode Selection */}
-                    <div className="flex items-center gap-3 bg-muted/20 p-1 rounded-lg border border-border/40 w-fit">
-                        <Button type="button" size="sm" variant={moduleTab === "guess" ? "secondary" : "ghost"} className="h-8 px-4 text-xs font-semibold" onClick={() => handleSwitchModule("guess")}>
-                            Guess Note
-                        </Button>
-                        <Button type="button" size="sm" variant={moduleTab === "play" ? "secondary" : "ghost"} className="h-8 px-4 text-xs font-semibold" onClick={() => handleSwitchModule("play")}>
-                            Play Practice
-                        </Button>
-                    </div>
+                    <SessionModeToggle<"guess" | "play">
+                        label="Practice Focus"
+                        value={moduleTab}
+                        onChange={handleSwitchModule}
+                        options={[
+                            {
+                                value: "guess",
+                                label: "Guess Note",
+                                description: "Visual note identification on fretboard and tab.",
+                            },
+                            {
+                                value: "play",
+                                label: "Play Practice",
+                                description: "Instrument-first practice with mic input support.",
+                            },
+                        ]}
+                        className="w-full"
+                    />
 
                     {moduleTab === "guess" ? (
-                        <Tabs value={mode as GuessMode} onValueChange={handleGuessModeChange} className="w-full">
-                            <TabsList className="grid w-full grid-cols-3 bg-muted/40 h-10">
-                                <TabsTrigger value="fretboardToNote">Fretboard → Note</TabsTrigger>
-                                <TabsTrigger value="tabToNote">Tab → Note</TabsTrigger>
-                                <TabsTrigger value="noteToTab">Note → Tab</TabsTrigger>
-                            </TabsList>
-                        </Tabs>
+                        <SessionModeToggle<GuessMode>
+                            label="Exercise Type"
+                            value={mode as GuessMode}
+                            onChange={handleGuessModeChange}
+                            options={[
+                                {
+                                    value: "fretboardToNote",
+                                    label: "Fretboard -> Note",
+                                    description: "Identify notes directly from fretboard positions.",
+                                },
+                                {
+                                    value: "tabToNote",
+                                    label: "Tab -> Note",
+                                    description: "Read tablature and name the sounding note.",
+                                },
+                                {
+                                    value: "noteToTab",
+                                    label: "Note -> Tab",
+                                    description: "Map note names to accurate fretboard positions.",
+                                },
+                            ]}
+                            className="w-full"
+                        />
                     ) : (
-                            <Tabs value={mode as PlayMode} onValueChange={handlePlayModeChange} className="w-full">
-                            <TabsList className="grid w-full grid-cols-2 bg-muted/40 h-10">
-                                <TabsTrigger value="playNotes">Note Generator</TabsTrigger>
-                                <TabsTrigger value="playTab">Tab Sequence</TabsTrigger>
-                            </TabsList>
-                        </Tabs>
+                        <SessionModeToggle<PlayMode>
+                            label="Exercise Type"
+                            value={mode as PlayMode}
+                            onChange={handlePlayModeChange}
+                            options={[
+                                {
+                                    value: "playNotes",
+                                    label: "Note Generator",
+                                    description: "Play prompted note names using live mic detection.",
+                                },
+                                {
+                                    value: "playTab",
+                                    label: "Tab Sequence",
+                                    description: "Play prompted tab positions in sequence.",
+                                },
+                            ]}
+                            className="w-full"
+                        />
                     )}
 
                     {/* Live Preview Card */}
@@ -1120,9 +1160,10 @@ export default function Practice() {
                                 </div>
                             )}
 
-                            <Button size="lg" className="w-full control-btn--primary font-bold text-base shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all" onClick={handleStartClick}>
-                                <Play className="mr-2 h-5 w-5 fill-current" /> Start Practice
-                            </Button>
+                            <SessionStartActions
+                                primaryLabel="Start Practice"
+                                onPrimary={handleStartClick}
+                            />
                         </div>
                     </Card>
                 </div>

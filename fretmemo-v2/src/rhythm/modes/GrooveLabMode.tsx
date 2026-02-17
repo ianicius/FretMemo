@@ -1,9 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { FormField } from "@/components/ui/form-field";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { SessionModeToggle } from "@/components/session-setup/session-mode-toggle";
+import { SessionStartActions } from "@/components/session-setup/session-start-actions";
+import { SessionStopButton } from "@/components/session-setup/session-stop-button";
+import { SessionSummaryCard } from "@/components/session-setup/session-summary-card";
+import { TempoNumberField } from "@/components/session-setup/tempo-number-field";
 import { GROOVE_PRESETS, type GroovePreset } from "@/rhythm/data/groovePresets";
 import { getExpectedStepFromSymbol } from "@/rhythm/data/strumPatterns";
 import { RhythmClock } from "@/rhythm/engine/RhythmClock";
@@ -536,10 +542,8 @@ export function GrooveLabMode() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid gap-3 sm:grid-cols-2">
-                            <div className="space-y-1.5">
-                                <Label htmlFor="groove-lab-preset">Preset</Label>
-                                <select
-                                    id="groove-lab-preset"
+                            <FormField id="groove-lab-preset" label="Preset">
+                                <Select
                                     value={settings.presetId}
                                     onChange={(event) =>
                                         setSettings((previous) => ({
@@ -547,38 +551,28 @@ export function GrooveLabMode() {
                                             presetId: event.target.value,
                                         }))
                                     }
-                                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                                 >
                                     {GROOVE_PRESETS.map((preset) => (
                                         <option key={preset.id} value={preset.id}>
                                             {preset.title} ({preset.feel})
                                         </option>
                                     ))}
-                                </select>
-                            </div>
-                            <div className="space-y-1.5">
-                                <Label htmlFor="groove-lab-bpm">Tempo</Label>
-                                <input
-                                    id="groove-lab-bpm"
-                                    type="number"
-                                    min={60}
-                                    max={170}
-                                    value={settings.bpm}
-                                    onChange={(event) => {
-                                        const value = Number(event.target.value);
-                                        if (Number.isNaN(value)) return;
-                                        setSettings((previous) => ({
-                                            ...previous,
-                                            bpm: Math.max(60, Math.min(170, Math.round(value))),
-                                        }));
-                                    }}
-                                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                                />
-                            </div>
-                            <div className="space-y-1.5">
-                                <Label htmlFor="groove-lab-bars">Bars</Label>
-                                <select
-                                    id="groove-lab-bars"
+                                </Select>
+                            </FormField>
+                            <TempoNumberField
+                                id="groove-lab-bpm"
+                                value={settings.bpm}
+                                min={60}
+                                max={170}
+                                onChange={(nextBpm) =>
+                                    setSettings((previous) => ({
+                                        ...previous,
+                                        bpm: Math.max(60, Math.min(170, Math.round(nextBpm))),
+                                    }))
+                                }
+                            />
+                            <FormField id="groove-lab-bars" label="Bars">
+                                <Select
                                     value={settings.bars}
                                     onChange={(event) =>
                                         setSettings((previous) => ({
@@ -586,18 +580,15 @@ export function GrooveLabMode() {
                                             bars: Math.max(4, Math.min(16, Number(event.target.value))),
                                         }))
                                     }
-                                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                                 >
                                     <option value={4}>4</option>
                                     <option value={8}>8</option>
                                     <option value={12}>12</option>
                                     <option value={16}>16</option>
-                                </select>
-                            </div>
-                            <div className="space-y-1.5">
-                                <Label htmlFor="groove-lab-click">Metronome Click</Label>
-                                <select
-                                    id="groove-lab-click"
+                                </Select>
+                            </FormField>
+                            <FormField id="groove-lab-click" label="Metronome Click">
+                                <Select
                                     value={settings.clickEnabled ? "on" : "off"}
                                     onChange={(event) =>
                                         setSettings((previous) => ({
@@ -605,12 +596,11 @@ export function GrooveLabMode() {
                                             clickEnabled: event.target.value === "on",
                                         }))
                                     }
-                                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                                 >
                                     <option value="on">On</option>
                                     <option value="off">Off</option>
-                                </select>
-                            </div>
+                                </Select>
+                            </FormField>
                         </div>
 
                         <div className="rounded-lg border border-border bg-muted/20 p-3 text-xs text-muted-foreground space-y-1">
@@ -644,18 +634,26 @@ export function GrooveLabMode() {
 
                         <PatternGrid slots={activePreset.slots} playheadStep={null} />
 
-                        <div className="flex flex-wrap gap-2">
-                            <Button onClick={() => void startSessionWithMode("scored")} className="w-full sm:w-auto">
-                                Start Scored Session
-                            </Button>
-                            <Button
-                                variant="outline"
-                                onClick={() => void startSessionWithMode("practice")}
-                                className="w-full sm:w-auto"
-                            >
-                                Practice with Guitar
-                            </Button>
-                        </div>
+                        <SessionModeToggle
+                            value={sessionMode}
+                            onChange={setSessionMode}
+                            options={[
+                                {
+                                    value: "scored",
+                                    label: "Scored",
+                                    description: "Records hits, misses and direction accuracy.",
+                                },
+                                {
+                                    value: "practice",
+                                    label: "Practice",
+                                    description: "Continuous groove playback for free-form guitar work.",
+                                },
+                            ]}
+                        />
+                        <SessionStartActions
+                            primaryLabel={sessionMode === "scored" ? "Start Scored Session" : "Practice with Guitar"}
+                            onPrimary={() => void startSessionWithMode(sessionMode)}
+                        />
                     </CardContent>
                 </Card>
             </div>
@@ -715,59 +713,34 @@ export function GrooveLabMode() {
             )}
 
             {summary && (
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Session Summary</CardTitle>
-                        <CardDescription>
-                            Score {summary.score} · Accuracy {summary.accuracy}% · Direction {summary.directionAccuracy}%
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-                        <div className="rounded-md border border-border bg-muted/20 p-2">
-                            <p className="text-xs text-muted-foreground">Hits</p>
-                            <p className="text-lg font-bold">{summary.hits}</p>
-                        </div>
-                        <div className="rounded-md border border-border bg-muted/20 p-2">
-                            <p className="text-xs text-muted-foreground">Misses</p>
-                            <p className="text-lg font-bold">{summary.misses}</p>
-                        </div>
-                        <div className="rounded-md border border-border bg-muted/20 p-2">
-                            <p className="text-xs text-muted-foreground">Extras</p>
-                            <p className="text-lg font-bold">{summary.extras}</p>
-                        </div>
-                        <div className="rounded-md border border-border bg-muted/20 p-2">
-                            <p className="text-xs text-muted-foreground">Avg offset</p>
-                            <p className="text-lg font-bold">{summary.avgOffsetMs}ms</p>
-                        </div>
-                        <div className="col-span-2 sm:col-span-4 pt-2">
-                            <div className="flex flex-wrap gap-2">
-                                <Button onClick={() => void startSessionWithMode("scored")} className="w-full sm:w-auto">
-                                    Retry
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    onClick={() => {
-                                        setStatus("idle");
-                                        statusRef.current = "idle";
-                                    }}
-                                    className="w-full sm:w-auto"
-                                >
-                                    Edit Settings
-                                </Button>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                <SessionSummaryCard
+                    description={`Score ${summary.score} · Accuracy ${summary.accuracy}% · Direction ${summary.directionAccuracy}%`}
+                    metrics={[
+                        { label: "Hits", value: summary.hits },
+                        { label: "Misses", value: summary.misses },
+                        { label: "Extras", value: summary.extras },
+                        { label: "Avg offset", value: `${summary.avgOffsetMs}ms` },
+                        { label: "Direction", value: `${summary.directionAccuracy}%` },
+                    ]}
+                    primaryAction={{
+                        label: "Retry",
+                        onClick: () => void startSessionWithMode("scored"),
+                    }}
+                    secondaryAction={{
+                        label: "Edit Settings",
+                        onClick: () => {
+                            setStatus("idle");
+                            statusRef.current = "idle";
+                        },
+                    }}
+                />
             )}
 
             {status === "running" && (
-                <Button
-                    variant="outline"
-                    onClick={sessionMode === "scored" ? finalizeSession : stopPracticeSession}
-                    className="w-full sm:w-auto"
-                >
-                    {sessionMode === "scored" ? "Stop" : "Stop Practice"}
-                </Button>
+                <SessionStopButton
+                    onStop={sessionMode === "scored" ? finalizeSession : stopPracticeSession}
+                    label={sessionMode === "scored" ? "Stop" : "Stop Practice"}
+                />
             )}
         </div>
     );
