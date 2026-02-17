@@ -122,7 +122,7 @@
         links.forEach((link) => {
             link.addEventListener("click", () => {
                 const ctaId = link.getAttribute("data-track-v2-link") || "unknown";
-                const rawHref = link.getAttribute("href") || "/v2/";
+                const rawHref = link.getAttribute("href") || "/";
                 const trackedHref = withV2TrackingParams(rawHref, ctaId);
 
                 markTransitionToV2(ctaId);

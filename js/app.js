@@ -3798,8 +3798,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- PWA registration (tool only) ---
     // Avoid service worker caching during local development (localhost).
     const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    const isLegacyV1Path = location.pathname.startsWith('/v1/');
     if ('serviceWorker' in navigator) {
-        if (isLocalhost || location.protocol === 'file:') {
+        if (isLocalhost || location.protocol === 'file:' || isLegacyV1Path) {
             navigator.serviceWorker.getRegistrations()
                 .then((regs) => Promise.all(regs.map((r) => r.unregister())))
                 .catch(() => { });

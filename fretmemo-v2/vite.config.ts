@@ -5,7 +5,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/fretmemo-v2/dist/',
+  base: '/',
   plugins: [
     react(),
     VitePWA({
@@ -15,8 +15,8 @@ export default defineConfig({
         name: 'FretMemo - Guitar Fretboard Trainer',
         short_name: 'FretMemo',
         description: 'Free, browser-based guitar fretboard trainer for note memorization, metronome practice, and local progress stats.',
-        start_url: '/fretmemo-v2/dist/',
-        scope: '/fretmemo-v2/dist/',
+        start_url: '/',
+        scope: '/',
         display: 'standalone',
         background_color: '#fcfbf8',
         theme_color: '#fcfbf8',
@@ -41,6 +41,16 @@ export default defineConfig({
         cleanupOutdatedCaches: true,
         skipWaiting: true,
         clientsClaim: true,
+        navigateFallbackDenylist: [
+          /^\/v1(?:\/|$)/,
+          /^\/v2(?:\/|$)/,
+          /^\/blog(?:\/|\.html$)/,
+          /^\/faq(?:\.html$|\/$)/,
+          /^\/rss\.xml$/,
+          /^\/sitemap\.xml$/,
+          /^\/robots\.txt$/,
+          /^\/BingSiteAuth\.xml$/,
+        ],
       }
     })
   ],
