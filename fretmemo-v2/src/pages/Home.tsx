@@ -34,7 +34,7 @@ const DRILL_META: Record<PracticeMode, { title: string; difficulty: ExerciseDiff
         masteryOffset: 0,
     },
     playNotes: {
-        title: "Note Names",
+        title: "Note Generator",
         difficulty: "beginner",
         source: "home-pinned-note-names",
         masteryOffset: 8,

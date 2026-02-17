@@ -1,6 +1,17 @@
 import type { NoteName } from "@/types/fretboard";
 
 export type PracticeScaleType = "major" | "minor" | "majorPentatonic" | "minorPentatonic";
+export type PracticeNoteSequence =
+    | "random"
+    | "minorThirds"
+    | "majorThirds"
+    | "fourths"
+    | "fifths"
+    | "sevenths"
+    | "majorScale"
+    | "naturalMinorScale"
+    | "majorPentatonic"
+    | "minorPentatonic";
 export type InstrumentType = "guitar6" | "guitar7" | "guitar8" | "bass4" | "bass5" | "ukulele4";
 
 export interface QuickSettings {
@@ -10,6 +21,7 @@ export interface QuickSettings {
     fretRange: { min: number; max: number };
     practiceRootNote: NoteName;
     practiceScaleType: PracticeScaleType;
+    practiceNoteSequence: PracticeNoteSequence;
 }
 
 export interface FullSettings {

@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Fretboard } from "@/components/fretboard/Fretboard";
 import { TabView } from "@/components/fretboard/TabView";
 import type { NoteName, Position, NoteStatus, FretboardLayer } from "@/types/fretboard";
-import { useGameStore, type ScaleType, type NoteFilter } from "@/stores/useGameStore";
+import { useGameStore, type ScaleType, type NoteFilter, type NoteSequence } from "@/stores/useGameStore";
 import { useProgressStore } from "@/stores/useProgressStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,7 @@ import { useXPToast } from "@/hooks/useXPToast";
 
 type GuessMode = "fretboardToNote" | "tabToNote" | "noteToTab";
 type PlayMode = "playNotes" | "playTab";
+type PlaySessionMode = "scored" | "guitar";
 type PracticeMode = GuessMode | PlayMode;
 type ChallengeConfig = {
     type: "timed" | "survival" | "findAll";
@@ -48,6 +49,7 @@ type PracticeRouteState = {
         noteFilter?: NoteFilter;
         rootNote?: NoteName;
         scaleType?: ScaleType;
+        noteSequence?: NoteSequence;
     };
 };
 
@@ -75,6 +77,12 @@ const SCALE_LABELS: Record<ScaleType, string> = {
     minor: "Minor",
     majorPentatonic: "Major Pentatonic",
     minorPentatonic: "Minor Pentatonic",
+};
+const SEQUENCE_SCALE_MAP: Partial<Record<NoteSequence, ScaleType>> = {
+    majorScale: "major",
+    naturalMinorScale: "minor",
+    majorPentatonic: "majorPentatonic",
+    minorPentatonic: "minorPentatonic",
 };
 
 
@@ -286,7 +294,7 @@ export default function Practice() {
                 : mode === "noteToTab"
                     ? "Note → Tab"
                     : mode === "playNotes"
-                        ? "Note Names (Mic)"
+                        ? "Note Generator (Mic)"
                         : "Tab Sequence (Mic)";
     const layerRootNote = practiceConstraints.rootNote;
     const layerScaleLabel = SCALE_LABELS[practiceConstraints.scaleType];
@@ -323,8 +331,51 @@ export default function Practice() {
     };
 
     const [micEnabled, setMicEnabled] = useState(false);
-    const { note: detectedNote } = usePitchDetector(micEnabled);
+    const [playSessionMode, setPlaySessionMode] = useState<PlaySessionMode>("scored");
+    const [selectedAudioInputId, setSelectedAudioInputId] = useState("");
+    const {
+        note: detectedNote,
+        error: pitchError,
+        inputDevices: audioInputDevices,
+        activeDeviceId: activeAudioInputId,
+        refreshInputDevices,
+    } = usePitchDetector(micEnabled, { deviceId: selectedAudioInputId || undefined });
     const lastDetectedRef = useRef<NoteName | null>(null);
+    const selectedDeviceStillExists = selectedAudioInputId
+        ? audioInputDevices.some((device) => device.id === selectedAudioInputId)
+        : false;
+    const resolvedAudioInputId = selectedDeviceStillExists ? selectedAudioInputId : activeAudioInputId || "";
+
+    const handleMicChange = useCallback((enabled: boolean) => {
+        setMicEnabled(enabled);
+        if (enabled) {
+            void refreshInputDevices();
+        }
+    }, [refreshInputDevices]);
+
+    const handleRefreshAudioInputs = useCallback(() => {
+        void refreshInputDevices();
+    }, [refreshInputDevices]);
+
+    const handleNoteSequenceChange = useCallback((noteSequence: NoteSequence) => {
+        const nextScaleType = SEQUENCE_SCALE_MAP[noteSequence];
+        if (nextScaleType) {
+            setPracticeConstraints({ noteSequence, scaleType: nextScaleType });
+            return;
+        }
+        setPracticeConstraints({ noteSequence });
+    }, [setPracticeConstraints]);
+
+    const effectivePlaySessionMode: PlaySessionMode =
+        isPlayModule && !activeChallenge ? playSessionMode : "scored";
+    const hudModeLabel = isPlayModule && effectivePlaySessionMode === "guitar"
+        ? `${modeLabel} · Guitar Mode`
+        : modeLabel;
+
+    useEffect(() => {
+        if (!isPreFlightOpen || !isPlayModule) return;
+        void refreshInputDevices();
+    }, [isPlayModule, isPreFlightOpen, refreshInputDevices]);
 
     useEffect(() => {
         lastDetectedRef.current = null;
@@ -509,7 +560,11 @@ export default function Practice() {
 
         return total;
     }, [activeChallenge, practiceConstraints.enabledStrings, practiceConstraints.fretRange.max, practiceConstraints.fretRange.min, tuning]);
-    const progressTarget = activeChallenge?.type === "findAll" ? findAllTargetCount : 30;
+    const progressTarget = activeChallenge?.type === "findAll"
+        ? findAllTargetCount
+        : effectivePlaySessionMode === "guitar"
+            ? null
+            : 30;
 
     const handleSwitchModule = (next: "guess" | "play") => {
         if (isPlaying) return;
@@ -650,17 +705,18 @@ export default function Practice() {
         finalizeSession();
     }, [activeChallenge, finalizeSession, findAllFoundKeys.length, findAllTargetCount, isPlaying]);
 
-    // Auto-end session when reaching progress target (30 questions for regular sessions)
+    // Auto-end scored sessions when reaching progress target.
     useEffect(() => {
         if (!isPlaying) return;
         // Skip for timed/survival/findAll - they have their own end conditions
         if (activeChallenge?.type === "timed" || activeChallenge?.type === "survival" || activeChallenge?.type === "findAll") return;
+        if (effectivePlaySessionMode === "guitar" || progressTarget === null) return;
         if (sessionTotal < progressTarget) return;
         if (challengeStopRef.current) return;
 
         challengeStopRef.current = true;
         finalizeSession();
-    }, [activeChallenge?.type, finalizeSession, isPlaying, progressTarget, sessionTotal]);
+    }, [activeChallenge?.type, effectivePlaySessionMode, finalizeSession, isPlaying, progressTarget, sessionTotal]);
 
     const handleStopSession = () => {
         challengeStopRef.current = true;
@@ -735,14 +791,14 @@ export default function Practice() {
                     incorrect={sessionIncorrect}
                     bpm={bpm}
                     noteDuration={noteDuration}
-                    modeLabel={modeLabel}
+                    modeLabel={hudModeLabel}
                     sessionStartTime={sessionStartTime}
                     onPause={handlePause}
                     onResume={handleResume}
                     onStop={handleStopSession}
                     isPaused={isPaused}
                     progressCurrent={sessionTotal}
-                    progressTarget={progressTarget}
+                    progressTarget={progressTarget ?? undefined}
                     onHeightChange={setHudHeight}
                 />
                 <XPToast
@@ -932,7 +988,7 @@ export default function Practice() {
                                 <HintButton onHint={handleHint} hintUsed={hintUsedForPrompt} />
                             )}
                             {moduleTab === "play" && (
-                                <PlayModeMicControls micEnabled={micEnabled} onMicChange={setMicEnabled} />
+                                <PlayModeMicControls micEnabled={micEnabled} onMicChange={handleMicChange} />
                             )}
                         </div>
                     </div>
@@ -974,9 +1030,9 @@ export default function Practice() {
                             </TabsList>
                         </Tabs>
                     ) : (
-                        <Tabs value={mode as PlayMode} onValueChange={handlePlayModeChange} className="w-full">
+                            <Tabs value={mode as PlayMode} onValueChange={handlePlayModeChange} className="w-full">
                             <TabsList className="grid w-full grid-cols-2 bg-muted/40 h-10">
-                                <TabsTrigger value="playNotes">Note Names</TabsTrigger>
+                                <TabsTrigger value="playNotes">Note Generator</TabsTrigger>
                                 <TabsTrigger value="playTab">Tab Sequence</TabsTrigger>
                             </TabsList>
                         </Tabs>
@@ -1060,7 +1116,7 @@ export default function Practice() {
                                         <Mic className="w-4 h-4 text-muted-foreground" />
                                         <Label htmlFor="mic-toggle" className="text-sm cursor-pointer">Microphone</Label>
                                     </div>
-                                    <Switch id="mic-toggle" checked={micEnabled} onCheckedChange={setMicEnabled} />
+                                    <Switch id="mic-toggle" checked={micEnabled} onCheckedChange={handleMicChange} />
                                 </div>
                             )}
 
@@ -1140,7 +1196,18 @@ export default function Practice() {
                 onRootNoteChange={(rootNote) => setPracticeConstraints({ rootNote })}
                 scaleType={practiceConstraints.scaleType}
                 onScaleTypeChange={(scaleType) => setPracticeConstraints({ scaleType })}
+                noteSequence={practiceConstraints.noteSequence}
+                onNoteSequenceChange={handleNoteSequenceChange}
                 onApplyPreset={(preset) => setPracticeConstraints(preset)}
+                micEnabled={micEnabled}
+                onMicEnabledChange={handleMicChange}
+                micError={pitchError}
+                audioInputDevices={audioInputDevices}
+                selectedAudioInputId={resolvedAudioInputId}
+                onAudioInputChange={setSelectedAudioInputId}
+                onRefreshAudioInputs={handleRefreshAudioInputs}
+                sessionMode={effectivePlaySessionMode}
+                onSessionModeChange={!activeChallenge ? setPlaySessionMode : undefined}
             />
             <SessionSummaryModal
                 isOpen={showSummary}
