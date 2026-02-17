@@ -29,12 +29,6 @@ export interface RhythmSessionSummary {
     okCount: number;
 }
 
-export const TIMING_WINDOWS_STANDARD: TimingWindowsMs = {
-    perfect: 20,
-    good: 50,
-    ok: 100,
-};
-
 export const TIMING_WINDOWS_RELAXED: TimingWindowsMs = {
     perfect: 30,
     good: 80,
