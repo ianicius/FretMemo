@@ -7,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { useProgressStore } from "@/stores/useProgressStore";
 import { useGameStore } from "@/stores/useGameStore";
 import { cn } from "@/lib/utils";
-import { Calendar, ChevronDown, Flame, Play, Sparkles, Target, Zap } from "lucide-react";
+import { ArrowRight, Calendar, ChevronDown, Flame, Play, Sparkles, Target, Zap } from "lucide-react";
 
 type ChallengeRouteConfig = {
     type: "timed" | "survival" | "findAll";
@@ -239,7 +239,7 @@ export default function Challenges() {
                             {new Date().toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}
                         </span>
                     </div>
-                    <CardTitle className="text-2xl">{dailyChallenge.name}</CardTitle>
+                    <CardTitle className="type-h1">{dailyChallenge.name}</CardTitle>
                     <CardDescription>{dailyChallenge.description}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -253,16 +253,19 @@ export default function Challenges() {
                             Reward: <strong>+100 XP</strong>
                         </span>
                     </div>
-                    <Button size="lg" className="control-btn--primary" onClick={handleStartChallenge}>
-                        <Play className="mr-2 h-4 w-4" />
-                        Start Challenge
+                    <Button size="lg" className="control-btn--primary w-full justify-between sm:w-auto" onClick={handleStartChallenge}>
+                        <span className="inline-flex items-center gap-2">
+                            <Play className="h-4 w-4" />
+                            Start Challenge
+                        </span>
+                        <ArrowRight className="h-4 w-4" />
                     </Button>
                 </CardContent>
             </Card>
 
             <Card>
                 <CardHeader>
-                    <CardTitle className="text-xl">This Week</CardTitle>
+                    <CardTitle>This Week</CardTitle>
                     <CardDescription>{WEEKLY_GOALS.filter((goal) => goal.current >= goal.target).length} of {WEEKLY_GOALS.length} goals completed</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -287,7 +290,7 @@ export default function Challenges() {
             <Card>
                 <CardHeader className="space-y-2">
                     <div className="flex items-center justify-between">
-                        <CardTitle className="text-xl">Hunts</CardTitle>
+                        <CardTitle>Hunts</CardTitle>
                         <Badge variant="secondary">{ACHIEVEMENT_HUNTS.length} active</Badge>
                     </div>
                     <CardDescription>Long-term goals that stay available every day.</CardDescription>

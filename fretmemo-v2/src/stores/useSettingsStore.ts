@@ -10,10 +10,40 @@ interface SettingsState extends AppSettings {
     updateQuickSettings: (settings: Partial<QuickSettings>) => void;
     updateFullSettings: (settings: Partial<FullSettings>) => void;
     updateModuleSettings: <M extends keyof ModuleSettings>(module: M, settings: Partial<ModuleSettings[M]>) => void;
+    resetModuleSettings: <M extends keyof ModuleSettings>(module: M) => void;
     resetSettings: () => void;
 }
 
-const DEFAULT_SETTINGS: AppSettings = {
+const DEFAULT_MODULE_SETTINGS: ModuleSettings = {
+    earTraining: {
+        intervals: ['P1', 'P5', 'P8'],
+        direction: 'ascending',
+    },
+    technique: {
+        startingBpm: {},
+        bestBpm: {},
+        sessionsCompleted: {},
+        lastPracticedAt: {},
+    },
+};
+
+function cloneDefaultModules(): ModuleSettings {
+    return {
+        earTraining: {
+            intervals: [...DEFAULT_MODULE_SETTINGS.earTraining.intervals],
+            direction: DEFAULT_MODULE_SETTINGS.earTraining.direction,
+        },
+        technique: {
+            startingBpm: {},
+            bestBpm: {},
+            sessionsCompleted: {},
+            lastPracticedAt: {},
+        },
+    };
+}
+
+function createDefaultSettings(): AppSettings {
+    return {
     quick: {
         tempo: 60,
         isMetronomeOn: false,
@@ -51,24 +81,14 @@ const DEFAULT_SETTINGS: AppSettings = {
             defaultLayer: 'standard',
         },
     },
-    modules: {
-        earTraining: {
-            intervals: ['P1', 'P5', 'P8'],
-            direction: 'ascending',
-        },
-        technique: {
-            startingBpm: {},
-            bestBpm: {},
-            sessionsCompleted: {},
-            lastPracticedAt: {},
-        },
-    },
-};
+        modules: cloneDefaultModules(),
+    };
+}
 
 export const useSettingsStore = create<SettingsState>()(
     persist(
         (set) => ({
-            ...DEFAULT_SETTINGS,
+            ...createDefaultSettings(),
 
             updateQuickSettings: (settings) =>
                 set((state) => {
@@ -106,7 +126,18 @@ export const useSettingsStore = create<SettingsState>()(
                     },
                 })),
 
-            resetSettings: () => set(DEFAULT_SETTINGS),
+            resetModuleSettings: <M extends keyof ModuleSettings>(module: M) =>
+                set((state) => {
+                    const defaultModules = cloneDefaultModules();
+                    return {
+                        modules: {
+                            ...state.modules,
+                            [module]: defaultModules[module],
+                        },
+                    };
+                }),
+
+            resetSettings: () => set(createDefaultSettings()),
         }),
         {
             name: 'fretmemo-settings-v2',

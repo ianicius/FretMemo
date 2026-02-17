@@ -46,35 +46,35 @@ export function ExerciseCard({
             <Component
                 type={onClick ? "button" : undefined}
                 className={cn(
-                    "group w-full rounded-xl border border-border bg-card p-2.5 text-left transition hover:border-border/80 hover:shadow-sm active:scale-[0.99] min-[390px]:p-3 min-[412px]:p-3.5",
+                    "group w-full rounded-xl border border-border bg-card p-3 text-left transition hover:border-border/80 hover:shadow-sm active:scale-[0.99] min-[390px]:p-3.5",
                     onClick && "cursor-pointer",
                     className
                 )}
                 onClick={onClick}
             >
                 <div className="flex items-start justify-between gap-2">
-                    <div className="flex min-w-0 items-start gap-1.5 min-[390px]:gap-2">
+                    <div className="flex min-w-0 items-start gap-2">
                         {Icon && (
                             <div className="mt-0.5 rounded-md bg-muted p-1.5 text-muted-foreground">
-                                <Icon className="h-3 w-3 min-[390px]:h-3.5 min-[390px]:w-3.5" />
+                                <Icon className="h-3.5 w-3.5" />
                             </div>
                         )}
-                        <h3 className="text-[13px] font-semibold leading-tight text-card-foreground break-words min-[390px]:text-sm min-[412px]:text-[15px]">
+                        <h3 className="text-[15px] font-semibold leading-tight text-card-foreground break-words">
                             {title}
                         </h3>
                     </div>
                     {onClick && <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />}
                 </div>
 
-                <div className="mt-1.5 min-[390px]:mt-2">
-                    <Badge variant="outline" className={cn("h-5 px-1.5 text-[9px] capitalize min-[390px]:px-2 min-[390px]:text-[10px]", DIFFICULTY_STYLES[difficulty])}>
+                <div className="mt-2">
+                    <Badge variant="outline" className={cn("h-5 px-2 text-[11px] capitalize", DIFFICULTY_STYLES[difficulty])}>
                         {difficulty}
                     </Badge>
                 </div>
 
-                <div className="mt-1.5 flex items-center gap-1.5 min-[390px]:mt-2 min-[390px]:gap-2">
+                <div className="mt-2 flex items-center gap-2">
                     <MasteryBar value={safeMastery} showLabel={false} className="flex-1" />
-                    <span className="w-8 shrink-0 text-right text-[11px] font-semibold text-muted-foreground min-[390px]:w-9 min-[390px]:text-xs">{masteryLabel}</span>
+                    <span className="w-9 shrink-0 text-right text-xs font-semibold text-muted-foreground">{masteryLabel}</span>
                 </div>
             </Component>
         );

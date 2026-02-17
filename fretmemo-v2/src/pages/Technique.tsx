@@ -3,8 +3,6 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { ContextPill } from "@/components/ui/context-pill";
 import { Fretboard } from "@/components/fretboard/Fretboard";
@@ -15,6 +13,9 @@ import { useSettingsStore } from "@/stores/useSettingsStore";
 import { TECHNIQUE_EXERCISES } from "@/data/techniqueExercises";
 import { ArrowLeft, Play, Square, Settings2, SkipForward } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { TechniqueSettingsCard } from "@/components/technique-settings/TechniqueSettingsCard";
+import { TechniqueStatusCard } from "@/components/technique-settings/TechniqueStatusCard";
+import { TechniqueSetupDialog } from "@/components/technique-settings/TechniqueSetupDialog";
 
 const SPIDER_FINGERS = 4;
 const TECHNIQUE_FRETS = 12;
@@ -432,6 +433,7 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
     const [speedUpAmount, setSpeedUpAmount] = useState(5);
     const [speedUpInterval, setSpeedUpInterval] = useState(8);
     const [speedUpBeatCounter, setSpeedUpBeatCounter] = useState(0);
+    const [showSetupDialog, setShowSetupDialog] = useState(false);
 
     const metronomeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const metronomeAudioContextRef = useRef<AudioContext | null>(null);
@@ -483,6 +485,37 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
         linearDirection,
     ]);
     const displayedPatternLabel = isPlaying ? activePatternLabel : defaultPatternLabel;
+    const permutationModeOptions = useMemo(
+        () =>
+            Object.entries(PERMUTATION_MODE_LABELS).map(([value, label]) => ({
+                value,
+                label,
+            })),
+        []
+    );
+    const permutationPatternOptions = useMemo(
+        () =>
+            availablePermutationIndices.map((index) => {
+                const pattern = PERMUTATIONS[index];
+                return {
+                    value: index,
+                    label: `#${index + 1} - ${pattern.pattern.join("-")} (T${pattern.tier})`,
+                };
+            }),
+        [availablePermutationIndices]
+    );
+    const stringSkipPatternOptions = useMemo(
+        () =>
+            Object.entries(STRING_SKIP_PATTERN_LABELS).map(([value, label]) => ({
+                value,
+                label,
+            })),
+        []
+    );
+    const legatoTrillPairOptions = useMemo(
+        () => Object.keys(LEGATO_TRILL_PAIRS),
+        []
+    );
 
     const getAlternatingPickDirection = useCallback(
         (step: number, startDirection: PickDirection): PickDirection =>
@@ -1112,19 +1145,31 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
         };
     }, []);
 
-    const togglePlay = () => {
-        if (isPlaying) {
-            if (currentStep > 0) {
-                persistTechniqueSession(currentBpmRef.current);
-            }
-            setIsPlaying(false);
-            resetTechniqueRunState();
-            return;
-        }
-
+    const startTechniqueSession = () => {
         resetTechniqueRunState();
         setIsPlaying(true);
         runTechniqueBeat();
+    };
+
+    const stopTechniqueSession = () => {
+        if (currentStep > 0) {
+            persistTechniqueSession(currentBpmRef.current);
+        }
+        setIsPlaying(false);
+        resetTechniqueRunState();
+    };
+
+    const handlePlayButton = () => {
+        if (isPlaying) {
+            stopTechniqueSession();
+            return;
+        }
+        setShowSetupDialog(true);
+    };
+
+    const handleStartFromSetup = () => {
+        setShowSetupDialog(false);
+        startTechniqueSession();
     };
 
     const handleBackToTrain = () => {
@@ -1137,6 +1182,146 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
         navigate("/train", { state: { restoreTrain: true } });
     };
 
+    const resetPreviewIfIdle = () => {
+        if (!isPlaying) {
+            resetTechniqueRunState(startFret, bpm);
+        }
+    };
+
+    const handleBpmChange = (value: number) => {
+        setBpm(value);
+        persistStartingBpm(value);
+        if (!isPlaying) {
+            currentBpmRef.current = value;
+            setCurrentBpm(value);
+        }
+    };
+
+    const handleStartFretChange = (fret: number) => {
+        setStartFret(fret);
+        if (exerciseId === "linear" && linearEndFret < fret + 3) {
+            setLinearEndFret(Math.min(TECHNIQUE_FRETS, fret + 3));
+        }
+        if (!isPlaying) {
+            resetTechniqueRunState(fret, bpm);
+        }
+    };
+
+    const handlePermutationTierChange = (value: string) => {
+        const nextTier = value === "all" ? "all" : (Number(value) as PermutationTier);
+        const nextTierIndices = getPermutationIndicesByTier(nextTier);
+        setPermutationTier(nextTier);
+        if (!nextTierIndices.includes(permutationIndex)) {
+            setPermutationIndex(nextTierIndices[0] ?? 0);
+        }
+        resetPreviewIfIdle();
+    };
+
+    const handlePermutationModeChange = (value: string) => {
+        setPermutationMode(value as PermutationMode);
+        resetPreviewIfIdle();
+    };
+
+    const handlePermutationPatternChange = (value: number) => {
+        setPermutationIndex(value);
+        resetPreviewIfIdle();
+    };
+
+    const handlePermutationStringsToPlayChange = (value: number) => {
+        setPermutationStringsToPlay(value);
+        resetPreviewIfIdle();
+    };
+
+    const handlePermutationDirectionChange = (value: string) => {
+        setPermutationDirection(value as PermutationDirection);
+        resetPreviewIfIdle();
+    };
+
+    const handleRandomSwitchBarsChange = (value: number) => {
+        setRandomSwitchBars(value);
+        resetPreviewIfIdle();
+    };
+
+    const handleDiagonalPatternChange = (value: string) => {
+        setDiagonalPattern(value as DiagonalPattern);
+        resetPreviewIfIdle();
+    };
+
+    const handleDiagonalStringsPerGroupChange = (value: number) => {
+        setDiagonalStringsPerGroup(value);
+        resetPreviewIfIdle();
+    };
+
+    const handleDiagonalPickingStyleChange = (value: string) => {
+        setDiagonalPickingStyle(value as DiagonalPickingStyle);
+        resetPreviewIfIdle();
+    };
+
+    const handleDiagonalShowPickDirectionChange = (checked: boolean) => {
+        setDiagonalShowPickDirection(checked);
+        resetPreviewIfIdle();
+    };
+
+    const handleStringSkipPatternChange = (value: string) => {
+        setStringSkipPattern(value as StringSkipPattern);
+        resetPreviewIfIdle();
+    };
+
+    const handleStringSkipPickingFocusChange = (value: string) => {
+        setStringSkipPickingFocus(value as StringSkipPickingFocus);
+        resetPreviewIfIdle();
+    };
+
+    const handleStringSkipStartPickDirectionChange = (value: string) => {
+        setStringSkipStartPickDirection(value as PickDirection);
+        resetPreviewIfIdle();
+    };
+
+    const handleStringSkipShowPickIndicatorsChange = (checked: boolean) => {
+        setStringSkipShowPickIndicators(checked);
+        resetPreviewIfIdle();
+    };
+
+    const handleLegatoExerciseTypeChange = (value: string) => {
+        setLegatoExerciseType(value as LegatoExerciseType);
+        resetPreviewIfIdle();
+    };
+
+    const handleLegatoTrillPairChange = (value: string) => {
+        setLegatoTrillPair(value as LegatoTrillPair);
+        resetPreviewIfIdle();
+    };
+
+    const handleLinearStringChange = (value: number) => {
+        setLinearString(value);
+        resetPreviewIfIdle();
+    };
+
+    const handleLinearEndFretChange = (value: number) => {
+        setLinearEndFret(Math.max(startFret + 3, value));
+        resetPreviewIfIdle();
+    };
+
+    const handleLinearNotesPerShiftChange = (value: number) => {
+        setLinearNotesPerShift(value);
+        resetPreviewIfIdle();
+    };
+
+    const handleLinearDirectionChange = (value: string) => {
+        setLinearDirection(value as LinearDirection);
+        resetPreviewIfIdle();
+    };
+
+    const handleLinearShiftAmountChange = (value: number) => {
+        setLinearShiftAmount(value);
+        resetPreviewIfIdle();
+    };
+
+    const handleLinearPickingStyleChange = (value: string) => {
+        setLinearPickingStyle(value as LinearPickingStyle);
+        resetPreviewIfIdle();
+    };
+
     return (
         <div className="space-y-6 pb-8">
             {/* Header */}
@@ -1145,8 +1330,8 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
                     <ArrowLeft className="w-5 h-5" />
                 </Button>
                 <div>
-                    <h1 className="text-2xl font-bold">{exercise.name}</h1>
-                    <p className="text-muted-foreground">{exercise.description}</p>
+                    <h1 className="type-display">{exercise.name}</h1>
+                    <p className="type-body text-muted-foreground">{exercise.description}</p>
                     <div className="mt-2 max-w-xl">
                         <ContextPill onOpenSettings={() => navigate("/me?section=settings")} />
                     </div>
@@ -1195,7 +1380,7 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
                                             "w-32",
                                             isPlaying ? "control-btn" : "control-btn--primary"
                                         )}
-                                        onClick={togglePlay}
+                                        onClick={handlePlayButton}
                                     >
                                         {isPlaying ? (
                                             <><Square className="mr-2 h-4 w-4 fill-current" /> Stop</>
@@ -1222,14 +1407,7 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
                                     </div>
                                     <Slider
                                         value={[bpm]}
-                                        onValueChange={([v]) => {
-                                            setBpm(v);
-                                            persistStartingBpm(v);
-                                            if (!isPlaying) {
-                                                currentBpmRef.current = v;
-                                                setCurrentBpm(v);
-                                            }
-                                        }}
+                                        onValueChange={([value]) => handleBpmChange(value)}
                                         min={30}
                                         max={200}
                                         step={5}
@@ -1259,694 +1437,125 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
                             </ol>
                         </CardContent>
                     </Card>
+                    <TechniqueSettingsCard
+                        isPlaying={isPlaying}
+                        stepMode={stepMode}
+                        onStepModeChange={setStepMode}
+                        startFret={startFret}
+                        onStartFretChange={handleStartFretChange}
+                        showPermutation={isPermutationExercise}
+                        permutationMode={permutationMode}
+                        permutationModeOptions={permutationModeOptions}
+                        onPermutationModeChange={handlePermutationModeChange}
+                        permutationTier={String(permutationTier)}
+                        onPermutationTierChange={handlePermutationTierChange}
+                        permutationPattern={resolvedPermutationIndex}
+                        permutationPatternOptions={permutationPatternOptions}
+                        onPermutationPatternChange={handlePermutationPatternChange}
+                        permutationDailyMode={permutationMode === "daily"}
+                        permutationStringsToPlay={permutationStringsToPlay}
+                        permutationStringsMax={stringCount}
+                        onPermutationStringsToPlayChange={handlePermutationStringsToPlayChange}
+                        permutationDirection={permutationDirection}
+                        onPermutationDirectionChange={handlePermutationDirectionChange}
+                        randomSwitchBars={randomSwitchBars}
+                        onRandomSwitchBarsChange={handleRandomSwitchBarsChange}
+                        showRandomSwitchBars={permutationMode === "random"}
+                        showDiagonal={exerciseId === "diagonal"}
+                        diagonalPattern={diagonalPattern}
+                        onDiagonalPatternChange={handleDiagonalPatternChange}
+                        diagonalStringsPerGroup={diagonalStringsPerGroup}
+                        diagonalStringsMax={Math.max(2, stringCount)}
+                        onDiagonalStringsPerGroupChange={handleDiagonalStringsPerGroupChange}
+                        diagonalPickingStyle={diagonalPickingStyle}
+                        onDiagonalPickingStyleChange={handleDiagonalPickingStyleChange}
+                        diagonalShowPickDirection={diagonalShowPickDirection}
+                        onDiagonalShowPickDirectionChange={handleDiagonalShowPickDirectionChange}
+                        showStringSkip={exerciseId === "stringskip"}
+                        stringSkipPattern={stringSkipPattern}
+                        stringSkipPatternOptions={stringSkipPatternOptions}
+                        onStringSkipPatternChange={handleStringSkipPatternChange}
+                        stringSkipPickingFocus={stringSkipPickingFocus}
+                        onStringSkipPickingFocusChange={handleStringSkipPickingFocusChange}
+                        stringSkipStartPickDirection={stringSkipStartPickDirection}
+                        onStringSkipStartPickDirectionChange={handleStringSkipStartPickDirectionChange}
+                        stringSkipShowPickIndicators={stringSkipShowPickIndicators}
+                        onStringSkipShowPickIndicatorsChange={handleStringSkipShowPickIndicatorsChange}
+                        showLegato={exerciseId === "legato"}
+                        legatoExerciseType={legatoExerciseType}
+                        onLegatoExerciseTypeChange={handleLegatoExerciseTypeChange}
+                        legatoTrillPair={legatoTrillPair}
+                        legatoTrillPairOptions={legatoTrillPairOptions}
+                        onLegatoTrillPairChange={handleLegatoTrillPairChange}
+                        showLinear={exerciseId === "linear"}
+                        linearString={linearString}
+                        linearStringMax={stringCount}
+                        onLinearStringChange={handleLinearStringChange}
+                        linearEndFret={linearEndFret}
+                        linearEndFretMin={Math.min(TECHNIQUE_FRETS, startFret + 3)}
+                        linearEndFretMax={TECHNIQUE_FRETS}
+                        onLinearEndFretChange={handleLinearEndFretChange}
+                        linearNotesPerShift={linearNotesPerShift}
+                        onLinearNotesPerShiftChange={handleLinearNotesPerShiftChange}
+                        linearDirection={linearDirection}
+                        onLinearDirectionChange={handleLinearDirectionChange}
+                        linearShiftAmount={linearShiftAmount}
+                        onLinearShiftAmountChange={handleLinearShiftAmountChange}
+                        linearPickingStyle={linearPickingStyle}
+                        onLinearPickingStyleChange={handleLinearPickingStyleChange}
+                        speedUpEnabled={speedUpEnabled}
+                        onSpeedUpEnabledChange={setSpeedUpEnabled}
+                        speedUpAmount={speedUpAmount}
+                        onSpeedUpAmountChange={setSpeedUpAmount}
+                        speedUpInterval={speedUpInterval}
+                        onSpeedUpIntervalChange={setSpeedUpInterval}
+                    />
+                    <TechniqueStatusCard
+                        currentStringLabel={stringLabels[currentString] ?? "-"}
+                        currentStep={currentStep}
+                        tempoBpm={isPlaying ? currentBpm : bpm}
+                        speedUpEnabled={speedUpEnabled}
+                        speedUpAmount={speedUpAmount}
+                        speedUpInterval={speedUpInterval}
+                        isPlaying={isPlaying}
+                        nextIncreaseInBeats={Math.max(0, speedUpInterval - speedUpBeatCounter)}
+                        showPermutationMeta={isPermutationExercise}
+                        permutationModeLabel={PERMUTATION_MODE_LABELS[permutationMode]}
+                        permutationTierLabel={
+                            permutationTier === "all"
+                                ? `All (T${activePermutationTier})`
+                                : `Tier ${activePermutationTier}`
+                        }
+                        permutationStringsToPlay={permutationStringsToPlay}
+                        permutationDirection={permutationDirection}
+                        techniqueCue={techniqueCue}
+                        displayedPatternLabel={displayedPatternLabel}
+                    />
 
-                    {/* Settings */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-lg flex items-center gap-2">
-                                <Settings2 className="w-4 h-4" />
-                                Settings
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <Label htmlFor="step-mode">Step Mode</Label>
-                                <Switch
-                                    id="step-mode"
-                                    checked={stepMode}
-                                    onCheckedChange={setStepMode}
-                                    disabled={isPlaying}
-                                />
-                            </div>
-                            
-                            <div className="space-y-2">
-                                <Label>Start Fret</Label>
-                                <div className="flex gap-2">
-                                    {[1, 3, 5, 7].map(fret => (
-                                        <Button
-                                            key={fret}
-                                            variant={startFret === fret ? "default" : "outline"}
-                                            size="sm"
-                                            onClick={() => {
-                                                setStartFret(fret);
-                                                if (exerciseId === "linear" && linearEndFret < fret + 3) {
-                                                    setLinearEndFret(Math.min(TECHNIQUE_FRETS, fret + 3));
-                                                }
-                                                if (!isPlaying) {
-                                                    resetTechniqueRunState(fret, bpm);
-                                                }
-                                            }}
-                                            disabled={isPlaying}
-                                            className="flex-1"
-                                        >
-                                            {fret}
-                                        </Button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {isPermutationExercise && (
-                                <div className="space-y-4 rounded-md border border-border/50 p-3">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="permutation-mode">Mode</Label>
-                                        <select
-                                            id="permutation-mode"
-                                            value={permutationMode}
-                                            onChange={(event) => {
-                                                setPermutationMode(event.target.value as PermutationMode);
-                                                if (!isPlaying) {
-                                                    resetTechniqueRunState(startFret, bpm);
-                                                }
-                                            }}
-                                            disabled={isPlaying}
-                                            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                        >
-                                            {Object.entries(PERMUTATION_MODE_LABELS).map(([mode, label]) => (
-                                                <option key={mode} value={mode}>
-                                                    {label}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="permutation-tier">Tier</Label>
-                                        <select
-                                            id="permutation-tier"
-                                            value={String(permutationTier)}
-                                            onChange={(event) => {
-                                                const value = event.target.value;
-                                                const nextTier = value === "all" ? "all" : (Number(value) as PermutationTier);
-                                                const nextTierIndices = getPermutationIndicesByTier(nextTier);
-                                                setPermutationTier(nextTier);
-                                                if (!nextTierIndices.includes(permutationIndex)) {
-                                                    setPermutationIndex(nextTierIndices[0] ?? 0);
-                                                }
-                                                if (!isPlaying) {
-                                                    resetTechniqueRunState(startFret, bpm);
-                                                }
-                                            }}
-                                            disabled={isPlaying}
-                                            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                        >
-                                            <option value="all">All Tiers (24)</option>
-                                            <option value="1">Tier 1 - Beginner</option>
-                                            <option value="2">Tier 2 - Intermediate</option>
-                                            <option value="3">Tier 3 - Advanced</option>
-                                        </select>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="permutation-pattern">Pattern</Label>
-                                        <select
-                                            id="permutation-pattern"
-                                            value={String(resolvedPermutationIndex)}
-                                            onChange={(event) => {
-                                                setPermutationIndex(Number(event.target.value));
-                                                if (!isPlaying) {
-                                                    resetTechniqueRunState(startFret, bpm);
-                                                }
-                                            }}
-                                            disabled={isPlaying || permutationMode === "daily"}
-                                            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                        >
-                                            {availablePermutationIndices.map((index) => {
-                                                const pattern = PERMUTATIONS[index];
-                                                return (
-                                                    <option key={index} value={index}>
-                                                        #{index + 1} - {pattern.pattern.join("-")} (T{pattern.tier})
-                                                    </option>
-                                                );
-                                            })}
-                                        </select>
-                                        {permutationMode === "daily" && (
-                                            <p className="text-xs text-muted-foreground">
-                                                Daily challenge selects a fixed pattern for today.
-                                            </p>
-                                        )}
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <div className="flex items-center justify-between text-sm">
-                                            <Label className="text-sm">Strings to play</Label>
-                                            <span className="font-mono text-xs">{permutationStringsToPlay}</span>
-                                        </div>
-                                        <Slider
-                                            value={[permutationStringsToPlay]}
-                                            onValueChange={([value]) => {
-                                                setPermutationStringsToPlay(value);
-                                                if (!isPlaying) {
-                                                    resetTechniqueRunState(startFret, bpm);
-                                                }
-                                            }}
-                                            min={1}
-                                            max={stringCount}
-                                            step={1}
-                                            disabled={isPlaying}
-                                        />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label>Direction</Label>
-                                        <div className="grid grid-cols-3 gap-2">
-                                            {[
-                                                { value: "ascending", label: "Ascending" },
-                                                { value: "descending", label: "Descending" },
-                                                { value: "both", label: "Both" },
-                                            ].map((option) => (
-                                                <Button
-                                                    key={option.value}
-                                                    variant={permutationDirection === option.value ? "default" : "outline"}
-                                                    size="sm"
-                                                    onClick={() => {
-                                                        setPermutationDirection(option.value as PermutationDirection);
-                                                        if (!isPlaying) {
-                                                            resetTechniqueRunState(startFret, bpm);
-                                                        }
-                                                    }}
-                                                    disabled={isPlaying}
-                                                >
-                                                    {option.label}
-                                                </Button>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center justify-between">
-                                        <div className="space-y-1">
-                                            <Label>Sticky Fingers</Label>
-                                            <p className="text-xs text-muted-foreground">
-                                                Enabled by default in Permutation Trainer (Spider-style).
-                                            </p>
-                                        </div>
-                                        <Badge variant="secondary">On</Badge>
-                                    </div>
-
-                                    {permutationMode === "random" && (
-                                        <div className="space-y-2">
-                                            <div className="flex items-center justify-between text-sm">
-                                                <Label className="text-sm">Random switch every</Label>
-                                                <span className="font-mono text-xs">
-                                                    {randomSwitchBars} bar{randomSwitchBars > 1 ? "s" : ""}
-                                                </span>
-                                            </div>
-                                            <Slider
-                                                value={[randomSwitchBars]}
-                                                onValueChange={([value]) => {
-                                                    setRandomSwitchBars(value);
-                                                    if (!isPlaying) {
-                                                        resetTechniqueRunState(startFret, bpm);
-                                                    }
-                                                }}
-                                                min={1}
-                                                max={8}
-                                                step={1}
-                                                disabled={isPlaying}
-                                            />
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {exerciseId === "diagonal" && (
-                                <div className="space-y-4 rounded-md border border-border/50 p-3">
-                                    <div className="space-y-2">
-                                        <Label>Pattern</Label>
-                                        <div className="grid grid-cols-3 gap-2">
-                                            {(
-                                                [
-                                                    { value: "ascending", label: "Ascending" },
-                                                    { value: "descending", label: "Descending" },
-                                                    { value: "full", label: "Full" },
-                                                ] satisfies Array<{ value: DiagonalPattern; label: string }>
-                                            ).map((option) => (
-                                                <Button
-                                                    key={option.value}
-                                                    variant={diagonalPattern === option.value ? "default" : "outline"}
-                                                    size="sm"
-                                                    onClick={() => {
-                                                        setDiagonalPattern(option.value);
-                                                        if (!isPlaying) resetTechniqueRunState(startFret, bpm);
-                                                    }}
-                                                    disabled={isPlaying}
-                                                >
-                                                    {option.label}
-                                                </Button>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <div className="flex items-center justify-between text-sm">
-                                            <Label className="text-sm">Strings per group</Label>
-                                            <span className="font-mono text-xs">{diagonalStringsPerGroup}</span>
-                                        </div>
-                                        <Slider
-                                            value={[diagonalStringsPerGroup]}
-                                            onValueChange={([value]) => {
-                                                setDiagonalStringsPerGroup(value);
-                                                if (!isPlaying) resetTechniqueRunState(startFret, bpm);
-                                            }}
-                                            min={2}
-                                            max={Math.max(2, stringCount)}
-                                            step={1}
-                                            disabled={isPlaying}
-                                        />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label>Picking Style</Label>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            {(
-                                                [
-                                                    { value: "alternate", label: "Alternate" },
-                                                    { value: "economy", label: "Economy" },
-                                                ] satisfies Array<{ value: DiagonalPickingStyle; label: string }>
-                                            ).map((option) => (
-                                                <Button
-                                                    key={option.value}
-                                                    variant={diagonalPickingStyle === option.value ? "default" : "outline"}
-                                                    size="sm"
-                                                    onClick={() => {
-                                                        setDiagonalPickingStyle(option.value);
-                                                        if (!isPlaying) resetTechniqueRunState(startFret, bpm);
-                                                    }}
-                                                    disabled={isPlaying}
-                                                >
-                                                    {option.label}
-                                                </Button>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center justify-between">
-                                        <Label htmlFor="diagonal-pick-indicators">Show pick indicators</Label>
-                                        <Switch
-                                            id="diagonal-pick-indicators"
-                                            checked={diagonalShowPickDirection}
-                                            onCheckedChange={(checked) => {
-                                                setDiagonalShowPickDirection(checked);
-                                                if (!isPlaying) resetTechniqueRunState(startFret, bpm);
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-                            )}
-
-                            {exerciseId === "stringskip" && (
-                                <div className="space-y-4 rounded-md border border-border/50 p-3">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="string-skip-pattern">Skip Pattern</Label>
-                                        <select
-                                            id="string-skip-pattern"
-                                            value={stringSkipPattern}
-                                            onChange={(event) => {
-                                                setStringSkipPattern(event.target.value as StringSkipPattern);
-                                                if (!isPlaying) resetTechniqueRunState(startFret, bpm);
-                                            }}
-                                            disabled={isPlaying}
-                                            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                        >
-                                            {Object.entries(STRING_SKIP_PATTERN_LABELS).map(([value, label]) => (
-                                                <option key={value} value={value}>
-                                                    {label}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label>Picking Focus</Label>
-                                        <div className="grid grid-cols-3 gap-2">
-                                            {(
-                                                [
-                                                    { value: "alternate", label: "Alternate" },
-                                                    { value: "inside", label: "Inside" },
-                                                    { value: "outside", label: "Outside" },
-                                                ] satisfies Array<{ value: StringSkipPickingFocus; label: string }>
-                                            ).map((option) => (
-                                                <Button
-                                                    key={option.value}
-                                                    variant={stringSkipPickingFocus === option.value ? "default" : "outline"}
-                                                    size="sm"
-                                                    onClick={() => {
-                                                        setStringSkipPickingFocus(option.value);
-                                                        if (!isPlaying) resetTechniqueRunState(startFret, bpm);
-                                                    }}
-                                                    disabled={isPlaying}
-                                                >
-                                                    {option.label}
-                                                </Button>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label>Start Pick Direction</Label>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            {(
-                                                [
-                                                    { value: "down", label: "Down (v)" },
-                                                    { value: "up", label: "Up (^)" },
-                                                ] satisfies Array<{ value: PickDirection; label: string }>
-                                            ).map((option) => (
-                                                <Button
-                                                    key={option.value}
-                                                    variant={stringSkipStartPickDirection === option.value ? "default" : "outline"}
-                                                    size="sm"
-                                                    onClick={() => {
-                                                        setStringSkipStartPickDirection(option.value);
-                                                        if (!isPlaying) resetTechniqueRunState(startFret, bpm);
-                                                    }}
-                                                    disabled={isPlaying}
-                                                >
-                                                    {option.label}
-                                                </Button>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center justify-between">
-                                        <Label htmlFor="string-skip-pick-indicators">Show pick indicators</Label>
-                                        <Switch
-                                            id="string-skip-pick-indicators"
-                                            checked={stringSkipShowPickIndicators}
-                                            onCheckedChange={(checked) => {
-                                                setStringSkipShowPickIndicators(checked);
-                                                if (!isPlaying) resetTechniqueRunState(startFret, bpm);
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-                            )}
-
-                            {exerciseId === "legato" && (
-                                <div className="space-y-4 rounded-md border border-border/50 p-3">
-                                    <div className="space-y-2">
-                                        <Label>Exercise Type</Label>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            {(
-                                                [
-                                                    { value: "trill", label: "Trill" },
-                                                    { value: "hammerOnly", label: "Hammer Spider" },
-                                                    { value: "pullOnly", label: "Pull Desc" },
-                                                    { value: "threeNote", label: "3-Note" },
-                                                ] satisfies Array<{ value: LegatoExerciseType; label: string }>
-                                            ).map((option) => (
-                                                <Button
-                                                    key={option.value}
-                                                    variant={legatoExerciseType === option.value ? "default" : "outline"}
-                                                    size="sm"
-                                                    onClick={() => {
-                                                        setLegatoExerciseType(option.value);
-                                                        if (!isPlaying) resetTechniqueRunState(startFret, bpm);
-                                                    }}
-                                                    disabled={isPlaying}
-                                                >
-                                                    {option.label}
-                                                </Button>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {legatoExerciseType === "trill" && (
-                                        <div className="space-y-2">
-                                            <Label htmlFor="legato-trill-pair">Trill Pair</Label>
-                                            <select
-                                                id="legato-trill-pair"
-                                                value={legatoTrillPair}
-                                                onChange={(event) => {
-                                                    setLegatoTrillPair(event.target.value as LegatoTrillPair);
-                                                    if (!isPlaying) resetTechniqueRunState(startFret, bpm);
-                                                }}
-                                                disabled={isPlaying}
-                                                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                            >
-                                                {Object.keys(LEGATO_TRILL_PAIRS).map((pair) => (
-                                                    <option key={pair} value={pair}>
-                                                        {pair}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    )}
-
-                                    <div className="rounded-md border border-primary/20 bg-primary/5 p-2 text-xs text-muted-foreground">
-                                        Legato notation follows guitar standard: <span className="font-mono">5h7</span> for hammer-on, <span className="font-mono">7p5</span> for pull-off.
-                                    </div>
-                                </div>
-                            )}
-
-                            {exerciseId === "linear" && (
-                                <div className="space-y-4 rounded-md border border-border/50 p-3">
-                                    <div className="space-y-2">
-                                        <div className="flex items-center justify-between text-sm">
-                                            <Label className="text-sm">String</Label>
-                                            <span className="font-mono text-xs">{linearString}</span>
-                                        </div>
-                                        <Slider
-                                            value={[linearString]}
-                                            onValueChange={([value]) => {
-                                                setLinearString(value);
-                                                if (!isPlaying) resetTechniqueRunState(startFret, bpm);
-                                            }}
-                                            min={1}
-                                            max={stringCount}
-                                            step={1}
-                                            disabled={isPlaying}
-                                        />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <div className="flex items-center justify-between text-sm">
-                                            <Label className="text-sm">End Fret</Label>
-                                            <span className="font-mono text-xs">{linearEndFret}</span>
-                                        </div>
-                                        <Slider
-                                            value={[linearEndFret]}
-                                            onValueChange={([value]) => {
-                                                setLinearEndFret(Math.max(startFret + 3, value));
-                                                if (!isPlaying) resetTechniqueRunState(startFret, bpm);
-                                            }}
-                                            min={Math.min(TECHNIQUE_FRETS, startFret + 3)}
-                                            max={TECHNIQUE_FRETS}
-                                            step={1}
-                                            disabled={isPlaying}
-                                        />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label>Notes per Shift</Label>
-                                        <div className="grid grid-cols-3 gap-2">
-                                            {[4, 5, 6].map((value) => (
-                                                <Button
-                                                    key={value}
-                                                    variant={linearNotesPerShift === value ? "default" : "outline"}
-                                                    size="sm"
-                                                    onClick={() => {
-                                                        setLinearNotesPerShift(value);
-                                                        if (!isPlaying) resetTechniqueRunState(startFret, bpm);
-                                                    }}
-                                                    disabled={isPlaying}
-                                                >
-                                                    {value}
-                                                </Button>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label>Direction</Label>
-                                        <div className="grid grid-cols-3 gap-2">
-                                            {(
-                                                [
-                                                    { value: "ascending", label: "Asc" },
-                                                    { value: "descending", label: "Desc" },
-                                                    { value: "roundTrip", label: "Round" },
-                                                ] satisfies Array<{ value: LinearDirection; label: string }>
-                                            ).map((option) => (
-                                                <Button
-                                                    key={option.value}
-                                                    variant={linearDirection === option.value ? "default" : "outline"}
-                                                    size="sm"
-                                                    onClick={() => {
-                                                        setLinearDirection(option.value);
-                                                        if (!isPlaying) resetTechniqueRunState(startFret, bpm);
-                                                    }}
-                                                    disabled={isPlaying}
-                                                >
-                                                    {option.label}
-                                                </Button>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <div className="flex items-center justify-between text-sm">
-                                            <Label className="text-sm">Shift Amount</Label>
-                                            <span className="font-mono text-xs">{linearShiftAmount}</span>
-                                        </div>
-                                        <Slider
-                                            value={[linearShiftAmount]}
-                                            onValueChange={([value]) => {
-                                                setLinearShiftAmount(value);
-                                                if (!isPlaying) resetTechniqueRunState(startFret, bpm);
-                                            }}
-                                            min={1}
-                                            max={3}
-                                            step={1}
-                                            disabled={isPlaying}
-                                        />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label>Picking Style</Label>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            {(
-                                                [
-                                                    { value: "alternate", label: "Alternate" },
-                                                    { value: "legato", label: "Legato" },
-                                                ] satisfies Array<{ value: LinearPickingStyle; label: string }>
-                                            ).map((option) => (
-                                                <Button
-                                                    key={option.value}
-                                                    variant={linearPickingStyle === option.value ? "default" : "outline"}
-                                                    size="sm"
-                                                    onClick={() => {
-                                                        setLinearPickingStyle(option.value);
-                                                        if (!isPlaying) resetTechniqueRunState(startFret, bpm);
-                                                    }}
-                                                    disabled={isPlaying}
-                                                >
-                                                    {option.label}
-                                                </Button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="space-y-3 border-t border-border/50 pt-3">
-                                <div className="flex items-center justify-between">
-                                    <Label htmlFor="speed-up">Auto Speed-Up</Label>
-                                    <Switch
-                                        id="speed-up"
-                                        checked={speedUpEnabled}
-                                        onCheckedChange={setSpeedUpEnabled}
-                                    />
-                                </div>
-
-                                <div className={cn("space-y-3", !speedUpEnabled && "opacity-50")}>
-                                    <div className="space-y-2">
-                                        <div className="flex items-center justify-between text-sm">
-                                            <Label className="text-sm">Increase</Label>
-                                            <span className="font-mono text-xs">+{speedUpAmount} BPM</span>
-                                        </div>
-                                        <Slider
-                                            value={[speedUpAmount]}
-                                            onValueChange={([v]) => setSpeedUpAmount(v)}
-                                            min={1}
-                                            max={20}
-                                            step={1}
-                                            disabled={!speedUpEnabled}
-                                        />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <div className="flex items-center justify-between text-sm">
-                                            <Label className="text-sm">Every</Label>
-                                            <span className="font-mono text-xs">{speedUpInterval} beat{speedUpInterval > 1 ? 's' : ''}</span>
-                                        </div>
-                                        <Slider
-                                            value={[speedUpInterval]}
-                                            onValueChange={([v]) => setSpeedUpInterval(v)}
-                                            min={1}
-                                            max={32}
-                                            step={1}
-                                            disabled={!speedUpEnabled}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Current Status */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-lg">Status</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-2">
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">Current String</span>
-                                <span className="font-medium">{stringLabels[currentString] ?? "-"}</span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">Step</span>
-                                <span className="font-medium">{currentStep}</span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">Tempo</span>
-                                <span className="font-medium">{isPlaying ? currentBpm : bpm} BPM</span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">Speed-Up</span>
-                                <span className="font-medium">
-                                    {speedUpEnabled ? `+${speedUpAmount}/${speedUpInterval}b` : "Off"}
-                                </span>
-                            </div>
-                            {speedUpEnabled && isPlaying && (
-                                <div className="flex justify-between text-sm">
-                                    <span className="text-muted-foreground">Next Increase In</span>
-                                    <span className="font-medium">
-                                        {Math.max(0, speedUpInterval - speedUpBeatCounter)} beat{Math.max(0, speedUpInterval - speedUpBeatCounter) !== 1 ? "s" : ""}
-                                    </span>
-                                </div>
-                            )}
-                            {isPermutationExercise && (
-                                <>
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-muted-foreground">Mode</span>
-                                        <span className="font-medium">{PERMUTATION_MODE_LABELS[permutationMode]}</span>
-                                    </div>
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-muted-foreground">Tier</span>
-                                        <span className="font-medium">
-                                            {permutationTier === "all" ? `All (T${activePermutationTier})` : `Tier ${activePermutationTier}`}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-muted-foreground">Strings</span>
-                                        <span className="font-medium">{permutationStringsToPlay}</span>
-                                    </div>
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-muted-foreground">Direction</span>
-                                        <span className="font-medium capitalize">{permutationDirection}</span>
-                                    </div>
-                                </>
-                            )}
-                            {techniqueCue && (
-                                <div className="space-y-1 rounded-md border border-primary/20 bg-primary/5 p-2">
-                                    <div className="flex items-center justify-between text-xs">
-                                        <span className="text-muted-foreground">Current Action</span>
-                                        <Badge variant="secondary">{techniqueCue.label}</Badge>
-                                    </div>
-                                    <div className="font-mono text-sm">{techniqueCue.notation}</div>
-                                    {techniqueCue.detail && (
-                                        <div className="text-xs text-muted-foreground">{techniqueCue.detail}</div>
-                                    )}
-                                </div>
-                            )}
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">Pattern</span>
-                                <Badge variant="secondary">
-                                    {displayedPatternLabel}
-                                </Badge>
-                            </div>
-                        </CardContent>
-                    </Card>
                 </div>
             </div>
+
+            <TechniqueSetupDialog
+                isOpen={showSetupDialog}
+                onOpenChange={setShowSetupDialog}
+                onStart={handleStartFromSetup}
+                exerciseName={exercise.name}
+                exerciseDescription={exercise.description}
+                bpm={bpm}
+                onBpmChange={handleBpmChange}
+                stepMode={stepMode}
+                onStepModeChange={setStepMode}
+                startFret={startFret}
+                onStartFretChange={handleStartFretChange}
+                speedUpEnabled={speedUpEnabled}
+                onSpeedUpEnabledChange={setSpeedUpEnabled}
+                speedUpAmount={speedUpAmount}
+                onSpeedUpAmountChange={setSpeedUpAmount}
+                speedUpInterval={speedUpInterval}
+                onSpeedUpIntervalChange={setSpeedUpInterval}
+            />
         </div>
     );
 }
+
+

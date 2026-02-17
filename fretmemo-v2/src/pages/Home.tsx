@@ -197,6 +197,8 @@ export default function Home() {
             };
         });
     }, [techniqueSettings.bestBpm, techniqueSettings.lastPracticedAt]);
+    const continuePrimary = recentExercises[0] ?? null;
+    const continueList = continuePrimary ? recentExercises.slice(1) : recentExercises;
 
     const pinnedExercises = useMemo(() => {
         return pinnedIds
@@ -349,7 +351,7 @@ export default function Home() {
 
             <Card>
                 <CardHeader>
-                    <CardTitle className="text-xl">Today&apos;s Challenge</CardTitle>
+                    <CardTitle>Today&apos;s Challenge</CardTitle>
                     <CardDescription>Lightning Round · 30 notes · +100 XP</CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-wrap items-center gap-3">
@@ -360,6 +362,35 @@ export default function Home() {
                     <span className="text-sm text-muted-foreground">Fast recall under light time pressure.</span>
                 </CardContent>
             </Card>
+
+            {continuePrimary && (
+                <Card className="border-border/80">
+                    <CardHeader className="pb-3">
+                        <CardTitle>Continue Last Session</CardTitle>
+                        <CardDescription>
+                            {continuePrimary.title} · Last practiced {continuePrimary.lastPracticed}
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                        <div className="flex items-center justify-between text-sm text-muted-foreground">
+                            <span>Mastery progress</span>
+                            <span className="font-semibold text-foreground">{continuePrimary.mastery}%</span>
+                        </div>
+                        <MasteryBar value={continuePrimary.mastery} showLabel={false} />
+                        <Button
+                            size="lg"
+                            className="w-full justify-between"
+                            onClick={() => navigate(`/technique/${continuePrimary.id}`)}
+                        >
+                            <span className="inline-flex items-center gap-2">
+                                <Play className="h-4 w-4" />
+                                Resume Session
+                            </span>
+                            <ArrowRight className="h-4 w-4" />
+                        </Button>
+                    </CardContent>
+                </Card>
+            )}
 
             <section className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -408,40 +439,42 @@ export default function Home() {
                 )}
             </section>
 
-            <section className="space-y-3">
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Continue</h2>
-                {recentExercises.length === 0 ? (
-                    <EmptyState
-                        title="No recent technique sessions"
-                        description="Open Train and pick a technique exercise to build consistency."
-                        ctaLabel="Open Train"
-                        onCtaClick={() => navigate("/train")}
-                    />
-                ) : (
-                    <div className="grid gap-3 md:grid-cols-2">
-                        {recentExercises.map((exercise) => (
-                            <ExerciseCard
-                                key={exercise.id}
-                                title={exercise.title}
-                                description="Resume where you left off."
-                                difficulty="intermediate"
-                                mastery={exercise.mastery}
-                                lastPracticedLabel={exercise.lastPracticed}
-                                icon={Target}
-                                onClick={() => navigate(`/technique/${exercise.id}`)}
-                            />
-                        ))}
-                    </div>
-                )}
-            </section>
+            {(continueList.length > 0 || !continuePrimary) && (
+                <section className="space-y-3">
+                    <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Continue</h2>
+                    {continueList.length === 0 ? (
+                        <EmptyState
+                            title="No recent technique sessions"
+                            description="Open Train and pick a technique exercise to build consistency."
+                            ctaLabel="Open Train"
+                            onCtaClick={() => navigate("/train")}
+                        />
+                    ) : (
+                        <div className="grid gap-3 md:grid-cols-2">
+                            {continueList.map((exercise) => (
+                                <ExerciseCard
+                                    key={exercise.id}
+                                    title={exercise.title}
+                                    description="Resume where you left off."
+                                    difficulty="intermediate"
+                                    mastery={exercise.mastery}
+                                    lastPracticedLabel={exercise.lastPracticed}
+                                    icon={Target}
+                                    onClick={() => navigate(`/technique/${exercise.id}`)}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </section>
+            )}
 
             <section className="space-y-3">
                 <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Explore</h2>
                 <div className="flex flex-wrap gap-2">
-                    <Button variant="outline" onClick={() => navigate("/train")}>Fretboard Drills</Button>
+                    <Button variant="outline" onClick={() => openPracticeSetup("fretboardToNote", "home-explore-drills")}>Fretboard Drills</Button>
                     <Button variant="outline" onClick={() => navigate("/train")}>Technique</Button>
-                    <Button variant="outline" disabled title="Coming soon" className="cursor-not-allowed opacity-70">Theory (Soon)</Button>
-                    <Button variant="outline" disabled title="Coming soon" className="cursor-not-allowed opacity-70">Ear Training (Soon)</Button>
+                    <Button variant="outline" onClick={() => navigate("/theory/scales")}>Theory Tools</Button>
+                    <Button variant="outline" onClick={() => navigate("/ear-training/sound-to-fret")}>Ear Training</Button>
                 </div>
             </section>
         </div>

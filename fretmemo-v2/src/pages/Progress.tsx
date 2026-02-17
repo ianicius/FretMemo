@@ -201,7 +201,7 @@ export default function ProgressPage() {
             <Card>
                 <CardHeader className="flex flex-row items-start justify-between gap-4">
                     <div>
-                        <CardTitle className="text-xl">Your Fretboard</CardTitle>
+                        <CardTitle>Your Fretboard</CardTitle>
                         <CardDescription>
                             {stats.positionsPracticed} positions practiced • {stats.coverage}% coverage
                         </CardDescription>
@@ -265,7 +265,7 @@ export default function ProgressPage() {
                 <CardHeader className="space-y-3">
                     <div className="flex items-center justify-between gap-3">
                         <div>
-                            <CardTitle className="text-xl">Accuracy Trend</CardTitle>
+                            <CardTitle>Accuracy Trend</CardTitle>
                             <CardDescription>Track consistency over time</CardDescription>
                         </div>
                         <div className="flex items-center gap-2">
@@ -288,7 +288,7 @@ export default function ProgressPage() {
 
             <Card>
                 <CardHeader>
-                    <CardTitle className="text-xl flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2">
                         <Music2 className="h-5 w-5" />
                         Functional Ear
                     </CardTitle>
@@ -329,7 +329,7 @@ export default function ProgressPage() {
             <div className="grid gap-6 md:grid-cols-2">
                 <Card>
                     <CardHeader>
-                        <CardTitle className="text-xl">Focus Areas</CardTitle>
+                        <CardTitle>Focus Areas</CardTitle>
                         <CardDescription>Positions with the lowest retention</CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -369,7 +369,7 @@ export default function ProgressPage() {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle className="text-xl">Achievements</CardTitle>
+                        <CardTitle>Achievements</CardTitle>
                         <CardDescription>{unlockedAchievements.length} / {achievements.length} unlocked</CardDescription>
                     </CardHeader>
                     <CardContent>

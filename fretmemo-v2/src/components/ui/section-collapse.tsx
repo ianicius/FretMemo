@@ -38,18 +38,18 @@ export function SectionCollapse({
             <Button
                 type="button"
                 variant="ghost"
-                className="h-auto w-full justify-between rounded-xl px-3 py-2.5"
+                className="h-auto w-full justify-between rounded-xl px-4 py-3.5"
                 onClick={handleToggle}
             >
                 <div className="min-w-0 text-left">
-                    <h3 className="truncate text-xs font-semibold uppercase tracking-[0.08em] text-card-foreground">{title}</h3>
+                    <h3 className="truncate text-sm font-semibold text-card-foreground">{title}</h3>
                 </div>
                 <div className="flex items-center gap-2">
-                    {summary && <p className="text-[11px] text-muted-foreground">{summary}</p>}
+                    {summary && <p className="text-xs text-muted-foreground">{summary}</p>}
                     <ChevronDown className={cn("h-4 w-4 transition-transform", resolvedOpen && "rotate-180")} />
                 </div>
             </Button>
-            {resolvedOpen && <div className="border-t border-border p-3">{children}</div>}
+            {resolvedOpen && <div className="border-t border-border p-4">{children}</div>}
         </section>
     );
 }
