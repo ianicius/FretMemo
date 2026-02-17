@@ -10,15 +10,16 @@ function autoCorrelate(buffer: Float32Array, sampleRate: number): number | null 
     rms += val * val;
   }
   rms = Math.sqrt(rms / buffer.length);
-  if (rms < 0.01) return null;
+  // Guitar picked up by laptop mics is often quieter than voice.
+  if (rms < 0.0035) return null;
 
   // Trim silence
   let start = 0;
   let end = buffer.length - 1;
-  const threshold = 0.2;
+  const threshold = Math.min(0.2, Math.max(0.015, rms * 0.75));
   while (start < buffer.length / 2 && Math.abs(buffer[start]) < threshold) start++;
   while (end > buffer.length / 2 && Math.abs(buffer[end]) < threshold) end--;
-  const trimmed = buffer.slice(start, end);
+  const trimmed = end - start > 8 ? buffer.slice(start, end + 1) : buffer;
   if (trimmed.length < 2) return null;
 
   const size = trimmed.length;
@@ -73,21 +74,49 @@ interface UsePitchDetectorOptions {
   minHz?: number;
   maxHz?: number;
   stableFrames?: number;
+  deviceId?: string;
+}
+
+export interface AudioInputDeviceOption {
+  id: string;
+  label: string;
 }
 
 export function usePitchDetector(enabled: boolean, opts: UsePitchDetectorOptions = {}) {
-  const { minHz = 70, maxHz = 1200, stableFrames = 3 } = opts;
+  const { minHz = 70, maxHz = 1200, stableFrames = 3, deviceId } = opts;
 
   const [note, setNote] = useState<NoteName | null>(null);
   const [frequency, setFrequency] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isRunning, setIsRunning] = useState(false);
+  const [inputDevices, setInputDevices] = useState<AudioInputDeviceOption[]>([]);
+  const [activeDeviceId, setActiveDeviceId] = useState<string | null>(null);
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const rafRef = useRef<number | null>(null);
   const stableRef = useRef<{ note: NoteName | null; count: number }>({ note: null, count: 0 });
+
+  const refreshInputDevices = useCallback(async () => {
+    if (!navigator.mediaDevices?.enumerateDevices) {
+      setInputDevices([]);
+      return;
+    }
+
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const audioInputs = devices
+        .filter((entry) => entry.kind === "audioinput")
+        .map((entry, index) => ({
+          id: entry.deviceId,
+          label: entry.label || `Microphone ${index + 1}`,
+        }));
+      setInputDevices(audioInputs);
+    } catch {
+      setInputDevices([]);
+    }
+  }, []);
 
   const stop = useCallback(() => {
     if (rafRef.current !== null) {
@@ -121,8 +150,27 @@ export function usePitchDetector(enabled: boolean, opts: UsePitchDetectorOptions
     }
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const baseAudioConstraints: MediaTrackConstraints = {
+        autoGainControl: false,
+        echoCancellation: false,
+        noiseSuppression: false,
+      };
+      let stream: MediaStream;
+
+      try {
+        const requestedConstraints: MediaTrackConstraints = deviceId
+          ? { ...baseAudioConstraints, deviceId: { exact: deviceId } }
+          : baseAudioConstraints;
+        stream = await navigator.mediaDevices.getUserMedia({ audio: requestedConstraints });
+      } catch {
+        if (!deviceId) throw new Error("Unable to access default microphone.");
+        stream = await navigator.mediaDevices.getUserMedia({ audio: baseAudioConstraints });
+      }
+
       streamRef.current = stream;
+      const [track] = stream.getAudioTracks();
+      setActiveDeviceId(track?.getSettings().deviceId ?? null);
+      void refreshInputDevices();
 
       const AudioContextCtor =
         window.AudioContext ||
@@ -139,6 +187,7 @@ export function usePitchDetector(enabled: boolean, opts: UsePitchDetectorOptions
 
       const analyser = audioContext.createAnalyser();
       analyser.fftSize = 2048;
+      analyser.smoothingTimeConstant = 0.05;
       analyserRef.current = analyser;
 
       const source = audioContext.createMediaStreamSource(stream);
@@ -182,7 +231,22 @@ export function usePitchDetector(enabled: boolean, opts: UsePitchDetectorOptions
       stop();
       setError("Microphone access denied. Allow mic permission to use pitch detection.");
     }
-  }, [maxHz, minHz, stableFrames, stop]);
+  }, [deviceId, maxHz, minHz, refreshInputDevices, stableFrames, stop]);
+
+  useEffect(() => {
+    void refreshInputDevices();
+
+    const mediaDevices = navigator.mediaDevices;
+    if (!mediaDevices?.addEventListener) return undefined;
+
+    const handleDeviceChange = () => {
+      void refreshInputDevices();
+    };
+    mediaDevices.addEventListener("devicechange", handleDeviceChange);
+    return () => {
+      mediaDevices.removeEventListener("devicechange", handleDeviceChange);
+    };
+  }, [refreshInputDevices]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -190,5 +254,5 @@ export function usePitchDetector(enabled: boolean, opts: UsePitchDetectorOptions
     return () => stop();
   }, [enabled, start, stop]);
 
-  return { note, frequency, error, isRunning };
+  return { note, frequency, error, isRunning, inputDevices, activeDeviceId, refreshInputDevices };
 }

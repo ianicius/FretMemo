@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { NOTES, getNoteAt } from '@/lib/constants';
 import { useProgressStore } from './useProgressStore';
 import type { Position, NoteName } from '@/types/fretboard';
-import type { PracticeScaleType } from '@/types/settings';
+import type { PracticeScaleType, PracticeNoteSequence } from '@/types/settings';
 import { useSettingsStore } from './useSettingsStore';
 import { normalizeTuning } from '@/lib/tuning';
 import { trackEvent } from '@/lib/analytics';
@@ -10,6 +10,7 @@ import { trackEvent } from '@/lib/analytics';
 type PracticeMode = 'fretboardToNote' | 'tabToNote' | 'noteToTab' | 'playNotes' | 'playTab';
 export type NoteFilter = 'all' | 'naturals';
 export type ScaleType = PracticeScaleType;
+export type NoteSequence = PracticeNoteSequence;
 
 interface PracticeConstraints {
     fretRange: { min: number; max: number };
@@ -17,6 +18,7 @@ interface PracticeConstraints {
     noteFilter: NoteFilter;
     rootNote: NoteName;
     scaleType: ScaleType;
+    noteSequence: NoteSequence;
 }
 
 interface OccurrenceOptions {
@@ -27,8 +29,40 @@ interface OccurrenceOptions {
 
 const NATURAL_NOTES: NoteName[] = ["C", "D", "E", "F", "G", "A", "B"];
 const SCALE_TYPES: ScaleType[] = ['major', 'minor', 'majorPentatonic', 'minorPentatonic'];
+const NOTE_SEQUENCES: NoteSequence[] = [
+    'random',
+    'minorThirds',
+    'majorThirds',
+    'fourths',
+    'fifths',
+    'sevenths',
+    'majorScale',
+    'naturalMinorScale',
+    'majorPentatonic',
+    'minorPentatonic',
+];
+const INTERVAL_SEQUENCE_STEPS: Partial<Record<NoteSequence, number>> = {
+    minorThirds: 3,
+    majorThirds: 4,
+    fourths: 5,
+    fifths: 7,
+    sevenths: 10,
+};
+const SCALE_INTERVAL_MAP: Record<ScaleType, number[]> = {
+    major: [0, 2, 4, 5, 7, 9, 11],
+    minor: [0, 2, 3, 5, 7, 8, 10],
+    majorPentatonic: [0, 2, 4, 7, 9],
+    minorPentatonic: [0, 3, 5, 7, 10],
+};
+const SEQUENCE_TO_SCALE: Partial<Record<NoteSequence, ScaleType>> = {
+    majorScale: 'major',
+    naturalMinorScale: 'minor',
+    majorPentatonic: 'majorPentatonic',
+    minorPentatonic: 'minorPentatonic',
+};
 const DEFAULT_ROOT_NOTE: NoteName = "C";
 const DEFAULT_SCALE_TYPE: ScaleType = "major";
+const DEFAULT_NOTE_SEQUENCE: NoteSequence = "random";
 
 function getActiveTuning(): NoteName[] {
     return normalizeTuning(useSettingsStore.getState().quick.tuning);
@@ -133,6 +167,9 @@ function normalizePracticeConstraints(
     const scaleType = SCALE_TYPES.includes(constraints.scaleType as ScaleType)
         ? (constraints.scaleType as ScaleType)
         : DEFAULT_SCALE_TYPE;
+    const noteSequence = NOTE_SEQUENCES.includes(constraints.noteSequence as NoteSequence)
+        ? (constraints.noteSequence as NoteSequence)
+        : DEFAULT_NOTE_SEQUENCE;
 
     return {
         fretRange,
@@ -140,6 +177,7 @@ function normalizePracticeConstraints(
         noteFilter: constraints.noteFilter === 'naturals' ? 'naturals' : 'all',
         rootNote,
         scaleType,
+        noteSequence,
     };
 }
 
@@ -171,6 +209,13 @@ function getAvailableNotesForConstraints(constraints: PracticeConstraints): Note
     const options = getOccurrenceOptions(constraints, 12);
     const tuning = getActiveTuning();
     return getAllowedNotePool(constraints.noteFilter).filter((note) => getAllOccurrences(note, 12, options, tuning).length > 0);
+}
+
+function getScaleNotesForRoot(rootNote: NoteName, scaleType: ScaleType): NoteName[] {
+    const rootIndex = NOTES.indexOf(rootNote);
+    if (rootIndex < 0) return NOTES;
+    const intervals = SCALE_INTERVAL_MAP[scaleType] ?? SCALE_INTERVAL_MAP.major;
+    return intervals.map((offset) => NOTES[(rootIndex + offset) % NOTES.length]);
 }
 
 function pickWeighted<T>(items: T[], weights: number[]): T {
@@ -239,7 +284,14 @@ function pickNoteByLearningPriority(
     return pickWeighted(pool, weights);
 }
 
-function getInitialQuickSettings(): { tempo: number; isMetronomeOn: boolean; fretRange: { min: number; max: number }; rootNote: NoteName; scaleType: ScaleType } | null {
+function getInitialQuickSettings(): {
+    tempo: number;
+    isMetronomeOn: boolean;
+    fretRange: { min: number; max: number };
+    rootNote: NoteName;
+    scaleType: ScaleType;
+    noteSequence: NoteSequence;
+} | null {
     if (typeof window === 'undefined') return null;
 
     try {
@@ -260,12 +312,16 @@ function getInitialQuickSettings(): { tempo: number; isMetronomeOn: boolean; fre
         const scaleType = SCALE_TYPES.includes(quick.practiceScaleType as ScaleType)
             ? (quick.practiceScaleType as ScaleType)
             : DEFAULT_SCALE_TYPE;
+        const noteSequence = NOTE_SEQUENCES.includes(quick.practiceNoteSequence as NoteSequence)
+            ? (quick.practiceNoteSequence as NoteSequence)
+            : DEFAULT_NOTE_SEQUENCE;
         return {
             tempo: Math.max(30, Math.min(280, Math.round(tempo))),
             isMetronomeOn: Boolean(quick.isMetronomeOn),
             fretRange,
             rootNote,
             scaleType,
+            noteSequence,
         };
     } catch {
         return null;
@@ -279,6 +335,7 @@ const initialPracticeConstraints = normalizePracticeConstraints({
     noteFilter: 'all',
     rootNote: initialQuick?.rootNote ?? DEFAULT_ROOT_NOTE,
     scaleType: initialQuick?.scaleType ?? DEFAULT_SCALE_TYPE,
+    noteSequence: initialQuick?.noteSequence ?? DEFAULT_NOTE_SEQUENCE,
 });
 
 function getPromptForMode(mode: PracticeMode): string {
@@ -423,6 +480,7 @@ export const useGameStore = create<GameState>((set, get) => ({
                 fretRange: normalized.fretRange,
                 practiceRootNote: normalized.rootNote,
                 practiceScaleType: normalized.scaleType,
+                practiceNoteSequence: normalized.noteSequence,
             });
             return { practiceConstraints: normalized };
         }),
@@ -482,6 +540,7 @@ export const useGameStore = create<GameState>((set, get) => ({
             fret_max: practiceConstraints.fretRange.max,
             enabled_strings_count: practiceConstraints.enabledStrings.filter(Boolean).length,
             note_filter: practiceConstraints.noteFilter,
+            note_sequence: practiceConstraints.noteSequence,
         });
 
         // Start metronome only if it was armed
@@ -702,6 +761,70 @@ export const useGameStore = create<GameState>((set, get) => ({
             const usable = candidates.length > 0 ? candidates : source;
             return pickNoteByLearningPriority(usable, normalizedConstraints, tuning);
         };
+        const sequenceScaleType = SEQUENCE_TO_SCALE[normalizedConstraints.noteSequence] ?? normalizedConstraints.scaleType;
+        const orderedScaleNotes = getScaleNotesForRoot(normalizedConstraints.rootNote, sequenceScaleType);
+        const sequencePool: NoteName[] = (() => {
+            if (!SEQUENCE_TO_SCALE[normalizedConstraints.noteSequence]) {
+                return activeNotePool.length > 0 ? activeNotePool : NOTES;
+            }
+
+            const constrainedScalePool = orderedScaleNotes.filter((note) => activeNotePool.includes(note));
+            if (constrainedScalePool.length > 0) return constrainedScalePool;
+
+            const fallbackScalePool = orderedScaleNotes.filter((note) => fallbackPool.includes(note));
+            if (fallbackScalePool.length > 0) return fallbackScalePool;
+
+            return activeNotePool.length > 0 ? activeNotePool : NOTES;
+        })();
+
+        const pickScaleSequenceNote = (previous: NoteName | null | undefined): NoteName => {
+            if (sequencePool.length === 0) return NOTES[0];
+            if (!previous) return sequencePool[0];
+
+            const previousIndex = sequencePool.indexOf(previous);
+            if (previousIndex >= 0) {
+                return sequencePool[(previousIndex + 1) % sequencePool.length];
+            }
+
+            const fallback = sequencePool.find((note) => note !== previous);
+            return fallback ?? sequencePool[0];
+        };
+
+        const pickIntervalSequenceNote = (previous: NoteName | null | undefined, semitones: number): NoteName => {
+            if (sequencePool.length === 0) return NOTES[0];
+            if (!previous) return pickNote(sequencePool);
+
+            const previousIndex = NOTES.indexOf(previous);
+            if (previousIndex < 0) return pickNote(sequencePool, previous);
+
+            for (let step = 1; step <= NOTES.length; step += 1) {
+                const index = (previousIndex + (semitones * step)) % NOTES.length;
+                const candidate = NOTES[index];
+                if (sequencePool.includes(candidate) && (sequencePool.length === 1 || candidate !== previous)) {
+                    return candidate;
+                }
+            }
+
+            return pickNote(sequencePool, previous);
+        };
+
+        const pickNextPlayNote = (previous: NoteName | null | undefined): NoteName => {
+            const noteSequence = normalizedConstraints.noteSequence;
+            if (noteSequence === 'random') {
+                return pickNote(sequencePool, previous);
+            }
+
+            if (SEQUENCE_TO_SCALE[noteSequence]) {
+                return pickScaleSequenceNote(previous);
+            }
+
+            const interval = INTERVAL_SEQUENCE_STEPS[noteSequence];
+            if (!interval) {
+                return pickNote(sequencePool, previous);
+            }
+
+            return pickIntervalSequenceNote(previous, interval);
+        };
 
         if (mode === 'fretboardToNote' || mode === 'tabToNote') {
             const pool = activeNotePool.length > 0 ? activeNotePool : NOTES;
@@ -800,14 +923,9 @@ export const useGameStore = create<GameState>((set, get) => ({
         if (mode === 'playNotes') {
             const current = get().targetNote;
             const existingNext = get().nextNote;
-            const pool = activeNotePool.length > 0 ? activeNotePool : NOTES;
-            const pickNext = (avoid?: NoteName | null) => {
-                if (!avoid || pool.length <= 1) return pickNote(pool);
-                return pickNote(pool, avoid);
-            };
 
-            const nextCurrent = existingNext ?? pickNext(current);
-            const nextNext = pickNext(nextCurrent);
+            const nextCurrent = existingNext ?? pickNextPlayNote(current);
+            const nextNext = pickNextPlayNote(nextCurrent);
 
             set({
                 targetNote: nextCurrent,
@@ -824,16 +942,10 @@ export const useGameStore = create<GameState>((set, get) => ({
 
         const currentPos = get().targetPosition;
         const existingNextPos = get().nextPosition;
-        const pool = activeNotePool.length > 0 ? activeNotePool : NOTES;
-
-        const pickPlayTabNote = (avoid?: NoteName | null) => {
-            if (!avoid || pool.length <= 1) return pickNote(pool);
-            return pickNote(pool, avoid);
-        };
 
         const initPos = () => {
             for (let i = 0; i < 40; i += 1) {
-                const note = pickPlayTabNote();
+                const note = pickNextPlayNote(null);
                 const constrained = getAllOccurrences(note, 12, occurrenceOptions, tuning);
                 if (constrained.length > 0) {
                     return pickRandom(constrained);
@@ -846,7 +958,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         };
 
         const newCurrent = existingNextPos ?? currentPos ?? initPos();
-        const desiredNextNote = pickPlayTabNote(newCurrent.note);
+        const desiredNextNote = pickNextPlayNote(newCurrent.note);
         const newNext =
             pickClosestPosition(newCurrent, desiredNextNote, 12, occurrenceOptions, tuning) ??
             pickClosestPosition(newCurrent, desiredNextNote, 12, {}, tuning) ??

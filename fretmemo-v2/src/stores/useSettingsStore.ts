@@ -21,6 +21,7 @@ const DEFAULT_SETTINGS: AppSettings = {
         fretRange: { min: 0, max: 12 },
         practiceRootNote: 'C',
         practiceScaleType: 'major',
+        practiceNoteSequence: 'random',
     },
     full: {
         learning: {

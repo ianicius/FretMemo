@@ -75,7 +75,7 @@ const DRILLS: Array<{
         },
         {
             id: "playNotes",
-            title: "Note Names",
+            title: "Note Generator",
             difficulty: "beginner",
             priority: 2,
             source: "train-drills-play-note-names",

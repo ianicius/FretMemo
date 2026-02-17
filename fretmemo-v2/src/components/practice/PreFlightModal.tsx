@@ -7,11 +7,12 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { NOTES } from "@/lib/constants";
-import { useGameStore, type NoteFilter, type ScaleType } from "@/stores/useGameStore";
+import { useGameStore, type NoteFilter, type NoteSequence, type ScaleType } from "@/stores/useGameStore";
 import type { NoteName } from "@/types/fretboard";
-import { ChevronDown, Play, Settings2, X, Zap } from "lucide-react";
+import { ChevronDown, Mic, Play, Settings2, X, Zap } from "lucide-react";
 
 type PracticeMode = "fretboardToNote" | "tabToNote" | "noteToTab" | "playNotes" | "playTab";
+type PlaySessionMode = "scored" | "guitar";
 
 interface PreFlightModalProps {
     isOpen: boolean;
@@ -35,6 +36,8 @@ interface PreFlightModalProps {
     onRootNoteChange: (root: NoteName) => void;
     scaleType: ScaleType;
     onScaleTypeChange: (scaleType: ScaleType) => void;
+    noteSequence: NoteSequence;
+    onNoteSequenceChange: (sequence: NoteSequence) => void;
     onApplyPreset: (preset: {
         fretRange?: { min: number; max: number };
         enabledStrings?: boolean[];
@@ -42,6 +45,15 @@ interface PreFlightModalProps {
         rootNote?: NoteName;
         scaleType?: ScaleType;
     }) => void;
+    micEnabled?: boolean;
+    onMicEnabledChange?: (enabled: boolean) => void;
+    micError?: string | null;
+    audioInputDevices?: Array<{ id: string; label: string }>;
+    selectedAudioInputId?: string;
+    onAudioInputChange?: (deviceId: string) => void;
+    onRefreshAudioInputs?: () => void;
+    sessionMode?: PlaySessionMode;
+    onSessionModeChange?: (mode: PlaySessionMode) => void;
 }
 
 const MODE_CONFIG: Record<PracticeMode, { label: string; description: string }> = {
@@ -58,7 +70,7 @@ const MODE_CONFIG: Record<PracticeMode, { label: string; description: string }> 
         description: "Find the right position for each note.",
     },
     playNotes: {
-        label: "Note Names (Mic)",
+        label: "Note Generator (Mic)",
         description: "Play the prompted note on your guitar.",
     },
     playTab: {
@@ -74,6 +86,31 @@ const SCALE_TYPE_OPTIONS: Array<{ id: ScaleType; label: string }> = [
     { id: "majorPentatonic", label: "Major Pentatonic" },
     { id: "minorPentatonic", label: "Minor Pentatonic" },
 ];
+const NOTE_SEQUENCE_OPTIONS: Array<{
+    group: string;
+    items: Array<{ id: NoteSequence; label: string }>;
+}> = [
+        {
+            group: "Intervals",
+            items: [
+                { id: "random", label: "Random" },
+                { id: "minorThirds", label: "Minor Thirds" },
+                { id: "majorThirds", label: "Major Thirds" },
+                { id: "fourths", label: "Fourths" },
+                { id: "fifths", label: "Fifths" },
+                { id: "sevenths", label: "Sevenths" },
+            ],
+        },
+        {
+            group: "Scales",
+            items: [
+                { id: "majorScale", label: "Major Scale" },
+                { id: "naturalMinorScale", label: "Natural Minor Scale" },
+                { id: "majorPentatonic", label: "Major Pentatonic" },
+                { id: "minorPentatonic", label: "Minor Pentatonic" },
+            ],
+        },
+    ];
 
 const PRESET_OPTIONS: Array<{
     id: string;
@@ -130,10 +167,22 @@ export function PreFlightModal({
     onRootNoteChange,
     scaleType,
     onScaleTypeChange,
+    noteSequence,
+    onNoteSequenceChange,
     onApplyPreset,
+    micEnabled,
+    onMicEnabledChange,
+    micError,
+    audioInputDevices,
+    selectedAudioInputId,
+    onAudioInputChange,
+    onRefreshAudioInputs,
+    sessionMode,
+    onSessionModeChange,
 }: PreFlightModalProps) {
     const config = MODE_CONFIG[mode];
     const [showAdvanced, setShowAdvanced] = useState(false);
+    const isPlayMode = mode === "playNotes" || mode === "playTab";
     const allStringsEnabled = useMemo(() => Array.from({ length: tuning.length }, () => true), [tuning.length]);
     const stringToggleLabels = useMemo(
         () => tuning.map((note, index) => (index === 0 ? note.toLowerCase() : note)),
@@ -199,6 +248,100 @@ export function PreFlightModal({
                                 }}
                             />
                         </div>
+
+                        {isPlayMode && onMicEnabledChange && (
+                            <div className="space-y-3 rounded-lg border border-border/50 p-3">
+                                <div className="flex items-center justify-between">
+                                    <div className="space-y-0.5">
+                                        <span className="inline-flex items-center gap-2 text-sm">
+                                            <Mic className="h-4 w-4 text-muted-foreground" />
+                                            Microphone Input
+                                        </span>
+                                        <p className="text-xs text-muted-foreground">Enable this to detect played guitar notes.</p>
+                                    </div>
+                                    <Switch checked={Boolean(micEnabled)} onCheckedChange={onMicEnabledChange} />
+                                </div>
+
+                                {Boolean(micEnabled) && onAudioInputChange && (
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <Label className="text-xs">Input Device</Label>
+                                            {onRefreshAudioInputs && (
+                                                <Button type="button" variant="ghost" size="sm" className="h-6 px-2 text-[11px]" onClick={onRefreshAudioInputs}>
+                                                    Refresh
+                                                </Button>
+                                            )}
+                                        </div>
+                                        <select
+                                            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
+                                            value={selectedAudioInputId ?? ""}
+                                            onChange={(event) => onAudioInputChange(event.target.value)}
+                                        >
+                                            <option value="">System Default</option>
+                                            {(audioInputDevices ?? []).map((device) => (
+                                                <option key={device.id} value={device.id}>
+                                                    {device.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
+
+                                {micError && <p className="text-xs text-destructive">{micError}</p>}
+                            </div>
+                        )}
+
+                        {isPlayMode && onSessionModeChange && (
+                            <div className="space-y-2 rounded-lg border border-border/50 p-3">
+                                <Label className="text-sm">Session Mode</Label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <Button
+                                        type="button"
+                                        size="sm"
+                                        variant={(sessionMode ?? "scored") === "scored" ? "secondary" : "outline"}
+                                        className="h-8 text-xs"
+                                        onClick={() => onSessionModeChange("scored")}
+                                    >
+                                        Scored Session
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        size="sm"
+                                        variant={(sessionMode ?? "scored") === "guitar" ? "secondary" : "outline"}
+                                        className="h-8 text-xs"
+                                        onClick={() => onSessionModeChange("guitar")}
+                                    >
+                                        Guitar Mode
+                                    </Button>
+                                </div>
+                                <p className="text-xs text-muted-foreground">
+                                    {(sessionMode ?? "scored") === "guitar"
+                                        ? "No session limit. Keep playing until you stop manually."
+                                        : "Auto-finishes after target count and shows summary."}
+                                </p>
+                            </div>
+                        )}
+
+                        {isPlayMode && (
+                            <div className="space-y-2 rounded-lg border border-border/50 p-3">
+                                <Label className="text-sm">Note Sequence</Label>
+                                <select
+                                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
+                                    value={noteSequence}
+                                    onChange={(event) => onNoteSequenceChange(event.target.value as NoteSequence)}
+                                >
+                                    {NOTE_SEQUENCE_OPTIONS.map((group) => (
+                                        <optgroup key={group.group} label={group.group}>
+                                            {group.items.map((option) => (
+                                                <option key={option.id} value={option.id}>
+                                                    {option.label}
+                                                </option>
+                                            ))}
+                                        </optgroup>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
 
                         <div className="space-y-2">
                             <Label className="text-sm">Quick Presets</Label>
