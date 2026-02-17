@@ -1,10 +1,14 @@
-import { type ChangeEvent, useRef, useState } from "react";
+import { type ChangeEvent, useMemo, useRef, useState } from "react";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { useFeedbackStore, type AppFeedbackTone } from "@/stores/useFeedbackStore";
 import { useProgressStore } from "@/stores/useProgressStore";
+import { useRhythmDojoStore } from "@/stores/useRhythmDojoStore";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { downloadProgressExport, parseJsonFile } from "@/lib/progressTransfer";
 import { trackEvent } from "@/lib/analytics";
+import { NOTES } from "@/lib/constants";
+import { formatPitchClass } from "@/lib/noteNotation";
+import { TECHNIQUE_EXERCISES } from "@/data/techniqueExercises";
 import {
     INSTRUMENT_LABELS,
     getDefaultTuningForInstrument,
@@ -15,28 +19,67 @@ import {
     normalizeTuning,
 } from "@/lib/tuning";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { FormField } from "@/components/ui/form-field";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { SectionCollapse } from "@/components/ui/section-collapse";
-import { RotateCcw, Volume2, Gamepad2, GraduationCap, Palette, Guitar, Database, CircleHelp, Newspaper, HandHeart, Coffee, Mail, ExternalLink } from "lucide-react";
+import { RotateCcw, Volume2, Gamepad2, GraduationCap, Palette, Guitar, Database, CircleHelp, Newspaper, HandHeart, Coffee, Mail, ExternalLink, Search, Settings2 } from "lucide-react";
 import { EXTERNAL_LINKS } from "@/lib/externalLinks";
 
 type ConfirmAction = "reset-settings" | "replace-progress-import" | "reset-progress" | null;
+type SettingsScope = "global" | "modules" | "data";
+
+const PRACTICE_SCALE_OPTIONS = [
+    { id: "major", label: "Major" },
+    { id: "minor", label: "Minor" },
+    { id: "majorPentatonic", label: "Major Pentatonic" },
+    { id: "minorPentatonic", label: "Minor Pentatonic" },
+] as const;
+
+const PRACTICE_NOTE_SEQUENCE_OPTIONS = [
+    { id: "random", label: "Random" },
+    { id: "minorThirds", label: "Minor Thirds" },
+    { id: "majorThirds", label: "Major Thirds" },
+    { id: "fourths", label: "Fourths" },
+    { id: "fifths", label: "Fifths" },
+    { id: "sevenths", label: "Sevenths" },
+    { id: "majorScale", label: "Major Scale" },
+    { id: "naturalMinorScale", label: "Natural Minor Scale" },
+    { id: "majorPentatonic", label: "Major Pentatonic" },
+    { id: "minorPentatonic", label: "Minor Pentatonic" },
+] as const;
+
+const EAR_INTERVAL_OPTIONS = ["P1", "m2", "M2", "m3", "M3", "P4", "TT", "P5", "m6", "M6", "m7", "M7", "P8"] as const;
+
+function clampInputLatency(value: number): number {
+    if (!Number.isFinite(value)) return 0;
+    return Math.max(0, Math.min(250, Math.round(value)));
+}
 
 export default function Settings() {
     const quick = useSettingsStore((state) => state.quick);
     const full = useSettingsStore((state) => state.full);
+    const modules = useSettingsStore((state) => state.modules);
     const updateQuickSettings = useSettingsStore((state) => state.updateQuickSettings);
     const updateFullSettings = useSettingsStore((state) => state.updateFullSettings);
+    const updateModuleSettings = useSettingsStore((state) => state.updateModuleSettings);
+    const resetModuleSettings = useSettingsStore((state) => state.resetModuleSettings);
     const resetSettings = useSettingsStore((state) => state.resetSettings);
     const importProgressData = useProgressStore((state) => state.importProgressData);
     const resetProgressData = useProgressStore((state) => state.resetProgressData);
+    const streakFreezes = useProgressStore((state) => state.streakFreezes);
+    const rhythmInputLatencyMs = useRhythmDojoStore((state) => state.inputLatencyMs);
+    const setRhythmInputLatencyMs = useRhythmDojoStore((state) => state.setInputLatencyMs);
     const enqueueFeedback = useFeedbackStore((state) => state.enqueue);
     const importFileInputRef = useRef<HTMLInputElement | null>(null);
     const importModeRef = useRef<"merge" | "replace">("merge");
     const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [activeScope, setActiveScope] = useState<SettingsScope>("global");
 
     const showFeedback = (message: string, tone: AppFeedbackTone = "info") => {
         enqueueFeedback(message, tone);
@@ -159,6 +202,30 @@ export default function Settings() {
     })();
     const selectedInstrumentLabel = INSTRUMENT_LABELS[instrumentType];
     const selectedTuningSummary = selectedTuning.slice().reverse().join("-");
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+    const matchesQuery = (keywords: string[]) => {
+        if (!normalizedQuery) return true;
+        return keywords.some((keyword) => keyword.toLowerCase().includes(normalizedQuery));
+    };
+    const techniqueStartingEntries = useMemo(
+        () => Object.entries(modules.technique.startingBpm ?? {}).sort(([left], [right]) => left.localeCompare(right)),
+        [modules.technique.startingBpm]
+    );
+
+    const showGlobalInstrument = matchesQuery(["profile", "instrument", "tuning", "notation", "left-handed", "fret"]);
+    const showGlobalLearning = matchesQuery(["learning", "session", "auto-advance", "hints", "difficulty", "repetition"]);
+    const showGlobalAudio = matchesQuery(["audio", "volume", "sound", "pitch", "input"]);
+    const showGlobalAppearance = matchesQuery(["appearance", "theme", "display", "layer"]);
+    const showGlobalGame = matchesQuery(["game", "gamification", "xp", "streak", "achievement"]);
+    const showModulePractice = matchesQuery(["practice defaults", "tempo", "metronome", "root", "scale", "sequence", "fret range"]);
+    const showModuleTechnique = matchesQuery(["technique defaults", "starting bpm", "history", "session"]);
+    const showModuleEar = matchesQuery(["ear training", "interval", "direction"]);
+    const showModuleRhythm = matchesQuery(["rhythm", "latency", "tap", "strum", "groove"]);
+    const showData = matchesQuery(["data", "backup", "import", "export", "reset"]);
+    const showHelp = matchesQuery(["help", "faq", "blog", "contact", "support"]);
+    const hasVisibleGlobal = showGlobalInstrument || showGlobalLearning || showGlobalAudio || showGlobalAppearance || showGlobalGame;
+    const hasVisibleModules = showModulePractice || showModuleTechnique || showModuleEar || showModuleRhythm;
+    const hasVisibleData = showData || showHelp;
 
     const handleConfirmDialogOpenChange = (open: boolean) => {
         if (!open) {
@@ -168,17 +235,46 @@ export default function Settings() {
 
     return (
         <div className="space-y-6 pb-8">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-                    <p className="text-muted-foreground">Manage your preferences and configuration.</p>
+                    <h1 className="type-display">Settings</h1>
+                    <p className="type-body text-muted-foreground">Manage global defaults, module defaults, and safety controls.</p>
                 </div>
                 <Button variant="outline" onClick={handleReset} className="text-destructive hover:text-destructive">
                     <RotateCcw className="mr-2 h-4 w-4" />
-                    Reset Defaults
+                    Reset All Defaults
                 </Button>
             </div>
 
+            <Card>
+                <CardContent className="space-y-4 pt-6">
+                    <div className="relative">
+                        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                            value={searchQuery}
+                            onChange={(event) => setSearchQuery(event.target.value)}
+                            placeholder="Search settings (e.g. tuning, metronome, latency)"
+                            className="pl-9"
+                        />
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        <Button type="button" size="sm" variant={activeScope === "global" ? "secondary" : "outline"} onClick={() => setActiveScope("global")}>
+                            Global Defaults
+                        </Button>
+                        <Button type="button" size="sm" variant={activeScope === "modules" ? "secondary" : "outline"} onClick={() => setActiveScope("modules")}>
+                            Module Defaults
+                        </Button>
+                        <Button type="button" size="sm" variant={activeScope === "data" ? "secondary" : "outline"} onClick={() => setActiveScope("data")}>
+                            Data & Support
+                        </Button>
+                    </div>
+                    <p className="type-caption text-muted-foreground">
+                        Global defaults affect the whole app. Module defaults prefill specific training modes.
+                    </p>
+                </CardContent>
+            </Card>
+
+            {activeScope === "global" && showGlobalInstrument && (
             <SectionCollapse
                 title="Instrument"
                 summary={`${selectedInstrumentLabel} · ${selectedTuning.length} strings`}
@@ -193,14 +289,12 @@ export default function Settings() {
                         <CardDescription>Configure instrument family, tuning, and handedness.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                        <div className="space-y-2">
-                            <div className="space-y-0.5">
-                                <Label htmlFor="instrument-type">Instrument Type</Label>
-                                <p className="text-sm text-muted-foreground">Changes available tuning presets and string count.</p>
-                            </div>
-                            <select
-                                id="instrument-type"
-                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        <FormField
+                            id="instrument-type"
+                            label="Instrument Type"
+                            hint="Changes available tuning presets and string count."
+                        >
+                            <Select
                                 value={instrumentType}
                                 onChange={(event) => {
                                     const nextType = normalizeInstrumentType(event.target.value);
@@ -213,17 +307,15 @@ export default function Settings() {
                                         {label}
                                     </option>
                                 ))}
-                            </select>
-                        </div>
+                            </Select>
+                        </FormField>
 
-                        <div className="space-y-2">
-                            <div className="space-y-0.5">
-                                <Label htmlFor="tuning-preset">Tuning Preset</Label>
-                                <p className="text-sm text-muted-foreground">Applies to all fretboard-based exercises.</p>
-                            </div>
-                            <select
-                                id="tuning-preset"
-                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        <FormField
+                            id="tuning-preset"
+                            label="Tuning Preset"
+                            hint="Applies to all fretboard-based exercises."
+                        >
+                            <Select
                                 value={selectedTuningPresetId}
                                 onChange={(event) => {
                                     const presetId = event.target.value;
@@ -237,11 +329,11 @@ export default function Settings() {
                                     </option>
                                 ))}
                                 <option value="custom">Custom (Current)</option>
-                            </select>
-                            <p className="text-xs font-mono text-muted-foreground">
+                            </Select>
+                            <p className="type-mono text-muted-foreground">
                                 Active tuning ({selectedTuning.length} strings): {selectedTuningSummary}
                             </p>
-                        </div>
+                        </FormField>
 
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
@@ -294,7 +386,9 @@ export default function Settings() {
                     </CardContent>
                 </Card>
             </SectionCollapse>
+            )}
 
+            {activeScope === "global" && showGlobalLearning && (
             <SectionCollapse
                 title="Practice"
                 summary={`${quick.tempo} BPM · ${full.learning.autoAdvance ? "Auto-Advance On" : "Auto-Advance Off"}`}
@@ -309,6 +403,33 @@ export default function Settings() {
                         <CardDescription>Adjust how the application helps you learn.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
+                        <div className="space-y-2">
+                            <div className="space-y-0.5">
+                                <Label>Difficulty Mode</Label>
+                                <p className="text-sm text-muted-foreground">Adaptive mode reacts to your results. Manual keeps fixed behavior.</p>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2 sm:w-72">
+                                {[
+                                    { id: "adaptive", label: "Adaptive" },
+                                    { id: "manual", label: "Manual" },
+                                ].map((difficultyOption) => (
+                                    <Button
+                                        key={difficultyOption.id}
+                                        type="button"
+                                        size="sm"
+                                        variant={full.learning.difficultyMode === difficultyOption.id ? "secondary" : "outline"}
+                                        onClick={() => updateFullSettings({
+                                            learning: {
+                                                ...full.learning,
+                                                difficultyMode: difficultyOption.id as typeof full.learning.difficultyMode,
+                                            },
+                                        })}
+                                    >
+                                        {difficultyOption.label}
+                                    </Button>
+                                ))}
+                            </div>
+                        </div>
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
                                 <Label>Auto-Advance</Label>
@@ -342,7 +463,9 @@ export default function Settings() {
                     </CardContent>
                 </Card>
             </SectionCollapse>
+            )}
 
+            {activeScope === "global" && showGlobalAudio && (
             <SectionCollapse
                 title="Audio"
                 summary={`Volume ${Math.round(full.audio.volume * 100)}% · ±${full.audio.pitchTolerance} cents`}
@@ -369,6 +492,21 @@ export default function Settings() {
                                 onValueChange={(vals) => updateFullSettings({ audio: { ...full.audio, volume: vals[0] / 100 } })}
                             />
                         </div>
+                        <FormField id="instrument-sound" label="Playback Instrument Sound" hint="Used for generated tones and reference notes.">
+                            <Select
+                                value={full.audio.instrumentSound}
+                                onChange={(event) => updateFullSettings({
+                                    audio: {
+                                        ...full.audio,
+                                        instrumentSound: event.target.value as typeof full.audio.instrumentSound,
+                                    },
+                                })}
+                            >
+                                <option value="acoustic">Acoustic</option>
+                                <option value="electric">Electric</option>
+                                <option value="clean">Clean</option>
+                            </Select>
+                        </FormField>
                         <div className="space-y-4">
                             <div className="flex justify-between">
                                 <Label>Pitch Tolerance (cents)</Label>
@@ -386,7 +524,9 @@ export default function Settings() {
                     </CardContent>
                 </Card>
             </SectionCollapse>
+            )}
 
+            {activeScope === "global" && showGlobalAppearance && (
             <SectionCollapse
                 title="Appearance"
                 summary={`${full.display.theme === "dark" ? "Dark" : full.display.theme === "light" ? "Light" : "System"} · ${full.display.defaultLayer}`}
@@ -455,7 +595,9 @@ export default function Settings() {
                     </CardContent>
                 </Card>
             </SectionCollapse>
+            )}
 
+            {activeScope === "global" && showGlobalGame && (
             <SectionCollapse
                 title="Game"
                 summary={`${full.gamification.showXPNotes ? "XP Notes On" : "XP Notes Off"} · ${full.gamification.showStreakWarnings ? "Warnings On" : "Warnings Off"}`}
@@ -489,6 +631,16 @@ export default function Settings() {
                                 onCheckedChange={(checked) => updateFullSettings({ gamification: { ...full.gamification, showStreakWarnings: checked } })}
                             />
                         </div>
+                        <div className="flex items-center justify-between">
+                            <div className="space-y-0.5">
+                                <Label>Achievement Toasts</Label>
+                                <p className="text-sm text-muted-foreground">Show unlock notifications during practice sessions.</p>
+                            </div>
+                            <Switch
+                                checked={full.gamification.showAchievements}
+                                onCheckedChange={(checked) => updateFullSettings({ gamification: { ...full.gamification, showAchievements: checked } })}
+                            />
+                        </div>
                         <div className="rounded-lg border border-border bg-muted/30 p-3">
                             <div className="flex items-center justify-between">
                                 <div className="space-y-0.5">
@@ -496,14 +648,252 @@ export default function Settings() {
                                     <p className="text-xs text-muted-foreground">Protect your streak if you miss a day.</p>
                                 </div>
                                 <span className="text-lg font-bold text-primary tabular-nums">
-                                    {useProgressStore.getState().streakFreezes}
+                                    {streakFreezes}
                                 </span>
                             </div>
                         </div>
                     </CardContent>
                 </Card>
             </SectionCollapse>
+            )}
 
+            {activeScope === "modules" && showModulePractice && (
+            <SectionCollapse
+                title="Practice Module Defaults"
+                summary={`${quick.tempo} BPM · ${quick.isMetronomeOn ? "Metronome On" : "Metronome Off"}`}
+                defaultOpen
+            >
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Settings2 className="h-5 w-5" />
+                            Practice Defaults
+                        </CardTitle>
+                        <CardDescription>Prefill Session Setup for fretboard practice modes.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <div className="space-y-4">
+                            <div className="flex justify-between">
+                                <Label>Default Tempo</Label>
+                                <span className="text-sm text-muted-foreground">{quick.tempo} BPM</span>
+                            </div>
+                            <Slider
+                                value={[quick.tempo]}
+                                min={30}
+                                max={280}
+                                step={1}
+                                onValueChange={([value]) => updateQuickSettings({ tempo: value })}
+                            />
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                            <div className="space-y-0.5">
+                                <Label>Metronome Armed by Default</Label>
+                                <p className="text-sm text-muted-foreground">Enable click track automatically on session start.</p>
+                            </div>
+                            <Switch
+                                checked={quick.isMetronomeOn}
+                                onCheckedChange={(checked) => updateQuickSettings({ isMetronomeOn: checked })}
+                            />
+                        </div>
+
+                        <div className="space-y-4">
+                            <div className="flex justify-between">
+                                <Label>Default Fret Range</Label>
+                                <span className="text-sm text-muted-foreground">{quick.fretRange.min} - {quick.fretRange.max}</span>
+                            </div>
+                            <Slider
+                                value={[quick.fretRange.min, quick.fretRange.max]}
+                                min={0}
+                                max={12}
+                                step={1}
+                                onValueChange={(values) => {
+                                    if (values.length < 2) return;
+                                    const min = Math.min(values[0], values[1]);
+                                    const max = Math.max(values[0], values[1]);
+                                    updateQuickSettings({ fretRange: { min, max } });
+                                }}
+                            />
+                        </div>
+
+                        <FormField id="practice-root-note" label="Default Root Note">
+                            <Select
+                                value={quick.practiceRootNote}
+                                onChange={(event) => updateQuickSettings({ practiceRootNote: event.target.value as typeof quick.practiceRootNote })}
+                            >
+                                {NOTES.map((note) => (
+                                    <option key={note} value={note}>
+                                        {formatPitchClass(note, full.instrument.notation)}
+                                    </option>
+                                ))}
+                            </Select>
+                        </FormField>
+
+                        <div className="space-y-2">
+                            <div className="space-y-0.5">
+                                <Label>Default Scale Type</Label>
+                                <p className="text-sm text-muted-foreground">Used when scale constraints are enabled.</p>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                                {PRACTICE_SCALE_OPTIONS.map((scaleOption) => (
+                                    <Button
+                                        key={scaleOption.id}
+                                        type="button"
+                                        size="sm"
+                                        variant={quick.practiceScaleType === scaleOption.id ? "secondary" : "outline"}
+                                        onClick={() => updateQuickSettings({ practiceScaleType: scaleOption.id })}
+                                    >
+                                        {scaleOption.label}
+                                    </Button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <FormField id="practice-note-sequence" label="Default Note Sequence">
+                            <Select
+                                value={quick.practiceNoteSequence}
+                                onChange={(event) => updateQuickSettings({ practiceNoteSequence: event.target.value as typeof quick.practiceNoteSequence })}
+                            >
+                                {PRACTICE_NOTE_SEQUENCE_OPTIONS.map((sequenceOption) => (
+                                    <option key={sequenceOption.id} value={sequenceOption.id}>
+                                        {sequenceOption.label}
+                                    </option>
+                                ))}
+                            </Select>
+                        </FormField>
+                    </CardContent>
+                </Card>
+            </SectionCollapse>
+            )}
+
+            {activeScope === "modules" && (showModuleTechnique || showModuleEar || showModuleRhythm) && (
+            <SectionCollapse
+                title="Training Module Defaults"
+                summary={`${techniqueStartingEntries.length} technique BPM overrides · ${modules.earTraining.intervals.length} ear intervals`}
+            >
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Technique, Ear Training & Rhythm</CardTitle>
+                        <CardDescription>Module-specific defaults and persisted training calibration.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-8">
+                        {showModuleTechnique && (
+                            <div className="space-y-4">
+                                <div className="space-y-0.5">
+                                    <Label>Technique Starting BPM Overrides</Label>
+                                    <p className="text-sm text-muted-foreground">Saved per exercise when tempo is adjusted in Technique mode.</p>
+                                </div>
+                                {techniqueStartingEntries.length === 0 ? (
+                                    <p className="text-sm text-muted-foreground">No exercise-specific starting BPM overrides yet.</p>
+                                ) : (
+                                    <div className="grid gap-2 sm:grid-cols-2">
+                                        {techniqueStartingEntries.map(([exerciseId, bpm]) => (
+                                            <div key={exerciseId} className="rounded-md border border-border bg-muted/20 px-3 py-2">
+                                                <p className="text-sm font-medium">{TECHNIQUE_EXERCISES[exerciseId]?.name ?? exerciseId}</p>
+                                                <p className="type-mono text-muted-foreground">{bpm} BPM</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                                <div className="flex flex-wrap gap-2">
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => updateModuleSettings("technique", { startingBpm: {} })}
+                                    >
+                                        Clear BPM Overrides
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => updateModuleSettings("technique", {
+                                            bestBpm: {},
+                                            sessionsCompleted: {},
+                                            lastPracticedAt: {},
+                                        })}
+                                    >
+                                        Clear Technique Stats
+                                    </Button>
+                                    <Button variant="outline" onClick={() => resetModuleSettings("technique")}>
+                                        Reset Technique Module
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+
+                        {showModuleEar && (
+                            <div className="space-y-4">
+                                <FormField id="ear-direction" label="Ear Training Default Direction">
+                                    <Select
+                                        value={modules.earTraining.direction}
+                                        onChange={(event) => updateModuleSettings("earTraining", {
+                                            direction: event.target.value as typeof modules.earTraining.direction,
+                                        })}
+                                    >
+                                        <option value="ascending">Ascending</option>
+                                        <option value="descending">Descending</option>
+                                        <option value="harmonic">Harmonic</option>
+                                    </Select>
+                                </FormField>
+                                <div className="space-y-2">
+                                    <div className="space-y-0.5">
+                                        <Label>Active Ear Intervals</Label>
+                                        <p className="text-sm text-muted-foreground">At least one interval must stay enabled.</p>
+                                    </div>
+                                    <div className="grid grid-cols-4 gap-2 sm:grid-cols-7">
+                                        {EAR_INTERVAL_OPTIONS.map((interval) => {
+                                            const active = modules.earTraining.intervals.includes(interval);
+                                            return (
+                                                <Button
+                                                    key={interval}
+                                                    type="button"
+                                                    size="sm"
+                                                    variant={active ? "secondary" : "outline"}
+                                                    onClick={() => {
+                                                        const current = modules.earTraining.intervals;
+                                                        const next = current.includes(interval)
+                                                            ? current.filter((item) => item !== interval)
+                                                            : [...current, interval];
+                                                        if (next.length === 0) return;
+                                                        const ordered = EAR_INTERVAL_OPTIONS.filter((option) => next.includes(option));
+                                                        updateModuleSettings("earTraining", { intervals: ordered });
+                                                    }}
+                                                >
+                                                    {interval}
+                                                </Button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                                <Button variant="outline" onClick={() => resetModuleSettings("earTraining")}>Reset Ear Defaults</Button>
+                            </div>
+                        )}
+
+                        {showModuleRhythm && (
+                            <div className="space-y-4">
+                                <div className="flex justify-between">
+                                    <Label>Rhythm Input Latency Compensation</Label>
+                                    <span className="text-sm text-muted-foreground">{rhythmInputLatencyMs} ms</span>
+                                </div>
+                                <Slider
+                                    value={[rhythmInputLatencyMs]}
+                                    min={0}
+                                    max={250}
+                                    step={5}
+                                    onValueChange={([value]) => setRhythmInputLatencyMs(clampInputLatency(value))}
+                                />
+                                <p className="text-xs text-muted-foreground">
+                                    Increase this if taps are consistently marked late despite feeling on-beat.
+                                </p>
+                                <Button variant="outline" onClick={() => setRhythmInputLatencyMs(0)}>
+                                    Reset Latency to 0 ms
+                                </Button>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+            </SectionCollapse>
+            )}
+
+            {activeScope === "data" && showData && (
             <SectionCollapse
                 title="Data"
                 summary="Export · Import · Reset"
@@ -560,7 +950,9 @@ export default function Settings() {
                     </CardContent>
                 </Card>
             </SectionCollapse>
+            )}
 
+            {activeScope === "data" && showHelp && (
             <SectionCollapse
                 title="Help"
                 summary="FAQ · Blog · Contact"
@@ -614,6 +1006,32 @@ export default function Settings() {
                     </CardContent>
                 </Card>
             </SectionCollapse>
+            )}
+
+            {activeScope === "global" && !hasVisibleGlobal && (
+                <Card>
+                    <CardContent className="py-10 text-center">
+                        <p className="type-body text-muted-foreground">No global settings match "{searchQuery.trim()}".</p>
+                        <Button variant="outline" className="mt-4" onClick={() => setSearchQuery("")}>Clear Search</Button>
+                    </CardContent>
+                </Card>
+            )}
+            {activeScope === "modules" && !hasVisibleModules && (
+                <Card>
+                    <CardContent className="py-10 text-center">
+                        <p className="type-body text-muted-foreground">No module settings match "{searchQuery.trim()}".</p>
+                        <Button variant="outline" className="mt-4" onClick={() => setSearchQuery("")}>Clear Search</Button>
+                    </CardContent>
+                </Card>
+            )}
+            {activeScope === "data" && !hasVisibleData && (
+                <Card>
+                    <CardContent className="py-10 text-center">
+                        <p className="type-body text-muted-foreground">No data/support settings match "{searchQuery.trim()}".</p>
+                        <Button variant="outline" className="mt-4" onClick={() => setSearchQuery("")}>Clear Search</Button>
+                    </CardContent>
+                </Card>
+            )}
 
             {confirmDialogConfig && (
                 <ConfirmDialog

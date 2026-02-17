@@ -199,6 +199,12 @@ function sortCatalogCards<T extends { title: string; difficulty: TechniqueDiffic
     });
 }
 
+function getAverageMastery(items: Array<{ mastery: number }>): number {
+    if (items.length === 0) return 0;
+    const total = items.reduce((sum, item) => sum + item.mastery, 0);
+    return Math.round(total / items.length);
+}
+
 export default function Library() {
     const navigate = useNavigate();
     const location = useLocation();
@@ -406,6 +412,23 @@ export default function Library() {
             .filter((card): card is NonNullable<typeof card> => Boolean(card));
     }, [drillCards, pinnedIds, rhythmCards, techniqueCards]);
 
+    const drillSummary = useMemo(
+        () => `${drillCards.length} modes • ${getAverageMastery(drillCards)}% avg`,
+        [drillCards]
+    );
+    const techniqueSummary = useMemo(
+        () => `${techniqueCards.length} exercises • ${getAverageMastery(techniqueCards)}% avg`,
+        [techniqueCards]
+    );
+    const rhythmSummary = useMemo(
+        () => `${rhythmCards.length} modes • ${getAverageMastery(rhythmCards)}% avg`,
+        [rhythmCards]
+    );
+    const pinnedSummary = useMemo(() => {
+        const avg = getAverageMastery(pinnedCards);
+        return `${pinnedCards.length}/${maxPins} • ${avg}% avg`;
+    }, [maxPins, pinnedCards]);
+
     const openPracticeSetup = (mode: PracticeMode, source: string) => {
         navigate("/practice", {
             state: {
@@ -427,7 +450,7 @@ export default function Library() {
 
             <SectionCollapse
                 title="Pinned"
-                summary={`${pinnedCards.length}/${maxPins}`}
+                summary={pinnedSummary}
                 open={sectionsOpen.pinned}
                 onOpenChange={(nextOpen) => handleSectionOpenChange("pinned", nextOpen)}
             >
@@ -472,7 +495,7 @@ export default function Library() {
 
             <SectionCollapse
                 title="Fretboard Drills"
-                summary={`${drillCards.length} modes`}
+                summary={drillSummary}
                 open={sectionsOpen.drills}
                 onOpenChange={(nextOpen) => handleSectionOpenChange("drills", nextOpen)}
             >
@@ -511,7 +534,7 @@ export default function Library() {
 
             <SectionCollapse
                 title="Technique"
-                summary={`${techniqueCards.length} exercises`}
+                summary={techniqueSummary}
                 open={sectionsOpen.technique}
                 onOpenChange={(nextOpen) => handleSectionOpenChange("technique", nextOpen)}
             >
@@ -650,7 +673,7 @@ export default function Library() {
 
             <SectionCollapse
                 title="Rhythm Dojo"
-                summary={`${rhythmCards.length} modes`}
+                summary={rhythmSummary}
                 open={sectionsOpen.rhythm}
                 onOpenChange={(nextOpen) => handleSectionOpenChange("rhythm", nextOpen)}
             >
