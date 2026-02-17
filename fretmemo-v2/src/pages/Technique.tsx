@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { ContextPill } from "@/components/ui/context-pill";
 import { Fretboard } from "@/components/fretboard/Fretboard";
@@ -460,6 +459,12 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
     const activePermutationPattern = PERMUTATIONS[resolvedPermutationIndex]?.pattern ?? PERMUTATIONS[0].pattern;
     const activePermutationTier = PERMUTATIONS[resolvedPermutationIndex]?.tier ?? 1;
     const isPermutationExercise = exerciseId === "permutation";
+    const hasExerciseSpecificSetup =
+        isPermutationExercise ||
+        exerciseId === "diagonal" ||
+        exerciseId === "stringskip" ||
+        exerciseId === "legato" ||
+        exerciseId === "linear";
     const stringSkipSequence = STRING_SKIP_PATTERNS[stringSkipPattern];
     const activeTrillPair = LEGATO_TRILL_PAIRS[legatoTrillPair];
     const defaultPatternLabel = useMemo(() => {
@@ -1400,20 +1405,20 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
                                     )}
                                 </div>
 
-                                <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-3">
                                     <div className="flex items-center gap-2">
                                         <Settings2 className="w-4 h-4 text-muted-foreground" />
                                         <span className="text-sm font-medium min-w-[60px]">{isPlaying ? currentBpm : bpm} BPM</span>
                                     </div>
-                                    <Slider
-                                        value={[bpm]}
-                                        onValueChange={([value]) => handleBpmChange(value)}
-                                        min={30}
-                                        max={200}
-                                        step={5}
-                                        className="w-32"
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setShowSetupDialog(true)}
                                         disabled={isPlaying}
-                                    />
+                                    >
+                                        <Settings2 className="mr-2 h-4 w-4" />
+                                        Session Setup
+                                    </Button>
                                 </div>
                             </div>
                         </CardContent>
@@ -1437,8 +1442,56 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
                             </ol>
                         </CardContent>
                     </Card>
-                    <TechniqueSettingsCard
+                    <TechniqueStatusCard
+                        currentStringLabel={stringLabels[currentString] ?? "-"}
+                        currentStep={currentStep}
+                        tempoBpm={isPlaying ? currentBpm : bpm}
+                        speedUpEnabled={speedUpEnabled}
+                        speedUpAmount={speedUpAmount}
+                        speedUpInterval={speedUpInterval}
                         isPlaying={isPlaying}
+                        nextIncreaseInBeats={Math.max(0, speedUpInterval - speedUpBeatCounter)}
+                        showPermutationMeta={isPermutationExercise}
+                        permutationModeLabel={PERMUTATION_MODE_LABELS[permutationMode]}
+                        permutationTierLabel={
+                            permutationTier === "all"
+                                ? `All (T${activePermutationTier})`
+                                : `Tier ${activePermutationTier}`
+                        }
+                        permutationStringsToPlay={permutationStringsToPlay}
+                        permutationDirection={permutationDirection}
+                        techniqueCue={techniqueCue}
+                        displayedPatternLabel={displayedPatternLabel}
+                    />
+
+                </div>
+            </div>
+
+            <TechniqueSetupDialog
+                isOpen={showSetupDialog}
+                onOpenChange={setShowSetupDialog}
+                onStart={handleStartFromSetup}
+                exerciseName={exercise.name}
+                exerciseDescription={exercise.description}
+                bpm={bpm}
+                onBpmChange={handleBpmChange}
+                stepMode={stepMode}
+                onStepModeChange={setStepMode}
+                startFret={startFret}
+                onStartFretChange={handleStartFretChange}
+                speedUpEnabled={speedUpEnabled}
+                onSpeedUpEnabledChange={setSpeedUpEnabled}
+                speedUpAmount={speedUpAmount}
+                onSpeedUpAmountChange={setSpeedUpAmount}
+                speedUpInterval={speedUpInterval}
+                onSpeedUpIntervalChange={setSpeedUpInterval}
+                advancedLabel="Exercise Advanced"
+                advancedContent={hasExerciseSpecificSetup ? (
+                    <TechniqueSettingsCard
+                        isPlaying={false}
+                        renderContainer={false}
+                        showCoreControls={false}
+                        showSpeedUpControls={false}
                         stepMode={stepMode}
                         onStepModeChange={setStepMode}
                         startFret={startFret}
@@ -1510,49 +1563,7 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
                         speedUpInterval={speedUpInterval}
                         onSpeedUpIntervalChange={setSpeedUpInterval}
                     />
-                    <TechniqueStatusCard
-                        currentStringLabel={stringLabels[currentString] ?? "-"}
-                        currentStep={currentStep}
-                        tempoBpm={isPlaying ? currentBpm : bpm}
-                        speedUpEnabled={speedUpEnabled}
-                        speedUpAmount={speedUpAmount}
-                        speedUpInterval={speedUpInterval}
-                        isPlaying={isPlaying}
-                        nextIncreaseInBeats={Math.max(0, speedUpInterval - speedUpBeatCounter)}
-                        showPermutationMeta={isPermutationExercise}
-                        permutationModeLabel={PERMUTATION_MODE_LABELS[permutationMode]}
-                        permutationTierLabel={
-                            permutationTier === "all"
-                                ? `All (T${activePermutationTier})`
-                                : `Tier ${activePermutationTier}`
-                        }
-                        permutationStringsToPlay={permutationStringsToPlay}
-                        permutationDirection={permutationDirection}
-                        techniqueCue={techniqueCue}
-                        displayedPatternLabel={displayedPatternLabel}
-                    />
-
-                </div>
-            </div>
-
-            <TechniqueSetupDialog
-                isOpen={showSetupDialog}
-                onOpenChange={setShowSetupDialog}
-                onStart={handleStartFromSetup}
-                exerciseName={exercise.name}
-                exerciseDescription={exercise.description}
-                bpm={bpm}
-                onBpmChange={handleBpmChange}
-                stepMode={stepMode}
-                onStepModeChange={setStepMode}
-                startFret={startFret}
-                onStartFretChange={handleStartFretChange}
-                speedUpEnabled={speedUpEnabled}
-                onSpeedUpEnabledChange={setSpeedUpEnabled}
-                speedUpAmount={speedUpAmount}
-                onSpeedUpAmountChange={setSpeedUpAmount}
-                speedUpInterval={speedUpInterval}
-                onSpeedUpIntervalChange={setSpeedUpInterval}
+                ) : undefined}
             />
         </div>
     );

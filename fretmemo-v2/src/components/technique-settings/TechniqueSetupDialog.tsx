@@ -1,3 +1,4 @@
+import { useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -5,7 +6,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { SessionSetupDialogShell } from "@/components/session-setup/session-setup-dialog-shell";
 import { cn } from "@/lib/utils";
-import { Play, Zap } from "lucide-react";
+import { ChevronDown, Play, Settings2, Zap } from "lucide-react";
 
 interface TechniqueSetupDialogProps {
     isOpen: boolean;
@@ -25,6 +26,8 @@ interface TechniqueSetupDialogProps {
     onSpeedUpAmountChange: (value: number) => void;
     speedUpInterval: number;
     onSpeedUpIntervalChange: (value: number) => void;
+    advancedContent?: ReactNode;
+    advancedLabel?: string;
 }
 
 export function TechniqueSetupDialog({
@@ -45,11 +48,20 @@ export function TechniqueSetupDialog({
     onSpeedUpAmountChange,
     speedUpInterval,
     onSpeedUpIntervalChange,
+    advancedContent,
+    advancedLabel = "Advanced",
 }: TechniqueSetupDialogProps) {
+    const [showAdvanced, setShowAdvanced] = useState(false);
+
     return (
         <SessionSetupDialogShell
             isOpen={isOpen}
-            onOpenChange={onOpenChange}
+            onOpenChange={(open) => {
+                if (!open) {
+                    setShowAdvanced(false);
+                }
+                onOpenChange(open);
+            }}
             title="Session Setup"
             badgeLabel={exerciseName}
             description={exerciseDescription}
@@ -154,9 +166,28 @@ export function TechniqueSetupDialog({
                         </div>
             </section>
 
-            <p className="text-xs text-muted-foreground">
-                Exercise-specific advanced options remain available in the side settings panel.
-            </p>
+            {advancedContent && (
+                <section className="space-y-3">
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        className="h-auto w-full justify-between rounded-lg border border-dashed border-border px-3 py-2"
+                        onClick={() => setShowAdvanced((prev) => !prev)}
+                    >
+                        <span className="inline-flex items-center gap-2 text-sm font-medium">
+                            <Settings2 className="h-4 w-4" />
+                            {advancedLabel}
+                        </span>
+                        <ChevronDown className={cn("h-4 w-4 transition-transform", showAdvanced && "rotate-180")} />
+                    </Button>
+
+                    {showAdvanced && (
+                        <div className="space-y-4 rounded-lg border border-border/50 p-3">
+                            {advancedContent}
+                        </div>
+                    )}
+                </section>
+            )}
         </SessionSetupDialogShell>
     );
 }

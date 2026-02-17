@@ -20,6 +20,10 @@ interface PatternOption {
 
 interface TechniqueSettingsCardProps {
     isPlaying: boolean;
+    renderContainer?: boolean;
+    contentClassName?: string;
+    showCoreControls?: boolean;
+    showSpeedUpControls?: boolean;
     stepMode: boolean;
     onStepModeChange: (checked: boolean) => void;
     startFret: number;
@@ -100,6 +104,10 @@ interface TechniqueSettingsCardProps {
 
 export function TechniqueSettingsCard({
     isPlaying,
+    renderContainer = true,
+    contentClassName,
+    showCoreControls = true,
+    showSpeedUpControls = true,
     stepMode,
     onStepModeChange,
     startFret,
@@ -171,20 +179,16 @@ export function TechniqueSettingsCard({
     speedUpInterval,
     onSpeedUpIntervalChange,
 }: TechniqueSettingsCardProps) {
-    return (
-        <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                    <Settings2 className="h-4 w-4" />
-                    Settings
-                </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+    const content = (
+        <div className={cn("space-y-4", contentClassName)}>
+            {showCoreControls && (
                 <div className="flex items-center justify-between">
                     <Label htmlFor="step-mode">Step Mode</Label>
                     <Switch id="step-mode" checked={stepMode} onCheckedChange={onStepModeChange} disabled={isPlaying} />
                 </div>
+            )}
 
+            {showCoreControls && (
                 <div className="space-y-2">
                     <Label>Start Fret</Label>
                     <div className="flex gap-2">
@@ -202,126 +206,127 @@ export function TechniqueSettingsCard({
                         ))}
                     </div>
                 </div>
+            )}
 
-                {showPermutation && (
-                    <div className="space-y-4 rounded-md border border-border/50 p-3">
-                        <div className="space-y-2">
-                            <Label htmlFor="permutation-mode">Mode</Label>
-                            <Select
-                                id="permutation-mode"
-                                value={permutationMode}
-                                onChange={(event) => onPermutationModeChange(event.target.value)}
-                                disabled={isPlaying}
-                                className="h-9 py-2"
-                            >
-                                {permutationModeOptions.map((option) => (
-                                    <option key={option.value} value={option.value}>
-                                        {option.label}
-                                    </option>
-                                ))}
-                            </Select>
+            {showPermutation && (
+                <div className="space-y-4 rounded-md border border-border/50 p-3">
+                    <div className="space-y-2">
+                        <Label htmlFor="permutation-mode">Mode</Label>
+                        <Select
+                            id="permutation-mode"
+                            value={permutationMode}
+                            onChange={(event) => onPermutationModeChange(event.target.value)}
+                            disabled={isPlaying}
+                            className="h-9 py-2"
+                        >
+                            {permutationModeOptions.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                    {option.label}
+                                </option>
+                            ))}
+                        </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="permutation-tier">Tier</Label>
+                        <Select
+                            id="permutation-tier"
+                            value={permutationTier}
+                            onChange={(event) => onPermutationTierChange(event.target.value)}
+                            disabled={isPlaying}
+                            className="h-9 py-2"
+                        >
+                            <option value="all">All Tiers (24)</option>
+                            <option value="1">Tier 1 - Beginner</option>
+                            <option value="2">Tier 2 - Intermediate</option>
+                            <option value="3">Tier 3 - Advanced</option>
+                        </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="permutation-pattern">Pattern</Label>
+                        <Select
+                            id="permutation-pattern"
+                            value={String(permutationPattern)}
+                            onChange={(event) => onPermutationPatternChange(Number(event.target.value))}
+                            disabled={isPlaying || permutationDailyMode}
+                            className="h-9 py-2"
+                        >
+                            {permutationPatternOptions.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                    {option.label}
+                                </option>
+                            ))}
+                        </Select>
+                        {permutationDailyMode && (
+                            <p className="text-xs text-muted-foreground">Daily challenge selects a fixed pattern for today.</p>
+                        )}
+                    </div>
+
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                            <Label className="text-sm">Strings to play</Label>
+                            <span className="font-mono text-xs">{permutationStringsToPlay}</span>
                         </div>
+                        <Slider
+                            value={[permutationStringsToPlay]}
+                            onValueChange={([value]) => onPermutationStringsToPlayChange(value)}
+                            min={1}
+                            max={permutationStringsMax}
+                            step={1}
+                            disabled={isPlaying}
+                        />
+                    </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="permutation-tier">Tier</Label>
-                            <Select
-                                id="permutation-tier"
-                                value={permutationTier}
-                                onChange={(event) => onPermutationTierChange(event.target.value)}
-                                disabled={isPlaying}
-                                className="h-9 py-2"
-                            >
-                                <option value="all">All Tiers (24)</option>
-                                <option value="1">Tier 1 - Beginner</option>
-                                <option value="2">Tier 2 - Intermediate</option>
-                                <option value="3">Tier 3 - Advanced</option>
-                            </Select>
+                    <div className="space-y-2">
+                        <Label>Direction</Label>
+                        <div className="grid grid-cols-3 gap-2">
+                            {[
+                                { value: "ascending", label: "Ascending" },
+                                { value: "descending", label: "Descending" },
+                                { value: "both", label: "Both" },
+                            ].map((option) => (
+                                <Button
+                                    key={option.value}
+                                    variant={permutationDirection === option.value ? "default" : "outline"}
+                                    size="sm"
+                                    onClick={() => onPermutationDirectionChange(option.value)}
+                                    disabled={isPlaying}
+                                >
+                                    {option.label}
+                                </Button>
+                            ))}
                         </div>
+                    </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="permutation-pattern">Pattern</Label>
-                            <Select
-                                id="permutation-pattern"
-                                value={String(permutationPattern)}
-                                onChange={(event) => onPermutationPatternChange(Number(event.target.value))}
-                                disabled={isPlaying || permutationDailyMode}
-                                className="h-9 py-2"
-                            >
-                                {permutationPatternOptions.map((option) => (
-                                    <option key={option.value} value={option.value}>
-                                        {option.label}
-                                    </option>
-                                ))}
-                            </Select>
-                            {permutationDailyMode && (
-                                <p className="text-xs text-muted-foreground">Daily challenge selects a fixed pattern for today.</p>
-                            )}
+                    <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                            <Label>Sticky Fingers</Label>
+                            <p className="text-xs text-muted-foreground">Enabled by default in Permutation Trainer (Spider-style).</p>
                         </div>
+                        <Badge variant="secondary">On</Badge>
+                    </div>
 
+                    {showRandomSwitchBars && (
                         <div className="space-y-2">
                             <div className="flex items-center justify-between text-sm">
-                                <Label className="text-sm">Strings to play</Label>
-                                <span className="font-mono text-xs">{permutationStringsToPlay}</span>
+                                <Label className="text-sm">Random switch every</Label>
+                                <span className="font-mono text-xs">
+                                    {randomSwitchBars} bar{randomSwitchBars > 1 ? "s" : ""}
+                                </span>
                             </div>
                             <Slider
-                                value={[permutationStringsToPlay]}
-                                onValueChange={([value]) => onPermutationStringsToPlayChange(value)}
+                                value={[randomSwitchBars]}
+                                onValueChange={([value]) => onRandomSwitchBarsChange(value)}
                                 min={1}
-                                max={permutationStringsMax}
+                                max={8}
                                 step={1}
                                 disabled={isPlaying}
                             />
                         </div>
-
-                        <div className="space-y-2">
-                            <Label>Direction</Label>
-                            <div className="grid grid-cols-3 gap-2">
-                                {[
-                                    { value: "ascending", label: "Ascending" },
-                                    { value: "descending", label: "Descending" },
-                                    { value: "both", label: "Both" },
-                                ].map((option) => (
-                                    <Button
-                                        key={option.value}
-                                        variant={permutationDirection === option.value ? "default" : "outline"}
-                                        size="sm"
-                                        onClick={() => onPermutationDirectionChange(option.value)}
-                                        disabled={isPlaying}
-                                    >
-                                        {option.label}
-                                    </Button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-1">
-                                <Label>Sticky Fingers</Label>
-                                <p className="text-xs text-muted-foreground">Enabled by default in Permutation Trainer (Spider-style).</p>
-                            </div>
-                            <Badge variant="secondary">On</Badge>
-                        </div>
-
-                        {showRandomSwitchBars && (
-                            <div className="space-y-2">
-                                <div className="flex items-center justify-between text-sm">
-                                    <Label className="text-sm">Random switch every</Label>
-                                    <span className="font-mono text-xs">
-                                        {randomSwitchBars} bar{randomSwitchBars > 1 ? "s" : ""}
-                                    </span>
-                                </div>
-                                <Slider
-                                    value={[randomSwitchBars]}
-                                    onValueChange={([value]) => onRandomSwitchBarsChange(value)}
-                                    min={1}
-                                    max={8}
-                                    step={1}
-                                    disabled={isPlaying}
-                                />
-                            </div>
-                        )}
-                    </div>
-                )}
+                    )}
+                </div>
+            )}
 
                 {showDiagonal && (
                     <div className="space-y-4 rounded-md border border-border/50 p-3">
@@ -620,6 +625,7 @@ export function TechniqueSettingsCard({
                     </div>
                 )}
 
+            {showSpeedUpControls && (
                 <div className="space-y-3 border-t border-border/50 pt-3">
                     <div className="flex items-center justify-between">
                         <Label htmlFor="speed-up">Auto Speed-Up</Label>
@@ -660,7 +666,21 @@ export function TechniqueSettingsCard({
                         </div>
                     </div>
                 </div>
-            </CardContent>
+            )}
+        </div>
+    );
+
+    if (!renderContainer) return content;
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                    <Settings2 className="h-4 w-4" />
+                    Settings
+                </CardTitle>
+            </CardHeader>
+            <CardContent>{content}</CardContent>
         </Card>
     );
 }
