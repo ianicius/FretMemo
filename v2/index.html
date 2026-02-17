@@ -3,17 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FretMemo v2</title>
+    <title>FretMemo redirect</title>
     <meta name="robots" content="noindex">
     <script>
         (function () {
-            var targetPath = "/fretmemo-v2/dist/index.html";
-            var nextUrl = targetPath + (window.location.search || "") + (window.location.hash || "");
+            var params = new URLSearchParams(window.location.search);
+            if (!params.has("fm_from")) params.set("fm_from", "legacy_v2_path");
+            if (!params.has("fm_cta")) params.set("fm_cta", "legacy_v2_path");
+            if (!params.has("fm_ts")) params.set("fm_ts", String(Date.now()));
+            var nextUrl = "/" + (params.toString() ? "?" + params.toString() : "") + (window.location.hash || "");
             window.location.replace(nextUrl);
         })();
     </script>
 </head>
 <body>
-    <p>Redirecting to FretMemo v2...</p>
+    <p>Redirecting to FretMemo...</p>
 </body>
 </html>

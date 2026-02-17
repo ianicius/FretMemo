@@ -27,7 +27,7 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { SectionCollapse } from "@/components/ui/section-collapse";
-import { RotateCcw, Volume2, Gamepad2, GraduationCap, Palette, Guitar, Database, CircleHelp, Newspaper, HandHeart, Coffee, Mail, ExternalLink, Search, Settings2 } from "lucide-react";
+import { RotateCcw, Volume2, Gamepad2, GraduationCap, Palette, Guitar, Database, CircleHelp, Newspaper, HandHeart, Coffee, Mail, ExternalLink, Search, Settings2, History } from "lucide-react";
 import { EXTERNAL_LINKS } from "@/lib/externalLinks";
 
 type ConfirmAction = "reset-settings" | "replace-progress-import" | "reset-progress" | null;
@@ -222,7 +222,7 @@ export default function Settings() {
     const showModuleEar = matchesQuery(["ear training", "interval", "direction"]);
     const showModuleRhythm = matchesQuery(["rhythm", "latency", "tap", "strum", "groove"]);
     const showData = matchesQuery(["data", "backup", "import", "export", "reset"]);
-    const showHelp = matchesQuery(["help", "faq", "blog", "contact", "support"]);
+    const showHelp = matchesQuery(["help", "faq", "blog", "contact", "support", "legacy", "v1"]);
     const hasVisibleGlobal = showGlobalInstrument || showGlobalLearning || showGlobalAudio || showGlobalAppearance || showGlobalGame;
     const hasVisibleModules = showModulePractice || showModuleTechnique || showModuleEar || showModuleRhythm;
     const hasVisibleData = showData || showHelp;
@@ -955,7 +955,7 @@ export default function Settings() {
             {activeScope === "data" && showHelp && (
             <SectionCollapse
                 title="Help"
-                summary="FAQ · Blog · Contact"
+                summary="FAQ · Blog · Contact · Legacy v1"
             >
                 <Card>
                     <CardHeader>
@@ -968,7 +968,7 @@ export default function Settings() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="grid gap-2 sm:grid-cols-3">
+                        <div className="grid gap-2 sm:grid-cols-4">
                             <Button asChild variant="outline" className="justify-between">
                                 <a href={EXTERNAL_LINKS.faq} target="_blank" rel="noreferrer noopener">
                                     <span className="inline-flex items-center gap-2">
@@ -992,6 +992,20 @@ export default function Settings() {
                                     <span className="inline-flex items-center gap-2">
                                         <Mail className="h-4 w-4" />
                                         Contact
+                                    </span>
+                                    <ExternalLink className="h-3.5 w-3.5" />
+                                </a>
+                            </Button>
+                            <Button asChild variant="outline" className="justify-between">
+                                <a
+                                    href={EXTERNAL_LINKS.legacyV1}
+                                    target="_blank"
+                                    rel="noreferrer noopener"
+                                    onClick={() => trackEvent("fm_v2_to_v1_clicked", { cta_id: "settings_help_legacy_v1" })}
+                                >
+                                    <span className="inline-flex items-center gap-2">
+                                        <History className="h-4 w-4" />
+                                        Legacy v1
                                     </span>
                                     <ExternalLink className="h-3.5 w-3.5" />
                                 </a>

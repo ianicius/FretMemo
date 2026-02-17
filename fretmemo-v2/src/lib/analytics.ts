@@ -25,6 +25,14 @@ const APP_VERSION = "v2";
 
 let initialized = false;
 
+interface EntryContext {
+    fromParam: string | null;
+    ctaParam: string | null;
+    sourceTimestamp: number | null;
+    markerSource: string | null;
+    markerCtaId: string | null;
+}
+
 function getAmplitude(): AmplitudeClient | null {
     if (typeof window === "undefined") return null;
     if (!window.amplitude || typeof window.amplitude.track !== "function") return null;
@@ -110,10 +118,7 @@ function identifyV2User(): void {
     }
 }
 
-function trackMigrationFromV1(): void {
-    const alreadyTracked = safeReadStorage(sessionStorage, MIGRATION_TRACKED_SESSION_KEY) === "1";
-    if (alreadyTracked) return;
-
+function getEntryContext(): EntryContext {
     const params = new URLSearchParams(window.location.search);
     const fromParam = params.get("fm_from");
     const ctaParam = params.get("fm_cta");
@@ -139,21 +144,35 @@ function trackMigrationFromV1(): void {
         }
     }
 
-    const cameFromV1 = fromParam === "v1" || markerSource === "v1";
-    if (!cameFromV1) return;
-
     const queryTimestamp = tsParam ? Number(tsParam) : null;
     const sourceTimestamp = Number.isFinite(queryTimestamp ?? Number.NaN)
         ? (queryTimestamp as number)
         : markerTimestamp;
+
+    return {
+        fromParam,
+        ctaParam,
+        sourceTimestamp,
+        markerSource,
+        markerCtaId,
+    };
+}
+
+function trackMigrationFromV1(context: EntryContext): void {
+    const alreadyTracked = safeReadStorage(sessionStorage, MIGRATION_TRACKED_SESSION_KEY) === "1";
+    if (alreadyTracked) return;
+
+    const cameFromV1 = context.fromParam === "v1" || context.markerSource === "v1";
+    if (!cameFromV1) return;
+
     const transitionLatencyMs =
-        typeof sourceTimestamp === "number" && Number.isFinite(sourceTimestamp)
-            ? Math.max(0, Date.now() - sourceTimestamp)
+        typeof context.sourceTimestamp === "number" && Number.isFinite(context.sourceTimestamp)
+            ? Math.max(0, Date.now() - context.sourceTimestamp)
             : null;
 
     trackEvent("fm_v2_opened_from_v1", {
-        entry_source: fromParam ?? markerSource ?? "v1",
-        cta_id: ctaParam ?? markerCtaId ?? "unknown",
+        entry_source: context.fromParam ?? context.markerSource ?? "v1",
+        cta_id: context.ctaParam ?? context.markerCtaId ?? "unknown",
         transition_latency_ms: transitionLatencyMs,
     });
 
@@ -165,13 +184,23 @@ export function initAnalyticsV2(): void {
     if (initialized) return;
     initialized = true;
 
+    const entryContext = getEntryContext();
+    const entryLatencyMs =
+        typeof entryContext.sourceTimestamp === "number" && Number.isFinite(entryContext.sourceTimestamp)
+            ? Math.max(0, Date.now() - entryContext.sourceTimestamp)
+            : null;
+
     identifyV2User();
 
     trackEvent("fm_v2_app_loaded", {
         entry_path: window.location.pathname,
+        entry_source: entryContext.fromParam ?? entryContext.markerSource ?? "direct",
+        entry_cta_id: entryContext.ctaParam ?? entryContext.markerCtaId ?? null,
+        entry_latency_ms: entryLatencyMs,
+        has_tracking_query: Boolean(entryContext.fromParam || entryContext.ctaParam),
     });
 
-    trackMigrationFromV1();
+    trackMigrationFromV1(entryContext);
 }
 
 export function trackEvent(eventName: string, eventProps: AnalyticsEventProps = {}): void {

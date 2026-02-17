@@ -3,6 +3,7 @@ import {
     CircleHelp,
     Coffee,
     Flame,
+    History,
     Mail,
     Menu,
     Moon,
@@ -18,6 +19,7 @@ import { useNavigate } from "react-router-dom";
 import { useProgressStore } from "@/stores/useProgressStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { EXTERNAL_LINKS } from "@/lib/externalLinks";
+import { trackEvent } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
@@ -125,6 +127,17 @@ export function Header() {
                                             <a href={EXTERNAL_LINKS.buyMeCoffee} target="_blank" rel="noreferrer noopener">
                                                 <Coffee className="mr-2 h-4 w-4" />
                                                 Buy me a coffee
+                                            </a>
+                                        </Button>
+                                        <Button asChild variant="outline" className="justify-start">
+                                            <a
+                                                href={EXTERNAL_LINKS.legacyV1}
+                                                target="_blank"
+                                                rel="noreferrer noopener"
+                                                onClick={() => trackEvent("fm_v2_to_v1_clicked", { cta_id: "header_menu_legacy_v1" })}
+                                            >
+                                                <History className="mr-2 h-4 w-4" />
+                                                Legacy v1
                                             </a>
                                         </Button>
                                         <Button asChild variant="outline" className="justify-start">

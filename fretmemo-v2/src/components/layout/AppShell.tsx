@@ -8,6 +8,7 @@ import { useAppStore } from "@/stores/useAppStore";
 import { useGameStore } from "@/stores/useGameStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { EXTERNAL_LINKS } from "@/lib/externalLinks";
+import { trackEvent } from "@/lib/analytics";
 import type { TabId } from "@/types";
 import { BottomNav } from "./BottomNav";
 import { Header } from "./Header";
@@ -28,9 +29,10 @@ const NAV_ITEMS: NavItem[] = [
     { id: "progress", label: "Me", icon: ChartBar, path: "/me" },
 ];
 
-const RESOURCE_LINKS: Array<{ label: string; href: string }> = [
+const RESOURCE_LINKS: Array<{ label: string; href: string; analyticsCtaId?: string }> = [
     { label: "FAQ", href: EXTERNAL_LINKS.faq },
     { label: "Blog", href: EXTERNAL_LINKS.blog },
+    { label: "Legacy v1", href: EXTERNAL_LINKS.legacyV1, analyticsCtaId: "sidebar_help_legacy_v1" },
 ];
 
 export function AppShell() {
@@ -146,7 +148,16 @@ export function AppShell() {
                     <div className="hidden lg:flex items-center gap-3 px-1">
                         {RESOURCE_LINKS.map((link) => (
                             <Button key={link.label} asChild variant="link" size="sm" className="h-auto px-0 text-xs text-muted-foreground">
-                                <a href={link.href} target="_blank" rel="noreferrer noopener">
+                                <a
+                                    href={link.href}
+                                    target="_blank"
+                                    rel="noreferrer noopener"
+                                    onClick={() => {
+                                        if (link.analyticsCtaId) {
+                                            trackEvent("fm_v2_to_v1_clicked", { cta_id: link.analyticsCtaId });
+                                        }
+                                    }}
+                                >
                                     {link.label}
                                 </a>
                             </Button>
