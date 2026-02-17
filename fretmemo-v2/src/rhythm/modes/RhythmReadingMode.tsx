@@ -2,8 +2,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { FormField } from "@/components/ui/form-field";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { SessionModeToggle } from "@/components/session-setup/session-mode-toggle";
+import { SessionStartActions } from "@/components/session-setup/session-start-actions";
+import { SessionStopButton } from "@/components/session-setup/session-stop-button";
+import { SessionSummaryCard } from "@/components/session-setup/session-summary-card";
+import { TempoNumberField } from "@/components/session-setup/tempo-number-field";
 import { LatencyCompensationControl } from "@/rhythm/ui/LatencyCompensationControl";
 import { RhythmClock } from "@/rhythm/engine/RhythmClock";
 import { MetronomeScheduler } from "@/rhythm/engine/MetronomeScheduler";
@@ -507,10 +514,8 @@ export function RhythmReadingMode() {
                         </div>
 
                         <div className="grid gap-3 sm:grid-cols-2">
-                            <div className="space-y-1.5">
-                                <Label htmlFor="rhythm-reading-level">Level</Label>
-                                <select
-                                    id="rhythm-reading-level"
+                            <FormField id="rhythm-reading-level" label="Level">
+                                <Select
                                     value={settings.level}
                                     onChange={(event) => {
                                         const nextLevel = Number(event.target.value) as RhythmReadingLevel;
@@ -521,19 +526,16 @@ export function RhythmReadingMode() {
                                             exerciseId: firstExercise.id,
                                         }));
                                     }}
-                                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                                 >
                                     {LEVEL_OPTIONS.map((level) => (
                                         <option key={`rr-level-${level}`} value={level}>
                                             Level {level}
                                         </option>
                                     ))}
-                                </select>
-                            </div>
-                            <div className="space-y-1.5">
-                                <Label htmlFor="rhythm-reading-exercise">Exercise</Label>
-                                <select
-                                    id="rhythm-reading-exercise"
+                                </Select>
+                            </FormField>
+                            <FormField id="rhythm-reading-exercise" label="Exercise">
+                                <Select
                                     value={activeExercise.id}
                                     onChange={(event) =>
                                         setSettings((prev) => ({
@@ -541,38 +543,28 @@ export function RhythmReadingMode() {
                                             exerciseId: event.target.value,
                                         }))
                                     }
-                                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                                 >
                                     {levelExercises.map((exercise) => (
                                         <option key={exercise.id} value={exercise.id}>
                                             {exercise.title}
                                         </option>
                                     ))}
-                                </select>
-                            </div>
-                            <div className="space-y-1.5">
-                                <Label htmlFor="rhythm-reading-bpm">Tempo</Label>
-                                <input
-                                    id="rhythm-reading-bpm"
-                                    type="number"
-                                    min={TEMPO_MIN}
-                                    max={TEMPO_MAX}
-                                    value={settings.bpm}
-                                    onChange={(event) => {
-                                        const value = Number(event.target.value);
-                                        if (Number.isNaN(value)) return;
-                                        setSettings((prev) => ({
-                                            ...prev,
-                                            bpm: clampTempo(value),
-                                        }));
-                                    }}
-                                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                                />
-                            </div>
-                            <div className="space-y-1.5">
-                                <Label htmlFor="rhythm-reading-bars">Bars</Label>
-                                <select
-                                    id="rhythm-reading-bars"
+                                </Select>
+                            </FormField>
+                            <TempoNumberField
+                                id="rhythm-reading-bpm"
+                                value={settings.bpm}
+                                min={TEMPO_MIN}
+                                max={TEMPO_MAX}
+                                onChange={(nextBpm) =>
+                                    setSettings((prev) => ({
+                                        ...prev,
+                                        bpm: clampTempo(nextBpm),
+                                    }))
+                                }
+                            />
+                            <FormField id="rhythm-reading-bars" label="Bars">
+                                <Select
                                     value={settings.bars}
                                     onChange={(event) =>
                                         setSettings((prev) => ({
@@ -580,18 +572,15 @@ export function RhythmReadingMode() {
                                             bars: Math.max(4, Math.min(16, Number(event.target.value))),
                                         }))
                                     }
-                                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                                 >
                                     <option value={4}>4</option>
                                     <option value={8}>8</option>
                                     <option value={12}>12</option>
                                     <option value={16}>16</option>
-                                </select>
-                            </div>
-                            <div className="space-y-1.5 sm:col-span-2">
-                                <Label htmlFor="rhythm-reading-click">Audio Click</Label>
-                                <select
-                                    id="rhythm-reading-click"
+                                </Select>
+                            </FormField>
+                            <FormField id="rhythm-reading-click" label="Audio Click" className="sm:col-span-2">
+                                <Select
                                     value={settings.clickEnabled ? "on" : "off"}
                                     onChange={(event) =>
                                         setSettings((prev) => ({
@@ -599,12 +588,11 @@ export function RhythmReadingMode() {
                                             clickEnabled: event.target.value === "on",
                                         }))
                                     }
-                                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                                 >
                                     <option value="on">On</option>
                                     <option value="off">Off</option>
-                                </select>
-                            </div>
+                                </Select>
+                            </FormField>
                             <div className="space-y-2 sm:col-span-2">
                                 <div className="flex items-center justify-between rounded-md border border-border bg-muted/20 px-3 py-2">
                                     <div>
@@ -649,17 +637,27 @@ export function RhythmReadingMode() {
                             <Button type="button" variant="outline" onClick={randomizeExercise}>
                                 Random Exercise
                             </Button>
-                            <Button type="button" onClick={() => void startSessionWithMode("scored")}>
-                                Start Scored Session
-                            </Button>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => void startSessionWithMode("practice")}
-                            >
-                                Practice with Guitar
-                            </Button>
                         </div>
+                        <SessionModeToggle
+                            value={sessionMode}
+                            onChange={setSessionMode}
+                            options={[
+                                {
+                                    value: "scored",
+                                    label: "Scored",
+                                    description: "Evaluates timing accuracy and auto-completes the run.",
+                                },
+                                {
+                                    value: "practice",
+                                    label: "Practice",
+                                    description: "Keeps notation running continuously until you stop.",
+                                },
+                            ]}
+                        />
+                        <SessionStartActions
+                            primaryLabel={sessionMode === "scored" ? "Start Scored Session" : "Practice with Guitar"}
+                            onPrimary={() => void startSessionWithMode(sessionMode)}
+                        />
                     </CardContent>
                 </Card>
             </div>
@@ -702,57 +700,32 @@ export function RhythmReadingMode() {
             )}
 
             {summary && (
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Session Summary</CardTitle>
-                        <CardDescription>
-                            Score {summary.score} · Accuracy {summary.accuracy}%
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-                        <div className="rounded-md border border-border bg-muted/20 p-2">
-                            <p className="text-xs text-muted-foreground">Hits</p>
-                            <p className="text-lg font-bold">{summary.hits}</p>
-                        </div>
-                        <div className="rounded-md border border-border bg-muted/20 p-2">
-                            <p className="text-xs text-muted-foreground">Misses</p>
-                            <p className="text-lg font-bold">{summary.misses}</p>
-                        </div>
-                        <div className="rounded-md border border-border bg-muted/20 p-2">
-                            <p className="text-xs text-muted-foreground">Extras</p>
-                            <p className="text-lg font-bold">{summary.extras}</p>
-                        </div>
-                        <div className="rounded-md border border-border bg-muted/20 p-2">
-                            <p className="text-xs text-muted-foreground">Avg offset</p>
-                            <p className="text-lg font-bold">{summary.avgOffsetMs}ms</p>
-                        </div>
-                        {adaptiveTempoMessage && (
-                            <div className="col-span-2 rounded-md border border-primary/30 bg-primary/10 p-2 text-xs font-medium text-primary sm:col-span-4">
-                                {adaptiveTempoMessage}
-                            </div>
-                        )}
-                        <div className="col-span-2 pt-2 sm:col-span-4">
-                            <div className="flex flex-wrap gap-2">
-                                <Button onClick={() => void startSessionWithMode("scored")} className="w-full sm:w-auto">
-                                    Retry
-                                </Button>
-                                <Button variant="outline" onClick={goToSetup} className="w-full sm:w-auto">
-                                    Edit Settings
-                                </Button>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                <SessionSummaryCard
+                    description={`Score ${summary.score} · Accuracy ${summary.accuracy}%`}
+                    metrics={[
+                        { label: "Hits", value: summary.hits },
+                        { label: "Misses", value: summary.misses },
+                        { label: "Extras", value: summary.extras },
+                        { label: "Avg offset", value: `${summary.avgOffsetMs}ms` },
+                    ]}
+                    notice={adaptiveTempoMessage}
+                    noticeClassName={adaptiveTempoMessage ? "border-primary/30 bg-primary/10 font-medium text-primary" : undefined}
+                    primaryAction={{
+                        label: "Retry",
+                        onClick: () => void startSessionWithMode("scored"),
+                    }}
+                    secondaryAction={{
+                        label: "Edit Settings",
+                        onClick: goToSetup,
+                    }}
+                />
             )}
 
             {status === "running" && (
-                <Button
-                    variant="outline"
-                    onClick={sessionMode === "scored" ? finalizeSession : stopPracticeSession}
-                    className="w-full sm:w-auto"
-                >
-                    {sessionMode === "scored" ? "Stop" : "Stop Practice"}
-                </Button>
+                <SessionStopButton
+                    onStop={sessionMode === "scored" ? finalizeSession : stopPracticeSession}
+                    label={sessionMode === "scored" ? "Stop" : "Stop Practice"}
+                />
             )}
         </div>
     );

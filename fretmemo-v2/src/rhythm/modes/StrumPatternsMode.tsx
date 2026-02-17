@@ -1,11 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
+import { FormField } from "@/components/ui/form-field";
+import { Select } from "@/components/ui/select";
 import { LatencyCompensationControl } from "@/rhythm/ui/LatencyCompensationControl";
 import { PatternGrid } from "@/rhythm/ui/PatternGrid";
 import { TapZone } from "@/rhythm/ui/TapZone";
 import { TimingFeedback } from "@/rhythm/ui/TimingFeedback";
+import { SessionModeToggle } from "@/components/session-setup/session-mode-toggle";
+import { SessionStartActions } from "@/components/session-setup/session-start-actions";
+import { SessionStopButton } from "@/components/session-setup/session-stop-button";
+import { SessionSummaryCard } from "@/components/session-setup/session-summary-card";
+import { TempoNumberField } from "@/components/session-setup/tempo-number-field";
 import { RhythmClock } from "@/rhythm/engine/RhythmClock";
 import { MetronomeScheduler } from "@/rhythm/engine/MetronomeScheduler";
 import type { StrumDirection, TapEvaluation } from "@/rhythm/engine/InputEvaluator";
@@ -377,10 +382,8 @@ export function StrumPatternsMode() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid gap-3 sm:grid-cols-2">
-                            <div className="space-y-1.5">
-                                <Label htmlFor="strum-pattern-id">Pattern</Label>
-                                <select
-                                    id="strum-pattern-id"
+                            <FormField id="strum-pattern-id" label="Pattern">
+                                <Select
                                     value={settings.patternId}
                                     onChange={(event) =>
                                         setSettings((prev) => ({
@@ -388,38 +391,28 @@ export function StrumPatternsMode() {
                                             patternId: event.target.value,
                                         }))
                                     }
-                                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                                 >
                                     {STRUM_PATTERNS.map((pattern) => (
                                         <option key={pattern.id} value={pattern.id}>
                                             {pattern.title} ({pattern.difficulty})
                                         </option>
                                     ))}
-                                </select>
-                            </div>
-                            <div className="space-y-1.5">
-                                <Label htmlFor="strum-pattern-bpm">Tempo</Label>
-                                <input
-                                    id="strum-pattern-bpm"
-                                    type="number"
-                                    min={50}
-                                    max={180}
-                                    value={settings.bpm}
-                                    onChange={(event) => {
-                                        const value = Number(event.target.value);
-                                        if (Number.isNaN(value)) return;
-                                        setSettings((prev) => ({
-                                            ...prev,
-                                            bpm: Math.max(50, Math.min(180, Math.round(value))),
-                                        }));
-                                    }}
-                                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                                />
-                            </div>
-                            <div className="space-y-1.5">
-                                <Label htmlFor="strum-pattern-bars">Bars</Label>
-                                <select
-                                    id="strum-pattern-bars"
+                                </Select>
+                            </FormField>
+                            <TempoNumberField
+                                id="strum-pattern-bpm"
+                                value={settings.bpm}
+                                min={50}
+                                max={180}
+                                onChange={(nextBpm) =>
+                                    setSettings((prev) => ({
+                                        ...prev,
+                                        bpm: Math.max(50, Math.min(180, Math.round(nextBpm))),
+                                    }))
+                                }
+                            />
+                            <FormField id="strum-pattern-bars" label="Bars">
+                                <Select
                                     value={settings.bars}
                                     onChange={(event) =>
                                         setSettings((prev) => ({
@@ -427,18 +420,15 @@ export function StrumPatternsMode() {
                                             bars: Math.max(4, Math.min(16, Number(event.target.value))),
                                         }))
                                     }
-                                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                                 >
                                     <option value={4}>4</option>
                                     <option value={8}>8</option>
                                     <option value={12}>12</option>
                                     <option value={16}>16</option>
-                                </select>
-                            </div>
-                            <div className="space-y-1.5">
-                                <Label htmlFor="strum-pattern-click">Audio Click</Label>
-                                <select
-                                    id="strum-pattern-click"
+                                </Select>
+                            </FormField>
+                            <FormField id="strum-pattern-click" label="Audio Click">
+                                <Select
                                     value={settings.clickEnabled ? "on" : "off"}
                                     onChange={(event) =>
                                         setSettings((prev) => ({
@@ -446,12 +436,11 @@ export function StrumPatternsMode() {
                                             clickEnabled: event.target.value === "on",
                                         }))
                                     }
-                                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                                 >
                                     <option value="on">On</option>
                                     <option value="off">Off</option>
-                                </select>
-                            </div>
+                                </Select>
+                            </FormField>
                         </div>
 
                         <div className="rounded-lg border border-border bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
@@ -463,18 +452,26 @@ export function StrumPatternsMode() {
                             onChange={setInputLatencyMs}
                         />
 
-                        <div className="flex flex-wrap gap-2">
-                            <Button onClick={() => void startSessionWithMode("scored")} className="w-full sm:w-auto">
-                                Start Scored Session
-                            </Button>
-                            <Button
-                                variant="outline"
-                                onClick={() => void startSessionWithMode("practice")}
-                                className="w-full sm:w-auto"
-                            >
-                                Practice with Guitar
-                            </Button>
-                        </div>
+                        <SessionModeToggle
+                            value={sessionMode}
+                            onChange={setSessionMode}
+                            options={[
+                                {
+                                    value: "scored",
+                                    label: "Scored",
+                                    description: "Tracks timing + direction and ends with summary.",
+                                },
+                                {
+                                    value: "practice",
+                                    label: "Practice",
+                                    description: "Open-ended groove to focus on feel and consistency.",
+                                },
+                            ]}
+                        />
+                        <SessionStartActions
+                            primaryLabel={sessionMode === "scored" ? "Start Scored Session" : "Practice with Guitar"}
+                            onPrimary={() => void startSessionWithMode(sessionMode)}
+                        />
                     </CardContent>
                 </Card>
             </div>
@@ -510,53 +507,30 @@ export function StrumPatternsMode() {
             )}
 
             {sessionMode === "scored" && summary && (
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Session Summary</CardTitle>
-                        <CardDescription>
-                            Score {summary.score} · Accuracy {summary.accuracy}% · Direction {summary.directionAccuracy}%
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-                        <div className="rounded-md border border-border bg-muted/20 p-2">
-                            <p className="text-xs text-muted-foreground">Hits</p>
-                            <p className="text-lg font-bold">{summary.hits}</p>
-                        </div>
-                        <div className="rounded-md border border-border bg-muted/20 p-2">
-                            <p className="text-xs text-muted-foreground">Misses</p>
-                            <p className="text-lg font-bold">{summary.misses}</p>
-                        </div>
-                        <div className="rounded-md border border-border bg-muted/20 p-2">
-                            <p className="text-xs text-muted-foreground">Extras</p>
-                            <p className="text-lg font-bold">{summary.extras}</p>
-                        </div>
-                        <div className="rounded-md border border-border bg-muted/20 p-2">
-                            <p className="text-xs text-muted-foreground">Avg offset</p>
-                            <p className="text-lg font-bold">{summary.avgOffsetMs}ms</p>
-                        </div>
-                        <div className="col-span-2 sm:col-span-4 pt-2">
-                            <Button
-                                onClick={() => {
-                                    setStatus("idle");
-                                    statusRef.current = "idle";
-                                }}
-                                className="w-full sm:w-auto"
-                            >
-                                New Session
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
+                <SessionSummaryCard
+                    description={`Score ${summary.score} · Accuracy ${summary.accuracy}% · Direction ${summary.directionAccuracy}%`}
+                    metrics={[
+                        { label: "Hits", value: summary.hits },
+                        { label: "Misses", value: summary.misses },
+                        { label: "Extras", value: summary.extras },
+                        { label: "Avg offset", value: `${summary.avgOffsetMs}ms` },
+                        { label: "Direction", value: `${summary.directionAccuracy}%` },
+                    ]}
+                    primaryAction={{
+                        label: "New Session",
+                        onClick: () => {
+                            setStatus("idle");
+                            statusRef.current = "idle";
+                        },
+                    }}
+                />
             )}
 
             {status === "running" && (
-                <Button
-                    variant="outline"
-                    onClick={sessionMode === "scored" ? finalizeSession : stopPracticeSession}
-                    className="w-full sm:w-auto"
-                >
-                    Stop
-                </Button>
+                <SessionStopButton
+                    onStop={sessionMode === "scored" ? finalizeSession : stopPracticeSession}
+                    label={sessionMode === "scored" ? "Stop" : "Stop Practice"}
+                />
             )}
         </div>
     );
