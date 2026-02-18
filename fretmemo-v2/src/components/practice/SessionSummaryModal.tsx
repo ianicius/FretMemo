@@ -121,7 +121,7 @@ export function SessionSummaryModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="sm:max-w-xl">
+            <DialogContent className="safe-area-bottom top-[max(0.5rem,env(safe-area-inset-top))] max-h-[calc(100dvh-1rem)] translate-y-0 overflow-y-auto pb-[max(1rem,env(safe-area-inset-bottom),3.5rem)] sm:top-[50%] sm:max-w-xl sm:translate-y-[-50%] sm:pb-6">
                 <DialogHeader>
                     <DialogTitle className="flex items-center justify-center gap-2 text-center">
                         <Trophy className="h-6 w-6 text-primary" />
