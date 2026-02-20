@@ -9,39 +9,58 @@ import type { NoteStatus, NoteName } from "@/types/fretboard";
 
 const ROOTS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"] as const;
 
-const CAGED_SHAPES: Record<string, { label: string; color: string; offsets: number[][] }> = {
+/**
+ * CAGED shapes defined as absolute fret numbers per string in open position.
+ * String indices: 0 = high E, 1 = B, 2 = G, 3 = D, 4 = A, 5 = low E
+ * null = string not played in this shape.
+ * nativeRoot = semitone index of the root in open position (C=0, D=2, E=4, G=7, A=9).
+ */
+interface CagedShape {
+    label: string;
+    color: string;
+    nativeRoot: number;
+    frets: (number | null)[];
+}
+
+const CAGED_SHAPES: Record<string, CagedShape> = {
     C: {
         label: "C Shape",
         color: "#ef4444",
-        offsets: [[0, 3], [1, 3], [2, 2], [3, 0], [4, 1], [5, 0]],
+        nativeRoot: 0, // C
+        // Open C: high E=0(E), B=1(C), G=0(G), D=2(E), A=3(C), low E=null
+        frets: [0, 1, 0, 2, 3, null],
     },
     A: {
         label: "A Shape",
         color: "#f97316",
-        offsets: [[1, 0], [2, 2], [3, 2], [4, 2], [5, 0]],
+        nativeRoot: 9, // A
+        // Open A: high E=0(E), B=2(C#), G=2(A), D=2(E), A=0(A), low E=null
+        frets: [0, 2, 2, 2, 0, null],
     },
     G: {
         label: "G Shape",
         color: "#eab308",
-        offsets: [[0, 3], [1, 0], [2, 0], [3, 0], [4, 0], [5, 3]],
+        nativeRoot: 7, // G
+        // Open G: high E=3(G), B=0(B), G=0(G), D=0(D), A=2(B), low E=3(G)
+        frets: [3, 0, 0, 0, 2, 3],
     },
     E: {
         label: "E Shape",
         color: "#22c55e",
-        offsets: [[0, 0], [1, 0], [2, 1], [3, 2], [4, 2], [5, 0]],
+        nativeRoot: 4, // E
+        // Open E: high E=0(E), B=0(B), G=1(G#), D=2(E), A=2(B), low E=0(E)
+        frets: [0, 0, 1, 2, 2, 0],
     },
     D: {
         label: "D Shape",
         color: "#3b82f6",
-        offsets: [[2, 0], [3, 2], [4, 3], [5, 2]],
+        nativeRoot: 2, // D
+        // Open D: high E=2(F#), B=3(D), G=2(A), D=0(D), A=null, low E=null
+        frets: [2, 3, 2, 0, null, null],
     },
 };
 
 const CAGED_ORDER = ["C", "A", "G", "E", "D"];
-
-const SHAPE_BASE_FRETS: Record<string, number> = {
-    C: 0, A: 3, G: 5, E: 8, D: 10,
-};
 
 export default function CagedVisualizer() {
     const [root, setRoot] = useState<NoteName>("C");
@@ -51,17 +70,22 @@ export default function CagedVisualizer() {
     const tuning = useMemo(() => normalizeTuning(quickTuning), [quickTuning]);
     const maxFret = 15;
 
-    const semitoneOffset = NOTES.indexOf(root);
+    const targetRootIndex = NOTES.indexOf(root);
 
     const activeNotes: NoteStatus[] = useMemo(() => {
         const result: NoteStatus[] = [];
 
         for (const [shapeKey, shape] of Object.entries(CAGED_SHAPES)) {
             if (!enabledShapes.has(shapeKey)) continue;
-            const baseFret = SHAPE_BASE_FRETS[shapeKey] + semitoneOffset;
 
-            for (const [stringIdx, fretOffset] of shape.offsets) {
-                const fret = baseFret + fretOffset;
+            // How many semitones to shift from native open position
+            const shift = (targetRootIndex - shape.nativeRoot + 12) % 12;
+
+            for (let stringIdx = 0; stringIdx < shape.frets.length; stringIdx++) {
+                const nativeFret = shape.frets[stringIdx];
+                if (nativeFret === null) continue;
+
+                const fret = nativeFret + shift;
                 if (fret < 0 || fret > maxFret) continue;
 
                 const note = getNoteAt(tuning[stringIdx], fret);
@@ -78,7 +102,7 @@ export default function CagedVisualizer() {
         }
 
         return result;
-    }, [enabledShapes, tuning, semitoneOffset, maxFret, root, notation]);
+    }, [enabledShapes, tuning, targetRootIndex, maxFret, root, notation]);
 
     const toggleShape = (shape: string) => {
         setEnabledShapes((prev) => {
@@ -155,3 +179,4 @@ export default function CagedVisualizer() {
         </div>
     );
 }
+

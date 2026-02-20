@@ -135,6 +135,7 @@ export function RhythmReadingMode() {
     const startedAtRef = useRef<number | null>(null);
     const statusRef = useRef<SessionStatus>("idle");
     const sessionModeRef = useRef<SessionMode>("scored");
+    const finalizeRef = useRef<() => void>(() => { });
 
     const checkAndUpdateStreak = useProgressStore((state) => state.checkAndUpdateStreak);
     const recordSession = useProgressStore((state) => state.recordSession);
@@ -280,6 +281,10 @@ export function RhythmReadingMode() {
         updatePracticeTime,
     ]);
 
+    useEffect(() => {
+        finalizeRef.current = finalizeSession;
+    }, [finalizeSession]);
+
     const startSessionWithMode = useCallback(async (mode: SessionMode) => {
         await clockRef.current.warmUp();
         checkAndUpdateStreak();
@@ -331,7 +336,7 @@ export function RhythmReadingMode() {
             const stepDurationSec = 60 / settings.bpm / activeExercise.subdivision;
             const durationMs = Math.ceil(totalSteps * stepDurationSec * 1000 + 350);
             finishTimerRef.current = window.setTimeout(() => {
-                finalizeSession();
+                finalizeRef.current();
             }, durationMs);
         }
 
@@ -385,8 +390,8 @@ export function RhythmReadingMode() {
         if (!candidate) {
             extrasRef.current += 1;
             const extraEvaluation: TapEvaluation = {
-                offsetMs: MATCH_WINDOW_SEC * 1000,
-                absOffsetMs: MATCH_WINDOW_SEC * 1000,
+                offsetMs: 0,
+                absOffsetMs: 0,
                 rating: "miss",
                 isHit: false,
                 directionCorrect: true,

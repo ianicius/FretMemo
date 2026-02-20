@@ -105,6 +105,13 @@ export function AppShell() {
         <div className="flex min-h-screen bg-background text-foreground safe-area-inset">
             <SeoManager />
 
+            <a
+                href="#app-main-scroll"
+                className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-background focus:text-foreground focus:border focus:rounded-md focus:shadow-md outline-none focus:ring-2 focus:ring-primary"
+            >
+                Skip to main content
+            </a>
+
             <aside className="hidden md:flex w-16 lg:w-64 border-r border-border flex-col bg-card/30 sticky top-0 h-screen">
                 <div className="h-14 flex items-center justify-center lg:justify-start lg:px-6 border-b border-border/50">
                     <span className="font-bold text-xl text-primary hidden lg:inline">FretMemo</span>

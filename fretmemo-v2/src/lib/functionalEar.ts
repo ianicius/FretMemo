@@ -62,7 +62,7 @@ export function degreeToNoteName(
     return NOTES[(rootPc + semitone) % 12];
 }
 
-export function buildCadenceForKey(keyRoot: NoteName, mode: FunctionalMode = "major", baseOctave = 3): number[][] {
+export function buildCadenceForKey(keyRoot: NoteName, mode: FunctionalMode = "major", baseOctave = 4): number[][] {
     const rootMidi = toMidi(keyRoot, baseOctave);
     if (mode === "major") {
         const I = buildMajorTriad(rootMidi);
@@ -79,15 +79,15 @@ export function buildFunctionalQuestion(options: FunctionalQuestionOptions = {})
     const degrees = options.degrees && options.degrees.length > 0 ? options.degrees : FUNCTIONAL_DEGREES;
     const keyRoot = options.keyRoot ?? randomItem(NOTES);
     const degree = randomItem(degrees);
-    const keyRootMidi = toMidi(keyRoot, 3);
-    const targetMidi = keyRootMidi + 12 + degreeToSemitone(degree, mode);
+    const keyRootMidi = toMidi(keyRoot, 4);
+    const targetMidi = keyRootMidi + degreeToSemitone(degree, mode);
 
     return {
         keyRoot,
         mode,
         degree,
         targetMidi,
-        contextChords: buildCadenceForKey(keyRoot, mode, 3),
+        contextChords: buildCadenceForKey(keyRoot, mode, 4),
         askedAtMs: Date.now(),
     };
 }
