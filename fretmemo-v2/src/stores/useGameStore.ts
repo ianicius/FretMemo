@@ -4,10 +4,13 @@ import { useProgressStore } from './useProgressStore';
 import type { Position, NoteName } from '@/types/fretboard';
 import type { PracticeScaleType, PracticeNoteSequence } from '@/types/settings';
 import { useSettingsStore } from './useSettingsStore';
+import { useAppStore } from './useAppStore';
 import { normalizeTuning } from '@/lib/tuning';
 import { trackEvent } from '@/lib/analytics';
+import { calculateDynamicXP } from '../lib/progression';
 
-type PracticeMode = 'fretboardToNote' | 'tabToNote' | 'noteToTab' | 'playNotes' | 'playTab';
+export type PracticeMode = 'fretboardToNote' | 'tabToNote' | 'noteToTab' | 'playNotes' | 'playTab';
+export type PracticeModeId = PracticeMode;
 export type NoteFilter = 'all' | 'naturals';
 export type ScaleType = PracticeScaleType;
 export type NoteSequence = PracticeNoteSequence;
@@ -869,7 +872,7 @@ export const useGameStore = create<GameState>((set, get) => ({
             const correct = pickRandom(occurrences);
 
             const options: Position[] = [correct];
-            const seen = new Set([`${correct.stringIndex}-${correct.fret}`]);
+            const seen = new Set([`${correct.stringIndex} -${correct.fret} `]);
             const allowedStrings = occurrenceOptions.stringIndices?.length
                 ? occurrenceOptions.stringIndices
                 : tuning.map((_, index) => index);
@@ -1002,9 +1005,18 @@ export const useGameStore = create<GameState>((set, get) => ({
         const isManualAdvanceMode = isGuessMode && !isMetronomeOn && !autoAdvanceEnabled;
 
         // Record to progress store
-        useProgressStore.getState().recordAnswer(targetPosition, isCorrect);
+        const progressStore = useProgressStore.getState();
         const responseTimeMs = get().targetPresentedAt ? Date.now() - get().targetPresentedAt! : 5_000;
-        useProgressStore.getState().updateSR(targetPosition, isCorrect, responseTimeMs);
+        const srResult = progressStore.updateSR(targetPosition, isCorrect, responseTimeMs);
+
+        const xpEarned = isCorrect ? calculateDynamicXP({
+            sm2Quality: srResult.lastQuality,
+            bpm: get().bpm,
+            isWeakSpot: false,
+            streakDays: progressStore.streakDays,
+        }) : 0;
+
+        progressStore.recordAnswer(targetPosition, isCorrect, xpEarned);
 
         if (isCorrect) {
             const newStreak = streak + 1;
@@ -1020,6 +1032,15 @@ export const useGameStore = create<GameState>((set, get) => ({
                 sessionCorrect: get().sessionCorrect + 1,
                 feedbackMessage: "Correct!"
             });
+
+            // Update local session stats
+            const appStore = useAppStore.getState();
+            appStore.updateSessionStats({
+                correctNotes: appStore.sessionStats.correctNotes + 1,
+                totalNotes: appStore.sessionStats.totalNotes + 1,
+                xpEarned: appStore.sessionStats.xpEarned + xpEarned,
+            });
+
             if (shouldAutoAdvanceByClick) {
                 setTimeout(() => {
                     set({ lastAnswer: null, feedbackMessage: getPromptForMode(mode) });
@@ -1038,6 +1059,12 @@ export const useGameStore = create<GameState>((set, get) => ({
                 sessionIncorrect: get().sessionIncorrect + 1,
                 feedbackMessage: `Incorrect! It was ${actualNote}`
             });
+
+            const appStore = useAppStore.getState();
+            appStore.updateSessionStats({
+                totalNotes: appStore.sessionStats.totalNotes + 1,
+            });
+
             if (shouldAutoAdvanceByClick) {
                 setTimeout(() => {
                     set({ lastAnswer: null, feedbackMessage: getPromptForMode(mode) });
@@ -1063,9 +1090,18 @@ export const useGameStore = create<GameState>((set, get) => ({
         const isManualAdvanceMode = mode === 'noteToTab' && !isMetronomeOn && !autoAdvanceEnabled;
 
         // Record to progress store using the *target* position (consistent with other identify-style modes)
-        useProgressStore.getState().recordAnswer(targetPosition, isCorrect);
+        const progressStore = useProgressStore.getState();
         const responseTimeMs = get().targetPresentedAt ? Date.now() - get().targetPresentedAt! : 5_000;
-        useProgressStore.getState().updateSR(targetPosition, isCorrect, responseTimeMs);
+        const srResult = progressStore.updateSR(targetPosition, isCorrect, responseTimeMs);
+
+        const xpEarned = isCorrect ? calculateDynamicXP({
+            sm2Quality: srResult.lastQuality,
+            bpm: get().bpm,
+            isWeakSpot: false,
+            streakDays: progressStore.streakDays,
+        }) : 0;
+
+        progressStore.recordAnswer(targetPosition, isCorrect, xpEarned);
 
         if (isCorrect) {
             const newStreak = streak + 1;
@@ -1081,6 +1117,14 @@ export const useGameStore = create<GameState>((set, get) => ({
                 sessionCorrect: get().sessionCorrect + 1,
                 feedbackMessage: "Correct!"
             });
+
+            const appStore = useAppStore.getState();
+            appStore.updateSessionStats({
+                correctNotes: appStore.sessionStats.correctNotes + 1,
+                totalNotes: appStore.sessionStats.totalNotes + 1,
+                xpEarned: appStore.sessionStats.xpEarned + xpEarned,
+            });
+
             if (shouldAutoAdvanceByClick) {
                 setTimeout(() => {
                     set({ lastAnswer: null, feedbackMessage: getPromptForMode(mode) });
@@ -1099,6 +1143,12 @@ export const useGameStore = create<GameState>((set, get) => ({
                 sessionIncorrect: get().sessionIncorrect + 1,
                 feedbackMessage: `Incorrect! Correct: string ${targetPosition.stringIndex + 1}, fret ${targetPosition.fret}`
             });
+
+            const appStore = useAppStore.getState();
+            appStore.updateSessionStats({
+                totalNotes: appStore.sessionStats.totalNotes + 1,
+            });
+
             if (shouldAutoAdvanceByClick) {
                 setTimeout(() => {
                     set({ lastAnswer: null, feedbackMessage: getPromptForMode(mode) });
@@ -1144,9 +1194,13 @@ export const useGameStore = create<GameState>((set, get) => ({
                     set({
                         streak: 0,
                         sessionIncorrect: get().sessionIncorrect + 1,
-                        feedbackMessage: `Incorrect (${note})`
+                        feedbackMessage: `Incorrect(${note})`
                     });
                 }
+                const appStore = useAppStore.getState();
+                appStore.updateSessionStats({
+                    totalNotes: appStore.sessionStats.totalNotes + 1,
+                });
             }
 
             return;
@@ -1161,6 +1215,15 @@ export const useGameStore = create<GameState>((set, get) => ({
                 if (newStreak === 20) {
                     useProgressStore.getState().unlockAchievement('perfect_session');
                 }
+                const progressStore = useProgressStore.getState();
+                const xpEarned = calculateDynamicXP({
+                    sm2Quality: 4,
+                    bpm: get().bpm,
+                    isWeakSpot: false,
+                    streakDays: progressStore.streakDays,
+                });
+                useProgressStore.setState((s) => ({ totalXP: s.totalXP + xpEarned }));
+
                 set({
                     score: score + 10 + (streak * 2),
                     streak: newStreak,
@@ -1168,6 +1231,14 @@ export const useGameStore = create<GameState>((set, get) => ({
                     feedbackMessage: "Correct!",
                     playCycleAnswered: true,
                 });
+
+                const appStore = useAppStore.getState();
+                appStore.updateSessionStats({
+                    correctNotes: appStore.sessionStats.correctNotes + 1,
+                    totalNotes: appStore.sessionStats.totalNotes + 1,
+                    xpEarned: appStore.sessionStats.xpEarned + xpEarned,
+                });
+
                 if (!isMetronomeOn) {
                     setTimeout(() => {
                         set({ feedbackMessage: getPromptForMode(mode) });
@@ -1179,9 +1250,13 @@ export const useGameStore = create<GameState>((set, get) => ({
                     set({
                         streak: 0,
                         sessionIncorrect: get().sessionIncorrect + 1,
-                        feedbackMessage: `Incorrect (${note})`
+                        feedbackMessage: `Incorrect(${note})`
                     });
                 }
+                const appStore = useAppStore.getState();
+                appStore.updateSessionStats({
+                    totalNotes: appStore.sessionStats.totalNotes + 1,
+                });
             }
         }
     },

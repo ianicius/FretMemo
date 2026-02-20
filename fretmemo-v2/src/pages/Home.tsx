@@ -12,7 +12,9 @@ import { ExerciseCard } from "@/components/ui/exercise-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { MasteryBar } from "@/components/ui/mastery-bar";
 import { StatLine } from "@/components/ui/stat-line";
-import { ArrowRight, Compass, Flame, Music2, Play, Sparkles, Star, Target, Trophy } from "lucide-react";
+import { ArrowRight, Compass, Flame, Music2, Play, Sparkles, Star, Target, Trophy, Gift, CheckCircle2 } from "lucide-react";
+import { getLevelProgress } from "@/lib/progression";
+import { useQuestStore } from "@/stores/useQuestStore";
 
 type PracticeMode = "fretboardToNote" | "tabToNote" | "noteToTab" | "playNotes" | "playTab";
 type ExerciseDifficulty = "beginner" | "intermediate" | "advanced";
@@ -107,7 +109,7 @@ function formatRelativeTime(isoTimestamp: string | null): string {
 
 export default function Home() {
     const navigate = useNavigate();
-    const { streakDays, totalCorrect, totalIncorrect, positionStats } = useProgressStore();
+    const { streakDays, totalCorrect, totalIncorrect, positionStats, totalXP } = useProgressStore();
     const { setMode, setPracticeConstraints } = useGameStore();
     const quickTuning = useSettingsStore((state) => state.quick.tuning);
     const techniqueSettings = useSettingsStore((state) => state.modules.technique);
@@ -116,6 +118,8 @@ export default function Home() {
     const unpin = usePinnedExercisesStore((state) => state.unpin);
     const rhythmModeStats = useRhythmDojoStore((state) => state.modeStats);
     const getRhythmModeMastery = useRhythmDojoStore((state) => state.getModeMastery);
+    const quests = useQuestStore((state) => state.quests);
+    const claimReward = useQuestStore((state) => state.claimReward);
 
     const tuning = useMemo(() => normalizeTuning(quickTuning), [quickTuning]);
     const positionsPracticed = Object.keys(positionStats).length;
@@ -126,10 +130,10 @@ export default function Home() {
     const overallAccuracy = totalCorrect + totalIncorrect > 0
         ? Math.round((totalCorrect / (totalCorrect + totalIncorrect)) * 100)
         : 0;
-    const xp = totalCorrect * 10;
-    const level = Math.floor(xp / 1000) + 1;
-    const xpProgress = ((xp % 1000) / 1000) * 100;
-    const xpToNext = 1000 - (xp % 1000);
+    const xp = totalXP ?? totalCorrect * 10;
+    const { level, progressPercent, xpRemaining } = getLevelProgress(xp);
+    const xpProgress = progressPercent;
+    const xpToNext = xpRemaining;
     const momentumLabel = streakDays > 1 ? `${streakDays} days` : streakDays === 1 ? "1 day" : "start";
 
     const weakAreas = useMemo(() => {
@@ -349,17 +353,54 @@ export default function Home() {
                 </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border-border/80">
                 <CardHeader>
-                    <CardTitle>Today&apos;s Challenge</CardTitle>
-                    <CardDescription>Lightning Round · 30 notes · +100 XP</CardDescription>
+                    <div className="flex items-center gap-2">
+                        <Target className="h-5 w-5 text-indigo-500" />
+                        <CardTitle>Daily Quests</CardTitle>
+                    </div>
+                    <CardDescription>Complete tasks to earn bonus XP</CardDescription>
                 </CardHeader>
-                <CardContent className="flex flex-wrap items-center gap-3">
-                    <Button className="control-btn--primary" onClick={() => openPracticeSetup("fretboardToNote", "home-daily-challenge")}>
-                        <Play className="mr-2 h-4 w-4" />
-                        Start Challenge
-                    </Button>
-                    <span className="text-sm text-muted-foreground">Fast recall under light time pressure.</span>
+                <CardContent className="space-y-4">
+                    {quests.map((quest) => (
+                        <div key={quest.id} className="space-y-2">
+                            <div className="flex items-start justify-between">
+                                <div>
+                                    <h4 className="text-sm font-semibold">{quest.title}</h4>
+                                    <p className="text-xs text-muted-foreground">{quest.description}</p>
+                                </div>
+                                {!quest.isClaimed && quest.isCompleted ? (
+                                    <Button
+                                        size="sm"
+                                        className="h-7 text-xs bg-indigo-500 hover:bg-indigo-600 text-white animate-pulse"
+                                        onClick={() => claimReward(quest.id)}
+                                    >
+                                        <Gift className="mr-1 h-3.5 w-3.5" />
+                                        Claim {quest.xpReward} XP
+                                    </Button>
+                                ) : quest.isClaimed ? (
+                                    <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-500">
+                                        <CheckCircle2 className="h-4 w-4" />
+                                        Claimed
+                                    </span>
+                                ) : (
+                                    <span className="inline-flex items-center gap-1 rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                                        <Star className="h-3 w-3" />
+                                        {quest.xpReward} XP
+                                    </span>
+                                )}
+                            </div>
+                            <MasteryBar
+                                value={Math.min(100, Math.round((quest.current / quest.target) * 100))}
+                                showLabel={false}
+                                className={quest.isCompleted ? "opacity-30" : ""}
+                            />
+                            <div className="flex w-full justify-between text-[10px] text-muted-foreground">
+                                <span>{quest.current}</span>
+                                <span>{quest.target}</span>
+                            </div>
+                        </div>
+                    ))}
                 </CardContent>
             </Card>
 

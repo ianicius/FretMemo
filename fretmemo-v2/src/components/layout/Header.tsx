@@ -14,6 +14,7 @@ import {
     Sun,
     Target,
     Trophy,
+    Download,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useProgressStore } from "@/stores/useProgressStore";
@@ -22,11 +23,13 @@ import { EXTERNAL_LINKS } from "@/lib/externalLinks";
 import { trackEvent } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { usePWAInstall } from "@/hooks/usePWAInstall";
 
 export function Header() {
     const navigate = useNavigate();
     const { streakDays, streakFreezes, totalCorrect } = useProgressStore();
     const { full, updateFullSettings } = useSettingsStore();
+    const { isInstallable, promptInstall } = usePWAInstall();
     const xp = totalCorrect * 10;
 
     const isDark =
@@ -84,6 +87,22 @@ export function Header() {
                         )}
                         <span className="sr-only">{isDark ? "Light mode" : "Dark mode"}</span>
                     </Button>
+
+                    {isInstallable && (
+                        <Button
+                            variant="default"
+                            size="sm"
+                            className="h-8 gap-1.5 rounded-full px-3 text-xs font-semibold shadow-sm"
+                            onClick={() => {
+                                trackEvent("install_prompt_clicked");
+                                promptInstall();
+                            }}
+                        >
+                            <Download className="h-3.5 w-3.5" />
+                            <span className="hidden sm:inline-block">Install App</span>
+                            <span className="sm:hidden">Install</span>
+                        </Button>
+                    )}
 
                     <Sheet>
                         <SheetTrigger asChild>

@@ -109,6 +109,7 @@ interface PositionAnswerButtonsProps {
     tuning: NoteName[];
     leftHanded: boolean;
     onSubmit: (option: Position) => void;
+    isLandscape?: boolean;
 }
 
 /**
@@ -125,9 +126,10 @@ export function PositionAnswerButtons({
     tuning,
     leftHanded,
     onSubmit,
+    isLandscape,
 }: PositionAnswerButtonsProps) {
     return (
-        <div className="grid grid-cols-2 gap-2.5 min-[390px]:gap-3 sm:gap-4">
+        <div className={cn("grid gap-2.5 min-[390px]:gap-3 sm:gap-4", isLandscape ? "grid-cols-1" : "grid-cols-2")}>
             {options.map((option) => {
                 const key = `${option.stringIndex}-${option.fret}`;
                 const isCorrectOption = isLocked && targetPosition && option.stringIndex === targetPosition.stringIndex && option.fret === targetPosition.fret;

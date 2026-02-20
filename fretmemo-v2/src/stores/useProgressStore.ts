@@ -5,6 +5,7 @@ import { getNoteAt, STANDARD_TUNING } from '@/lib/constants';
 import { useSettingsStore } from './useSettingsStore';
 import { normalizeTuning } from '@/lib/tuning';
 import { calculateNextReview, gradeAnswer, isDueForReview, type SpacedRepetitionEntry, type SM2Result } from '@/lib/sm2';
+import { useQuestStore } from './useQuestStore';
 
 export interface PositionStats {
     correct: number;
@@ -50,6 +51,7 @@ interface NormalizedProgressData {
     lastPracticeDate: string | null;
     totalCorrect: number;
     totalIncorrect: number;
+    totalXP: number;
     sessionHistory: SessionRecord[];
     achievements: Achievement[];
     functionalEarStats: Record<string, FunctionalDegreeStats>;
@@ -73,6 +75,7 @@ interface ProgressState {
     lastPracticeDate: string | null;
     totalCorrect: number;
     totalIncorrect: number;
+    totalXP: number;
     sessionHistory: SessionRecord[];
     functionalEarStats: Record<string, FunctionalDegreeStats>;
 
@@ -83,7 +86,7 @@ interface ProgressState {
     spacedRepetition: Record<string, SpacedRepetitionEntry>; // key: "string-fret"
 
     // Actions
-    recordAnswer: (position: Position, isCorrect: boolean) => void;
+    recordAnswer: (position: Position, isCorrect: boolean, xpEarned?: number) => void;
     toggleHeatMap: () => void;
     getPositionAccuracy: (stringIndex: number, fret: number) => number | null;
     getHeatMapClass: (accuracy: number | null) => string;
@@ -104,6 +107,7 @@ interface ProgressState {
     updateSR: (position: Position, isCorrect: boolean, responseTimeMs: number) => SM2Result;
     getSREntry: (stringIndex: number, fret: number) => SpacedRepetitionEntry | null;
     isDueForReview: (stringIndex: number, fret: number) => boolean;
+    addBonusXP: (amount: number) => void;
 }
 
 const DEFAULT_ACHIEVEMENTS: Achievement[] = [
@@ -126,6 +130,7 @@ type ProgressSnapshot = Pick<
     | 'lastPracticeDate'
     | 'totalCorrect'
     | 'totalIncorrect'
+    | 'totalXP'
     | 'sessionHistory'
     | 'achievements'
     | 'functionalEarStats'
@@ -147,6 +152,7 @@ function createInitialProgressSnapshot(): ProgressSnapshot {
         lastPracticeDate: null,
         totalCorrect: 0,
         totalIncorrect: 0,
+        totalXP: 0,
         sessionHistory: [],
         achievements: createDefaultAchievements(),
         functionalEarStats: {},
@@ -333,6 +339,7 @@ function normalizeImportedProgress(payload: unknown): NormalizedProgressData | n
         lastPracticeDate: toIsoOrNull(source.lastPracticeDate),
         totalCorrect: toNonNegativeInt(source.totalCorrect),
         totalIncorrect: toNonNegativeInt(source.totalIncorrect),
+        totalXP: typeof source.totalXP === 'number' ? toNonNegativeInt(source.totalXP) : toNonNegativeInt(source.totalCorrect) * 10, // Backwards compat
         sessionHistory: normalizeSessionHistory(source.sessionHistory),
         achievements: normalizeAchievements(source.achievements),
         functionalEarStats: normalizeFunctionalEarStats(source.functionalEarStats),
@@ -445,7 +452,7 @@ export const useProgressStore = create<ProgressState>()(
         (set, get) => ({
             ...createInitialProgressSnapshot(),
 
-            recordAnswer: (position: Position, isCorrect: boolean) => {
+            recordAnswer: (position: Position, isCorrect: boolean, xpEarned: number = 0) => {
                 const key = `${position.stringIndex}-${position.fret}`;
                 const current = get().positionStats[key] || { correct: 0, total: 0, lastPracticed: null };
 
@@ -460,6 +467,7 @@ export const useProgressStore = create<ProgressState>()(
                     },
                     totalCorrect: state.totalCorrect + (isCorrect ? 1 : 0),
                     totalIncorrect: state.totalIncorrect + (isCorrect ? 0 : 1),
+                    totalXP: state.totalXP + xpEarned,
                 }));
 
                 // Check for achievements
@@ -596,6 +604,10 @@ export const useProgressStore = create<ProgressState>()(
                 set((state) => ({
                     sessionHistory: [...state.sessionHistory.slice(-199), session],
                 }));
+
+                if (durationSeconds > 0) {
+                    useQuestStore.getState().updateProgress('practice_time', Math.ceil(durationSeconds / 60));
+                }
             },
 
             recordFunctionalEarAnswer: (degree, isCorrect, responseTimeMs) => {
@@ -652,6 +664,7 @@ export const useProgressStore = create<ProgressState>()(
                         lastPracticeDate: normalized.lastPracticeDate,
                         totalCorrect: normalized.totalCorrect,
                         totalIncorrect: normalized.totalIncorrect,
+                        totalXP: normalized.totalXP,
                         sessionHistory: normalized.sessionHistory,
                         achievements: normalized.achievements,
                         functionalEarStats: normalized.functionalEarStats,
@@ -674,6 +687,7 @@ export const useProgressStore = create<ProgressState>()(
                     lastPracticeDate: pickLatestIso(state.lastPracticeDate, normalized.lastPracticeDate),
                     totalCorrect: state.totalCorrect + normalized.totalCorrect,
                     totalIncorrect: state.totalIncorrect + normalized.totalIncorrect,
+                    totalXP: state.totalXP + normalized.totalXP,
                     sessionHistory: mergeSessionHistory(state.sessionHistory, normalized.sessionHistory),
                     achievements: mergeAchievements(state.achievements, normalized.achievements),
                     functionalEarStats: mergeFunctionalEarStats(state.functionalEarStats, normalized.functionalEarStats),
@@ -724,6 +738,12 @@ export const useProgressStore = create<ProgressState>()(
                 if (!entry) return true; // Never reviewed = due
                 return isDueForReview(entry);
             },
+
+            addBonusXP: (amount: number) => {
+                set((state) => ({
+                    totalXP: state.totalXP + amount
+                }));
+            },
         }),
         {
             name: 'fretmemo-progress',
@@ -737,6 +757,7 @@ export const useProgressStore = create<ProgressState>()(
                 lastPracticeDate: state.lastPracticeDate,
                 totalCorrect: state.totalCorrect,
                 totalIncorrect: state.totalIncorrect,
+                totalXP: state.totalXP,
                 sessionHistory: state.sessionHistory,
                 achievements: state.achievements,
                 functionalEarStats: state.functionalEarStats,
