@@ -108,10 +108,10 @@ const TRAIN_UI_STATE_KEY = "fretmemo.train.ui";
 const DEFAULT_SECTIONS_OPEN: TrainSectionsOpenState = {
     pinned: false,
     drills: true,
-    technique: false,
-    theory: false,
-    ear: false,
-    rhythm: false,
+    technique: true,
+    theory: true,
+    ear: true,
+    rhythm: true,
 };
 
 function normalizeSectionsOpen(

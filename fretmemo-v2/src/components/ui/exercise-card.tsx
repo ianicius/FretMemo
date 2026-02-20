@@ -39,7 +39,11 @@ export function ExerciseCard({
 }: ExerciseCardProps) {
     const Component = onClick ? "button" : "div";
     const safeMastery = Math.max(0, Math.min(100, Math.round(mastery)));
-    const masteryLabel = isNew ? "New" : `${safeMastery}%`;
+    const masteryLabel = isNew ? (
+        <Badge className="bg-amber-500 text-amber-950 hover:bg-amber-400 font-bold uppercase tracking-widest text-[10px] px-1.5 py-0">NEW</Badge>
+    ) : (
+        `${safeMastery}%`
+    );
 
     if (variant === "catalog") {
         return (
