@@ -79,62 +79,38 @@ export function TechniqueSetupDialog({
             }
         >
             <section className="space-y-3 rounded-lg border border-border/50 p-3">
-                        <div className="space-y-2">
-                            <div className="flex items-center justify-between">
-                                <Label className="text-sm">Tempo</Label>
-                                <span className="font-mono text-xs text-muted-foreground">{bpm} BPM</span>
-                            </div>
-                            <Slider
-                                value={[bpm]}
-                                onValueChange={([value]) => onBpmChange(value)}
-                                min={30}
-                                max={280}
-                                step={1}
-                            />
-                        </div>
+                <div className={cn("space-y-2", stepMode && "opacity-50 pointer-events-none")}>
+                    <div className="flex items-center justify-between">
+                        <Label className="text-sm">Tempo</Label>
+                        <span className="font-mono text-xs text-muted-foreground">{bpm} BPM</span>
+                    </div>
+                    <Slider
+                        value={[bpm]}
+                        onValueChange={([value]) => onBpmChange(value)}
+                        min={30}
+                        max={280}
+                        step={1}
+                        disabled={stepMode}
+                    />
+                </div>
 
+                {!stepMode && (
+                    <div className="space-y-3 rounded-md border border-amber-300/40 bg-amber-50/60 p-3 dark:border-amber-500/20 dark:bg-amber-900/10">
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
-                                <Label className="text-sm">Step Mode</Label>
-                                <p className="text-xs text-muted-foreground">Manually advance each beat.</p>
-                            </div>
-                            <Switch checked={stepMode} onCheckedChange={onStepModeChange} />
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label className="text-sm">Start Fret</Label>
-                            <div className="flex gap-2">
-                                {[1, 3, 5, 7].map((fret) => (
-                                    <Button
-                                        key={fret}
-                                        variant={startFret === fret ? "default" : "outline"}
-                                        size="sm"
-                                        onClick={() => onStartFretChange(fret)}
-                                        className="flex-1"
-                                    >
-                                        {fret}
-                                    </Button>
-                                ))}
-                            </div>
-                        </div>
-            </section>
-
-            <section className="space-y-3 rounded-lg border border-border/50 p-3">
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-0.5">
-                                <span className="inline-flex items-center gap-2 text-sm">
-                                    <Zap className="h-4 w-4 text-muted-foreground" />
+                                <span className="inline-flex items-center gap-2 text-sm font-medium">
+                                    <Zap className="h-4 w-4 text-amber-600" />
                                     Auto Speed-Up
                                 </span>
-                                <p className="text-xs text-muted-foreground">Increase tempo automatically while playing.</p>
+                                <p className="text-xs text-muted-foreground">Increase tempo automatically.</p>
                             </div>
                             <Switch checked={speedUpEnabled} onCheckedChange={onSpeedUpEnabledChange} />
                         </div>
 
-                        <div className={cn("space-y-3", !speedUpEnabled && "opacity-50")}>
+                        <div className={cn("space-y-3", !speedUpEnabled && "hidden")}>
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between text-sm">
-                                    <Label className="text-sm">Increase</Label>
+                                    <Label className="text-xs">Increase</Label>
                                     <span className="font-mono text-xs">+{speedUpAmount} BPM</span>
                                 </div>
                                 <Slider
@@ -143,13 +119,12 @@ export function TechniqueSetupDialog({
                                     min={1}
                                     max={20}
                                     step={1}
-                                    disabled={!speedUpEnabled}
                                 />
                             </div>
 
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between text-sm">
-                                    <Label className="text-sm">Every</Label>
+                                    <Label className="text-xs">Every</Label>
                                     <span className="font-mono text-xs">
                                         {speedUpInterval} beat{speedUpInterval > 1 ? "s" : ""}
                                     </span>
@@ -160,11 +135,39 @@ export function TechniqueSetupDialog({
                                     min={1}
                                     max={32}
                                     step={1}
-                                    disabled={!speedUpEnabled}
                                 />
                             </div>
                         </div>
+                    </div>
+                )}
+
+                <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                        <Label className="text-sm">Step Mode</Label>
+                        <p className="text-xs text-muted-foreground">Manually advance each beat.</p>
+                    </div>
+                    <Switch checked={stepMode} onCheckedChange={onStepModeChange} />
+                </div>
+
+                <div className="space-y-2">
+                    <Label className="text-sm">Start Fret</Label>
+                    <div className="flex gap-2">
+                        {[1, 3, 5, 7].map((fret) => (
+                            <Button
+                                key={fret}
+                                variant={startFret === fret ? "default" : "outline"}
+                                size="sm"
+                                onClick={() => onStartFretChange(fret)}
+                                className="flex-1"
+                            >
+                                {fret}
+                            </Button>
+                        ))}
+                    </div>
+                </div>
             </section>
+
+
 
             {advancedContent && (
                 <section className="space-y-3">

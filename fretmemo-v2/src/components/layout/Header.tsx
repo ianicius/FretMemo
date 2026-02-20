@@ -87,8 +87,8 @@ export function Header() {
 
                     <Sheet>
                         <SheetTrigger asChild>
-                            <Button variant="ghost" size="icon" className="md:hidden">
-                                <Menu className="h-5 w-5" />
+                            <Button variant="ghost" size="icon" className="md:hidden h-12 w-12 rounded-full p-2">
+                                <Menu className="h-6 w-6" />
                                 <span className="sr-only">Open quick menu</span>
                             </Button>
                         </SheetTrigger>
