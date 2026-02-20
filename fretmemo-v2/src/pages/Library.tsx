@@ -9,6 +9,7 @@ import { ExerciseCard } from "@/components/ui/exercise-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
 import { Compass, Drum, Ear, Guitar, Music2, Sparkles, Star, Target } from "lucide-react";
+import { getLevelProgress } from "@/lib/progression";
 
 type TechniqueDifficulty = "beginner" | "intermediate" | "advanced";
 type PracticeMode = "fretboardToNote" | "tabToNote" | "noteToTab" | "playNotes" | "playTab";
@@ -23,6 +24,8 @@ type CatalogCard = {
     mastery: number;
     isNew: boolean;
     source: string;
+    minLevel?: number;
+    isLocked?: boolean;
 };
 
 interface TechniqueExerciseItem {
@@ -37,6 +40,7 @@ interface RhythmExerciseItem {
     difficulty: TechniqueDifficulty;
     priority: number;
     status: "active" | "coming-soon";
+    minLevel?: number;
 }
 
 interface TrainUiStateSnapshot {
@@ -65,6 +69,7 @@ const DRILLS: Array<{
     difficulty: TechniqueDifficulty;
     priority: number;
     source: string;
+    minLevel?: number;
 }> = [
         {
             id: "fretboardToNote",
@@ -79,6 +84,7 @@ const DRILLS: Array<{
             difficulty: "beginner",
             priority: 2,
             source: "train-drills-play-note-names",
+            minLevel: 2,
         },
         {
             id: "noteToTab",
@@ -86,6 +92,7 @@ const DRILLS: Array<{
             difficulty: "intermediate",
             priority: 3,
             source: "train-drills-note-to-tab",
+            minLevel: 3,
         },
         {
             id: "tabToNote",
@@ -93,6 +100,7 @@ const DRILLS: Array<{
             difficulty: "intermediate",
             priority: 4,
             source: "train-drills-tab-to-note",
+            minLevel: 3,
         },
         {
             id: "playTab",
@@ -100,6 +108,7 @@ const DRILLS: Array<{
             difficulty: "advanced",
             priority: 5,
             source: "train-drills-play-tab-sequence",
+            minLevel: 5,
         },
     ];
 
@@ -217,6 +226,9 @@ export default function Library() {
     const maxPins = usePinnedExercisesStore((state) => state.maxPins);
     const togglePinned = usePinnedExercisesStore((state) => state.togglePinned);
     const hasSessionHistory = sessionHistory.length > 0;
+    const storeTotalXP = useProgressStore((state) => state.totalXP);
+    const resolvedXp = storeTotalXP ?? totalCorrect * 10;
+    const { level: userLevel } = getLevelProgress(resolvedXp);
     const scrollContainerRef = useRef<HTMLElement | null>(null);
     const hasRestoredScrollRef = useRef(false);
     const [sectionsOpen, setSectionsOpen] = useState<TrainSectionsOpenState>(() => {
@@ -315,10 +327,12 @@ export default function Library() {
             source: drill.source,
             mastery: Math.max(0, overallAccuracy - index * 8),
             isNew: !hasSessionHistory,
+            minLevel: drill.minLevel,
+            isLocked: drill.minLevel ? drill.minLevel > userLevel : false,
         }));
 
         return sortCatalogCards(cards);
-    }, [hasSessionHistory, overallAccuracy]);
+    }, [hasSessionHistory, overallAccuracy, userLevel]);
 
     const techniqueCards = useMemo(() => {
         const bestBpm = techniqueSettings.bestBpm ?? {};
@@ -380,6 +394,8 @@ export default function Library() {
                         mastery: drill.mastery,
                         isNew: drill.isNew,
                         source: drill.source,
+                        minLevel: drill.minLevel,
+                        isLocked: (drill.minLevel && drill.minLevel > userLevel) ? true : false,
                     };
                 }
 
@@ -404,13 +420,15 @@ export default function Library() {
                         difficulty: rhythm.difficulty,
                         mastery: rhythm.mastery,
                         isNew: rhythm.isNew,
+                        minLevel: rhythm.minLevel,
+                        isLocked: (rhythm.minLevel && rhythm.minLevel > userLevel) ? true : false,
                     };
                 }
 
                 return null;
             })
             .filter((card): card is NonNullable<typeof card> => Boolean(card));
-    }, [drillCards, pinnedIds, rhythmCards, techniqueCards]);
+    }, [drillCards, pinnedIds, rhythmCards, techniqueCards, userLevel]);
 
     const drillSummary = useMemo(
         () => `${drillCards.length} modes • ${getAverageMastery(drillCards)}% avg`,
@@ -479,6 +497,8 @@ export default function Library() {
                                     icon={card.kind === "drill" ? Target : card.kind === "technique" ? Guitar : Drum}
                                     variant="catalog"
                                     isNew={card.isNew}
+                                    isLocked={card.isLocked}
+                                    minLevel={card.minLevel}
                                     onClick={() =>
                                         card.kind === "drill"
                                             ? openPracticeSetup(card.id as PracticeMode, card.source)

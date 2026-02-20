@@ -42,6 +42,10 @@ function AppRoutes() {
 }
 
 function App() {
+  import("./stores/useQuestStore").then(({ useQuestStore }) => {
+    useQuestStore.getState().checkAndRefreshQuests();
+  }).catch(err => console.error("Failed to refresh quests", err));
+
   return (
     <ErrorBoundary>
       {import.meta.env.VITE_USE_HASH_ROUTER === "true" ? (

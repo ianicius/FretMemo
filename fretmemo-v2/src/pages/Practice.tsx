@@ -5,6 +5,7 @@ import { TabView } from "@/components/fretboard/TabView";
 import type { NoteName, Position, NoteStatus, FretboardLayer } from "@/types/fretboard";
 import { useGameStore, type ScaleType, type NoteFilter, type NoteSequence } from "@/stores/useGameStore";
 import { useProgressStore } from "@/stores/useProgressStore";
+import { useAppStore } from "@/stores/useAppStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
@@ -179,6 +180,7 @@ export default function Practice() {
         previousAccuracy: number | null;
         isFirstSession: boolean;
         personalBest: boolean;
+        xpEarned: number;
     } | null>(null);
 
     const maxStreakRef = useRef(0);
@@ -655,6 +657,8 @@ export default function Practice() {
             ? Math.max(...sessionHistory.map((session) => Math.round(session.accuracy)))
             : 0;
 
+        const appStore = useAppStore.getState();
+
         setSessionStats({
             score,
             correct: sessionCorrect,
@@ -664,6 +668,7 @@ export default function Practice() {
             previousAccuracy,
             isFirstSession: sessionHistory.length === 0,
             personalBest: sessionHistory.length > 0 && currentAccuracy > maxPreviousAccuracy,
+            xpEarned: appStore.sessionStats.xpEarned,
         });
         setIsPaused(false);
         hideToast();
@@ -784,7 +789,7 @@ export default function Practice() {
         handleRestart();
     };
 
-    const xpEarned = sessionStats ? sessionStats.correct * 10 + Math.max(0, (sessionStats.maxStreak - 1) * sessionStats.maxStreak) : 0;
+    const xpEarned = sessionStats ? sessionStats.xpEarned : 0;
 
     // Focus Mode Active UI
     if (isPlaying) {
@@ -867,6 +872,7 @@ export default function Practice() {
                         tuning={tuning}
                         leftHanded={leftHanded}
                         onSubmit={handlePositionGuess}
+                        isLandscape={isLandscape}
                     />
                 )}
                 {manualAdvanceRequired && (
@@ -902,12 +908,12 @@ export default function Practice() {
                     </div>
                 )}
                 {moduleTab === "guess" && mode === "noteToTab" && (
-                    <div className={cn("w-full max-w-md mx-auto text-center animate-in zoom-in-90 fade-in duration-500", isLandscape && "max-w-sm")}>
-                        <div className={cn("text-xs text-muted-foreground font-semibold tracking-wider uppercase", isLandscape ? "mb-2" : "mb-8")}>Target Note</div>
-                        <div className={cn("font-black text-primary leading-none transition-all drop-shadow-2xl", isLandscape ? "text-7xl" : "text-[12rem]")}>
+                    <div className={cn("w-full max-w-md mx-auto text-center flex flex-col items-center animate-in zoom-in-90 fade-in duration-500", isLandscape && "max-w-sm")}>
+                        <div className={cn("text-[10px] md:text-xs text-muted-foreground font-semibold tracking-wider uppercase", isLandscape ? "mb-2" : "mb-2 md:mb-6")}>Target Note</div>
+                        <div className={cn("font-black text-primary leading-none transition-all drop-shadow-2xl", isLandscape ? "text-6xl sm:text-7xl" : "text-[8rem] sm:text-[10rem] lg:text-[12rem]")}>
                             {targetNote ?? "?"}
                         </div>
-                        <div className={cn("text-muted-foreground/80 font-light", isLandscape ? "mt-3 text-sm" : "mt-12 text-lg")}>Pick the matching tab position below</div>
+                        <div className={cn("text-muted-foreground/80 font-light", isLandscape ? "mt-3 text-xs sm:text-sm" : "mt-4 md:mt-8 text-sm md:text-lg")}>Pick the matching tab position below</div>
                     </div>
                 )}
                 {moduleTab === "play" && mode === "playNotes" && (
@@ -1018,7 +1024,7 @@ export default function Practice() {
                             </div>
 
                             {/* Right: Controls Panel */}
-                            <div className="shrink min-w-0 flex flex-col justify-center bg-card/30 border-l border-border/30 px-2 py-2 overflow-y-auto landscape-controls" style={{ paddingTop: `${safeHudHeight}px`, width: 'clamp(140px, 25%, 208px)' }}>
+                            <div className="shrink min-w-0 flex flex-col justify-center bg-card/30 border-l border-border/30 px-2 py-2 overflow-y-auto landscape-controls" style={{ paddingTop: `${safeHudHeight}px`, width: mode === "noteToTab" ? 'clamp(220px, 35%, 320px)' : 'clamp(140px, 25%, 208px)' }}>
                                 <div className="space-y-2">
                                     {feedbackContent}
                                     {controlsContent}
