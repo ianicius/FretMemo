@@ -33,7 +33,7 @@ export function Fretboard({
     // If fitContainer is true, we allow squishing (min 0).
     const minColWidth = fitContainer ? '0px' : '1.75rem'; // 1.75rem was original
     const gridColumns = `minmax(2.25rem, 3rem) repeat(${frets}, minmax(${minColWidth}, 1fr))`;
-    const gridRows = `repeat(${tuning.length}, minmax(2.35rem, 1fr))`;
+    const gridRows = `repeat(${tuning.length}, minmax(1.75rem, 1fr))`;
 
     const markerMap: Record<number, number[]> = {
         3: [2],
@@ -120,14 +120,32 @@ export function Fretboard({
                                         data-fret={0}
                                     >
                                         <StringLine thickness={stringThicknesses[stringIdx]} />
-                                        <span
-                                            className={cn(
-                                                "relative z-10 text-[11px] font-semibold text-muted-foreground",
-                                                leftHanded && "transform scale-x-[-1]"
-                                            )}
-                                        >
-                                            {openNote}
-                                        </span>
+                                        {(() => {
+                                            const nutStatus = activeNotes.find(
+                                                (n) => n.position.stringIndex === stringIdx && n.position.fret === 0
+                                            );
+                                            if (nutStatus) {
+                                                return (
+                                                    <NoteDot
+                                                        position={{ stringIndex: stringIdx, fret: 0, note: openNote }}
+                                                        noteStatus={nutStatus}
+                                                        onClick={onNoteClick}
+                                                        showLabel={false}
+                                                        leftHanded={leftHanded}
+                                                    />
+                                                );
+                                            }
+                                            return (
+                                                <span
+                                                    className={cn(
+                                                        "relative z-10 text-[11px] font-semibold text-muted-foreground",
+                                                        leftHanded && "transform scale-x-[-1]"
+                                                    )}
+                                                >
+                                                    {openNote}
+                                                </span>
+                                            );
+                                        })()}
                                     </div>
 
                                     {/* Fretted notes 1..N */}

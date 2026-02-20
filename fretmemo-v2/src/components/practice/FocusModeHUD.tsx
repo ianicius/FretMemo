@@ -20,6 +20,7 @@ interface FocusModeHUDProps {
     progressTarget?: number;
     onHeightChange?: (height: number) => void;
     showTempo?: boolean;
+    isLandscape?: boolean;
 }
 
 export function FocusModeHUD({
@@ -39,6 +40,7 @@ export function FocusModeHUD({
     progressTarget,
     onHeightChange,
     showTempo = true,
+    isLandscape = false,
 }: FocusModeHUDProps) {
     const [elapsedTime, setElapsedTime] = useState(0);
     const hudRef = useRef<HTMLDivElement | null>(null);
@@ -112,6 +114,68 @@ export function FocusModeHUD({
         );
     }
 
+    // Landscape compact: single-line inline HUD
+    if (isLandscape) {
+        return (
+            <div ref={hudRef} className="fixed left-0 right-0 top-0 z-50 px-2 py-1">
+                <div className="mx-auto max-w-none">
+                    <div className="flex items-center gap-2 rounded-lg border border-border/40 bg-card/90 px-2 py-1 shadow-sm backdrop-blur-md">
+                        <p className="truncate text-[9px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+                            {modeLabel}
+                        </p>
+                        <div className="flex items-center gap-1 text-xs">
+                            <Timer className="h-3 w-3 text-muted-foreground" />
+                            <span className="font-mono font-medium">{formatTime(elapsedTime)}</span>
+                        </div>
+                        <div
+                            className={cn(
+                                "rounded-full border px-1.5 py-0.5 text-[10px] font-semibold",
+                                accuracy >= 75 && "border-emerald-500/40 bg-emerald-500/10 text-emerald-400",
+                                accuracy >= 50 && accuracy < 75 && "border-amber-500/40 bg-amber-500/10 text-amber-300",
+                                accuracy < 50 && "border-rose-500/40 bg-rose-500/10 text-rose-400"
+                            )}
+                        >
+                            {accuracy}%
+                        </div>
+                        <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                            <Target className="h-3 w-3" />
+                            <span className="font-mono">{correct}/{total}</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                            <Zap className="h-3 w-3" />
+                            <span className="font-mono">{streak}</span>
+                        </div>
+                        <span className="text-[10px] text-muted-foreground">Score <span className="font-mono font-semibold text-foreground">{score}</span></span>
+                        {progressValue !== null && (
+                            <div className="flex-1 mx-1">
+                                <div className="h-1 overflow-hidden rounded-full bg-muted/50">
+                                    <div
+                                        className="h-full rounded-full bg-primary transition-all duration-300"
+                                        style={{ width: `${progressValue}%` }}
+                                    />
+                                </div>
+                            </div>
+                        )}
+                        <div className="ml-auto flex items-center gap-1">
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onPause}>
+                                <Pause className="h-3 w-3" />
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                onClick={onStop}
+                            >
+                                <Square className="h-3 w-3 fill-current" />
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Portrait / desktop: standard HUD
     return (
         <div ref={hudRef} className="fixed left-0 right-0 top-0 z-50 px-4 py-3">
             <div className="mx-auto max-w-3xl">

@@ -69,6 +69,7 @@ export function StrumPatternsMode() {
     const startedAtRef = useRef<number | null>(null);
     const statusRef = useRef<SessionStatus>("idle");
     const sessionModeRef = useRef<SessionMode>("scored");
+    const finalizeRef = useRef<() => void>(() => { });
 
     const checkAndUpdateStreak = useProgressStore((state) => state.checkAndUpdateStreak);
     const recordSession = useProgressStore((state) => state.recordSession);
@@ -191,6 +192,10 @@ export function StrumPatternsMode() {
         updatePracticeTime,
     ]);
 
+    useEffect(() => {
+        finalizeRef.current = finalizeSession;
+    }, [finalizeSession]);
+
     const startSessionWithMode = useCallback(async (mode: SessionMode) => {
         await clockRef.current.warmUp();
         checkAndUpdateStreak();
@@ -247,7 +252,7 @@ export function StrumPatternsMode() {
             const stepDurationSec = 60 / settings.bpm / activePattern.subdivision;
             const durationMs = Math.ceil(totalSteps * stepDurationSec * 1000 + 350);
             finishTimerRef.current = window.setTimeout(() => {
-                finalizeSession();
+                finalizeRef.current();
             }, durationMs);
         }
 
@@ -295,8 +300,8 @@ export function StrumPatternsMode() {
         if (!candidate) {
             extrasRef.current += 1;
             const extraEvaluation: TapEvaluation = {
-                offsetMs: MATCH_WINDOW_SEC * 1000,
-                absOffsetMs: MATCH_WINDOW_SEC * 1000,
+                offsetMs: 0,
+                absOffsetMs: 0,
                 rating: "miss",
                 isHit: false,
                 directionCorrect: true,

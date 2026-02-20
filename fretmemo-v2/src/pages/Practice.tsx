@@ -28,6 +28,7 @@ import { PlayModeMicControls, HintButton, NextButton } from "@/components/practi
 import { SessionModeToggle } from "@/components/session-setup/session-mode-toggle";
 import { SessionStartActions } from "@/components/session-setup/session-start-actions";
 import { useXPToast } from "@/hooks/useXPToast";
+import { useOrientation } from "@/hooks/useOrientation";
 
 type GuessMode = "fretboardToNote" | "tabToNote" | "noteToTab";
 type PlayMode = "playNotes" | "playTab";
@@ -147,6 +148,7 @@ export default function Practice() {
     const quickTuning = useSettingsStore((state) => state.quick.tuning);
     const tuning = useMemo(() => normalizeTuning(quickTuning), [quickTuning]);
     const displaySettings = useSettingsStore((state) => state.full.display);
+    const { isLandscape, requestFullscreen, exitFullscreen } = useOrientation();
     const updateFullSettings = useSettingsStore((state) => state.updateFullSettings);
     const [focusLayerOverride, setFocusLayerOverride] = useState<FretboardLayer | null>(null);
     const focusLayer: FretboardLayer = focusLayerOverride ?? displaySettings.defaultLayer;
@@ -301,7 +303,9 @@ export default function Practice() {
     const layerScaleLabel = SCALE_LABELS[practiceConstraints.scaleType];
     const manualAdvanceRequired = moduleTab === "guess" && !isMetronomeOn && !autoAdvanceEnabled && Boolean(lastAnswer);
     const isFretboardGuessMode = moduleTab === "guess" && mode === "fretboardToNote";
-    const safeHudHeight = Math.min(132, Math.max(hudHeight + 8, 108));
+    const safeHudHeight = isLandscape
+        ? Math.max(hudHeight + 4, 36)
+        : Math.min(132, Math.max(hudHeight + 8, 108));
     const selectedGuessNote = lastAnswer?.selectedNote;
     const sessionTotal = sessionCorrect + sessionIncorrect;
     const currentPromptKey = `${mode}:${targetPosition?.stringIndex ?? "x"}-${targetPosition?.fret ?? "x"}:${targetNote ?? "x"}`;
@@ -627,6 +631,7 @@ export default function Practice() {
             setForcedTargetNote(null);
         }
         setChallengeSecondsLeft(activeChallenge?.type === "timed" ? (activeChallenge.timeLimitSec ?? 60) : null);
+        if (isLandscape) requestFullscreen();
         startGame();
     };
 
@@ -665,7 +670,8 @@ export default function Practice() {
         stopGame();
         setForcedTargetNote(null);
         setShowSummary(true);
-    }, [hideToast, score, sessionCorrect, sessionHistory, sessionIncorrect, sessionStartTime, setForcedTargetNote, stopGame]);
+        exitFullscreen();
+    }, [exitFullscreen, hideToast, score, sessionCorrect, sessionHistory, sessionIncorrect, sessionStartTime, setForcedTargetNote, stopGame]);
 
     useEffect(() => {
         if (!isPlaying || activeChallenge?.type !== "timed" || isPaused) return;
@@ -782,6 +788,165 @@ export default function Practice() {
 
     // Focus Mode Active UI
     if (isPlaying) {
+        // Shared content blocks
+        const layerTabsContent = isFretboardGuessMode && (
+            <div className={cn("shrink-0 flex flex-col items-center", isLandscape ? "gap-1" : "gap-1.5 w-full")}>
+                <div className={cn("overflow-x-auto", isLandscape ? "" : "w-full pb-1")}>
+                    <div className={cn(
+                        "mx-auto inline-flex min-w-max items-center gap-1 rounded-full border border-border/50 bg-card/85 p-1 backdrop-blur-md shadow-md",
+                    )}>
+                        {LAYER_OPTIONS.map((layer) => (
+                            <Button
+                                key={layer.id}
+                                type="button"
+                                size="sm"
+                                variant={focusLayer === layer.id ? "secondary" : "ghost"}
+                                className={cn(
+                                    "rounded-full",
+                                    isLandscape
+                                        ? "h-6 px-2 text-[10px]"
+                                        : "h-7 px-2.5 text-[11px] md:h-8 md:px-3 md:text-xs",
+                                    focusLayer === layer.id && "text-primary border border-primary/20"
+                                )}
+                                onClick={() => handleLayerChange(layer.id)}
+                            >
+                                {layer.label}
+                            </Button>
+                        ))}
+                    </div>
+                </div>
+                {(focusLayer === "scale" || focusLayer === "intervals") && (
+                    <div className={cn(
+                        "font-medium text-muted-foreground rounded-full bg-card/80 border border-border/40 backdrop-blur",
+                        isLandscape ? "text-[9px] px-2 py-0.5" : "text-[11px] px-3 py-1"
+                    )}>
+                        Root: <span className="text-foreground font-semibold">{layerRootNote}</span> • Scale: <span className="text-foreground font-semibold">{layerScaleLabel}</span>
+                    </div>
+                )}
+            </div>
+        );
+
+        const feedbackContent = (
+            <div className="flex items-center justify-center" aria-live="polite">
+                <div
+                    className={cn(
+                        "rounded-full border px-3 py-1 font-medium backdrop-blur-sm transition-colors",
+                        isLandscape ? "text-xs min-h-6" : "text-sm min-h-8",
+                        feedbackMessage?.includes("Correct") && "border-emerald-500/45 bg-emerald-500/10 text-emerald-400",
+                        (feedbackMessage?.includes("Incorrect") || feedbackMessage?.includes("Too slow")) && "border-rose-500/45 bg-rose-500/10 text-rose-300",
+                        !feedbackMessage && "border-border/50 bg-card/50 text-muted-foreground"
+                    )}
+                >
+                    {feedbackMessage ?? (moduleTab === "play" ? "Play the prompt." : "Identify the note.")}
+                </div>
+            </div>
+        );
+
+        const controlsContent = (
+            <>
+                {moduleTab === "guess" && (mode === "fretboardToNote" || mode === "tabToNote") && (
+                    <NoteAnswerButtons
+                        noteOptions={noteOptions}
+                        targetNote={targetPosition?.note}
+                        selectedNote={selectedGuessNote}
+                        isLocked={Boolean(lastAnswer)}
+                        isCorrect={lastAnswer?.correct}
+                        isPlaying={isPlaying}
+                        onSubmit={submitNoteGuess}
+                    />
+                )}
+                {moduleTab === "guess" && mode === "noteToTab" && (
+                    <PositionAnswerButtons
+                        options={noteToTabOptions}
+                        targetPosition={targetPosition ?? undefined}
+                        lastAnswerPosition={lastAnswer?.position}
+                        isLocked={Boolean(lastAnswer)}
+                        isCorrect={lastAnswer?.correct}
+                        isPlaying={isPlaying}
+                        stringLabels={stringLabels}
+                        tuning={tuning}
+                        leftHanded={leftHanded}
+                        onSubmit={handlePositionGuess}
+                    />
+                )}
+                {manualAdvanceRequired && (
+                    <NextButton onNext={advanceAfterAnswer} />
+                )}
+                {moduleTab === "guess" && !lastAnswer && (
+                    <HintButton onHint={handleHint} hintUsed={hintUsedForPrompt} />
+                )}
+                {moduleTab === "play" && (
+                    <PlayModeMicControls micEnabled={micEnabled} onMicChange={handleMicChange} />
+                )}
+            </>
+        );
+
+        // Main visual content (fretboard / tab / big note)
+        const mainVisualContent = (
+            <>
+                {isFretboardGuessMode && (
+                    <div className="w-full transition-all duration-500 ease-out animate-in zoom-in-95 fade-in">
+                        <Fretboard
+                            frets={12}
+                            activeLayer={focusLayer}
+                            activeNotes={activeNotes}
+                            tuning={tuning}
+                            leftHanded={leftHanded}
+                            className="max-w-full drop-shadow-2xl"
+                        />
+                    </div>
+                )}
+                {moduleTab === "guess" && mode === "tabToNote" && (
+                    <div className="w-full transition-all duration-500 ease-out animate-in slide-in-from-bottom-4 fade-in">
+                        <TabView tuning={tuning} position={targetPosition} leftHanded={leftHanded} className="w-full shadow-xl rounded-xl border border-border/20 bg-card/40 backdrop-blur-sm" />
+                    </div>
+                )}
+                {moduleTab === "guess" && mode === "noteToTab" && (
+                    <div className={cn("w-full max-w-md mx-auto text-center animate-in zoom-in-90 fade-in duration-500", isLandscape && "max-w-sm")}>
+                        <div className={cn("text-xs text-muted-foreground font-semibold tracking-wider uppercase", isLandscape ? "mb-2" : "mb-8")}>Target Note</div>
+                        <div className={cn("font-black text-primary leading-none transition-all drop-shadow-2xl", isLandscape ? "text-7xl" : "text-[12rem]")}>
+                            {targetNote ?? "?"}
+                        </div>
+                        <div className={cn("text-muted-foreground/80 font-light", isLandscape ? "mt-3 text-sm" : "mt-12 text-lg")}>Pick the matching tab position below</div>
+                    </div>
+                )}
+                {moduleTab === "play" && mode === "playNotes" && (
+                    <div className={cn("w-full max-w-md mx-auto text-center animate-in zoom-in-90 fade-in duration-500", isLandscape && "max-w-sm")}>
+                        <div className={cn("text-xs text-muted-foreground font-semibold tracking-wider uppercase", isLandscape ? "mb-2" : "mb-8")}>Play This Note</div>
+                        <div className={cn("font-black text-primary leading-none transition-all drop-shadow-2xl", isLandscape ? "text-7xl" : "text-[12rem]")}>{targetNote ?? "?"}</div>
+                        <div className={cn("flex items-center justify-center gap-6 text-base text-muted-foreground", isLandscape ? "mt-3 text-sm gap-3" : "mt-12")}>
+                            <span className="rounded-full border border-border/50 bg-background/40 px-6 py-2 backdrop-blur-md shadow-sm">
+                                Next: <span className="font-mono text-foreground font-bold">{nextNote ?? "--"}</span>
+                            </span>
+                            <span className="rounded-full border border-border/50 bg-background/40 px-6 py-2 backdrop-blur-md shadow-sm">
+                                Mic: <span className={cn("font-mono font-bold transition-colors", micEnabled ? "text-emerald-500" : "")}>{micEnabled ? detectedNote ?? "--" : "Off"}</span>
+                            </span>
+                        </div>
+                    </div>
+                )}
+                {moduleTab === "play" && mode === "playTab" && (
+                    <div className={cn("w-full mx-auto backdrop-blur-sm bg-background/30 rounded-3xl border border-border/20 shadow-2xl", isLandscape ? "p-4 max-w-4xl" : "p-8 max-w-6xl")}>
+                        <div className={cn("grid items-center", isLandscape ? "gap-6 grid-cols-2" : "gap-12 lg:grid-cols-2")}>
+                            <div className="relative group">
+                                <div
+                                    className="absolute -left-4 top-1/2 -translate-y-1/2 w-1 h-32 rounded-full bg-primary"
+                                    style={{ boxShadow: "0 0 15px hsl(var(--primary) / 0.5)" }}
+                                />
+                                <div className="text-xs text-primary font-bold tracking-[0.2em] uppercase mb-4 pl-2 opacity-80">Current</div>
+                                <TabView tuning={tuning} position={targetPosition} leftHanded={leftHanded} className="w-full max-w-none shadow-lg scale-105 transition-transform" />
+                                {targetPosition && <div className="mt-4 text-base font-medium text-muted-foreground pl-2">{stringLabels[targetPosition.stringIndex]} string, fret <span className="font-mono text-foreground text-lg">{targetPosition.fret}</span></div>}
+                            </div>
+                            <div className="opacity-50 scale-95 origin-left blur-[1px] transition-all group-hover:blur-0 group-hover:opacity-70">
+                                <div className="text-xs text-muted-foreground font-bold tracking-[0.2em] uppercase mb-4 pl-2">Next</div>
+                                <TabView tuning={tuning} position={nextPosition} leftHanded={leftHanded} className="w-full max-w-none grayscale" />
+                                {nextPosition && <div className="mt-4 text-base text-muted-foreground pl-2">{stringLabels[nextPosition.stringIndex]} string, fret <span className="font-mono text-foreground">{nextPosition.fret}</span></div>}
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </>
+        );
+
         return (
             <>
                 <FocusModeHUD
@@ -801,6 +966,7 @@ export default function Practice() {
                     progressTarget={progressTarget ?? undefined}
                     onHeightChange={setHudHeight}
                     showTempo={isMetronomeOn}
+                    isLandscape={isLandscape}
                 />
                 <XPToast
                     xp={toast.xp}
@@ -813,8 +979,11 @@ export default function Practice() {
                 <AriaLiveAnnouncer message={feedbackMessage} />
                 {activeChallenge && (
                     <div
-                        className="fixed left-1/2 z-40 -translate-x-1/2 rounded-full border border-primary/40 bg-card/90 px-4 py-2 text-xs font-medium shadow-lg backdrop-blur-md"
-                        style={{ top: `${safeHudHeight + 8}px` }}
+                        className={cn(
+                            "fixed left-1/2 z-40 -translate-x-1/2 rounded-full border border-primary/40 bg-card/90 px-4 py-2 text-xs font-medium shadow-lg backdrop-blur-md",
+                            isLandscape && "px-2 py-1 text-[10px]"
+                        )}
+                        style={{ top: `${safeHudHeight + (isLandscape ? 4 : 8)}px` }}
                     >
                         <span className="text-primary">{activeChallenge.label}</span>
                         {activeChallenge.type === "timed" && (
@@ -830,170 +999,63 @@ export default function Practice() {
                         )}
                     </div>
                 )}
-                <div className={cn("fixed inset-0 z-40 bg-background flex flex-col", isPaused && "blur-sm")}>
+                <div className={cn("fixed inset-0 z-40 bg-background", isPaused && "blur-sm", isLandscape ? "flex flex-row" : "flex flex-col")}>
                     {/* Header Space for HUD */}
-                    <div className="shrink-0" style={{ height: `${safeHudHeight}px` }} />
+                    <div className="shrink-0" style={isLandscape ? { height: `${safeHudHeight}px`, width: '100%', position: 'absolute', top: 0, left: 0 } : { height: `${safeHudHeight}px` }} />
 
-                    {/* Main Immersive Workspace */}
-                    <div className={cn(
-                        "flex-1 w-full relative flex items-center justify-center overflow-x-hidden",
-                        isFretboardGuessMode ? "overflow-y-auto" : "overflow-hidden"
-                    )}>
-                        {/* Background ambience */}
-                        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent pointer-events-none" />
-                        <div
-                            className={cn(
-                                "w-full max-w-[1400px] px-4 md:px-8 flex",
-                                isFretboardGuessMode
-                                    ? "flex-col items-center justify-start gap-1.5 pt-1 md:pt-3"
-                                    : "items-center justify-center"
-                            )}
-                        >
-                            {isFretboardGuessMode && (
-                                <div className="w-full shrink-0 flex flex-col items-center gap-1.5">
-                                    <div className="w-full overflow-x-auto pb-1">
-                                        <div className="mx-auto inline-flex min-w-max items-center gap-1 rounded-full border border-border/50 bg-card/85 p-1 backdrop-blur-md shadow-md">
-                                            {LAYER_OPTIONS.map((layer) => (
-                                                <Button
-                                                    key={layer.id}
-                                                    type="button"
-                                                    size="sm"
-                                                    variant={focusLayer === layer.id ? "secondary" : "ghost"}
-                                                    className={cn(
-                                                        "h-7 rounded-full px-2.5 text-[11px] md:h-8 md:px-3 md:text-xs",
-                                                        focusLayer === layer.id && "text-primary border border-primary/20"
-                                                    )}
-                                                    onClick={() => handleLayerChange(layer.id)}
-                                                >
-                                                    {layer.label}
-                                                </Button>
-                                            ))}
-                                        </div>
+                    {isLandscape ? (
+                        /* ===== LANDSCAPE: Horizontal Split ===== */
+                        <>
+                            {/* Left: Fretboard / Main Visual */}
+                            <div className="flex-1 min-h-0 relative flex flex-col items-center overflow-hidden" style={{ paddingTop: `${safeHudHeight}px` }}>
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent pointer-events-none" />
+                                <div className="w-full h-full px-3 flex flex-col items-center justify-center gap-1">
+                                    {layerTabsContent}
+                                    <div className="w-full flex-1 min-h-0 flex items-center">
+                                        {mainVisualContent}
                                     </div>
-                                    {(focusLayer === "scale" || focusLayer === "intervals") && (
-                                        <div className="text-[11px] font-medium text-muted-foreground rounded-full bg-card/80 border border-border/40 px-3 py-1 backdrop-blur">
-                                            Root: <span className="text-foreground font-semibold">{layerRootNote}</span> • Scale: <span className="text-foreground font-semibold">{layerScaleLabel}</span>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                            {isFretboardGuessMode && (
-                                <div className="w-full transition-all duration-500 ease-out animate-in zoom-in-95 fade-in">
-                                    <Fretboard
-                                        frets={12}
-                                        activeLayer={focusLayer}
-                                        activeNotes={activeNotes}
-                                        tuning={tuning}
-                                        leftHanded={leftHanded}
-                                        className="max-w-full drop-shadow-2xl"
-                                    />
-                                </div>
-                            )}
-                            {moduleTab === "guess" && mode === "tabToNote" && (
-                                <div className="w-full transition-all duration-500 ease-out animate-in slide-in-from-bottom-4 fade-in">
-                                    <TabView tuning={tuning} position={targetPosition} leftHanded={leftHanded} className="w-full shadow-xl rounded-xl border border-border/20 bg-card/40 backdrop-blur-sm" />
-                                </div>
-                            )}
-                            {moduleTab === "guess" && mode === "noteToTab" && (
-                                <div className="w-full max-w-md mx-auto text-center animate-in zoom-in-90 fade-in duration-500">
-                                    <div className="text-xs text-muted-foreground font-semibold tracking-wider uppercase mb-8">Target Note</div>
-                                    <div className="text-[12rem] font-black text-primary leading-none transition-all drop-shadow-2xl">
-                                        {targetNote ?? "?"}
-                                    </div>
-                                    <div className="mt-12 text-lg text-muted-foreground/80 font-light">Pick the matching tab position below</div>
-                                </div>
-                            )}
-                            {moduleTab === "play" && mode === "playNotes" && (
-                                <div className="w-full max-w-md mx-auto text-center animate-in zoom-in-90 fade-in duration-500">
-                                    <div className="text-xs text-muted-foreground font-semibold tracking-wider uppercase mb-8">Play This Note</div>
-                                    <div className="text-[12rem] font-black text-primary leading-none transition-all drop-shadow-2xl">{targetNote ?? "?"}</div>
-                                    <div className="mt-12 flex items-center justify-center gap-6 text-base text-muted-foreground">
-                                        <span className="rounded-full border border-border/50 bg-background/40 px-6 py-2 backdrop-blur-md shadow-sm">
-                                            Next: <span className="font-mono text-foreground font-bold">{nextNote ?? "--"}</span>
-                                        </span>
-                                        <span className="rounded-full border border-border/50 bg-background/40 px-6 py-2 backdrop-blur-md shadow-sm">
-                                            Mic: <span className={cn("font-mono font-bold transition-colors", micEnabled ? "text-emerald-500" : "")}>{micEnabled ? detectedNote ?? "--" : "Off"}</span>
-                                        </span>
-                                    </div>
-                                </div>
-                            )}
-                            {moduleTab === "play" && mode === "playTab" && (
-                                <div className="w-full max-w-6xl mx-auto backdrop-blur-sm bg-background/30 p-8 rounded-3xl border border-border/20 shadow-2xl">
-                                    <div className="grid gap-12 lg:grid-cols-2 items-center">
-                                        <div className="relative group">
-                                            <div
-                                                className="absolute -left-4 top-1/2 -translate-y-1/2 w-1 h-32 rounded-full bg-primary"
-                                                style={{ boxShadow: "0 0 15px hsl(var(--primary) / 0.5)" }}
-                                            />
-                                            <div className="text-xs text-primary font-bold tracking-[0.2em] uppercase mb-4 pl-2 opacity-80">Current</div>
-                                            <TabView tuning={tuning} position={targetPosition} leftHanded={leftHanded} className="w-full max-w-none shadow-lg scale-105 transition-transform" />
-                                            {targetPosition && <div className="mt-4 text-base font-medium text-muted-foreground pl-2">{stringLabels[targetPosition.stringIndex]} string, fret <span className="font-mono text-foreground text-lg">{targetPosition.fret}</span></div>}
-                                        </div>
-                                        <div className="opacity-50 scale-95 origin-left blur-[1px] transition-all group-hover:blur-0 group-hover:opacity-70">
-                                            <div className="text-xs text-muted-foreground font-bold tracking-[0.2em] uppercase mb-4 pl-2">Next</div>
-                                            <TabView tuning={tuning} position={nextPosition} leftHanded={leftHanded} className="w-full max-w-none grayscale" />
-                                            {nextPosition && <div className="mt-4 text-base text-muted-foreground pl-2">{stringLabels[nextPosition.stringIndex]} string, fret <span className="font-mono text-foreground">{nextPosition.fret}</span></div>}
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Bottom Controls Area */}
-                    <div className="shrink-0 w-full bg-gradient-to-t from-background via-background/95 to-transparent pt-3 md:pt-8 pb-16 md:pb-8 px-4 z-20">
-                        <div className="max-w-4xl mx-auto space-y-4 md:space-y-6">
-                            {/* Feedback Text */}
-                            <div className="flex items-center justify-center" aria-live="polite">
-                                <div
-                                    className={cn(
-                                        "min-h-8 rounded-full border px-3 py-1 text-sm font-medium backdrop-blur-sm transition-colors",
-                                        feedbackMessage?.includes("Correct") && "border-emerald-500/45 bg-emerald-500/10 text-emerald-400",
-                                        (feedbackMessage?.includes("Incorrect") || feedbackMessage?.includes("Too slow")) && "border-rose-500/45 bg-rose-500/10 text-rose-300",
-                                        !feedbackMessage && "border-border/50 bg-card/50 text-muted-foreground"
-                                    )}
-                                >
-                                    {feedbackMessage ?? (moduleTab === "play" ? "Play the prompt." : "Identify the note.")}
                                 </div>
                             </div>
 
-                            {/* Controls */}
-                            {moduleTab === "guess" && (mode === "fretboardToNote" || mode === "tabToNote") && (
-                                <NoteAnswerButtons
-                                    noteOptions={noteOptions}
-                                    targetNote={targetPosition?.note}
-                                    selectedNote={selectedGuessNote}
-                                    isLocked={Boolean(lastAnswer)}
-                                    isCorrect={lastAnswer?.correct}
-                                    isPlaying={isPlaying}
-                                    onSubmit={submitNoteGuess}
-                                />
-                            )}
-                            {moduleTab === "guess" && mode === "noteToTab" && (
-                                <PositionAnswerButtons
-                                    options={noteToTabOptions}
-                                    targetPosition={targetPosition ?? undefined}
-                                    lastAnswerPosition={lastAnswer?.position}
-                                    isLocked={Boolean(lastAnswer)}
-                                    isCorrect={lastAnswer?.correct}
-                                    isPlaying={isPlaying}
-                                    stringLabels={stringLabels}
-                                    tuning={tuning}
-                                    leftHanded={leftHanded}
-                                    onSubmit={handlePositionGuess}
-                                />
-                            )}
-                            {manualAdvanceRequired && (
-                                <NextButton onNext={advanceAfterAnswer} />
-                            )}
-                            {moduleTab === "guess" && !lastAnswer && (
-                                <HintButton onHint={handleHint} hintUsed={hintUsedForPrompt} />
-                            )}
-                            {moduleTab === "play" && (
-                                <PlayModeMicControls micEnabled={micEnabled} onMicChange={handleMicChange} />
-                            )}
-                        </div>
-                    </div>
+                            {/* Right: Controls Panel */}
+                            <div className="shrink min-w-0 flex flex-col justify-center bg-card/30 border-l border-border/30 px-2 py-2 overflow-y-auto landscape-controls" style={{ paddingTop: `${safeHudHeight}px`, width: 'clamp(140px, 25%, 208px)' }}>
+                                <div className="space-y-2">
+                                    {feedbackContent}
+                                    {controlsContent}
+                                </div>
+                            </div>
+                        </>
+                    ) : (
+                        /* ===== PORTRAIT: Vertical Stack (original) ===== */
+                        <>
+                            {/* Main Immersive Workspace */}
+                            <div className={cn(
+                                "flex-1 w-full relative flex items-center justify-center overflow-x-hidden",
+                                isFretboardGuessMode ? "overflow-y-auto" : "overflow-hidden"
+                            )}>
+                                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent pointer-events-none" />
+                                <div
+                                    className={cn(
+                                        "w-full max-w-[1400px] px-3 md:px-8 flex",
+                                        isFretboardGuessMode
+                                            ? "flex-col items-center justify-center gap-2"
+                                            : "items-center justify-center"
+                                    )}
+                                >
+                                    {layerTabsContent}
+                                    {mainVisualContent}
+                                </div>
+                            </div>
+
+                            {/* Bottom Controls Area */}
+                            <div className="shrink-0 w-full bg-gradient-to-t from-background via-background/95 to-transparent pt-2 md:pt-6 pb-6 md:pb-8 px-3 z-20">
+                                <div className="max-w-4xl mx-auto space-y-2 md:space-y-4">
+                                    {feedbackContent}
+                                    {controlsContent}
+                                </div>
+                            </div>
+                        </>
+                    )}
                 </div>
             </>
         );

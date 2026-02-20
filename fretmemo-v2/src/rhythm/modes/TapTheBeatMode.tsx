@@ -59,6 +59,7 @@ export function TapTheBeatMode() {
     const startedAtRef = useRef<number | null>(null);
     const statusRef = useRef<SessionStatus>("idle");
     const sessionModeRef = useRef<SessionMode>("scored");
+    const finalizeRef = useRef<() => void>(() => { });
 
     const checkAndUpdateStreak = useProgressStore((state) => state.checkAndUpdateStreak);
     const recordSession = useProgressStore((state) => state.recordSession);
@@ -161,6 +162,10 @@ export function TapTheBeatMode() {
         updatePracticeTime,
     ]);
 
+    useEffect(() => {
+        finalizeRef.current = finalizeSession;
+    }, [finalizeSession]);
+
     const startSessionWithMode = useCallback(async (mode: SessionMode) => {
         await clockRef.current.warmUp();
         checkAndUpdateStreak();
@@ -209,7 +214,7 @@ export function TapTheBeatMode() {
         if (mode === "scored") {
             const durationMs = Math.ceil(totalExpected * (60 / settings.bpm) * 1000 + 350);
             finishTimerRef.current = window.setTimeout(() => {
-                finalizeSession();
+                finalizeRef.current();
             }, durationMs);
         }
 
@@ -251,8 +256,8 @@ export function TapTheBeatMode() {
         if (!candidate) {
             extrasRef.current += 1;
             const extraEval: TapEvaluation = {
-                offsetMs: MATCH_WINDOW_SEC * 1000,
-                absOffsetMs: MATCH_WINDOW_SEC * 1000,
+                offsetMs: 0,
+                absOffsetMs: 0,
                 rating: "miss",
                 isHit: false,
                 directionCorrect: true,

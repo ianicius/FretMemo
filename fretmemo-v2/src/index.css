@@ -35,16 +35,20 @@
     --graphite-950: #0C0A09;
 
     /* Shadcn/ui Theme Mappings - Light Mode */
-    --background: 30 14% 98%; /* Graphite-50 */
-    --foreground: 24 10% 10%; /* Graphite-900 */
+    --background: 30 14% 98%;
+    /* Graphite-50 */
+    --foreground: 24 10% 10%;
+    /* Graphite-900 */
 
-    --card: 60 5% 96%; /* Graphite-100 */
+    --card: 60 5% 96%;
+    /* Graphite-100 */
     --card-foreground: 24 10% 10%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 24 10% 10%;
 
-    --primary: 27 81% 37%; /* Accessible amber text/action base */
+    --primary: 27 81% 37%;
+    /* Accessible amber text/action base */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 60 5% 96%;
@@ -53,15 +57,18 @@
     --muted: 24 5% 64%;
     --muted-foreground: 24 4% 46%;
 
-    --accent: 42 87% 91%; /* Gold-100 */
+    --accent: 42 87% 91%;
+    /* Gold-100 */
     --accent-foreground: 24 10% 10%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 24 6% 88%; /* Graphite-200 */
+    --border: 24 6% 88%;
+    /* Graphite-200 */
     --input: 24 6% 88%;
-    --ring: 38 92% 50%; /* Gold-500 */
+    --ring: 38 92% 50%;
+    /* Gold-500 */
 
     --radius: 0.75rem;
     --space-page-x: clamp(1rem, 0.8rem + 0.5vw, 1.5rem);
@@ -83,15 +90,15 @@
     --fretboard-bg-light: radial-gradient(1200px 260px at 50% -120px, rgba(245, 158, 11, 0.18) 0%, transparent 70%), linear-gradient(90deg, rgba(245, 158, 11, 0.05) 0%, transparent 50%, rgba(245, 158, 11, 0.05) 100%), linear-gradient(180deg, #FFFFFF 0%, #FAFAF9 100%);
     --fretboard-bg-dark: radial-gradient(1000px 260px at 50% -120px, rgba(251, 191, 36, 0.10) 0%, transparent 70%), linear-gradient(90deg, rgba(251, 191, 36, 0.05) 0%, transparent 50%, rgba(251, 191, 36, 0.05) 100%), linear-gradient(180deg, #1C1917 0%, #0C0A09 100%);
     --marker-gold: radial-gradient(circle at 30% 30%, rgba(252, 211, 77, 0.95) 0%, rgba(245, 158, 11, 0.95) 55%, rgba(180, 83, 9, 0.95) 100%);
-    
+
     /* String colors */
     --string-color-light: rgba(41, 37, 36, 0.42);
     --string-color-dark: rgba(214, 211, 209, 0.32);
-    
+
     /* Fret wire color */
     --fret-wire-light: rgba(120, 113, 108, 0.28);
     --fret-wire-dark: rgba(68, 64, 60, 0.75);
-    
+
     /* Nut color */
     --nut-color-light: rgba(28, 25, 23, 0.88);
     --nut-color-dark: rgba(250, 250, 249, 0.90);
@@ -99,16 +106,20 @@
 
   .dark {
     /* Shadcn/ui Theme Mappings - Dark Mode */
-    --background: 24 10% 4%; /* Graphite-950 */
-    --foreground: 60 5% 96%; /* Graphite-50 */
+    --background: 24 10% 4%;
+    /* Graphite-950 */
+    --foreground: 60 5% 96%;
+    /* Graphite-50 */
 
-    --card: 24 6% 10%; /* Graphite-800 */
+    --card: 24 6% 10%;
+    /* Graphite-800 */
     --card-foreground: 60 5% 96%;
 
     --popover: 24 10% 4%;
     --popover-foreground: 60 5% 96%;
 
-    --primary: 45 93% 47%; /* Gold-400 for dark mode */
+    --primary: 45 93% 47%;
+    /* Gold-400 for dark mode */
     --primary-foreground: 24 10% 4%;
 
     --secondary: 24 6% 16%;
@@ -125,7 +136,8 @@
 
     --border: 24 6% 22%;
     --input: 24 6% 22%;
-    --ring: 45 93% 47%; /* Gold-400 */
+    --ring: 45 93% 47%;
+    /* Gold-400 */
   }
 }
 
@@ -133,11 +145,11 @@
   * {
     @apply border-border;
   }
-  
+
   html {
     scroll-behavior: smooth;
   }
-  
+
   body {
     font-family: var(--font-body);
     background-color: hsl(var(--background));
@@ -147,7 +159,12 @@
     line-height: 1.6;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-heading);
     letter-spacing: -0.025em;
     font-weight: 700;
@@ -155,6 +172,7 @@
 }
 
 @layer components {
+
   /* Premium Control Buttons (matching original) */
   .control-btn {
     @apply inline-flex items-center justify-center gap-2 h-11 px-5 rounded-lg font-bold text-sm transition-all duration-150;
@@ -268,27 +286,23 @@
 
   /* String lines */
   .string-line {
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.22) 0%,
-      var(--string-color-light) 45%,
-      var(--string-color-light) 55%,
-      rgba(0, 0, 0, 0.18) 100%
-    );
+    background: linear-gradient(180deg,
+        rgba(255, 255, 255, 0.22) 0%,
+        var(--string-color-light) 45%,
+        var(--string-color-light) 55%,
+        rgba(0, 0, 0, 0.18) 100%);
   }
 
   .dark .string-line {
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.10) 0%,
-      var(--string-color-dark) 45%,
-      var(--string-color-dark) 55%,
-      rgba(0, 0, 0, 0.48) 100%
-    );
+    background: linear-gradient(180deg,
+        rgba(255, 255, 255, 0.10) 0%,
+        var(--string-color-dark) 45%,
+        var(--string-color-dark) 55%,
+        rgba(0, 0, 0, 0.48) 100%);
   }
 
   .fret-cell {
-    min-height: 40px;
+    min-height: 28px;
   }
 
   /* Marker dots */
@@ -425,10 +439,13 @@
 
 /* Animation keyframes */
 @keyframes metronome-pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
     opacity: 0.85;
   }
+
   50% {
     transform: scale(1.25);
     opacity: 1;
@@ -440,21 +457,27 @@
 }
 
 @keyframes pulse-subtle {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.72;
   }
 }
 
 @keyframes note-active-pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow:
       0 0 0 4px rgba(245, 158, 11, 0.10),
       0 0 24px rgba(245, 158, 11, 0.35),
       inset 0 0 12px rgba(245, 158, 11, 0.12);
   }
+
   50% {
     box-shadow:
       0 0 0 6px rgba(245, 158, 11, 0.12),
@@ -479,8 +502,46 @@
   padding-bottom: env(safe-area-inset-bottom);
 }
 
+/* Landscape mobile: optimize fretboard for full-width immersive */
+@media (orientation: landscape) and (max-height: 500px) {
+  .fret-cell {
+    min-height: 20px;
+  }
+
+  .note-dot {
+    width: clamp(14px, 3vw, 26px);
+    height: clamp(14px, 3vw, 26px);
+    font-size: 9px;
+  }
+
+  .fretboard-container {
+    border-radius: 10px;
+  }
+
+  .marker-dot {
+    width: 8px !important;
+    height: 8px !important;
+  }
+}
+
+/* Landscape controls panel: compact answer buttons */
+.landscape-controls button {
+  height: 2.25rem !important;
+  min-height: 0 !important;
+  font-size: 0.875rem !important;
+  padding-top: 0.25rem !important;
+  padding-bottom: 0.25rem !important;
+  border-radius: 0.5rem !important;
+}
+
+.landscape-controls .grid {
+  gap: 0.375rem !important;
+  max-width: none !important;
+}
+
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {
@@ -489,13 +550,13 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  
+
   .animate-metronome-pulse,
   .animate-pulse-subtle,
   .note-dot--active-strong {
     animation: none !important;
   }
-  
+
   .control-btn:hover,
   .control-btn--primary:hover {
     transform: none !important;

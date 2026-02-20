@@ -41,7 +41,7 @@ export default function IntervalTrainer() {
 
     const activeIntervals = INTERVALS.filter(i => DIFFICULTY_SETS[difficulty].includes(i.semitones));
 
-    const generateNewQuestion = useCallback(() => {
+    const generateNewQuestion = useCallback(async () => {
         const set = DIFFICULTY_SETS[difficulty];
         const semitones = set[Math.floor(Math.random() * set.length)];
         const interval = INTERVALS.find(i => i.semitones === semitones)!;
@@ -49,7 +49,7 @@ export default function IntervalTrainer() {
         const target = root + semitones;
 
         setCurrentInterval([root, target], interval.name);
-        playIntervalAudio(root, target);
+        await playIntervalAudio(root, target);
     }, [difficulty, setCurrentInterval]);
 
     const handleStart = useCallback(() => {
