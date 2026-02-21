@@ -10,6 +10,7 @@ import { useRhythmDojoStore, type RhythmModeId } from "@/stores/useRhythmDojoSto
 import { normalizeTuning } from "@/lib/tuning";
 import { ExerciseCard } from "@/components/ui/exercise-card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useTranslation, Trans } from "react-i18next";
 import { MasteryBar } from "@/components/ui/mastery-bar";
 import { StatLine } from "@/components/ui/stat-line";
 import { ArrowRight, Compass, Flame, Music2, Play, Sparkles, Star, Target, Trophy, Gift, CheckCircle2 } from "lucide-react";
@@ -19,62 +20,67 @@ import { useQuestStore } from "@/stores/useQuestStore";
 type PracticeMode = "fretboardToNote" | "tabToNote" | "noteToTab" | "playNotes" | "playTab";
 type ExerciseDifficulty = "beginner" | "intermediate" | "advanced";
 
-const TECHNIQUE_NAMES: Record<string, string> = {
-    spider: "Spider Walk",
-    permutation: "Permutation Trainer",
-    linear: "Linear Shifter",
-    diagonal: "Diagonal Patterns",
-    stringskip: "String Skipping",
-    legato: "Legato Builder",
+const TECHNIQUE_TITLE_KEYS: Record<string, string> = {
+    spider: "technique.spider.name",
+    permutation: "technique.permutation.name",
+    linear: "technique.linear.name",
+    diagonal: "technique.diagonal.name",
+    stringskip: "technique.stringskip.name",
+    legato: "technique.legato.name",
 };
 
-const DRILL_META: Record<PracticeMode, { title: string; difficulty: ExerciseDifficulty; source: string; masteryOffset: number }> = {
+const DRILL_META: Record<PracticeMode, { titleKey: string; titleFallback: string; difficulty: ExerciseDifficulty; source: string; masteryOffset: number }> = {
     fretboardToNote: {
-        title: "Fretboard → Note",
+        titleKey: "practice.modes.fretboardToNote",
+        titleFallback: "Fretboard -> Note",
         difficulty: "beginner",
         source: "home-pinned-fretboard-to-note",
         masteryOffset: 0,
     },
     playNotes: {
-        title: "Note Generator",
+        titleKey: "practice.modes.playNotes",
+        titleFallback: "Note Generator",
         difficulty: "beginner",
         source: "home-pinned-note-names",
         masteryOffset: 8,
     },
     noteToTab: {
-        title: "Note → Tab",
+        titleKey: "practice.modes.noteToTab",
+        titleFallback: "Note -> Tab",
         difficulty: "intermediate",
         source: "home-pinned-note-to-tab",
         masteryOffset: 16,
     },
     tabToNote: {
-        title: "Tab → Note",
+        titleKey: "practice.modes.tabToNote",
+        titleFallback: "Tab -> Note",
         difficulty: "intermediate",
         source: "home-pinned-tab-to-note",
         masteryOffset: 24,
     },
     playTab: {
-        title: "Tab Sequence",
+        titleKey: "practice.modes.playTab",
+        titleFallback: "Tab Sequence",
         difficulty: "advanced",
         source: "home-pinned-tab-sequence",
         masteryOffset: 32,
     },
 };
 
-const TECHNIQUE_META: Record<string, { title: string; difficulty: ExerciseDifficulty }> = {
-    spider: { title: "Spider Walk", difficulty: "beginner" },
-    permutation: { title: "Permutation Trainer", difficulty: "intermediate" },
-    linear: { title: "Linear Shifter", difficulty: "intermediate" },
-    diagonal: { title: "Diagonal Patterns", difficulty: "intermediate" },
-    stringskip: { title: "String Skipping", difficulty: "advanced" },
-    legato: { title: "Legato Builder", difficulty: "intermediate" },
+const TECHNIQUE_META: Record<string, { titleFallback: string; difficulty: ExerciseDifficulty }> = {
+    spider: { titleFallback: "Spider Walk", difficulty: "beginner" },
+    permutation: { titleFallback: "Permutation Trainer", difficulty: "intermediate" },
+    linear: { titleFallback: "Linear Shifter", difficulty: "intermediate" },
+    diagonal: { titleFallback: "Diagonal Patterns", difficulty: "intermediate" },
+    stringskip: { titleFallback: "String Skipping", difficulty: "advanced" },
+    legato: { titleFallback: "Legato Builder", difficulty: "intermediate" },
 };
 
-const RHYTHM_META: Record<RhythmModeId, { title: string; difficulty: ExerciseDifficulty }> = {
-    "tap-beat": { title: "Tap the Beat", difficulty: "beginner" },
-    "strum-patterns": { title: "Strum Patterns", difficulty: "beginner" },
-    "rhythm-reading": { title: "Rhythm Reading", difficulty: "intermediate" },
-    "groove-lab": { title: "Groove Lab", difficulty: "intermediate" },
+const RHYTHM_META: Record<RhythmModeId, { titleKey: string; titleFallback: string; difficulty: ExerciseDifficulty }> = {
+    "tap-beat": { titleKey: "rhythmModes.tapBeat", titleFallback: "Tap the Beat", difficulty: "beginner" },
+    "strum-patterns": { titleKey: "rhythmModes.strumPatterns", titleFallback: "Strum Patterns", difficulty: "beginner" },
+    "rhythm-reading": { titleKey: "rhythmModes.rhythmReading", titleFallback: "Rhythm Reading", difficulty: "intermediate" },
+    "groove-lab": { titleKey: "rhythmModes.grooveLab", titleFallback: "Groove Lab", difficulty: "intermediate" },
 };
 
 const TECHNIQUE_MASTERY_TARGET_BPM: Record<string, number> = {
@@ -86,28 +92,32 @@ const TECHNIQUE_MASTERY_TARGET_BPM: Record<string, number> = {
     legato: 150,
 };
 
-function formatRelativeTime(isoTimestamp: string | null): string {
-    if (!isoTimestamp) return "New";
+function formatRelativeTime(
+    isoTimestamp: string | null,
+    t: (key: string, options?: Record<string, unknown>) => string,
+): string {
+    if (!isoTimestamp) return t("home.time.new");
     const timestamp = Date.parse(isoTimestamp);
-    if (Number.isNaN(timestamp)) return "New";
+    if (Number.isNaN(timestamp)) return t("home.time.new");
 
     const elapsedMs = Date.now() - timestamp;
-    if (elapsedMs < 60_000) return "Just now";
+    if (elapsedMs < 60_000) return t("home.time.justNow");
 
     const elapsedMinutes = Math.floor(elapsedMs / 60_000);
-    if (elapsedMinutes < 60) return `${elapsedMinutes}m ago`;
+    if (elapsedMinutes < 60) return t("home.time.minutesAgo", { count: elapsedMinutes });
 
     const elapsedHours = Math.floor(elapsedMinutes / 60);
-    if (elapsedHours < 24) return `${elapsedHours}h ago`;
+    if (elapsedHours < 24) return t("home.time.hoursAgo", { count: elapsedHours });
 
     const elapsedDays = Math.floor(elapsedHours / 24);
-    if (elapsedDays === 1) return "Yesterday";
-    if (elapsedDays < 7) return `${elapsedDays} days ago`;
+    if (elapsedDays === 1) return t("home.time.yesterday");
+    if (elapsedDays < 7) return t("home.time.daysAgo", { count: elapsedDays });
 
     return new Date(isoTimestamp).toLocaleDateString();
 }
 
 export default function Home() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const { streakDays, totalCorrect, totalIncorrect, positionStats, totalXP } = useProgressStore();
     const { setMode, setPracticeConstraints } = useGameStore();
@@ -134,7 +144,11 @@ export default function Home() {
     const { level, progressPercent, xpRemaining } = getLevelProgress(xp);
     const xpProgress = progressPercent;
     const xpToNext = xpRemaining;
-    const momentumLabel = streakDays > 1 ? `${streakDays} days` : streakDays === 1 ? "1 day" : "start";
+    const momentumLabel = streakDays > 1
+        ? t("home.momentumDays", { count: streakDays })
+        : streakDays === 1
+            ? t("home.momentumDay")
+            : t("home.momentumStart");
 
     const weakAreas = useMemo(() => {
         const candidates = Object.entries(positionStats)
@@ -195,12 +209,12 @@ export default function Home() {
             const mastery = bestBpm > 0 ? Math.min(100, Math.round((bestBpm / 140) * 100)) : 0;
             return {
                 id,
-                title: TECHNIQUE_NAMES[id] ?? "Technique Drill",
+                title: t(TECHNIQUE_TITLE_KEYS[id] ?? "", "Technique Drill"),
                 mastery,
-                lastPracticed: formatRelativeTime(lastPracticed),
+                lastPracticed: formatRelativeTime(lastPracticed, t),
             };
         });
-    }, [techniqueSettings.bestBpm, techniqueSettings.lastPracticedAt]);
+    }, [t, techniqueSettings.bestBpm, techniqueSettings.lastPracticedAt]);
     const continuePrimary = recentExercises[0] ?? null;
     const continueList = continuePrimary ? recentExercises.slice(1) : recentExercises;
 
@@ -212,7 +226,7 @@ export default function Home() {
                     const drill = DRILL_META[drillId];
                     return {
                         id,
-                        title: drill.title,
+                        title: t(drill.titleKey, drill.titleFallback),
                         difficulty: drill.difficulty,
                         kind: "drill" as const,
                         source: drill.source,
@@ -226,7 +240,7 @@ export default function Home() {
                     const rhythmSessions = rhythmModeStats[rhythmId]?.sessions ?? 0;
                     return {
                         id,
-                        title: rhythmMeta.title,
+                        title: t(rhythmMeta.titleKey, rhythmMeta.titleFallback),
                         difficulty: rhythmMeta.difficulty,
                         kind: "rhythm" as const,
                         mastery: getRhythmModeMastery(rhythmId),
@@ -241,7 +255,7 @@ export default function Home() {
 
                 return {
                     id,
-                    title: technique.title,
+                    title: t(TECHNIQUE_TITLE_KEYS[id] ?? "", technique.titleFallback),
                     difficulty: technique.difficulty,
                     kind: "technique" as const,
                     mastery: bestBpm > 0
@@ -250,7 +264,7 @@ export default function Home() {
                 };
             })
             .filter((item): item is NonNullable<typeof item> => Boolean(item));
-    }, [getRhythmModeMastery, overallAccuracy, pinnedIds, rhythmModeStats, techniqueSettings.bestBpm]);
+    }, [getRhythmModeMastery, overallAccuracy, pinnedIds, rhythmModeStats, t, techniqueSettings.bestBpm]);
 
     const applyWeakAreaPracticePreset = (stringIndex: number, fret: number) => {
         // Expand fret range: 4 frets centered on weak spot
@@ -302,7 +316,7 @@ export default function Home() {
         <div className="space-y-6 pb-8">
             <header className="space-y-3">
                 <div className="flex items-center justify-between">
-                    <h1 className="type-display">Welcome back</h1>
+                    <h1 className="type-display">{t('home.welcome')}</h1>
                     <div className="inline-flex items-center gap-4 rounded-full border border-border bg-muted/40 px-3 py-1.5 text-sm">
                         <span className="inline-flex items-center gap-1 font-medium text-foreground">
                             <Flame className="h-4 w-4 text-amber-700 dark:text-amber-300" />
@@ -316,8 +330,8 @@ export default function Home() {
                 </div>
                 <div className="rounded-xl border border-border bg-card p-4">
                     <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
-                        <span>Level {level}</span>
-                        <span>{xpToNext} XP to next level</span>
+                        <span>{t('home.level', { level })}</span>
+                        <span>{t('home.xpToNext', { xp: xpToNext })}</span>
                     </div>
                     <MasteryBar value={xpProgress} showLabel={false} />
                 </div>
@@ -327,26 +341,34 @@ export default function Home() {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Sparkles className="h-5 w-5 text-primary" />
-                        Your Next Step
+                        {t('home.nextStep')}
                     </CardTitle>
                     <CardDescription>
                         {weakSummary
-                            ? `Strings ${Math.max(1, weakSummary.stringIndex)}-${Math.min(6, weakSummary.stringIndex + 2)}, frets ${Math.max(1, weakSummary.fret - 2)}-${Math.min(12, weakSummary.fret + 2)} need extra reps.`
-                            : "Start with a short fretboard drill to lock in note locations."}
+                            ? <Trans
+                                i18nKey="home.nextStepDescWeak"
+                                values={{
+                                    minStr: Math.max(1, weakSummary.stringIndex),
+                                    maxStr: Math.min(6, weakSummary.stringIndex + 2),
+                                    minFret: Math.max(1, weakSummary.fret - 2),
+                                    maxFret: Math.min(12, weakSummary.fret + 2)
+                                }}
+                            />
+                            : t('home.nextStepDescDefault')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {hasPracticeData && (
                         <div className="grid gap-2 sm:grid-cols-3">
-                            <StatLine icon={Target} label="Accuracy" value={`${overallAccuracy}%`} tone={overallAccuracy >= 75 ? "success" : overallAccuracy >= 50 ? "warning" : "danger"} />
-                            <StatLine icon={Compass} label="Coverage" value={`${coverage}%`} tone={coverage >= 70 ? "success" : coverage >= 40 ? "warning" : "danger"} />
-                            <StatLine icon={Trophy} label="Momentum" value={momentumLabel} />
+                            <StatLine icon={Target} label={t('home.accuracy')} value={`${overallAccuracy}%`} tone={overallAccuracy >= 75 ? "success" : overallAccuracy >= 50 ? "warning" : "danger"} />
+                            <StatLine icon={Compass} label={t('home.coverage')} value={`${coverage}%`} tone={coverage >= 70 ? "success" : coverage >= 40 ? "warning" : "danger"} />
+                            <StatLine icon={Trophy} label={t('home.momentum')} value={momentumLabel} />
                         </div>
                     )}
                     <Button size="lg" className="w-full control-btn--primary justify-between" onClick={startNextStep}>
                         <span className="inline-flex items-center gap-2">
                             <Play className="h-4 w-4" />
-                            {weakSummary ? "Start Focused Practice" : "Start First Drill"}
+                            {weakSummary ? t('home.startFocused') : t('home.startFirst')}
                         </span>
                         <ArrowRight className="h-4 w-4" />
                     </Button>
@@ -357,17 +379,17 @@ export default function Home() {
                 <CardHeader>
                     <div className="flex items-center gap-2">
                         <Target className="h-5 w-5 text-indigo-500" />
-                        <CardTitle>Daily Quests</CardTitle>
+                        <CardTitle>{t('home.dailyQuests')}</CardTitle>
                     </div>
-                    <CardDescription>Complete tasks to earn bonus XP</CardDescription>
+                    <CardDescription>{t('home.dailyQuestsDesc')}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {quests.map((quest) => (
                         <div key={quest.id} className="space-y-2">
                             <div className="flex items-start justify-between">
                                 <div>
-                                    <h4 className="text-sm font-semibold">{quest.title}</h4>
-                                    <p className="text-xs text-muted-foreground">{quest.description}</p>
+                                    <h4 className="text-sm font-semibold">{t(`quests.${quest.title.replace(/\s+/g, '').replace(/^[A-Z]/, c => c.toLowerCase())}.title`, quest.title)}</h4>
+                                    <p className="text-xs text-muted-foreground">{t(`quests.${quest.title.replace(/\s+/g, '').replace(/^[A-Z]/, c => c.toLowerCase())}.description`, quest.description)}</p>
                                 </div>
                                 {!quest.isClaimed && quest.isCompleted ? (
                                     <Button
@@ -376,17 +398,17 @@ export default function Home() {
                                         onClick={() => claimReward(quest.id)}
                                     >
                                         <Gift className="mr-1 h-3.5 w-3.5" />
-                                        Claim {quest.xpReward} XP
+                                        {t('home.claimXp', { xp: quest.xpReward })}
                                     </Button>
                                 ) : quest.isClaimed ? (
                                     <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-500">
                                         <CheckCircle2 className="h-4 w-4" />
-                                        Claimed
+                                        {t('home.claimed')}
                                     </span>
                                 ) : (
                                     <span className="inline-flex items-center gap-1 rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
                                         <Star className="h-3 w-3" />
-                                        {quest.xpReward} XP
+                                        {t("home.xpShort", { xp: quest.xpReward })}
                                     </span>
                                 )}
                             </div>
@@ -407,14 +429,14 @@ export default function Home() {
             {continuePrimary && (
                 <Card className="border-border/80">
                     <CardHeader className="pb-3">
-                        <CardTitle>Continue Last Session</CardTitle>
+                        <CardTitle>{t('home.continueLast')}</CardTitle>
                         <CardDescription>
-                            {continuePrimary.title} · Last practiced {continuePrimary.lastPracticed}
+                            {continuePrimary.title} · {t('home.lastPracticed', { time: continuePrimary.lastPracticed })}
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-3">
                         <div className="flex items-center justify-between text-sm text-muted-foreground">
-                            <span>Mastery progress</span>
+                            <span>{t('home.masteryProgress')}</span>
                             <span className="font-semibold text-foreground">{continuePrimary.mastery}%</span>
                         </div>
                         <MasteryBar value={continuePrimary.mastery} showLabel={false} />
@@ -425,7 +447,7 @@ export default function Home() {
                         >
                             <span className="inline-flex items-center gap-2">
                                 <Play className="h-4 w-4" />
-                                Resume Session
+                                {t('home.resumeSession')}
                             </span>
                             <ArrowRight className="h-4 w-4" />
                         </Button>
@@ -435,14 +457,14 @@ export default function Home() {
 
             <section className="space-y-3">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Pinned</h2>
+                    <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{t('home.pinned')}</h2>
                     <span className="text-xs text-muted-foreground">{pinnedExercises.length}/{maxPins}</span>
                 </div>
                 {pinnedExercises.length === 0 ? (
                     <EmptyState
-                        title="No pinned exercises yet"
-                        description="Pin your favorites in Train for quick access here."
-                        ctaLabel="Open Train"
+                        title={t('home.noPinned')}
+                        description={t('home.noPinnedDesc')}
+                        ctaLabel={t('home.openTrain')}
                         onCtaClick={() => navigate("/train")}
                     />
                 ) : (
@@ -455,14 +477,14 @@ export default function Home() {
                                     variant="outline"
                                     className="absolute right-2 top-2 z-10 h-7 w-7 rounded-full border-primary/40 bg-primary/10 text-primary hover:bg-primary/20"
                                     onClick={() => unpin(exercise.id as PinnedExerciseId)}
-                                    aria-label={`Unpin ${exercise.title}`}
-                                    title="Unpin"
+                                    aria-label={t("home.unpinAria", { title: exercise.title })}
+                                    title={t("home.unpin")}
                                 >
                                     <Star className="h-3.5 w-3.5 fill-current" />
                                 </Button>
                                 <ExerciseCard
                                     title={exercise.title}
-                                    description="Pinned quick launch."
+                                    description={t("home.pinnedQuickLaunch")}
                                     difficulty={exercise.difficulty}
                                     mastery={exercise.mastery}
                                     icon={exercise.kind === "drill" ? Target : exercise.kind === "technique" ? Trophy : Music2}
@@ -482,12 +504,12 @@ export default function Home() {
 
             {(continueList.length > 0 || !continuePrimary) && (
                 <section className="space-y-3">
-                    <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Continue</h2>
+                    <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{t('home.continue')}</h2>
                     {continueList.length === 0 ? (
                         <EmptyState
-                            title="No recent technique sessions"
-                            description="Open Train and pick a technique exercise to build consistency."
-                            ctaLabel="Open Train"
+                            title={t('home.noRecent')}
+                            description={t('home.noRecentDesc')}
+                            ctaLabel={t('home.openTrain')}
                             onCtaClick={() => navigate("/train")}
                         />
                     ) : (
@@ -496,7 +518,7 @@ export default function Home() {
                                 <ExerciseCard
                                     key={exercise.id}
                                     title={exercise.title}
-                                    description="Resume where you left off."
+                                    description={t("home.resumeWhereLeft")}
                                     difficulty="intermediate"
                                     mastery={exercise.mastery}
                                     lastPracticedLabel={exercise.lastPracticed}
@@ -510,12 +532,12 @@ export default function Home() {
             )}
 
             <section className="space-y-3">
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Explore</h2>
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{t('home.explore')}</h2>
                 <div className="flex flex-wrap gap-2">
-                    <Button variant="outline" onClick={() => openPracticeSetup("fretboardToNote", "home-explore-drills")}>Fretboard Drills</Button>
-                    <Button variant="outline" onClick={() => navigate("/train")}>Technique</Button>
-                    <Button variant="outline" onClick={() => navigate("/theory/scales")}>Theory Tools</Button>
-                    <Button variant="outline" onClick={() => navigate("/ear-training/sound-to-fret")}>Ear Training</Button>
+                    <Button variant="outline" onClick={() => openPracticeSetup("fretboardToNote", "home-explore-drills")}>{t('home.fretboardDrills')}</Button>
+                    <Button variant="outline" onClick={() => navigate("/train")}>{t('home.technique')}</Button>
+                    <Button variant="outline" onClick={() => navigate("/theory/scales")}>{t('home.theoryTools')}</Button>
+                    <Button variant="outline" onClick={() => navigate("/ear-training/sound-to-fret")}>{t('home.earTraining')}</Button>
                 </div>
             </section>
         </div>

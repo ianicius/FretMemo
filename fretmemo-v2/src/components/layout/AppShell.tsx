@@ -13,7 +13,9 @@ import type { TabId } from "@/types";
 import { BottomNav } from "./BottomNav";
 import { Header } from "./Header";
 import { DarkModeToggle } from "./DarkModeToggle";
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import { SeoManager } from "./SeoManager";
+import { useTranslation } from "react-i18next";
 
 interface NavItem {
     id: TabId;
@@ -36,6 +38,7 @@ const RESOURCE_LINKS: Array<{ label: string; href: string; analyticsCtaId?: stri
 ];
 
 export function AppShell() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
     const navigationType = useNavigationType();
@@ -141,7 +144,7 @@ export function AppShell() {
                                     <div className="w-16 lg:w-auto flex justify-center lg:justify-start items-center">
                                         <item.icon className={cn("w-5 h-5 lg:mr-3", isActive && "text-primary")} />
                                     </div>
-                                    <span className="hidden lg:inline">{item.label}</span>
+                                    <span className="hidden lg:inline">{t(`nav.${item.id}`)}</span>
                                 </Button>
                             );
                         })}
@@ -150,7 +153,7 @@ export function AppShell() {
 
                 <div className="p-4 border-t border-border/50 space-y-3">
                     <div className="hidden lg:block px-1">
-                        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Help</p>
+                        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{t('nav.help')}</p>
                     </div>
                     <div className="hidden lg:flex items-center gap-3 px-1">
                         {RESOURCE_LINKS.map((link) => (
@@ -182,22 +185,23 @@ export function AppShell() {
                             {EXTERNAL_LINKS.contactEmail}
                         </a>
                     </Button>
-                    <div className="flex items-center gap-2">
-                        <Button asChild variant="ghost" size="icon" className="lg:hidden">
+                    <div className="flex items-center gap-1.5 w-full">
+                        <Button asChild variant="ghost" size="icon" className="lg:hidden shrink-0">
                             <a href={EXTERNAL_LINKS.buyMeCoffee} target="_blank" rel="noreferrer noopener" aria-label="Buy me a coffee">
                                 <Coffee className="w-5 h-5" />
                             </a>
                         </Button>
-                        <Button asChild variant="ghost" size="icon" className="lg:hidden">
+                        <Button asChild variant="ghost" size="icon" className="lg:hidden shrink-0">
                             <a href={EXTERNAL_LINKS.faq} target="_blank" rel="noreferrer noopener" aria-label="Open FAQ">
                                 <CircleHelp className="w-5 h-5" />
                             </a>
                         </Button>
-                        <Button variant="ghost" className="flex-1 justify-start text-muted-foreground" onClick={() => navigate("/me?section=settings")}>
-                            <Settings className="w-5 h-5 lg:mr-3" />
-                            <span className="hidden lg:inline">Settings</span>
+                        <Button variant="ghost" className="flex-1 min-w-0 justify-start text-muted-foreground px-2" onClick={() => navigate("/me?section=settings")}>
+                            <Settings className="w-5 h-5 lg:mr-2 shrink-0" />
+                            <span className="hidden lg:inline truncate">{t('nav.settings')}</span>
                         </Button>
-                        <DarkModeToggle />
+                        <LanguageSwitcher className="hidden lg:flex shrink-0" />
+                        <div className="shrink-0"><DarkModeToggle /></div>
                     </div>
                 </div>
             </aside>

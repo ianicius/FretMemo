@@ -4,17 +4,18 @@ import { useEarTrainingStore } from "@/stores/useEarTrainingStore";
 import { Button } from "@/components/ui/button";
 import { Volume2, RotateCcw, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 const CHORD_QUALITIES = [
-    { name: "major", label: "Major", intervals: [0, 4, 7] },
-    { name: "minor", label: "Minor", intervals: [0, 3, 7] },
-    { name: "diminished", label: "Diminished", intervals: [0, 3, 6] },
-    { name: "augmented", label: "Augmented", intervals: [0, 4, 8] },
-    { name: "sus2", label: "Sus2", intervals: [0, 2, 7] },
-    { name: "sus4", label: "Sus4", intervals: [0, 5, 7] },
-    { name: "dom7", label: "Dom 7th", intervals: [0, 4, 7, 10] },
-    { name: "maj7", label: "Maj 7th", intervals: [0, 4, 7, 11] },
-    { name: "min7", label: "Min 7th", intervals: [0, 3, 7, 10] },
+    { name: "major", labelKey: "ear.chords.qualities.major", intervals: [0, 4, 7] },
+    { name: "minor", labelKey: "ear.chords.qualities.minor", intervals: [0, 3, 7] },
+    { name: "diminished", labelKey: "ear.chords.qualities.diminished", intervals: [0, 3, 6] },
+    { name: "augmented", labelKey: "ear.chords.qualities.augmented", intervals: [0, 4, 8] },
+    { name: "sus2", labelKey: "ear.chords.qualities.sus2", intervals: [0, 2, 7] },
+    { name: "sus4", labelKey: "ear.chords.qualities.sus4", intervals: [0, 5, 7] },
+    { name: "dom7", labelKey: "ear.chords.qualities.dom7", intervals: [0, 4, 7, 10] },
+    { name: "maj7", labelKey: "ear.chords.qualities.maj7", intervals: [0, 4, 7, 11] },
+    { name: "min7", labelKey: "ear.chords.qualities.min7", intervals: [0, 3, 7, 10] },
 ];
 
 type Difficulty = "triads" | "extended";
@@ -28,6 +29,7 @@ function getRandomRoot(): number {
 }
 
 export default function ChordQualityTrainer() {
+    const { t } = useTranslation();
     const [difficulty, setDifficulty] = useState<Difficulty>("triads");
     const {
         isPlaying, lastResult, score, streak, totalCorrect, totalIncorrect,
@@ -75,9 +77,9 @@ export default function ChordQualityTrainer() {
             <div className="flex flex-col items-center gap-6 py-12">
                 <div className="text-center space-y-2">
                     <Volume2 className="w-12 h-12 mx-auto text-primary/60" />
-                    <h2 className="text-xl font-bold">Chord Quality Recognition</h2>
+                    <h2 className="text-xl font-bold">{t("ear.page.modes.chordQuality")}</h2>
                     <p className="text-muted-foreground text-sm max-w-md">
-                        Listen to a chord and identify its quality (major, minor, etc.).
+                        {t("ear.chords.description")}
                     </p>
                 </div>
 
@@ -93,13 +95,13 @@ export default function ChordQualityTrainer() {
                                     : "bg-card border-border text-muted-foreground"
                             )}
                         >
-                            {d}
+                            {t(`ear.chords.difficulty.${d}`)}
                         </button>
                     ))}
                 </div>
 
                 <Button className="control-btn control-btn--primary" onClick={handleStart}>
-                    <Play className="w-4 h-4 mr-2" /> Start Training
+                    <Play className="w-4 h-4 mr-2" /> {t("ear.common.startTraining")}
                 </Button>
             </div>
         );
@@ -112,7 +114,7 @@ export default function ChordQualityTrainer() {
             {/* Stats */}
             <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-4">
-                    <span className="font-bold text-primary">Score: {score}</span>
+                    <span className="font-bold text-primary">{t("ear.common.score")}: {score}</span>
                     <span className="text-amber-600 dark:text-amber-300">🔥 {streak}</span>
                 </div>
                 <div className="text-muted-foreground">
@@ -123,15 +125,15 @@ export default function ChordQualityTrainer() {
             {/* Controls */}
             <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" onClick={handleReplay} disabled={!currentChordMidis}>
-                    <Volume2 className="w-4 h-4 mr-1" /> Replay
+                    <Volume2 className="w-4 h-4 mr-1" /> {t("ear.common.replay")}
                 </Button>
                 {lastResult && (
                     <Button variant="outline" size="sm" onClick={generateNewQuestion}>
-                        <RotateCcw className="w-4 h-4 mr-1" /> Next
+                        <RotateCcw className="w-4 h-4 mr-1" /> {t("ear.common.next")}
                     </Button>
                 )}
                 <Button variant="ghost" size="sm" onClick={endSession} className="ml-auto text-muted-foreground">
-                    End
+                    {t("ear.common.end")}
                 </Button>
             </div>
 
@@ -142,8 +144,10 @@ export default function ChordQualityTrainer() {
                         : "text-rose-700 bg-rose-500/10 dark:text-rose-300"
                     }`}>
                     {lastResult === "correct"
-                        ? "✓ Correct!"
-                        : `✗ It was ${correctQuality?.label ?? currentAnswer}`
+                        ? t("ear.common.correct")
+                        : t("ear.chords.itWas", {
+                            quality: correctQuality ? t(correctQuality.labelKey) : currentAnswer ?? "?",
+                        })
                     }
                 </div>
             )}
@@ -166,7 +170,7 @@ export default function ChordQualityTrainer() {
                                 !isCorrectOption && !isWrongChoice && "border-border bg-card"
                             )}
                         >
-                            {quality.label}
+                            {t(quality.labelKey)}
                         </button>
                     );
                 })}

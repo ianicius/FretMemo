@@ -1,30 +1,18 @@
 import { useState, useCallback, useEffect } from "react";
-import { playInterval as playIntervalAudio, initAudio } from "@/lib/audio";
+import { playIntervalPrompt, initAudio } from "@/lib/audio";
+import { EAR_INTERVALS, getEarIntervalsFromTokens } from "@/lib/earIntervals";
 import { useEarTrainingStore } from "@/stores/useEarTrainingStore";
+import { useSettingsStore } from "@/stores/useSettingsStore";
 import { Button } from "@/components/ui/button";
 import { Volume2, RotateCcw, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const INTERVALS = [
-    { semitones: 1, name: "m2", label: "Minor 2nd" },
-    { semitones: 2, name: "M2", label: "Major 2nd" },
-    { semitones: 3, name: "m3", label: "Minor 3rd" },
-    { semitones: 4, name: "M3", label: "Major 3rd" },
-    { semitones: 5, name: "P4", label: "Perfect 4th" },
-    { semitones: 6, name: "A4", label: "Tritone" },
-    { semitones: 7, name: "P5", label: "Perfect 5th" },
-    { semitones: 8, name: "m6", label: "Minor 6th" },
-    { semitones: 9, name: "M6", label: "Major 6th" },
-    { semitones: 10, name: "m7", label: "Minor 7th" },
-    { semitones: 11, name: "M7", label: "Major 7th" },
-    { semitones: 12, name: "P8", label: "Octave" },
-];
+import { useTranslation } from "react-i18next";
 
 type Difficulty = "easy" | "medium" | "hard";
 const DIFFICULTY_SETS: Record<Difficulty, number[]> = {
-    easy: [3, 4, 5, 7, 12],       // m3, M3, P4, P5, P8
-    medium: [2, 3, 4, 5, 7, 9, 12], // + M2, M6
-    hard: INTERVALS.map(i => i.semitones),
+    easy: [0, 3, 4, 5, 7, 12], // P1, m3, M3, P4, P5, P8
+    medium: [0, 2, 3, 4, 5, 7, 9, 12], // + M2, M6
+    hard: EAR_INTERVALS.map((interval) => interval.semitones),
 };
 
 function getRandomRoot(): number {
@@ -32,38 +20,53 @@ function getRandomRoot(): number {
 }
 
 export default function IntervalTrainer() {
+    const { t } = useTranslation();
     const [difficulty, setDifficulty] = useState<Difficulty>("easy");
+    const configuredIntervals = useSettingsStore((state) => state.modules.earTraining.intervals);
+    const intervalDirection = useSettingsStore((state) => state.modules.earTraining.direction);
     const {
         isPlaying, lastResult, score, streak, totalCorrect, totalIncorrect,
         currentInterval, currentAnswer,
         startSession, endSession, setCurrentInterval, setAudioReady,
     } = useEarTrainingStore();
 
-    const activeIntervals = INTERVALS.filter(i => DIFFICULTY_SETS[difficulty].includes(i.semitones));
+    const configured = getEarIntervalsFromTokens(configuredIntervals);
+    const byDifficulty = new Set(DIFFICULTY_SETS[difficulty]);
+    const constrained = configured.filter((interval) => byDifficulty.has(interval.semitones));
+    const activeIntervals = constrained.length > 0 ? constrained : configured;
 
     const generateNewQuestion = useCallback(async () => {
-        const set = DIFFICULTY_SETS[difficulty];
-        const semitones = set[Math.floor(Math.random() * set.length)];
-        const interval = INTERVALS.find(i => i.semitones === semitones)!;
+        if (activeIntervals.length === 0) return;
+        const interval = activeIntervals[Math.floor(Math.random() * activeIntervals.length)];
         const root = getRandomRoot();
-        const target = root + semitones;
+        const target = root + interval.semitones;
 
         setCurrentInterval([root, target], interval.name);
-        await playIntervalAudio(root, target);
-    }, [difficulty, setCurrentInterval]);
+        await playIntervalPrompt(root, target, {
+            direction: intervalDirection,
+            noteDuration: 0.8,
+            gap: 0.12,
+        });
+    }, [activeIntervals, intervalDirection, setCurrentInterval]);
 
     const handleStart = useCallback(() => {
         initAudio();
         setAudioReady(true);
         startSession();
-        setTimeout(() => generateNewQuestion(), 300);
+        setTimeout(() => {
+            void generateNewQuestion();
+        }, 300);
     }, [startSession, setAudioReady, generateNewQuestion]);
 
     const handleReplay = useCallback(() => {
         if (currentInterval) {
-            playIntervalAudio(currentInterval[0], currentInterval[1]);
+            void playIntervalPrompt(currentInterval[0], currentInterval[1], {
+                direction: intervalDirection,
+                noteDuration: 0.8,
+                gap: 0.12,
+            });
         }
-    }, [currentInterval]);
+    }, [currentInterval, intervalDirection]);
 
     const handleAnswer = useCallback((intervalName: string) => {
         if (lastResult !== null) return;
@@ -79,9 +82,9 @@ export default function IntervalTrainer() {
             <div className="flex flex-col items-center gap-6 py-12">
                 <div className="text-center space-y-2">
                     <Volume2 className="w-12 h-12 mx-auto text-primary/60" />
-                    <h2 className="text-xl font-bold">Interval Recognition</h2>
+                    <h2 className="text-xl font-bold">{t("ear.page.modes.intervalRecognition")}</h2>
                     <p className="text-muted-foreground text-sm max-w-md">
-                        Listen to two notes played in sequence and identify the interval between them.
+                        {t("ear.intervals.description")}
                     </p>
                 </div>
 
@@ -97,26 +100,26 @@ export default function IntervalTrainer() {
                                     : "bg-card border-border text-muted-foreground"
                             )}
                         >
-                            {d}
+                            {t(`ear.intervals.difficulty.${d}`)}
                         </button>
                     ))}
                 </div>
 
                 <Button className="control-btn control-btn--primary" onClick={handleStart}>
-                    <Play className="w-4 h-4 mr-2" /> Start Training
+                    <Play className="w-4 h-4 mr-2" /> {t("ear.common.startTraining")}
                 </Button>
             </div>
         );
     }
 
-    const correctInterval = INTERVALS.find(i => i.name === currentAnswer);
+    const correctInterval = EAR_INTERVALS.find((interval) => interval.name === currentAnswer);
 
     return (
         <div className="space-y-4">
             {/* Stats */}
             <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-4">
-                    <span className="font-bold text-primary">Score: {score}</span>
+                    <span className="font-bold text-primary">{t("ear.common.score")}: {score}</span>
                     <span className="text-amber-600 dark:text-amber-300">🔥 {streak}</span>
                 </div>
                 <div className="text-muted-foreground">
@@ -127,15 +130,15 @@ export default function IntervalTrainer() {
             {/* Controls */}
             <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" onClick={handleReplay} disabled={!currentInterval}>
-                    <Volume2 className="w-4 h-4 mr-1" /> Replay
+                    <Volume2 className="w-4 h-4 mr-1" /> {t("ear.common.replay")}
                 </Button>
                 {lastResult && (
                     <Button variant="outline" size="sm" onClick={generateNewQuestion}>
-                        <RotateCcw className="w-4 h-4 mr-1" /> Next
+                        <RotateCcw className="w-4 h-4 mr-1" /> {t("ear.common.next")}
                     </Button>
                 )}
                 <Button variant="ghost" size="sm" onClick={endSession} className="ml-auto text-muted-foreground">
-                    End
+                    {t("ear.common.end")}
                 </Button>
             </div>
 
@@ -146,8 +149,10 @@ export default function IntervalTrainer() {
                     : "text-rose-700 bg-rose-500/10 dark:text-rose-300"
                     }`}>
                     {lastResult === "correct"
-                        ? "✓ Correct!"
-                        : `✗ It was ${correctInterval?.label ?? currentAnswer}`
+                        ? t("ear.common.correct")
+                        : t("ear.intervals.itWas", {
+                            interval: correctInterval ? t(correctInterval.labelKey) : currentAnswer ?? "?",
+                        })
                     }
                 </div>
             )}
@@ -171,7 +176,7 @@ export default function IntervalTrainer() {
                             )}
                         >
                             <div className="text-xs text-muted-foreground">{interval.name}</div>
-                            <div>{interval.label}</div>
+                            <div>{t(interval.labelKey)}</div>
                         </button>
                     );
                 })}

@@ -6,6 +6,7 @@ import { areEnharmonic, formatPitchClass } from "@/lib/noteNotation";
 import { Fretboard } from "@/components/fretboard/Fretboard";
 import { Select } from "@/components/ui/select";
 import type { NoteStatus, NoteName } from "@/types/fretboard";
+import { useTranslation } from "react-i18next";
 
 const ROOTS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"] as const;
 
@@ -16,7 +17,6 @@ const ROOTS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"] 
  * nativeRoot = semitone index of the root in open position (C=0, D=2, E=4, G=7, A=9).
  */
 interface CagedShape {
-    label: string;
     color: string;
     nativeRoot: number;
     frets: (number | null)[];
@@ -24,35 +24,30 @@ interface CagedShape {
 
 const CAGED_SHAPES: Record<string, CagedShape> = {
     C: {
-        label: "C Shape",
         color: "#ef4444",
         nativeRoot: 0, // C
         // Open C: high E=0(E), B=1(C), G=0(G), D=2(E), A=3(C), low E=null
         frets: [0, 1, 0, 2, 3, null],
     },
     A: {
-        label: "A Shape",
         color: "#f97316",
         nativeRoot: 9, // A
         // Open A: high E=0(E), B=2(C#), G=2(A), D=2(E), A=0(A), low E=null
         frets: [0, 2, 2, 2, 0, null],
     },
     G: {
-        label: "G Shape",
         color: "#eab308",
         nativeRoot: 7, // G
         // Open G: high E=3(G), B=0(B), G=0(G), D=0(D), A=2(B), low E=3(G)
         frets: [3, 0, 0, 0, 2, 3],
     },
     E: {
-        label: "E Shape",
         color: "#22c55e",
         nativeRoot: 4, // E
         // Open E: high E=0(E), B=0(B), G=1(G#), D=2(E), A=2(B), low E=0(E)
         frets: [0, 0, 1, 2, 2, 0],
     },
     D: {
-        label: "D Shape",
         color: "#3b82f6",
         nativeRoot: 2, // D
         // Open D: high E=2(F#), B=3(D), G=2(A), D=0(D), A=null, low E=null
@@ -63,6 +58,7 @@ const CAGED_SHAPES: Record<string, CagedShape> = {
 const CAGED_ORDER = ["C", "A", "G", "E", "D"];
 
 export default function CagedVisualizer() {
+    const { t } = useTranslation();
     const [root, setRoot] = useState<NoteName>("C");
     const [enabledShapes, setEnabledShapes] = useState<Set<string>>(new Set(CAGED_ORDER));
     const quickTuning = useSettingsStore((state) => state.quick.tuning);
@@ -126,7 +122,7 @@ export default function CagedVisualizer() {
             {/* Controls */}
             <div className="flex flex-wrap items-center gap-3">
                 <div className="space-y-1">
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Root</label>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("theory.caged.root")}</label>
                     <Select
                         value={root}
                         onChange={(e) => setRoot(e.target.value as NoteName)}
@@ -139,7 +135,7 @@ export default function CagedVisualizer() {
                 </div>
 
                 <div className="space-y-1 flex-1">
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Shapes</label>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("theory.caged.shapes")}</label>
                     <div className="flex flex-wrap gap-2">
                         {CAGED_ORDER.map((shape) => {
                             const active = enabledShapes.has(shape);
@@ -152,7 +148,7 @@ export default function CagedVisualizer() {
                                         : "bg-card border-border text-muted-foreground opacity-50"
                                         }`}
                                 >
-                                    {CAGED_SHAPES[shape].label}
+                                    {shape}
                                 </button>
                             );
                         })}
@@ -170,11 +166,8 @@ export default function CagedVisualizer() {
 
             {/* Legend */}
             <div className="rounded-xl border border-border bg-muted/40 p-4 text-sm text-muted-foreground">
-                <p className="font-medium text-foreground">CAGED System</p>
-                <p className="mt-1">
-                    The CAGED system connects five open chord shapes across the fretboard.
-                    Toggle individual shapes to see how they overlap and connect for any root note.
-                </p>
+                <p className="font-medium text-foreground">{t("theory.caged.systemTitle")}</p>
+                <p className="mt-1">{t("theory.caged.legend")}</p>
             </div>
         </div>
     );

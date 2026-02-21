@@ -1,5 +1,6 @@
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface LatencyCompensationControlProps {
     value: number;
@@ -17,13 +18,14 @@ export function LatencyCompensationControl({
     onChange,
     className,
 }: LatencyCompensationControlProps) {
+    const { t } = useTranslation();
     const safeValue = clampLatency(value);
 
     return (
         <div className={cn("space-y-2 rounded-md border border-border bg-muted/20 p-3", className)}>
             <div className="flex items-center justify-between">
-                <Label htmlFor="rhythm-latency-range">Input Latency Compensation</Label>
-                <span className="text-xs font-semibold text-foreground">{safeValue} ms</span>
+                <Label htmlFor="rhythm-latency-range">{t("rhythm.ui.latency.title")}</Label>
+                <span className="text-xs font-semibold text-foreground">{t("rhythm.ui.latency.value", { value: safeValue })}</span>
             </div>
             <input
                 id="rhythm-latency-range"
@@ -36,7 +38,7 @@ export function LatencyCompensationControl({
                 className="w-full accent-primary"
             />
             <p className="text-xs text-muted-foreground">
-                Increase this if your taps are consistently marked late despite feeling on-beat.
+                {t("rhythm.ui.latency.description")}
             </p>
         </div>
     );

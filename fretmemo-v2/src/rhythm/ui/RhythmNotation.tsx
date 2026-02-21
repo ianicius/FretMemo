@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import type { RhythmNotationToken } from "@/rhythm/data/rhythmExercises";
+import { useTranslation } from "react-i18next";
 
 interface RhythmNotationProps {
     tokens: RhythmNotationToken[];
@@ -22,6 +23,7 @@ export function RhythmNotation({
     playheadStep,
     showLegend = false,
 }: RhythmNotationProps) {
+    const { t } = useTranslation();
     const totalUnits = timeSignatureTop * subdivision;
     const hasPlayhead = typeof playheadStep === "number" && playheadStep >= 0;
     const width = 1000;
@@ -55,9 +57,9 @@ export function RhythmNotation({
     return (
         <div className="space-y-3 rounded-xl border border-border bg-gradient-to-br from-amber-100/30 via-card to-orange-100/20 p-3 dark:from-amber-900/20 dark:via-card dark:to-orange-950/15">
             <div className="flex items-center justify-between gap-2">
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Notation Lane</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("rhythm.ui.rhythmNotation.title")}</p>
                 <p className="text-xs text-muted-foreground">
-                    {timeSignatureTop}/4 · grid {subdivision}
+                    {t("rhythm.ui.rhythmNotation.meta", { signature: `${timeSignatureTop}/4`, subdivision })}
                 </p>
             </div>
 
@@ -205,9 +207,9 @@ export function RhythmNotation({
 
             {showLegend && (
                 <div className="grid gap-1 text-[11px] text-muted-foreground sm:grid-cols-3">
-                    <div className="rounded border border-border/60 bg-muted/20 px-2 py-1">Tap on note heads only</div>
-                    <div className="rounded border border-border/60 bg-muted/20 px-2 py-1">Do not tap during rests</div>
-                    <div className="rounded border border-border/60 bg-muted/20 px-2 py-1">Accent marks show stronger pulse</div>
+                    <div className="rounded border border-border/60 bg-muted/20 px-2 py-1">{t("rhythm.ui.rhythmNotation.legend.tapNotesOnly")}</div>
+                    <div className="rounded border border-border/60 bg-muted/20 px-2 py-1">{t("rhythm.ui.rhythmNotation.legend.noRests")}</div>
+                    <div className="rounded border border-border/60 bg-muted/20 px-2 py-1">{t("rhythm.ui.rhythmNotation.legend.accents")}</div>
                 </div>
             )}
         </div>

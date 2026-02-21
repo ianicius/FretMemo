@@ -2,17 +2,32 @@ import { useState, useMemo } from "react";
 import { Chord, Note } from "tonal";
 import { cn } from "@/lib/utils";
 import { playChord } from "@/lib/audio";
+import { applyPolishNotation, formatPitchClass } from "@/lib/noteNotation";
+import { useSettingsStore } from "@/stores/useSettingsStore";
+import { useTranslation } from "react-i18next";
 
 const ROOTS = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"];
 const QUALITY_GROUPS = [
-    { label: "Triads", types: ["major", "minor", "dim", "aug"] },
-    { label: "7ths", types: ["7", "maj7", "m7", "m7b5", "dim7"] },
-    { label: "Sus / Add", types: ["sus2", "sus4", "add9", "madd9"] },
-    { label: "Extended", types: ["9", "m9", "maj9", "11", "13"] },
+    { labelKey: "theory.chordLibrary.groups.triads", types: ["major", "minor", "dim", "aug"] },
+    { labelKey: "theory.chordLibrary.groups.sevenths", types: ["7", "maj7", "m7", "m7b5", "dim7"] },
+    { labelKey: "theory.chordLibrary.groups.susAdd", types: ["sus2", "sus4", "add9", "madd9"] },
+    { labelKey: "theory.chordLibrary.groups.extended", types: ["9", "m9", "maj9", "11", "13"] },
 ];
 
 function normalizeNote(n: string): string {
     return Note.simplify(n) ?? n;
+}
+
+function getChordSuffix(type: string): string {
+    if (type === "major") return "";
+    if (type === "minor") return "m";
+    return type;
+}
+
+function getTypeLabel(type: string): string {
+    if (type === "major") return "maj";
+    if (type === "minor") return "m";
+    return type;
 }
 
 // Common guitar voicings (open chords and barre shapes)
@@ -33,7 +48,8 @@ const COMMON_VOICINGS: Record<string, number[][]> = {
     Bm: [[-1, 2, 4, 4, 3, 2]],
 };
 
-function ChordDiagram({ frets, label }: { frets: number[]; root: string; label: string }) {
+function ChordDiagram({ frets, label }: { frets: number[]; label: string }) {
+    const { t } = useTranslation();
     const W = 120;
     const H = 140;
     const stringSpacing = 18;
@@ -91,7 +107,7 @@ function ChordDiagram({ frets, label }: { frets: number[]; root: string; label: 
             <button
                 className="mt-1 flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition"
                 onClick={() => playChord(midiValues, 1.2)}
-                title="Play chord"
+                title={t("theory.chordLibrary.playChord")}
             >
                 🔊 {label}
             </button>
@@ -100,24 +116,27 @@ function ChordDiagram({ frets, label }: { frets: number[]; root: string; label: 
 }
 
 export default function ChordLibrary() {
+    const { t } = useTranslation();
+    const notation = useSettingsStore((state) => state.full.instrument.notation);
     const [root, setRoot] = useState("C");
     const [selectedType, setSelectedType] = useState("major");
 
-    const chordName = `${root}${selectedType === "major" ? "" : selectedType}`;
+    const chordName = `${root}${getChordSuffix(selectedType)}`;
     const chordData = Chord.get(chordName);
 
     const chordNotes = useMemo(() => {
         if (!chordData.notes.length) return [];
-        return chordData.notes.map(normalizeNote);
-    }, [chordData.notes]);
+        return chordData.notes.map(normalizeNote).map((note) => formatPitchClass(note, notation));
+    }, [chordData.notes, notation]);
 
-    const voicings = COMMON_VOICINGS[chordName] ?? COMMON_VOICINGS[`${root}${selectedType === "minor" ? "m" : ""}`] ?? [];
+    const voicings = COMMON_VOICINGS[chordName] ?? [];
+    const displayChordName = applyPolishNotation(chordData.symbol || chordName);
 
     return (
         <div className="space-y-5">
             {/* Root selector */}
             <div>
-                <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">Root Note</label>
+                <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">{t("theory.chordLibrary.rootNote")}</label>
                 <div className="flex flex-wrap gap-1.5">
                     {ROOTS.map((n) => (
                         <button
@@ -130,7 +149,7 @@ export default function ChordLibrary() {
                                     : "bg-card border-border text-muted-foreground hover:border-primary/50"
                             )}
                         >
-                            {n}
+                            {formatPitchClass(n, notation)}
                         </button>
                     ))}
                 </div>
@@ -138,27 +157,27 @@ export default function ChordLibrary() {
 
             {/* Quality selector */}
             {QUALITY_GROUPS.map((group) => (
-                <div key={group.label}>
-                    <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">{group.label}</label>
+                <div key={group.labelKey}>
+                    <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">{t(group.labelKey)}</label>
                     <div className="flex flex-wrap gap-1.5">
-                        {group.types.map((t) => {
-                            const name = `${root}${t === "major" ? "" : t}`;
+                        {group.types.map((type) => {
+                            const name = `${root}${getChordSuffix(type)}`;
                             const data = Chord.get(name);
                             const valid = data.notes.length > 0;
                             return (
                                 <button
-                                    key={t}
+                                    key={type}
                                     disabled={!valid}
-                                    onClick={() => setSelectedType(t)}
+                                    onClick={() => setSelectedType(type)}
                                     className={cn(
                                         "h-9 px-3 rounded-lg border text-sm font-bold transition",
-                                        t === selectedType
+                                        type === selectedType
                                             ? "bg-primary/10 border-primary text-primary"
                                             : "bg-card border-border text-muted-foreground hover:border-primary/50",
                                         !valid && "opacity-30 cursor-not-allowed"
                                     )}
                                 >
-                                    {t === "major" ? "maj" : t}
+                                    {getTypeLabel(type)}
                                 </button>
                             );
                         })}
@@ -168,11 +187,11 @@ export default function ChordLibrary() {
 
             {/* Chord info */}
             <div className="rounded-xl border border-border bg-card p-4 space-y-2">
-                <h3 className="text-lg font-bold">{chordName}</h3>
+                <h3 className="text-lg font-bold">{displayChordName}</h3>
                 {chordNotes.length > 0 ? (
                     <>
                         <div className="flex items-center gap-2 text-sm">
-                            <span className="text-muted-foreground">Notes:</span>
+                            <span className="text-muted-foreground">{t("theory.chordLibrary.notes")}:</span>
                             <div className="flex gap-1">
                                 {chordNotes.map((n, i) => (
                                     <span key={i} className="px-2 py-0.5 bg-primary/10 rounded-md text-xs font-bold">{n}</span>
@@ -181,23 +200,23 @@ export default function ChordLibrary() {
                         </div>
                         {chordData.intervals.length > 0 && (
                             <div className="flex items-center gap-2 text-sm">
-                                <span className="text-muted-foreground">Intervals:</span>
+                                <span className="text-muted-foreground">{t("theory.chordLibrary.intervals")}:</span>
                                 <span className="text-xs font-mono">{chordData.intervals.join(" – ")}</span>
                             </div>
                         )}
                     </>
                 ) : (
-                    <p className="text-sm text-muted-foreground">Chord not found in library.</p>
+                    <p className="text-sm text-muted-foreground">{t("theory.chordLibrary.notFound")}</p>
                 )}
             </div>
 
             {/* Voicings */}
             {voicings.length > 0 && (
                 <div>
-                    <label className="text-xs font-bold text-muted-foreground uppercase mb-2 block">Voicings</label>
+                    <label className="text-xs font-bold text-muted-foreground uppercase mb-2 block">{t("theory.chordLibrary.voicings")}</label>
                     <div className="flex flex-wrap gap-4">
                         {voicings.map((v, i) => (
-                            <ChordDiagram key={i} frets={v} root={root} label={`Voicing ${i + 1}`} />
+                            <ChordDiagram key={i} frets={v} label={t("theory.chordLibrary.voicingLabel", { index: i + 1 })} />
                         ))}
                     </div>
                 </div>

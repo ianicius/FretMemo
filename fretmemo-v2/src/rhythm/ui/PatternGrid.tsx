@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import type { StrumStepSymbol } from "@/rhythm/data/strumPatterns";
+import { useTranslation } from "react-i18next";
 
 interface PatternGridProps {
     slots: StrumStepSymbol[];
@@ -21,6 +22,7 @@ function slotLabel(symbol: StrumStepSymbol): string {
 }
 
 export function PatternGrid({ slots, playheadStep }: PatternGridProps) {
+    const { t } = useTranslation();
     const wideGrid = slots.length > 8;
     const gridStyle = wideGrid
         ? { gridTemplateColumns: `repeat(${slots.length}, minmax(0, 1fr))` }
@@ -28,7 +30,7 @@ export function PatternGrid({ slots, playheadStep }: PatternGridProps) {
 
     return (
         <div className="rounded-xl border border-border bg-card p-3 space-y-2">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">Pattern Grid</p>
+            <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">{t("rhythm.ui.patternGrid.title")}</p>
             <div className={cn("grid gap-1", !wideGrid && "grid-cols-8")} style={gridStyle}>
                 {slots.map((symbol, index) => {
                     const isActive = playheadStep === index;
@@ -49,4 +51,3 @@ export function PatternGrid({ slots, playheadStep }: PatternGridProps) {
         </div>
     );
 }
-

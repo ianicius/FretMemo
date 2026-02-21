@@ -7,6 +7,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { Settings2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface SelectOption {
     value: string;
@@ -179,18 +180,20 @@ export function TechniqueSettingsCard({
     speedUpInterval,
     onSpeedUpIntervalChange,
 }: TechniqueSettingsCardProps) {
+    const { t } = useTranslation();
+
     const content = (
         <div className={cn("space-y-4", contentClassName)}>
             {showCoreControls && (
                 <div className="flex items-center justify-between">
-                    <Label htmlFor="step-mode">Step Mode</Label>
+                    <Label htmlFor="step-mode">{t("technique.settings.stepMode")}</Label>
                     <Switch id="step-mode" checked={stepMode} onCheckedChange={onStepModeChange} disabled={isPlaying} />
                 </div>
             )}
 
             {showCoreControls && (
                 <div className="space-y-2">
-                    <Label>Start Fret</Label>
+                    <Label>{t("technique.settings.startFret")}</Label>
                     <div className="flex gap-2">
                         {[1, 3, 5, 7].map((fret) => (
                             <Button
@@ -211,7 +214,7 @@ export function TechniqueSettingsCard({
             {showPermutation && (
                 <div className="space-y-4 rounded-md border border-border/50 p-3">
                     <div className="space-y-2">
-                        <Label htmlFor="permutation-mode">Mode</Label>
+                        <Label htmlFor="permutation-mode">{t("technique.settings.mode")}</Label>
                         <Select
                             id="permutation-mode"
                             value={permutationMode}
@@ -228,7 +231,7 @@ export function TechniqueSettingsCard({
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="permutation-tier">Tier</Label>
+                        <Label htmlFor="permutation-tier">{t("technique.settings.tier")}</Label>
                         <Select
                             id="permutation-tier"
                             value={permutationTier}
@@ -236,15 +239,15 @@ export function TechniqueSettingsCard({
                             disabled={isPlaying}
                             className="h-9 py-2"
                         >
-                            <option value="all">All Tiers (24)</option>
-                            <option value="1">Tier 1 - Beginner</option>
-                            <option value="2">Tier 2 - Intermediate</option>
-                            <option value="3">Tier 3 - Advanced</option>
+                            <option value="all">{t("technique.settings.tierOptions.all")}</option>
+                            <option value="1">{t("technique.settings.tierOptions.tier1")}</option>
+                            <option value="2">{t("technique.settings.tierOptions.tier2")}</option>
+                            <option value="3">{t("technique.settings.tierOptions.tier3")}</option>
                         </Select>
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="permutation-pattern">Pattern</Label>
+                        <Label htmlFor="permutation-pattern">{t("technique.settings.pattern")}</Label>
                         <Select
                             id="permutation-pattern"
                             value={String(permutationPattern)}
@@ -259,13 +262,13 @@ export function TechniqueSettingsCard({
                             ))}
                         </Select>
                         {permutationDailyMode && (
-                            <p className="text-xs text-muted-foreground">Daily challenge selects a fixed pattern for today.</p>
+                            <p className="text-xs text-muted-foreground">{t("technique.settings.dailyModeHint")}</p>
                         )}
                     </div>
 
                     <div className="space-y-2">
                         <div className="flex items-center justify-between text-sm">
-                            <Label className="text-sm">Strings to play</Label>
+                            <Label className="text-sm">{t("technique.settings.stringsToPlay")}</Label>
                             <span className="font-mono text-xs">{permutationStringsToPlay}</span>
                         </div>
                         <Slider
@@ -279,12 +282,12 @@ export function TechniqueSettingsCard({
                     </div>
 
                     <div className="space-y-2">
-                        <Label>Direction</Label>
+                        <Label>{t("technique.settings.direction")}</Label>
                         <div className="grid grid-cols-3 gap-2">
                             {[
-                                { value: "ascending", label: "Ascending" },
-                                { value: "descending", label: "Descending" },
-                                { value: "both", label: "Both" },
+                                { value: "ascending", label: t("technique.settings.directionOptions.ascending") },
+                                { value: "descending", label: t("technique.settings.directionOptions.descending") },
+                                { value: "both", label: t("technique.settings.directionOptions.both") },
                             ].map((option) => (
                                 <Button
                                     key={option.value}
@@ -301,18 +304,18 @@ export function TechniqueSettingsCard({
 
                     <div className="flex items-center justify-between">
                         <div className="space-y-1">
-                            <Label>Sticky Fingers</Label>
-                            <p className="text-xs text-muted-foreground">Enabled by default in Permutation Trainer (Spider-style).</p>
+                            <Label>{t("technique.settings.stickyFingers")}</Label>
+                            <p className="text-xs text-muted-foreground">{t("technique.settings.stickyFingersHint")}</p>
                         </div>
-                        <Badge variant="secondary">On</Badge>
+                        <Badge variant="secondary">{t("technique.settings.on")}</Badge>
                     </div>
 
                     {showRandomSwitchBars && (
                         <div className="space-y-2">
                             <div className="flex items-center justify-between text-sm">
-                                <Label className="text-sm">Random switch every</Label>
+                                <Label className="text-sm">{t("technique.settings.randomSwitchEvery")}</Label>
                                 <span className="font-mono text-xs">
-                                    {randomSwitchBars} bar{randomSwitchBars > 1 ? "s" : ""}
+                                    {randomSwitchBars} {randomSwitchBars > 1 ? t("technique.settings.bars") : t("technique.settings.bar")}
                                 </span>
                             </div>
                             <Slider
@@ -331,12 +334,12 @@ export function TechniqueSettingsCard({
                 {showDiagonal && (
                     <div className="space-y-4 rounded-md border border-border/50 p-3">
                         <div className="space-y-2">
-                            <Label>Pattern</Label>
+                            <Label>{t("technique.settings.pattern")}</Label>
                             <div className="grid grid-cols-3 gap-2">
                                 {[
-                                    { value: "ascending", label: "Ascending" },
-                                    { value: "descending", label: "Descending" },
-                                    { value: "full", label: "Full" },
+                                    { value: "ascending", label: t("technique.settings.diagonalPatternOptions.ascending") },
+                                    { value: "descending", label: t("technique.settings.diagonalPatternOptions.descending") },
+                                    { value: "full", label: t("technique.settings.diagonalPatternOptions.full") },
                                 ].map((option) => (
                                     <Button
                                         key={option.value}
@@ -353,7 +356,7 @@ export function TechniqueSettingsCard({
 
                         <div className="space-y-2">
                             <div className="flex items-center justify-between text-sm">
-                                <Label className="text-sm">Strings per group</Label>
+                                <Label className="text-sm">{t("technique.settings.stringsPerGroup")}</Label>
                                 <span className="font-mono text-xs">{diagonalStringsPerGroup}</span>
                             </div>
                             <Slider
@@ -367,11 +370,11 @@ export function TechniqueSettingsCard({
                         </div>
 
                         <div className="space-y-2">
-                            <Label>Picking Style</Label>
+                            <Label>{t("technique.settings.pickingStyle")}</Label>
                             <div className="grid grid-cols-2 gap-2">
                                 {[
-                                    { value: "alternate", label: "Alternate" },
-                                    { value: "economy", label: "Economy" },
+                                    { value: "alternate", label: t("technique.settings.pickingStyles.alternate") },
+                                    { value: "economy", label: t("technique.settings.pickingStyles.economy") },
                                 ].map((option) => (
                                     <Button
                                         key={option.value}
@@ -387,7 +390,7 @@ export function TechniqueSettingsCard({
                         </div>
 
                         <div className="flex items-center justify-between">
-                            <Label htmlFor="diagonal-pick-indicators">Show pick indicators</Label>
+                            <Label htmlFor="diagonal-pick-indicators">{t("technique.settings.showPickIndicators")}</Label>
                             <Switch
                                 id="diagonal-pick-indicators"
                                 checked={diagonalShowPickDirection}
@@ -400,7 +403,7 @@ export function TechniqueSettingsCard({
                 {showStringSkip && (
                     <div className="space-y-4 rounded-md border border-border/50 p-3">
                         <div className="space-y-2">
-                            <Label htmlFor="string-skip-pattern">Skip Pattern</Label>
+                            <Label htmlFor="string-skip-pattern">{t("technique.settings.skipPattern")}</Label>
                             <Select
                                 id="string-skip-pattern"
                                 value={stringSkipPattern}
@@ -417,12 +420,12 @@ export function TechniqueSettingsCard({
                         </div>
 
                         <div className="space-y-2">
-                            <Label>Picking Focus</Label>
+                            <Label>{t("technique.settings.pickingFocus")}</Label>
                             <div className="grid grid-cols-3 gap-2">
                                 {[
-                                    { value: "alternate", label: "Alternate" },
-                                    { value: "inside", label: "Inside" },
-                                    { value: "outside", label: "Outside" },
+                                    { value: "alternate", label: t("technique.settings.pickingFocusOptions.alternate") },
+                                    { value: "inside", label: t("technique.settings.pickingFocusOptions.inside") },
+                                    { value: "outside", label: t("technique.settings.pickingFocusOptions.outside") },
                                 ].map((option) => (
                                     <Button
                                         key={option.value}
@@ -438,11 +441,11 @@ export function TechniqueSettingsCard({
                         </div>
 
                         <div className="space-y-2">
-                            <Label>Start Pick Direction</Label>
+                            <Label>{t("technique.settings.startPickDirection")}</Label>
                             <div className="grid grid-cols-2 gap-2">
                                 {[
-                                    { value: "down", label: "Down (v)" },
-                                    { value: "up", label: "Up (^)" },
+                                    { value: "down", label: t("technique.settings.pickDirectionOptions.down") },
+                                    { value: "up", label: t("technique.settings.pickDirectionOptions.up") },
                                 ].map((option) => (
                                     <Button
                                         key={option.value}
@@ -458,7 +461,7 @@ export function TechniqueSettingsCard({
                         </div>
 
                         <div className="flex items-center justify-between">
-                            <Label htmlFor="string-skip-pick-indicators">Show pick indicators</Label>
+                            <Label htmlFor="string-skip-pick-indicators">{t("technique.settings.showPickIndicators")}</Label>
                             <Switch
                                 id="string-skip-pick-indicators"
                                 checked={stringSkipShowPickIndicators}
@@ -471,13 +474,13 @@ export function TechniqueSettingsCard({
                 {showLegato && (
                     <div className="space-y-4 rounded-md border border-border/50 p-3">
                         <div className="space-y-2">
-                            <Label>Exercise Type</Label>
+                            <Label>{t("technique.settings.exerciseType")}</Label>
                             <div className="grid grid-cols-2 gap-2">
                                 {[
-                                    { value: "trill", label: "Trill" },
-                                    { value: "hammerOnly", label: "Hammer Spider" },
-                                    { value: "pullOnly", label: "Pull Desc" },
-                                    { value: "threeNote", label: "3-Note" },
+                                    { value: "trill", label: t("technique.settings.legatoTypeOptions.trill") },
+                                    { value: "hammerOnly", label: t("technique.settings.legatoTypeOptions.hammerOnly") },
+                                    { value: "pullOnly", label: t("technique.settings.legatoTypeOptions.pullOnly") },
+                                    { value: "threeNote", label: t("technique.settings.legatoTypeOptions.threeNote") },
                                 ].map((option) => (
                                     <Button
                                         key={option.value}
@@ -494,7 +497,7 @@ export function TechniqueSettingsCard({
 
                         {legatoExerciseType === "trill" && (
                             <div className="space-y-2">
-                                <Label htmlFor="legato-trill-pair">Trill Pair</Label>
+                                <Label htmlFor="legato-trill-pair">{t("technique.settings.trillPair")}</Label>
                                 <Select
                                     id="legato-trill-pair"
                                     value={legatoTrillPair}
@@ -512,8 +515,8 @@ export function TechniqueSettingsCard({
                         )}
 
                         <div className="rounded-md border border-primary/20 bg-primary/5 p-2 text-xs text-muted-foreground">
-                            Legato notation follows guitar standard: <span className="font-mono">5h7</span> for hammer-on,{" "}
-                            <span className="font-mono">7p5</span> for pull-off.
+                            {t("technique.settings.legatoNotationHintPrefix")} <span className="font-mono">5h7</span> {t("technique.settings.legatoNotationHintMiddle")}{" "}
+                            <span className="font-mono">7p5</span> {t("technique.settings.legatoNotationHintSuffix")}
                         </div>
                     </div>
                 )}
@@ -522,7 +525,7 @@ export function TechniqueSettingsCard({
                     <div className="space-y-4 rounded-md border border-border/50 p-3">
                         <div className="space-y-2">
                             <div className="flex items-center justify-between text-sm">
-                                <Label className="text-sm">String</Label>
+                                <Label className="text-sm">{t("technique.settings.string")}</Label>
                                 <span className="font-mono text-xs">{linearString}</span>
                             </div>
                             <Slider
@@ -537,7 +540,7 @@ export function TechniqueSettingsCard({
 
                         <div className="space-y-2">
                             <div className="flex items-center justify-between text-sm">
-                                <Label className="text-sm">End Fret</Label>
+                                <Label className="text-sm">{t("technique.settings.endFret")}</Label>
                                 <span className="font-mono text-xs">{linearEndFret}</span>
                             </div>
                             <Slider
@@ -551,7 +554,7 @@ export function TechniqueSettingsCard({
                         </div>
 
                         <div className="space-y-2">
-                            <Label>Notes per Shift</Label>
+                            <Label>{t("technique.settings.notesPerShift")}</Label>
                             <div className="grid grid-cols-3 gap-2">
                                 {[4, 5, 6].map((value) => (
                                     <Button
@@ -568,12 +571,12 @@ export function TechniqueSettingsCard({
                         </div>
 
                         <div className="space-y-2">
-                            <Label>Direction</Label>
+                            <Label>{t("technique.settings.direction")}</Label>
                             <div className="grid grid-cols-3 gap-2">
                                 {[
-                                    { value: "ascending", label: "Asc" },
-                                    { value: "descending", label: "Desc" },
-                                    { value: "roundTrip", label: "Round" },
+                                    { value: "ascending", label: t("technique.settings.linearDirectionOptions.asc") },
+                                    { value: "descending", label: t("technique.settings.linearDirectionOptions.desc") },
+                                    { value: "roundTrip", label: t("technique.settings.linearDirectionOptions.round") },
                                 ].map((option) => (
                                     <Button
                                         key={option.value}
@@ -590,7 +593,7 @@ export function TechniqueSettingsCard({
 
                         <div className="space-y-2">
                             <div className="flex items-center justify-between text-sm">
-                                <Label className="text-sm">Shift Amount</Label>
+                                <Label className="text-sm">{t("technique.settings.shiftAmount")}</Label>
                                 <span className="font-mono text-xs">{linearShiftAmount}</span>
                             </div>
                             <Slider
@@ -604,11 +607,11 @@ export function TechniqueSettingsCard({
                         </div>
 
                         <div className="space-y-2">
-                            <Label>Picking Style</Label>
+                            <Label>{t("technique.settings.pickingStyle")}</Label>
                             <div className="grid grid-cols-2 gap-2">
                                 {[
-                                    { value: "alternate", label: "Alternate" },
-                                    { value: "legato", label: "Legato" },
+                                    { value: "alternate", label: t("technique.settings.pickingStyles.alternate") },
+                                    { value: "legato", label: t("technique.settings.pickingStyles.legato") },
                                 ].map((option) => (
                                     <Button
                                         key={option.value}
@@ -628,14 +631,14 @@ export function TechniqueSettingsCard({
             {showSpeedUpControls && (
                 <div className="space-y-3 border-t border-border/50 pt-3">
                     <div className="flex items-center justify-between">
-                        <Label htmlFor="speed-up">Auto Speed-Up</Label>
+                        <Label htmlFor="speed-up">{t("technique.settings.autoSpeedUp")}</Label>
                         <Switch id="speed-up" checked={speedUpEnabled} onCheckedChange={onSpeedUpEnabledChange} />
                     </div>
 
                     <div className={cn("space-y-3", !speedUpEnabled && "opacity-50")}>
                         <div className="space-y-2">
                             <div className="flex items-center justify-between text-sm">
-                                <Label className="text-sm">Increase</Label>
+                                <Label className="text-sm">{t("technique.settings.increase")}</Label>
                                 <span className="font-mono text-xs">+{speedUpAmount} BPM</span>
                             </div>
                             <Slider
@@ -650,9 +653,9 @@ export function TechniqueSettingsCard({
 
                         <div className="space-y-2">
                             <div className="flex items-center justify-between text-sm">
-                                <Label className="text-sm">Every</Label>
+                                <Label className="text-sm">{t("technique.settings.every")}</Label>
                                 <span className="font-mono text-xs">
-                                    {speedUpInterval} beat{speedUpInterval > 1 ? "s" : ""}
+                                    {speedUpInterval} {speedUpInterval > 1 ? t("technique.settings.beats") : t("technique.settings.beat")}
                                 </span>
                             </div>
                             <Slider
@@ -677,7 +680,7 @@ export function TechniqueSettingsCard({
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
                     <Settings2 className="h-4 w-4" />
-                    Settings
+                    {t("technique.settings.title")}
                 </CardTitle>
             </CardHeader>
             <CardContent>{content}</CardContent>

@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProgressPage from "@/pages/Progress";
 import SettingsPage from "@/pages/Settings";
@@ -7,6 +8,7 @@ import SettingsPage from "@/pages/Settings";
 type MeSection = "progress" | "settings";
 
 export default function Me() {
+    const { t } = useTranslation();
     const [searchParams, setSearchParams] = useSearchParams();
     const sectionParam = searchParams.get("section");
     const section: MeSection = sectionParam === "settings" ? "settings" : "progress";
@@ -27,8 +29,8 @@ export default function Me() {
             <div className="sticky top-0 z-20 border-b border-border/50 bg-background/95 py-2 backdrop-blur">
                 <Tabs value={section} onValueChange={(value) => setSection(value as MeSection)} className="w-full">
                     <TabsList className="grid w-full max-w-sm grid-cols-2">
-                        <TabsTrigger value="progress">Progress</TabsTrigger>
-                        <TabsTrigger value="settings">Settings</TabsTrigger>
+                        <TabsTrigger value="progress">{t("me.tabs.progress")}</TabsTrigger>
+                        <TabsTrigger value="settings">{t("me.tabs.settings")}</TabsTrigger>
                     </TabsList>
                 </Tabs>
             </div>

@@ -29,28 +29,29 @@ import { Button } from "@/components/ui/button";
 import { SectionCollapse } from "@/components/ui/section-collapse";
 import { RotateCcw, Volume2, Gamepad2, GraduationCap, Palette, Guitar, Database, CircleHelp, Newspaper, HandHeart, Coffee, Mail, ExternalLink, Search, Settings2, History } from "lucide-react";
 import { EXTERNAL_LINKS } from "@/lib/externalLinks";
+import { useTranslation } from "react-i18next";
 
 type ConfirmAction = "reset-settings" | "replace-progress-import" | "reset-progress" | null;
 type SettingsScope = "global" | "modules" | "data";
 
 const PRACTICE_SCALE_OPTIONS = [
-    { id: "major", label: "Major" },
-    { id: "minor", label: "Minor" },
-    { id: "majorPentatonic", label: "Major Pentatonic" },
-    { id: "minorPentatonic", label: "Minor Pentatonic" },
+    { id: "major" },
+    { id: "minor" },
+    { id: "majorPentatonic" },
+    { id: "minorPentatonic" },
 ] as const;
 
 const PRACTICE_NOTE_SEQUENCE_OPTIONS = [
-    { id: "random", label: "Random" },
-    { id: "minorThirds", label: "Minor Thirds" },
-    { id: "majorThirds", label: "Major Thirds" },
-    { id: "fourths", label: "Fourths" },
-    { id: "fifths", label: "Fifths" },
-    { id: "sevenths", label: "Sevenths" },
-    { id: "majorScale", label: "Major Scale" },
-    { id: "naturalMinorScale", label: "Natural Minor Scale" },
-    { id: "majorPentatonic", label: "Major Pentatonic" },
-    { id: "minorPentatonic", label: "Minor Pentatonic" },
+    { id: "random" },
+    { id: "minorThirds" },
+    { id: "majorThirds" },
+    { id: "fourths" },
+    { id: "fifths" },
+    { id: "sevenths" },
+    { id: "majorScale" },
+    { id: "naturalMinorScale" },
+    { id: "majorPentatonic" },
+    { id: "minorPentatonic" },
 ] as const;
 
 const EAR_INTERVAL_OPTIONS = ["P1", "m2", "M2", "m3", "M3", "P4", "TT", "P5", "m6", "M6", "m7", "M7", "P8"] as const;
@@ -61,6 +62,7 @@ function clampInputLatency(value: number): number {
 }
 
 export default function Settings() {
+    const { t } = useTranslation();
     const quick = useSettingsStore((state) => state.quick);
     const full = useSettingsStore((state) => state.full);
     const modules = useSettingsStore((state) => state.modules);
@@ -98,10 +100,10 @@ export default function Settings() {
         try {
             downloadProgressExport(useProgressStore.getState());
             trackEvent("fm_v2_progress_export_clicked");
-            showFeedback("Progress data exported.", "success");
+            showFeedback(t("settingsPage.feedback.exportSuccess"), "success");
         } catch (error) {
             console.error("Failed to export progress data", error);
-            showFeedback("Could not export progress data. Please try again.", "error");
+            showFeedback(t("settingsPage.feedback.exportError"), "error");
             trackEvent("fm_v2_progress_export_failed");
         }
     };
@@ -129,7 +131,7 @@ export default function Settings() {
             });
         } catch (error) {
             console.error("Failed to import progress data", error);
-            showFeedback("Could not import progress data. Make sure the file is valid JSON.", "error");
+            showFeedback(t("settingsPage.feedback.importError"), "error");
             trackEvent("fm_v2_progress_import_failed", {
                 mode: importModeRef.current,
             });
@@ -145,7 +147,7 @@ export default function Settings() {
     const handleConfirmAction = () => {
         if (confirmAction === "reset-settings") {
             resetSettings();
-            showFeedback("Settings reset to defaults.", "success");
+            showFeedback(t("settingsPage.feedback.resetSettingsSuccess"), "success");
             return;
         }
         if (confirmAction === "replace-progress-import") {
@@ -154,7 +156,7 @@ export default function Settings() {
         }
         if (confirmAction === "reset-progress") {
             resetProgressData();
-            showFeedback("All progress data has been reset.", "success");
+            showFeedback(t("settingsPage.feedback.resetProgressSuccess"), "success");
             trackEvent("fm_v2_progress_reset_confirmed");
         }
     };
@@ -167,25 +169,25 @@ export default function Settings() {
     } | null = (() => {
         if (confirmAction === "reset-settings") {
             return {
-                title: "Reset Settings?",
-                description: "This restores all app settings to defaults. Progress data will not be changed.",
-                confirmLabel: "Reset Settings",
+                title: t("settingsPage.confirm.resetSettings.title"),
+                description: t("settingsPage.confirm.resetSettings.description"),
+                confirmLabel: t("settingsPage.confirm.resetSettings.confirm"),
                 confirmVariant: "destructive",
             };
         }
         if (confirmAction === "replace-progress-import") {
             return {
-                title: "Replace Progress Data?",
-                description: "This will overwrite your current progress with imported data.",
-                confirmLabel: "Replace",
+                title: t("settingsPage.confirm.replaceImport.title"),
+                description: t("settingsPage.confirm.replaceImport.description"),
+                confirmLabel: t("settingsPage.confirm.replaceImport.confirm"),
                 confirmVariant: "destructive",
             };
         }
         if (confirmAction === "reset-progress") {
             return {
-                title: "Reset All Progress Data?",
-                description: "This removes practice stats, session history, and unlocked achievements.",
-                confirmLabel: "Reset Progress",
+                title: t("settingsPage.confirm.resetProgress.title"),
+                description: t("settingsPage.confirm.resetProgress.description"),
+                confirmLabel: t("settingsPage.confirm.resetProgress.confirm"),
                 confirmVariant: "destructive",
             };
         }
@@ -200,7 +202,7 @@ export default function Settings() {
         const presetId = getTuningPresetId(selectedTuning);
         return instrumentPresets.some((preset) => preset.id === presetId) ? presetId : "custom";
     })();
-    const selectedInstrumentLabel = INSTRUMENT_LABELS[instrumentType];
+    const selectedInstrumentLabel = t(`settingsPage.instrument.instrumentTypes.${instrumentType}`, INSTRUMENT_LABELS[instrumentType]);
     const selectedTuningSummary = selectedTuning.slice().reverse().join("-");
     const normalizedQuery = searchQuery.trim().toLowerCase();
     const matchesQuery = (keywords: string[]) => {
@@ -212,17 +214,17 @@ export default function Settings() {
         [modules.technique.startingBpm]
     );
 
-    const showGlobalInstrument = matchesQuery(["profile", "instrument", "tuning", "notation", "left-handed", "fret"]);
-    const showGlobalLearning = matchesQuery(["learning", "session", "auto-advance", "hints", "difficulty", "repetition"]);
-    const showGlobalAudio = matchesQuery(["audio", "volume", "sound", "pitch", "input"]);
-    const showGlobalAppearance = matchesQuery(["appearance", "theme", "display", "layer"]);
-    const showGlobalGame = matchesQuery(["game", "gamification", "xp", "streak", "achievement"]);
-    const showModulePractice = matchesQuery(["practice defaults", "tempo", "metronome", "root", "scale", "sequence", "fret range"]);
-    const showModuleTechnique = matchesQuery(["technique defaults", "starting bpm", "history", "session"]);
-    const showModuleEar = matchesQuery(["ear training", "interval", "direction"]);
-    const showModuleRhythm = matchesQuery(["rhythm", "latency", "tap", "strum", "groove"]);
-    const showData = matchesQuery(["data", "backup", "import", "export", "reset"]);
-    const showHelp = matchesQuery(["help", "faq", "blog", "contact", "support", "legacy", "v1"]);
+    const showGlobalInstrument = matchesQuery(["profile", "profil", "instrument", "tuning", "strojenie", "notation", "notacja", "left-handed", "leworęczny", "fret", "gryf"]);
+    const showGlobalLearning = matchesQuery(["learning", "nauka", "session", "sesja", "auto-advance", "auto", "hints", "podpowiedzi", "difficulty", "trudność", "repetition", "powtórki"]);
+    const showGlobalAudio = matchesQuery(["audio", "dźwięk", "volume", "głośność", "sound", "pitch", "strój", "input", "wejście"]);
+    const showGlobalAppearance = matchesQuery(["appearance", "wygląd", "theme", "motyw", "display", "widok", "layer", "warstwa"]);
+    const showGlobalGame = matchesQuery(["game", "gra", "gamification", "xp", "streak", "seria", "achievement", "osiągnięcia"]);
+    const showModulePractice = matchesQuery(["practice defaults", "domyślne treningu", "tempo", "metronome", "metronom", "root", "tonika", "scale", "skala", "sequence", "kolejność", "fret range", "zakres progów"]);
+    const showModuleTechnique = matchesQuery(["technique defaults", "domyślne techniki", "starting bpm", "startowe bpm", "history", "historia", "session", "sesja"]);
+    const showModuleEar = matchesQuery(["ear training", "trening słuchu", "interval", "interwał", "direction", "kierunek"]);
+    const showModuleRhythm = matchesQuery(["rhythm", "rytm", "latency", "opóźnienie", "tap", "strum", "groove"]);
+    const showData = matchesQuery(["data", "dane", "backup", "kopia", "import", "eksport", "export", "reset"]);
+    const showHelp = matchesQuery(["help", "pomoc", "faq", "blog", "contact", "kontakt", "support", "legacy", "v1"]);
     const hasVisibleGlobal = showGlobalInstrument || showGlobalLearning || showGlobalAudio || showGlobalAppearance || showGlobalGame;
     const hasVisibleModules = showModulePractice || showModuleTechnique || showModuleEar || showModuleRhythm;
     const hasVisibleData = showData || showHelp;
@@ -237,12 +239,12 @@ export default function Settings() {
         <div className="space-y-6 pb-8">
             <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                    <h1 className="type-display">Settings</h1>
-                    <p className="type-body text-muted-foreground">Manage global defaults, module defaults, and safety controls.</p>
+                    <h1 className="type-display">{t("settingsPage.title")}</h1>
+                    <p className="type-body text-muted-foreground">{t("settingsPage.subtitle")}</p>
                 </div>
                 <Button variant="outline" onClick={handleReset} className="text-destructive hover:text-destructive">
                     <RotateCcw className="mr-2 h-4 w-4" />
-                    Reset All Defaults
+                    {t("settingsPage.resetAllDefaults")}
                 </Button>
             </div>
 
@@ -253,46 +255,49 @@ export default function Settings() {
                         <Input
                             value={searchQuery}
                             onChange={(event) => setSearchQuery(event.target.value)}
-                            placeholder="Search settings (e.g. tuning, metronome, latency)"
+                            placeholder={t("settingsPage.searchPlaceholder")}
                             className="pl-9"
                         />
                     </div>
                     <div className="flex flex-wrap gap-2">
                         <Button type="button" size="sm" variant={activeScope === "global" ? "secondary" : "outline"} onClick={() => setActiveScope("global")}>
-                            Global Defaults
+                            {t("settingsPage.scope.global")}
                         </Button>
                         <Button type="button" size="sm" variant={activeScope === "modules" ? "secondary" : "outline"} onClick={() => setActiveScope("modules")}>
-                            Module Defaults
+                            {t("settingsPage.scope.modules")}
                         </Button>
                         <Button type="button" size="sm" variant={activeScope === "data" ? "secondary" : "outline"} onClick={() => setActiveScope("data")}>
-                            Data & Support
+                            {t("settingsPage.scope.data")}
                         </Button>
                     </div>
                     <p className="type-caption text-muted-foreground">
-                        Global defaults affect the whole app. Module defaults prefill specific training modes.
+                        {t("settingsPage.scopeHint")}
                     </p>
                 </CardContent>
             </Card>
 
             {activeScope === "global" && showGlobalInstrument && (
             <SectionCollapse
-                title="Instrument"
-                summary={`${selectedInstrumentLabel} · ${selectedTuning.length} strings`}
+                title={t("settingsPage.instrument.sectionTitle")}
+                summary={t("settingsPage.instrument.sectionSummary", {
+                    instrument: selectedInstrumentLabel,
+                    strings: selectedTuning.length,
+                })}
                 defaultOpen
             >
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Guitar className="h-5 w-5" />
-                            Instrument
+                            {t("settingsPage.instrument.cardTitle")}
                         </CardTitle>
-                        <CardDescription>Configure instrument family, tuning, and handedness.</CardDescription>
+                        <CardDescription>{t("settingsPage.instrument.cardDescription")}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <FormField
                             id="instrument-type"
-                            label="Instrument Type"
-                            hint="Changes available tuning presets and string count."
+                            label={t("settingsPage.instrument.instrumentType")}
+                            hint={t("settingsPage.instrument.instrumentTypeHint")}
                         >
                             <Select
                                 value={instrumentType}
@@ -304,7 +309,7 @@ export default function Settings() {
                             >
                                 {Object.entries(INSTRUMENT_LABELS).map(([value, label]) => (
                                     <option key={value} value={value}>
-                                        {label}
+                                        {t(`settingsPage.instrument.instrumentTypes.${value}`, label)}
                                     </option>
                                 ))}
                             </Select>
@@ -312,8 +317,8 @@ export default function Settings() {
 
                         <FormField
                             id="tuning-preset"
-                            label="Tuning Preset"
-                            hint="Applies to all fretboard-based exercises."
+                            label={t("settingsPage.instrument.tuningPreset")}
+                            hint={t("settingsPage.instrument.tuningPresetHint")}
                         >
                             <Select
                                 value={selectedTuningPresetId}
@@ -325,20 +330,23 @@ export default function Settings() {
                             >
                                 {instrumentPresets.map((preset) => (
                                     <option key={preset.id} value={preset.id}>
-                                        {preset.label}
+                                        {t(`settingsPage.instrument.tuningPresets.${preset.id}`, preset.label)}
                                     </option>
                                 ))}
-                                <option value="custom">Custom (Current)</option>
+                                <option value="custom">{t("settingsPage.instrument.customCurrent")}</option>
                             </Select>
                             <p className="type-mono text-muted-foreground">
-                                Active tuning ({selectedTuning.length} strings): {selectedTuningSummary}
+                                {t("settingsPage.instrument.activeTuning", {
+                                    strings: selectedTuning.length,
+                                    tuning: selectedTuningSummary,
+                                })}
                             </p>
                         </FormField>
 
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
-                                <Label>Left-Handed Mode</Label>
-                                <p className="text-sm text-muted-foreground">Mirror the fretboard for left-handed playing.</p>
+                                <Label>{t("settingsPage.instrument.leftHanded")}</Label>
+                                <p className="text-sm text-muted-foreground">{t("settingsPage.instrument.leftHandedHint")}</p>
                             </div>
                             <Switch
                                 checked={full.instrument.leftHanded}
@@ -347,8 +355,8 @@ export default function Settings() {
                         </div>
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
-                                <Label>Show Fret Numbers</Label>
-                                <p className="text-sm text-muted-foreground">Display numbers on the fretboard visualization.</p>
+                                <Label>{t("settingsPage.instrument.showFretNumbers")}</Label>
+                                <p className="text-sm text-muted-foreground">{t("settingsPage.instrument.showFretNumbersHint")}</p>
                             </div>
                             <Switch
                                 checked={full.instrument.showFretNumbers}
@@ -358,13 +366,13 @@ export default function Settings() {
 
                         <div className="space-y-2">
                             <div className="space-y-0.5">
-                                <Label>Note Naming</Label>
-                                <p className="text-sm text-muted-foreground">Choose whether notes are displayed as sharps or flats.</p>
+                                <Label>{t("settingsPage.instrument.noteNaming")}</Label>
+                                <p className="text-sm text-muted-foreground">{t("settingsPage.instrument.noteNamingHint")}</p>
                             </div>
                             <div className="grid grid-cols-2 gap-2 sm:w-56">
                                 {[
-                                    { id: "sharps", label: "Sharps (#)" },
-                                    { id: "flats", label: "Flats (b)" },
+                                    { id: "sharps", label: t("settingsPage.instrument.notation.sharps") },
+                                    { id: "flats", label: t("settingsPage.instrument.notation.flats") },
                                 ].map((notationOption) => (
                                     <Button
                                         key={notationOption.id}
@@ -390,28 +398,33 @@ export default function Settings() {
 
             {activeScope === "global" && showGlobalLearning && (
             <SectionCollapse
-                title="Practice"
-                summary={`${quick.tempo} BPM · ${full.learning.autoAdvance ? "Auto-Advance On" : "Auto-Advance Off"}`}
+                title={t("settingsPage.learning.sectionTitle")}
+                summary={t("settingsPage.learning.sectionSummary", {
+                    tempo: quick.tempo,
+                    autoAdvance: full.learning.autoAdvance
+                        ? t("settingsPage.common.on")
+                        : t("settingsPage.common.off"),
+                })}
                 defaultOpen
             >
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <GraduationCap className="h-5 w-5" />
-                            Learning Behavior
+                            {t("settingsPage.learning.cardTitle")}
                         </CardTitle>
-                        <CardDescription>Adjust how the application helps you learn.</CardDescription>
+                        <CardDescription>{t("settingsPage.learning.cardDescription")}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <div className="space-y-2">
                             <div className="space-y-0.5">
-                                <Label>Difficulty Mode</Label>
-                                <p className="text-sm text-muted-foreground">Adaptive mode reacts to your results. Manual keeps fixed behavior.</p>
+                                <Label>{t("settingsPage.learning.difficultyMode")}</Label>
+                                <p className="text-sm text-muted-foreground">{t("settingsPage.learning.difficultyModeHint")}</p>
                             </div>
                             <div className="grid grid-cols-2 gap-2 sm:w-72">
                                 {[
-                                    { id: "adaptive", label: "Adaptive" },
-                                    { id: "manual", label: "Manual" },
+                                    { id: "adaptive", label: t("settingsPage.learning.difficulty.adaptive") },
+                                    { id: "manual", label: t("settingsPage.learning.difficulty.manual") },
                                 ].map((difficultyOption) => (
                                     <Button
                                         key={difficultyOption.id}
@@ -432,8 +445,8 @@ export default function Settings() {
                         </div>
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
-                                <Label>Auto-Advance</Label>
-                                <p className="text-sm text-muted-foreground">Automatically move to the next question after a correct answer.</p>
+                                <Label>{t("settingsPage.learning.autoAdvance")}</Label>
+                                <p className="text-sm text-muted-foreground">{t("settingsPage.learning.autoAdvanceHint")}</p>
                             </div>
                             <Switch
                                 checked={full.learning.autoAdvance}
@@ -442,8 +455,8 @@ export default function Settings() {
                         </div>
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
-                                <Label>Show Hints</Label>
-                                <p className="text-sm text-muted-foreground">Display markers or helpers when stuck.</p>
+                                <Label>{t("settingsPage.learning.showHints")}</Label>
+                                <p className="text-sm text-muted-foreground">{t("settingsPage.learning.showHintsHint")}</p>
                             </div>
                             <Switch
                                 checked={full.learning.showHints}
@@ -452,8 +465,8 @@ export default function Settings() {
                         </div>
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
-                                <Label>Spaced Repetition</Label>
-                                <p className="text-sm text-muted-foreground">Prioritize weak areas and older items.</p>
+                                <Label>{t("settingsPage.learning.spacedRepetition")}</Label>
+                                <p className="text-sm text-muted-foreground">{t("settingsPage.learning.spacedRepetitionHint")}</p>
                             </div>
                             <Switch
                                 checked={full.learning.spacedRepetition}
@@ -467,21 +480,24 @@ export default function Settings() {
 
             {activeScope === "global" && showGlobalAudio && (
             <SectionCollapse
-                title="Audio"
-                summary={`Volume ${Math.round(full.audio.volume * 100)}% · ±${full.audio.pitchTolerance} cents`}
+                title={t("settingsPage.audio.sectionTitle")}
+                summary={t("settingsPage.audio.sectionSummary", {
+                    volume: Math.round(full.audio.volume * 100),
+                    tolerance: full.audio.pitchTolerance,
+                })}
             >
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Volume2 className="h-5 w-5" />
-                            Audio & Input
+                            {t("settingsPage.audio.cardTitle")}
                         </CardTitle>
-                        <CardDescription>Manage sound output and microphone input.</CardDescription>
+                        <CardDescription>{t("settingsPage.audio.cardDescription")}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <div className="space-y-4">
                             <div className="flex justify-between">
-                                <Label>Master Volume</Label>
+                                <Label>{t("settingsPage.audio.masterVolume")}</Label>
                                 <span className="text-sm text-muted-foreground">{Math.round(full.audio.volume * 100)}%</span>
                             </div>
                             <Slider
@@ -492,7 +508,11 @@ export default function Settings() {
                                 onValueChange={(vals) => updateFullSettings({ audio: { ...full.audio, volume: vals[0] / 100 } })}
                             />
                         </div>
-                        <FormField id="instrument-sound" label="Playback Instrument Sound" hint="Used for generated tones and reference notes.">
+                        <FormField
+                            id="instrument-sound"
+                            label={t("settingsPage.audio.instrumentSound")}
+                            hint={t("settingsPage.audio.instrumentSoundHint")}
+                        >
                             <Select
                                 value={full.audio.instrumentSound}
                                 onChange={(event) => updateFullSettings({
@@ -502,14 +522,14 @@ export default function Settings() {
                                     },
                                 })}
                             >
-                                <option value="acoustic">Acoustic</option>
-                                <option value="electric">Electric</option>
-                                <option value="clean">Clean</option>
+                                <option value="acoustic">{t("settingsPage.audio.sounds.acoustic")}</option>
+                                <option value="electric">{t("settingsPage.audio.sounds.electric")}</option>
+                                <option value="clean">{t("settingsPage.audio.sounds.clean")}</option>
                             </Select>
                         </FormField>
                         <div className="space-y-4">
                             <div className="flex justify-between">
-                                <Label>Pitch Tolerance (cents)</Label>
+                                <Label>{t("settingsPage.audio.pitchTolerance")}</Label>
                                 <span className="text-sm text-muted-foreground">±{full.audio.pitchTolerance}</span>
                             </div>
                             <Slider
@@ -519,7 +539,7 @@ export default function Settings() {
                                 step={1}
                                 onValueChange={(vals) => updateFullSettings({ audio: { ...full.audio, pitchTolerance: vals[0] } })}
                             />
-                            <p className="text-xs text-muted-foreground">Higher values make detection more forgiving.</p>
+                            <p className="text-xs text-muted-foreground">{t("settingsPage.audio.pitchToleranceHint")}</p>
                         </div>
                     </CardContent>
                 </Card>
@@ -528,28 +548,31 @@ export default function Settings() {
 
             {activeScope === "global" && showGlobalAppearance && (
             <SectionCollapse
-                title="Appearance"
-                summary={`${full.display.theme === "dark" ? "Dark" : full.display.theme === "light" ? "Light" : "System"} · ${full.display.defaultLayer}`}
+                title={t("settingsPage.appearance.sectionTitle")}
+                summary={t("settingsPage.appearance.sectionSummary", {
+                    theme: t(`settingsPage.appearance.themeOptions.${full.display.theme}`),
+                    layer: t(`practice.layers.${full.display.defaultLayer}`),
+                })}
             >
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Palette className="h-5 w-5" />
-                            Appearance & Interface
+                            {t("settingsPage.appearance.cardTitle")}
                         </CardTitle>
-                        <CardDescription>Customize how FretMemo looks and feels.</CardDescription>
+                        <CardDescription>{t("settingsPage.appearance.cardDescription")}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <div className="space-y-2">
                             <div className="space-y-0.5">
-                                <Label>Theme</Label>
-                                <p className="text-sm text-muted-foreground">Choose light, dark, or follow your device preference.</p>
+                                <Label>{t("settingsPage.appearance.theme")}</Label>
+                                <p className="text-sm text-muted-foreground">{t("settingsPage.appearance.themeHint")}</p>
                             </div>
                             <div className="grid grid-cols-3 gap-2">
                                 {[
-                                    { id: "light", label: "Light" },
-                                    { id: "dark", label: "Dark" },
-                                    { id: "system", label: "System" },
+                                    { id: "light", label: t("settingsPage.appearance.themeOptions.light") },
+                                    { id: "dark", label: t("settingsPage.appearance.themeOptions.dark") },
+                                    { id: "system", label: t("settingsPage.appearance.themeOptions.system") },
                                 ].map((themeOption) => (
                                     <Button
                                         key={themeOption.id}
@@ -568,15 +591,15 @@ export default function Settings() {
 
                         <div className="space-y-2">
                             <div className="space-y-0.5">
-                                <Label>Default Fretboard Layer</Label>
-                                <p className="text-sm text-muted-foreground">Used as the starting layer in Focus Mode.</p>
+                                <Label>{t("settingsPage.appearance.defaultLayer")}</Label>
+                                <p className="text-sm text-muted-foreground">{t("settingsPage.appearance.defaultLayerHint")}</p>
                             </div>
                             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                                 {[
-                                    { id: "standard", label: "Standard" },
-                                    { id: "heatmap", label: "Heatmap" },
-                                    { id: "scale", label: "Scale" },
-                                    { id: "intervals", label: "Intervals" },
+                                    { id: "standard", label: t("practice.layers.standard") },
+                                    { id: "heatmap", label: t("practice.layers.heatmap") },
+                                    { id: "scale", label: t("practice.layers.scale") },
+                                    { id: "intervals", label: t("practice.layers.intervals") },
                                 ].map((layer) => (
                                     <Button
                                         key={layer.id}
@@ -599,22 +622,25 @@ export default function Settings() {
 
             {activeScope === "global" && showGlobalGame && (
             <SectionCollapse
-                title="Game"
-                summary={`${full.gamification.showXPNotes ? "XP Notes On" : "XP Notes Off"} · ${full.gamification.showStreakWarnings ? "Warnings On" : "Warnings Off"}`}
+                title={t("settingsPage.gamification.sectionTitle")}
+                summary={t("settingsPage.gamification.sectionSummary", {
+                    xp: full.gamification.showXPNotes ? t("settingsPage.common.on") : t("settingsPage.common.off"),
+                    warnings: full.gamification.showStreakWarnings ? t("settingsPage.common.on") : t("settingsPage.common.off"),
+                })}
             >
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Gamepad2 className="h-5 w-5" />
-                            Gamification
+                            {t("settingsPage.gamification.cardTitle")}
                         </CardTitle>
-                        <CardDescription>Manage XP, streaks, and rewards.</CardDescription>
+                        <CardDescription>{t("settingsPage.gamification.cardDescription")}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
-                                <Label>Show XP Animations</Label>
-                                <p className="text-sm text-muted-foreground">Show floating XP summaries after answers.</p>
+                                <Label>{t("settingsPage.gamification.showXpAnimations")}</Label>
+                                <p className="text-sm text-muted-foreground">{t("settingsPage.gamification.showXpAnimationsHint")}</p>
                             </div>
                             <Switch
                                 checked={full.gamification.showXPNotes}
@@ -623,8 +649,8 @@ export default function Settings() {
                         </div>
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
-                                <Label>Streak Warnings</Label>
-                                <p className="text-sm text-muted-foreground">Alert when streak is at risk of breaking.</p>
+                                <Label>{t("settingsPage.gamification.streakWarnings")}</Label>
+                                <p className="text-sm text-muted-foreground">{t("settingsPage.gamification.streakWarningsHint")}</p>
                             </div>
                             <Switch
                                 checked={full.gamification.showStreakWarnings}
@@ -633,8 +659,8 @@ export default function Settings() {
                         </div>
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
-                                <Label>Achievement Toasts</Label>
-                                <p className="text-sm text-muted-foreground">Show unlock notifications during practice sessions.</p>
+                                <Label>{t("settingsPage.gamification.achievementToasts")}</Label>
+                                <p className="text-sm text-muted-foreground">{t("settingsPage.gamification.achievementToastsHint")}</p>
                             </div>
                             <Switch
                                 checked={full.gamification.showAchievements}
@@ -644,8 +670,8 @@ export default function Settings() {
                         <div className="rounded-lg border border-border bg-muted/30 p-3">
                             <div className="flex items-center justify-between">
                                 <div className="space-y-0.5">
-                                    <span className="text-sm font-medium">Streak Freezes</span>
-                                    <p className="text-xs text-muted-foreground">Protect your streak if you miss a day.</p>
+                                    <span className="text-sm font-medium">{t("settingsPage.gamification.streakFreezes")}</span>
+                                    <p className="text-xs text-muted-foreground">{t("settingsPage.gamification.streakFreezesHint")}</p>
                                 </div>
                                 <span className="text-lg font-bold text-primary tabular-nums">
                                     {streakFreezes}
@@ -659,22 +685,25 @@ export default function Settings() {
 
             {activeScope === "modules" && showModulePractice && (
             <SectionCollapse
-                title="Practice Module Defaults"
-                summary={`${quick.tempo} BPM · ${quick.isMetronomeOn ? "Metronome On" : "Metronome Off"}`}
+                title={t("settingsPage.modulePractice.sectionTitle")}
+                summary={t("settingsPage.modulePractice.sectionSummary", {
+                    tempo: quick.tempo,
+                    metronome: quick.isMetronomeOn ? t("settingsPage.common.on") : t("settingsPage.common.off"),
+                })}
                 defaultOpen
             >
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Settings2 className="h-5 w-5" />
-                            Practice Defaults
+                            {t("settingsPage.modulePractice.cardTitle")}
                         </CardTitle>
-                        <CardDescription>Prefill Session Setup for fretboard practice modes.</CardDescription>
+                        <CardDescription>{t("settingsPage.modulePractice.cardDescription")}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <div className="space-y-4">
                             <div className="flex justify-between">
-                                <Label>Default Tempo</Label>
+                                <Label>{t("settingsPage.modulePractice.defaultTempo")}</Label>
                                 <span className="text-sm text-muted-foreground">{quick.tempo} BPM</span>
                             </div>
                             <Slider
@@ -688,8 +717,8 @@ export default function Settings() {
 
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
-                                <Label>Metronome Armed by Default</Label>
-                                <p className="text-sm text-muted-foreground">Enable click track automatically on session start.</p>
+                                <Label>{t("settingsPage.modulePractice.metronomeDefault")}</Label>
+                                <p className="text-sm text-muted-foreground">{t("settingsPage.modulePractice.metronomeDefaultHint")}</p>
                             </div>
                             <Switch
                                 checked={quick.isMetronomeOn}
@@ -699,7 +728,7 @@ export default function Settings() {
 
                         <div className="space-y-4">
                             <div className="flex justify-between">
-                                <Label>Default Fret Range</Label>
+                                <Label>{t("settingsPage.modulePractice.defaultFretRange")}</Label>
                                 <span className="text-sm text-muted-foreground">{quick.fretRange.min} - {quick.fretRange.max}</span>
                             </div>
                             <Slider
@@ -716,7 +745,7 @@ export default function Settings() {
                             />
                         </div>
 
-                        <FormField id="practice-root-note" label="Default Root Note">
+                        <FormField id="practice-root-note" label={t("settingsPage.modulePractice.defaultRootNote")}>
                             <Select
                                 value={quick.practiceRootNote}
                                 onChange={(event) => updateQuickSettings({ practiceRootNote: event.target.value as typeof quick.practiceRootNote })}
@@ -731,8 +760,8 @@ export default function Settings() {
 
                         <div className="space-y-2">
                             <div className="space-y-0.5">
-                                <Label>Default Scale Type</Label>
-                                <p className="text-sm text-muted-foreground">Used when scale constraints are enabled.</p>
+                                <Label>{t("settingsPage.modulePractice.defaultScaleType")}</Label>
+                                <p className="text-sm text-muted-foreground">{t("settingsPage.modulePractice.defaultScaleTypeHint")}</p>
                             </div>
                             <div className="grid grid-cols-2 gap-2">
                                 {PRACTICE_SCALE_OPTIONS.map((scaleOption) => (
@@ -743,20 +772,20 @@ export default function Settings() {
                                         variant={quick.practiceScaleType === scaleOption.id ? "secondary" : "outline"}
                                         onClick={() => updateQuickSettings({ practiceScaleType: scaleOption.id })}
                                     >
-                                        {scaleOption.label}
+                                        {t(`practice.setup.scaleTypes.${scaleOption.id}`)}
                                     </Button>
                                 ))}
                             </div>
                         </div>
 
-                        <FormField id="practice-note-sequence" label="Default Note Sequence">
+                        <FormField id="practice-note-sequence" label={t("settingsPage.modulePractice.defaultNoteSequence")}>
                             <Select
                                 value={quick.practiceNoteSequence}
                                 onChange={(event) => updateQuickSettings({ practiceNoteSequence: event.target.value as typeof quick.practiceNoteSequence })}
                             >
                                 {PRACTICE_NOTE_SEQUENCE_OPTIONS.map((sequenceOption) => (
                                     <option key={sequenceOption.id} value={sequenceOption.id}>
-                                        {sequenceOption.label}
+                                        {t(`practice.setup.sequenceOptions.${sequenceOption.id}`)}
                                     </option>
                                 ))}
                             </Select>
@@ -768,28 +797,33 @@ export default function Settings() {
 
             {activeScope === "modules" && (showModuleTechnique || showModuleEar || showModuleRhythm) && (
             <SectionCollapse
-                title="Training Module Defaults"
-                summary={`${techniqueStartingEntries.length} technique BPM overrides · ${modules.earTraining.intervals.length} ear intervals`}
+                title={t("settingsPage.moduleTraining.sectionTitle")}
+                summary={t("settingsPage.moduleTraining.sectionSummary", {
+                    technique: techniqueStartingEntries.length,
+                    intervals: modules.earTraining.intervals.length,
+                })}
             >
                 <Card>
                     <CardHeader>
-                        <CardTitle>Technique, Ear Training & Rhythm</CardTitle>
-                        <CardDescription>Module-specific defaults and persisted training calibration.</CardDescription>
+                        <CardTitle>{t("settingsPage.moduleTraining.cardTitle")}</CardTitle>
+                        <CardDescription>{t("settingsPage.moduleTraining.cardDescription")}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-8">
                         {showModuleTechnique && (
                             <div className="space-y-4">
                                 <div className="space-y-0.5">
-                                    <Label>Technique Starting BPM Overrides</Label>
-                                    <p className="text-sm text-muted-foreground">Saved per exercise when tempo is adjusted in Technique mode.</p>
+                                    <Label>{t("settingsPage.moduleTraining.technique.bpmOverrides")}</Label>
+                                    <p className="text-sm text-muted-foreground">{t("settingsPage.moduleTraining.technique.bpmOverridesHint")}</p>
                                 </div>
                                 {techniqueStartingEntries.length === 0 ? (
-                                    <p className="text-sm text-muted-foreground">No exercise-specific starting BPM overrides yet.</p>
+                                    <p className="text-sm text-muted-foreground">{t("settingsPage.moduleTraining.technique.noOverrides")}</p>
                                 ) : (
                                     <div className="grid gap-2 sm:grid-cols-2">
                                         {techniqueStartingEntries.map(([exerciseId, bpm]) => (
                                             <div key={exerciseId} className="rounded-md border border-border bg-muted/20 px-3 py-2">
-                                                <p className="text-sm font-medium">{TECHNIQUE_EXERCISES[exerciseId]?.name ?? exerciseId}</p>
+                                                <p className="text-sm font-medium">
+                                                    {t(`technique.${exerciseId}.name`, TECHNIQUE_EXERCISES[exerciseId]?.name ?? exerciseId)}
+                                                </p>
                                                 <p className="type-mono text-muted-foreground">{bpm} BPM</p>
                                             </div>
                                         ))}
@@ -800,7 +834,7 @@ export default function Settings() {
                                         variant="outline"
                                         onClick={() => updateModuleSettings("technique", { startingBpm: {} })}
                                     >
-                                        Clear BPM Overrides
+                                        {t("settingsPage.moduleTraining.technique.clearBpmOverrides")}
                                     </Button>
                                     <Button
                                         variant="outline"
@@ -810,10 +844,10 @@ export default function Settings() {
                                             lastPracticedAt: {},
                                         })}
                                     >
-                                        Clear Technique Stats
+                                        {t("settingsPage.moduleTraining.technique.clearTechniqueStats")}
                                     </Button>
                                     <Button variant="outline" onClick={() => resetModuleSettings("technique")}>
-                                        Reset Technique Module
+                                        {t("settingsPage.moduleTraining.technique.resetTechniqueModule")}
                                     </Button>
                                 </div>
                             </div>
@@ -821,22 +855,22 @@ export default function Settings() {
 
                         {showModuleEar && (
                             <div className="space-y-4">
-                                <FormField id="ear-direction" label="Ear Training Default Direction">
+                                <FormField id="ear-direction" label={t("settingsPage.moduleTraining.ear.defaultDirection")}>
                                     <Select
                                         value={modules.earTraining.direction}
                                         onChange={(event) => updateModuleSettings("earTraining", {
                                             direction: event.target.value as typeof modules.earTraining.direction,
                                         })}
                                     >
-                                        <option value="ascending">Ascending</option>
-                                        <option value="descending">Descending</option>
-                                        <option value="harmonic">Harmonic</option>
+                                        <option value="ascending">{t("settingsPage.moduleTraining.ear.directions.ascending")}</option>
+                                        <option value="descending">{t("settingsPage.moduleTraining.ear.directions.descending")}</option>
+                                        <option value="harmonic">{t("settingsPage.moduleTraining.ear.directions.harmonic")}</option>
                                     </Select>
                                 </FormField>
                                 <div className="space-y-2">
                                     <div className="space-y-0.5">
-                                        <Label>Active Ear Intervals</Label>
-                                        <p className="text-sm text-muted-foreground">At least one interval must stay enabled.</p>
+                                        <Label>{t("settingsPage.moduleTraining.ear.activeIntervals")}</Label>
+                                        <p className="text-sm text-muted-foreground">{t("settingsPage.moduleTraining.ear.activeIntervalsHint")}</p>
                                     </div>
                                     <div className="grid grid-cols-4 gap-2 sm:grid-cols-7">
                                         {EAR_INTERVAL_OPTIONS.map((interval) => {
@@ -863,14 +897,16 @@ export default function Settings() {
                                         })}
                                     </div>
                                 </div>
-                                <Button variant="outline" onClick={() => resetModuleSettings("earTraining")}>Reset Ear Defaults</Button>
+                                <Button variant="outline" onClick={() => resetModuleSettings("earTraining")}>
+                                    {t("settingsPage.moduleTraining.ear.resetDefaults")}
+                                </Button>
                             </div>
                         )}
 
                         {showModuleRhythm && (
                             <div className="space-y-4">
                                 <div className="flex justify-between">
-                                    <Label>Rhythm Input Latency Compensation</Label>
+                                    <Label>{t("settingsPage.moduleTraining.rhythm.inputLatency")}</Label>
                                     <span className="text-sm text-muted-foreground">{rhythmInputLatencyMs} ms</span>
                                 </div>
                                 <Slider
@@ -881,10 +917,10 @@ export default function Settings() {
                                     onValueChange={([value]) => setRhythmInputLatencyMs(clampInputLatency(value))}
                                 />
                                 <p className="text-xs text-muted-foreground">
-                                    Increase this if taps are consistently marked late despite feeling on-beat.
+                                    {t("settingsPage.moduleTraining.rhythm.inputLatencyHint")}
                                 </p>
                                 <Button variant="outline" onClick={() => setRhythmInputLatencyMs(0)}>
-                                    Reset Latency to 0 ms
+                                    {t("settingsPage.moduleTraining.rhythm.resetLatency")}
                                 </Button>
                             </div>
                         )}
@@ -895,17 +931,17 @@ export default function Settings() {
 
             {activeScope === "data" && showData && (
             <SectionCollapse
-                title="Data"
-                summary="Export · Import · Reset"
+                title={t("settingsPage.data.sectionTitle")}
+                summary={t("settingsPage.data.sectionSummary")}
             >
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Database className="h-5 w-5" />
-                            Progress Backup
+                            {t("settingsPage.data.cardTitle")}
                         </CardTitle>
                         <CardDescription>
-                            Export your practice data to JSON and import it later.
+                            {t("settingsPage.data.cardDescription")}
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -918,17 +954,17 @@ export default function Settings() {
                         />
                         <div className="grid gap-2 sm:grid-cols-3">
                             <Button variant="outline" onClick={handleExportProgress}>
-                                Export Progress
+                                {t("settingsPage.data.export")}
                             </Button>
                             <Button variant="outline" onClick={() => handleImportProgressTrigger("merge")}>
-                                Import (Merge)
+                                {t("settingsPage.data.importMerge")}
                             </Button>
                             <Button variant="outline" onClick={() => handleImportProgressTrigger("replace")}>
-                                Import (Replace)
+                                {t("settingsPage.data.importReplace")}
                             </Button>
                         </div>
                         <p className="text-xs text-muted-foreground">
-                            Merge keeps current progress and adds imported data. Replace overwrites all current progress.
+                            {t("settingsPage.data.mergeVsReplace")}
                         </p>
                     </CardContent>
                 </Card>
@@ -937,15 +973,15 @@ export default function Settings() {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-destructive">
                             <RotateCcw className="h-5 w-5" />
-                            Danger Zone
+                            {t("settingsPage.data.dangerTitle")}
                         </CardTitle>
                         <CardDescription>
-                            Permanent actions affecting your learning history.
+                            {t("settingsPage.data.dangerDescription")}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <Button variant="destructive" onClick={handleResetProgress}>
-                            Reset All Progress Data
+                            {t("settingsPage.data.resetAllProgress")}
                         </Button>
                     </CardContent>
                 </Card>
@@ -954,17 +990,17 @@ export default function Settings() {
 
             {activeScope === "data" && showHelp && (
             <SectionCollapse
-                title="Help"
-                summary="FAQ · Blog · Contact · Legacy v1"
+                title={t("settingsPage.help.sectionTitle")}
+                summary={t("settingsPage.help.sectionSummary")}
             >
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <HandHeart className="h-5 w-5" />
-                            Help & Support
+                            {t("settingsPage.help.cardTitle")}
                         </CardTitle>
                         <CardDescription>
-                            Quick access to FAQ, updates, and support.
+                            {t("settingsPage.help.cardDescription")}
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -973,7 +1009,7 @@ export default function Settings() {
                                 <a href={EXTERNAL_LINKS.faq} target="_blank" rel="noreferrer noopener">
                                     <span className="inline-flex items-center gap-2">
                                         <CircleHelp className="h-4 w-4" />
-                                        FAQ
+                                        {t("settingsPage.help.faq")}
                                     </span>
                                     <ExternalLink className="h-3.5 w-3.5" />
                                 </a>
@@ -982,7 +1018,7 @@ export default function Settings() {
                                 <a href={EXTERNAL_LINKS.blog} target="_blank" rel="noreferrer noopener">
                                     <span className="inline-flex items-center gap-2">
                                         <Newspaper className="h-4 w-4" />
-                                        Blog
+                                        {t("settingsPage.help.blog")}
                                     </span>
                                     <ExternalLink className="h-3.5 w-3.5" />
                                 </a>
@@ -991,7 +1027,7 @@ export default function Settings() {
                                 <a href={EXTERNAL_LINKS.contactMailto}>
                                     <span className="inline-flex items-center gap-2">
                                         <Mail className="h-4 w-4" />
-                                        Contact
+                                        {t("settingsPage.help.contact")}
                                     </span>
                                     <ExternalLink className="h-3.5 w-3.5" />
                                 </a>
@@ -1005,7 +1041,7 @@ export default function Settings() {
                                 >
                                     <span className="inline-flex items-center gap-2">
                                         <History className="h-4 w-4" />
-                                        Legacy v1
+                                        {t("settingsPage.help.legacyV1")}
                                     </span>
                                     <ExternalLink className="h-3.5 w-3.5" />
                                 </a>
@@ -1014,7 +1050,7 @@ export default function Settings() {
                         <Button asChild className="control-btn--primary justify-start">
                             <a href={EXTERNAL_LINKS.buyMeCoffee} target="_blank" rel="noreferrer noopener">
                                 <Coffee className="h-4 w-4" />
-                                Buy me a coffee
+                                {t("settingsPage.help.buyCoffee")}
                             </a>
                         </Button>
                     </CardContent>
@@ -1025,24 +1061,36 @@ export default function Settings() {
             {activeScope === "global" && !hasVisibleGlobal && (
                 <Card>
                     <CardContent className="py-10 text-center">
-                        <p className="type-body text-muted-foreground">No global settings match "{searchQuery.trim()}".</p>
-                        <Button variant="outline" className="mt-4" onClick={() => setSearchQuery("")}>Clear Search</Button>
+                        <p className="type-body text-muted-foreground">
+                            {t("settingsPage.empty.global", { query: searchQuery.trim() })}
+                        </p>
+                        <Button variant="outline" className="mt-4" onClick={() => setSearchQuery("")}>
+                            {t("settingsPage.empty.clearSearch")}
+                        </Button>
                     </CardContent>
                 </Card>
             )}
             {activeScope === "modules" && !hasVisibleModules && (
                 <Card>
                     <CardContent className="py-10 text-center">
-                        <p className="type-body text-muted-foreground">No module settings match "{searchQuery.trim()}".</p>
-                        <Button variant="outline" className="mt-4" onClick={() => setSearchQuery("")}>Clear Search</Button>
+                        <p className="type-body text-muted-foreground">
+                            {t("settingsPage.empty.modules", { query: searchQuery.trim() })}
+                        </p>
+                        <Button variant="outline" className="mt-4" onClick={() => setSearchQuery("")}>
+                            {t("settingsPage.empty.clearSearch")}
+                        </Button>
                     </CardContent>
                 </Card>
             )}
             {activeScope === "data" && !hasVisibleData && (
                 <Card>
                     <CardContent className="py-10 text-center">
-                        <p className="type-body text-muted-foreground">No data/support settings match "{searchQuery.trim()}".</p>
-                        <Button variant="outline" className="mt-4" onClick={() => setSearchQuery("")}>Clear Search</Button>
+                        <p className="type-body text-muted-foreground">
+                            {t("settingsPage.empty.data", { query: searchQuery.trim() })}
+                        </p>
+                        <Button variant="outline" className="mt-4" onClick={() => setSearchQuery("")}>
+                            {t("settingsPage.empty.clearSearch")}
+                        </Button>
                     </CardContent>
                 </Card>
             )}

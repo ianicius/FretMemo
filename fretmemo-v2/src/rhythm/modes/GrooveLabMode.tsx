@@ -31,6 +31,7 @@ import { trackEvent } from "@/lib/analytics";
 import { useProgressStore } from "@/stores/useProgressStore";
 import { useRhythmDojoStore } from "@/stores/useRhythmDojoStore";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface GrooveLabSettings {
     bpm: number;
@@ -166,12 +167,14 @@ function scheduleGrooveDrums(clock: RhythmClock, preset: GroovePreset, step: Sch
 }
 
 export function GrooveLabMode() {
+    const { t } = useTranslation();
     const clockRef = useRef(new RhythmClock());
     const schedulerRef = useRef<MetronomeScheduler | null>(null);
     const expectedStepsRef = useRef<ExpectedGrooveStep[]>([]);
     const evaluationsRef = useRef<TapEvaluation[]>([]);
     const extrasRef = useRef(0);
     const finishTimerRef = useRef<number | null>(null);
+    const scheduleTokenRef = useRef(0);
     const startedAtRef = useRef<number | null>(null);
     const statusRef = useRef<SessionStatus>("idle");
     const phaseRef = useRef<GroovePhase>("play");
@@ -198,6 +201,13 @@ export function GrooveLabMode() {
         () => GROOVE_PRESETS.find((preset) => preset.id === settings.presetId) ?? GROOVE_PRESETS[0],
         [settings.presetId],
     );
+    const activePresetTitle = t(`rhythm.grooveLab.presets.${activePreset.id}.title`, activePreset.title);
+    const activePresetGenre = t(`rhythm.grooveLab.presets.${activePreset.id}.genre`, activePreset.genre);
+    const activePresetDescription = t(
+        `rhythm.grooveLab.presets.${activePreset.id}.description`,
+        activePreset.description,
+    );
+    const activePresetFeel = t(`rhythm.grooveLab.feels.${activePreset.feel}`, activePreset.feel);
     const responseStartBar = useMemo(
         () => (settings.echoMode ? Math.max(1, Math.floor(settings.bars / 2)) : 0),
         [settings.bars, settings.echoMode],
@@ -232,6 +242,7 @@ export function GrooveLabMode() {
     }, [sessionMode]);
 
     const stopScheduler = useCallback(() => {
+        scheduleTokenRef.current += 1;
         if (finishTimerRef.current !== null) {
             window.clearTimeout(finishTimerRef.current);
             finishTimerRef.current = null;
@@ -334,6 +345,7 @@ export function GrooveLabMode() {
         evaluationsRef.current = [];
         extrasRef.current = 0;
         startedAtRef.current = Date.now();
+        const scheduleToken = scheduleTokenRef.current;
 
         setSummary(null);
         setLastEvaluation(null);
@@ -352,10 +364,9 @@ export function GrooveLabMode() {
             bpm: settings.bpm,
             timeSignatureTop: activePreset.timeSignatureTop,
             subdivision: activePreset.subdivision,
+            maxSteps: mode === "scored" ? totalSteps : undefined,
             clickEnabled: settings.clickEnabled,
             onStep: (step) => {
-                if (mode === "scored" && step.index >= totalSteps) return;
-
                 const effectiveBarIndex = mode === "practice"
                     ? step.barIndex % settings.bars
                     : step.barIndex;
@@ -383,6 +394,7 @@ export function GrooveLabMode() {
 
                 const delayMs = clockRef.current.toDelayMs(step.time);
                 window.setTimeout(() => {
+                    if (scheduleTokenRef.current !== scheduleToken) return;
                     setPlayheadStep(slotIndex);
                     setCurrentBar(effectiveBarIndex + 1);
                     const nextPhase: GroovePhase = isResponseBar ? "play" : "listen";
@@ -420,7 +432,6 @@ export function GrooveLabMode() {
     }, [
         activePreset,
         checkAndUpdateStreak,
-        finalizeSession,
         inputLatencyMs,
         responseBars,
         responseStartBar,
@@ -440,20 +451,25 @@ export function GrooveLabMode() {
 
         const rawTapTime = clockRef.current.now();
         const tapTime = applyInputLatencyCompensation(rawTapTime, inputLatencyMs);
-        const candidate = expectedStepsRef.current
+        const nearestStep = expectedStepsRef.current
             .filter((step) => !step.matched)
             .map((step) => ({
                 step,
+                offsetSec: tapTime - step.time,
                 absOffsetSec: Math.abs(tapTime - step.time),
             }))
-            .filter((item) => item.absOffsetSec <= MATCH_WINDOW_SEC)
             .sort((left, right) => left.absOffsetSec - right.absOffsetSec)[0];
+
+        const candidate = nearestStep && nearestStep.absOffsetSec <= MATCH_WINDOW_SEC
+            ? nearestStep
+            : null;
 
         if (!candidate) {
             extrasRef.current += 1;
+            const offsetMs = nearestStep ? nearestStep.offsetSec * 1000 : 0;
             const extraEvaluation: TapEvaluation = {
-                offsetMs: 0,
-                absOffsetMs: 0,
+                offsetMs,
+                absOffsetMs: Math.abs(offsetMs),
                 rating: "miss",
                 isHit: false,
                 directionCorrect: true,
@@ -540,14 +556,14 @@ export function GrooveLabMode() {
             <div className="space-y-4">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Groove Lab</CardTitle>
+                        <CardTitle>{t("rhythm.grooveLab.title")}</CardTitle>
                         <CardDescription>
-                            Play inside real groove feel. Use Echo Mode to test internal timing memory.
+                            {t("rhythm.grooveLab.description")}
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid gap-3 sm:grid-cols-2">
-                            <FormField id="groove-lab-preset" label="Preset">
+                            <FormField id="groove-lab-preset" label={t("rhythm.grooveLab.presetLabel")}>
                                 <Select
                                     value={settings.presetId}
                                     onChange={(event) =>
@@ -559,7 +575,8 @@ export function GrooveLabMode() {
                                 >
                                     {GROOVE_PRESETS.map((preset) => (
                                         <option key={preset.id} value={preset.id}>
-                                            {preset.title} ({preset.feel})
+                                            {t(`rhythm.grooveLab.presets.${preset.id}.title`, preset.title)} (
+                                            {t(`rhythm.grooveLab.feels.${preset.feel}`, preset.feel)})
                                         </option>
                                     ))}
                                 </Select>
@@ -576,7 +593,7 @@ export function GrooveLabMode() {
                                     }))
                                 }
                             />
-                            <FormField id="groove-lab-bars" label="Bars">
+                            <FormField id="groove-lab-bars" label={t("rhythm.common.barsLabel")}>
                                 <Select
                                     value={settings.bars}
                                     onChange={(event) =>
@@ -592,7 +609,7 @@ export function GrooveLabMode() {
                                     <option value={16}>16</option>
                                 </Select>
                             </FormField>
-                            <FormField id="groove-lab-click" label="Metronome Click">
+                            <FormField id="groove-lab-click" label={t("rhythm.grooveLab.metronomeClickLabel")}>
                                 <Select
                                     value={settings.clickEnabled ? "on" : "off"}
                                     onChange={(event) =>
@@ -602,22 +619,22 @@ export function GrooveLabMode() {
                                         }))
                                     }
                                 >
-                                    <option value="on">On</option>
-                                    <option value="off">Off</option>
+                                    <option value="on">{t("rhythm.common.on")}</option>
+                                    <option value="off">{t("rhythm.common.off")}</option>
                                 </Select>
                             </FormField>
                         </div>
 
                         <div className="rounded-lg border border-border bg-muted/20 p-3 text-xs text-muted-foreground space-y-1">
-                            <p className="font-semibold text-foreground">{activePreset.title} · {activePreset.genre}</p>
-                            <p>{activePreset.description}</p>
+                            <p className="font-semibold text-foreground">{activePresetTitle} · {activePresetGenre}</p>
+                            <p>{activePresetDescription}</p>
                         </div>
 
                         <div className="flex items-center justify-between rounded-md border border-border bg-muted/20 px-3 py-2">
                             <div>
-                                <Label htmlFor="groove-lab-echo">Echo Mode</Label>
+                                <Label htmlFor="groove-lab-echo">{t("rhythm.grooveLab.echoModeLabel")}</Label>
                                 <p className="text-xs text-muted-foreground">
-                                    First half listen, second half replay in silence.
+                                    {t("rhythm.grooveLab.echoModeDesc")}
                                 </p>
                             </div>
                             <Switch
@@ -645,18 +662,18 @@ export function GrooveLabMode() {
                             options={[
                                 {
                                     value: "scored",
-                                    label: "Scored",
-                                    description: "Records hits, misses and direction accuracy.",
+                                    label: t("rhythm.common.scored"),
+                                    description: t("rhythm.grooveLab.sessionScoredDesc"),
                                 },
                                 {
                                     value: "practice",
-                                    label: "Practice",
-                                    description: "Continuous groove playback for free-form guitar work.",
+                                    label: t("rhythm.common.practice"),
+                                    description: t("rhythm.grooveLab.sessionPracticeDesc"),
                                 },
                             ]}
                         />
                         <SessionStartActions
-                            primaryLabel={sessionMode === "scored" ? "Start Scored Session" : "Practice with Guitar"}
+                            primaryLabel={sessionMode === "scored" ? t("rhythm.common.startScored") : t("rhythm.common.practiceWithGuitar")}
                             onPrimary={() => void startSessionWithMode(sessionMode)}
                         />
                     </CardContent>
@@ -669,16 +686,20 @@ export function GrooveLabMode() {
         <div className="space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm">
                 <div className="space-y-0.5">
-                    <p className="font-semibold text-primary">{activePreset.title}</p>
+                    <p className="font-semibold text-primary">{activePresetTitle}</p>
                     <p className="text-xs text-muted-foreground">
-                        {activePreset.genre} · {activePreset.feel} · {settings.bpm} BPM
+                        {t("rhythm.grooveLab.headerMeta", {
+                            genre: activePresetGenre,
+                            feel: activePresetFeel,
+                            bpm: settings.bpm,
+                        })}
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
                     <Badge variant="outline">
-                        Bar {Math.min(settings.bars, currentBar)}/{settings.bars}
+                        {t("rhythm.grooveLab.barCounter", { current: Math.min(settings.bars, currentBar), total: settings.bars })}
                     </Badge>
-                    {sessionMode === "practice" && <Badge variant="outline">Practice</Badge>}
+                    {sessionMode === "practice" && <Badge variant="outline">{t("rhythm.common.practice")}</Badge>}
                     {settings.echoMode && (
                         <Badge
                             variant="outline"
@@ -688,7 +709,7 @@ export function GrooveLabMode() {
                                     : "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
                             )}
                         >
-                            {phase === "listen" ? "Listen" : "Replay"}
+                            {phase === "listen" ? t("rhythm.grooveLab.phaseListen") : t("rhythm.grooveLab.phaseReplay")}
                         </Badge>
                     )}
                 </div>
@@ -698,7 +719,7 @@ export function GrooveLabMode() {
 
             {settings.echoMode && phase === "listen" && (
                 <div className="rounded-lg border border-amber-500/35 bg-amber-500/10 px-3 py-2 text-xs font-medium text-amber-700 dark:text-amber-300">
-                    Listen phase: internalize the groove. Input opens in replay phase.
+                    {t("rhythm.grooveLab.listenPhaseHint")}
                 </div>
             )}
 
@@ -713,26 +734,30 @@ export function GrooveLabMode() {
                 </>
             ) : (
                 <div className="rounded-lg border border-primary/35 bg-primary/10 px-3 py-2 text-xs font-medium text-primary">
-                    Practice mode: play this groove on guitar. The app will run continuously until you stop it.
+                    {t("rhythm.grooveLab.practiceHint")}
                 </div>
             )}
 
             {summary && (
                 <SessionSummaryCard
-                    description={`Score ${summary.score} · Accuracy ${summary.accuracy}% · Direction ${summary.directionAccuracy}%`}
+                    description={t("rhythm.grooveLab.summaryDescription", {
+                        score: summary.score,
+                        accuracy: summary.accuracy,
+                        direction: summary.directionAccuracy,
+                    })}
                     metrics={[
-                        { label: "Hits", value: summary.hits },
-                        { label: "Misses", value: summary.misses },
-                        { label: "Extras", value: summary.extras },
-                        { label: "Avg offset", value: `${summary.avgOffsetMs}ms` },
-                        { label: "Direction", value: `${summary.directionAccuracy}%` },
+                        { label: t("rhythm.common.metrics.hits"), value: summary.hits },
+                        { label: t("rhythm.common.metrics.misses"), value: summary.misses },
+                        { label: t("rhythm.common.metrics.extras"), value: summary.extras },
+                        { label: t("rhythm.common.metrics.avgOffset"), value: `${summary.avgOffsetMs}ms` },
+                        { label: t("rhythm.common.metrics.direction"), value: `${summary.directionAccuracy}%` },
                     ]}
                     primaryAction={{
-                        label: "Retry",
+                        label: t("rhythm.common.retry"),
                         onClick: () => void startSessionWithMode("scored"),
                     }}
                     secondaryAction={{
-                        label: "Edit Settings",
+                        label: t("rhythm.common.editSettings"),
                         onClick: () => {
                             setStatus("idle");
                             statusRef.current = "idle";
@@ -744,7 +769,7 @@ export function GrooveLabMode() {
             {status === "running" && (
                 <SessionStopButton
                     onStop={sessionMode === "scored" ? finalizeSession : stopPracticeSession}
-                    label={sessionMode === "scored" ? "Stop" : "Stop Practice"}
+                    label={sessionMode === "scored" ? t("rhythm.common.stop") : t("rhythm.common.stopPractice")}
                 />
             )}
         </div>

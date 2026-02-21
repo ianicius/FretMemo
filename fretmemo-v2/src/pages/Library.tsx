@@ -9,7 +9,7 @@ import { ExerciseCard } from "@/components/ui/exercise-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
 import { Compass, Drum, Ear, Guitar, Music2, Sparkles, Star, Target } from "lucide-react";
-import { getLevelProgress } from "@/lib/progression";
+import { useTranslation } from "react-i18next";
 
 type TechniqueDifficulty = "beginner" | "intermediate" | "advanced";
 type PracticeMode = "fretboardToNote" | "tabToNote" | "noteToTab" | "playNotes" | "playTab";
@@ -182,6 +182,13 @@ const RHYTHM_EXERCISES: RhythmExerciseItem[] = [
     { id: "groove-lab", title: "Groove Lab", difficulty: "intermediate", priority: 4, status: "active" },
 ];
 
+const RHYTHM_MODE_TITLE_KEYS: Record<RhythmModeId, string> = {
+    "tap-beat": "rhythmModes.tapBeat",
+    "strum-patterns": "rhythmModes.strumPatterns",
+    "rhythm-reading": "rhythmModes.rhythmReading",
+    "groove-lab": "rhythmModes.grooveLab",
+};
+
 function getMasteryTargetBpm(exerciseId: string, difficulty: TechniqueDifficulty): number {
     if (EXERCISE_MASTERY_TARGET_BPM[exerciseId]) {
         return EXERCISE_MASTERY_TARGET_BPM[exerciseId];
@@ -215,6 +222,7 @@ function getAverageMastery(items: Array<{ mastery: number }>): number {
 }
 
 export default function Library() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
     const navigationType = useNavigationType();
@@ -226,9 +234,6 @@ export default function Library() {
     const maxPins = usePinnedExercisesStore((state) => state.maxPins);
     const togglePinned = usePinnedExercisesStore((state) => state.togglePinned);
     const hasSessionHistory = sessionHistory.length > 0;
-    const storeTotalXP = useProgressStore((state) => state.totalXP);
-    const resolvedXp = storeTotalXP ?? totalCorrect * 10;
-    const { level: userLevel } = getLevelProgress(resolvedXp);
     const scrollContainerRef = useRef<HTMLElement | null>(null);
     const hasRestoredScrollRef = useRef(false);
     const [sectionsOpen, setSectionsOpen] = useState<TrainSectionsOpenState>(() => {
@@ -321,18 +326,18 @@ export default function Library() {
     const drillCards = useMemo<CatalogCard[]>(() => {
         const cards = DRILLS.map((drill, index) => ({
             id: drill.id,
-            title: drill.title,
+            title: t(`practice.modes.${drill.id}`, drill.title),
             difficulty: drill.difficulty,
             priority: drill.priority,
             source: drill.source,
             mastery: Math.max(0, overallAccuracy - index * 8),
             isNew: !hasSessionHistory,
             minLevel: drill.minLevel,
-            isLocked: drill.minLevel ? drill.minLevel > userLevel : false,
+            isLocked: false, // drill.minLevel ? drill.minLevel > userLevel : false,
         }));
 
         return sortCatalogCards(cards);
-    }, [hasSessionHistory, overallAccuracy, userLevel]);
+    }, [hasSessionHistory, overallAccuracy, t]);
 
     const techniqueCards = useMemo(() => {
         const bestBpm = techniqueSettings.bestBpm ?? {};
@@ -348,20 +353,22 @@ export default function Library() {
 
             return {
                 ...exercise,
+                title: t(`technique.${exercise.id}.name`, exercise.title),
                 mastery,
                 isNew: sessionCount === 0 && mastery === 0,
             };
         });
 
         return sortCatalogCards(cards);
-    }, [techniqueSettings.bestBpm, techniqueSettings.sessionsCompleted]);
+    }, [techniqueSettings.bestBpm, techniqueSettings.sessionsCompleted, t]);
 
     const rhythmCards = useMemo(() => {
         const cards = RHYTHM_EXERCISES.map((mode) => {
             const modeStats = rhythmModeStats[mode.id];
             const sessions = modeStats?.sessions ?? 0;
             const modeMastery = getRhythmModeMastery(mode.id);
-            const title = mode.status === "coming-soon" ? `${mode.title} (Soon)` : mode.title;
+            const translatedTitle = t(RHYTHM_MODE_TITLE_KEYS[mode.id], mode.title);
+            const title = mode.status === "coming-soon" ? `${translatedTitle} (${t("library.soon")})` : translatedTitle;
 
             return {
                 ...mode,
@@ -372,7 +379,7 @@ export default function Library() {
         });
 
         return sortCatalogCards(cards);
-    }, [getRhythmModeMastery, rhythmModeStats]);
+    }, [getRhythmModeMastery, rhythmModeStats, t]);
 
     const pinnedSet = useMemo(() => new Set(pinnedIds), [pinnedIds]);
     const isPinLimitReached = pinnedIds.length >= maxPins;
@@ -395,7 +402,7 @@ export default function Library() {
                         isNew: drill.isNew,
                         source: drill.source,
                         minLevel: drill.minLevel,
-                        isLocked: (drill.minLevel && drill.minLevel > userLevel) ? true : false,
+                        isLocked: false, // (drill.minLevel && drill.minLevel > userLevel) ? true : false,
                     };
                 }
 
@@ -421,31 +428,31 @@ export default function Library() {
                         mastery: rhythm.mastery,
                         isNew: rhythm.isNew,
                         minLevel: rhythm.minLevel,
-                        isLocked: (rhythm.minLevel && rhythm.minLevel > userLevel) ? true : false,
+                        isLocked: false, // (rhythm.minLevel && rhythm.minLevel > userLevel) ? true : false,
                     };
                 }
 
                 return null;
             })
             .filter((card): card is NonNullable<typeof card> => Boolean(card));
-    }, [drillCards, pinnedIds, rhythmCards, techniqueCards, userLevel]);
+    }, [drillCards, pinnedIds, rhythmCards, techniqueCards]);
 
     const drillSummary = useMemo(
-        () => `${drillCards.length} modes • ${getAverageMastery(drillCards)}% avg`,
-        [drillCards]
+        () => t('library.summary.modes', { count: drillCards.length, avg: getAverageMastery(drillCards) }),
+        [drillCards, t]
     );
     const techniqueSummary = useMemo(
-        () => `${techniqueCards.length} exercises • ${getAverageMastery(techniqueCards)}% avg`,
-        [techniqueCards]
+        () => t('library.summary.exercises', { count: techniqueCards.length, avg: getAverageMastery(techniqueCards) }),
+        [techniqueCards, t]
     );
     const rhythmSummary = useMemo(
-        () => `${rhythmCards.length} modes • ${getAverageMastery(rhythmCards)}% avg`,
-        [rhythmCards]
+        () => t('library.summary.modes', { count: rhythmCards.length, avg: getAverageMastery(rhythmCards) }),
+        [rhythmCards, t]
     );
     const pinnedSummary = useMemo(() => {
         const avg = getAverageMastery(pinnedCards);
-        return `${pinnedCards.length}/${maxPins} • ${avg}% avg`;
-    }, [maxPins, pinnedCards]);
+        return t('library.summary.pinned', { count: pinnedCards.length, max: maxPins, avg });
+    }, [maxPins, pinnedCards, t]);
 
     const openPracticeSetup = (mode: PracticeMode, source: string) => {
         navigate("/practice", {
@@ -460,22 +467,22 @@ export default function Library() {
     return (
         <div className="space-y-5 pb-8">
             <div>
-                <h1 className="type-display">Train</h1>
+                <h1 className="type-display">{t('library.title')}</h1>
                 <p className="mt-1 text-muted-foreground">
-                    One catalog for fretboard drills, technique, theory, ear training, and rhythm.
+                    {t('library.description')}
                 </p>
             </div>
 
             <SectionCollapse
-                title="Pinned"
+                title={t('library.pinned')}
                 summary={pinnedSummary}
                 open={sectionsOpen.pinned}
                 onOpenChange={(nextOpen) => handleSectionOpenChange("pinned", nextOpen)}
             >
                 {pinnedCards.length === 0 ? (
                     <EmptyState
-                        title="No pinned exercises yet"
-                        description="Pin your favorite drills with the star icon for quick access."
+                        title={t("library.noPinnedTitle")}
+                        description={t("library.noPinnedDesc")}
                     />
                 ) : (
                     <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 min-[390px]:gap-2.5 min-[412px]:gap-3 lg:grid-cols-3">
@@ -485,8 +492,8 @@ export default function Library() {
                                     type="button"
                                     className="absolute right-2 top-2 z-10 inline-flex h-7 w-7 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-primary shadow-sm transition hover:bg-primary/20"
                                     onClick={() => togglePinned(card.id)}
-                                    aria-label={`Unpin ${card.title}`}
-                                    title="Unpin"
+                                    aria-label={t("library.unpinAria", { title: card.title })}
+                                    title={t("library.unpin")}
                                 >
                                     <Star className="h-3.5 w-3.5 fill-current" />
                                 </button>
@@ -514,7 +521,7 @@ export default function Library() {
             </SectionCollapse>
 
             <SectionCollapse
-                title="Fretboard Drills"
+                title={t('library.drills')}
                 summary={drillSummary}
                 open={sectionsOpen.drills}
                 onOpenChange={(nextOpen) => handleSectionOpenChange("drills", nextOpen)}
@@ -527,13 +534,17 @@ export default function Library() {
                                 className="absolute right-2 top-2 z-10 inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-background/95 text-muted-foreground shadow-sm transition hover:border-primary/40 hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
                                 onClick={() => togglePinned(drill.id as PinnedExerciseId)}
                                 disabled={!pinnedSet.has(drill.id as PinnedExerciseId) && isPinLimitReached}
-                                aria-label={pinnedSet.has(drill.id as PinnedExerciseId) ? `Unpin ${drill.title}` : `Pin ${drill.title}`}
+                                aria-label={
+                                    pinnedSet.has(drill.id as PinnedExerciseId)
+                                        ? t("library.unpinAria", { title: drill.title })
+                                        : t("library.pinAria", { title: drill.title })
+                                }
                                 title={
                                     !pinnedSet.has(drill.id as PinnedExerciseId) && isPinLimitReached
-                                        ? `Pin limit reached (${maxPins})`
+                                        ? t("library.pinLimitReached", { max: maxPins })
                                         : pinnedSet.has(drill.id as PinnedExerciseId)
-                                            ? "Unpin"
-                                            : "Pin"
+                                            ? t("library.unpin")
+                                            : t("library.pin")
                                 }
                             >
                                 <Star className={cn("h-3.5 w-3.5", pinnedSet.has(drill.id as PinnedExerciseId) && "fill-current text-primary")} />
@@ -545,6 +556,8 @@ export default function Library() {
                                 icon={Target}
                                 variant="catalog"
                                 isNew={drill.isNew}
+                                isLocked={drill.isLocked}
+                                minLevel={drill.minLevel}
                                 onClick={() => openPracticeSetup(drill.id as PracticeMode, drill.source)}
                             />
                         </div>
@@ -553,7 +566,7 @@ export default function Library() {
             </SectionCollapse>
 
             <SectionCollapse
-                title="Technique"
+                title={t('library.technique')}
                 summary={techniqueSummary}
                 open={sectionsOpen.technique}
                 onOpenChange={(nextOpen) => handleSectionOpenChange("technique", nextOpen)}
@@ -566,13 +579,17 @@ export default function Library() {
                                 className="absolute right-2 top-2 z-10 inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-background/95 text-muted-foreground shadow-sm transition hover:border-primary/40 hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
                                 onClick={() => togglePinned(exercise.id as PinnedExerciseId)}
                                 disabled={!pinnedSet.has(exercise.id as PinnedExerciseId) && isPinLimitReached}
-                                aria-label={pinnedSet.has(exercise.id as PinnedExerciseId) ? `Unpin ${exercise.title}` : `Pin ${exercise.title}`}
+                                aria-label={
+                                    pinnedSet.has(exercise.id as PinnedExerciseId)
+                                        ? t("library.unpinAria", { title: exercise.title })
+                                        : t("library.pinAria", { title: exercise.title })
+                                }
                                 title={
                                     !pinnedSet.has(exercise.id as PinnedExerciseId) && isPinLimitReached
-                                        ? `Pin limit reached (${maxPins})`
+                                        ? t("library.pinLimitReached", { max: maxPins })
                                         : pinnedSet.has(exercise.id as PinnedExerciseId)
-                                            ? "Unpin"
-                                            : "Pin"
+                                            ? t("library.unpin")
+                                            : t("library.pin")
                                 }
                             >
                                 <Star className={cn("h-3.5 w-3.5", pinnedSet.has(exercise.id as PinnedExerciseId) && "fill-current text-primary")} />
@@ -592,14 +609,14 @@ export default function Library() {
             </SectionCollapse>
 
             <SectionCollapse
-                title="Theory"
-                summary="6 tools"
+                title={t('library.theory')}
+                summary={t("library.theorySummary", { count: 6 })}
                 open={sectionsOpen.theory}
                 onOpenChange={(nextOpen) => handleSectionOpenChange("theory", nextOpen)}
             >
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     <ExerciseCard
-                        title="Scale Explorer"
+                        title={t("theory.page.tools.scaleExplorer")}
                         difficulty="beginner"
                         mastery={0}
                         icon={Music2}
@@ -607,7 +624,7 @@ export default function Library() {
                         onClick={() => navigate("/theory/scales")}
                     />
                     <ExerciseCard
-                        title="Circle of Fifths"
+                        title={t("theory.page.tools.circleOfFifths")}
                         difficulty="intermediate"
                         mastery={0}
                         icon={Compass}
@@ -615,7 +632,7 @@ export default function Library() {
                         onClick={() => navigate("/theory/circle")}
                     />
                     <ExerciseCard
-                        title="CAGED System"
+                        title={t("theory.page.tools.cagedSystem")}
                         difficulty="intermediate"
                         mastery={0}
                         icon={Guitar}
@@ -623,7 +640,7 @@ export default function Library() {
                         onClick={() => navigate("/theory/caged")}
                     />
                     <ExerciseCard
-                        title="Triads"
+                        title={t("theory.page.tools.triads")}
                         difficulty="intermediate"
                         mastery={0}
                         icon={Guitar}
@@ -631,7 +648,7 @@ export default function Library() {
                         onClick={() => navigate("/theory/triads")}
                     />
                     <ExerciseCard
-                        title="Chord Library"
+                        title={t("theory.page.tools.chordLibrary")}
                         difficulty="beginner"
                         mastery={0}
                         icon={Music2}
@@ -639,7 +656,7 @@ export default function Library() {
                         onClick={() => navigate("/theory/chords")}
                     />
                     <ExerciseCard
-                        title="Interval Trainer"
+                        title={t("theory.page.tools.intervalTrainer")}
                         difficulty="intermediate"
                         mastery={0}
                         icon={Target}
@@ -650,14 +667,14 @@ export default function Library() {
             </SectionCollapse>
 
             <SectionCollapse
-                title="Ear Training"
-                summary="4 modes"
+                title={t('library.ear')}
+                summary={t("library.earSummary", { count: 4 })}
                 open={sectionsOpen.ear}
                 onOpenChange={(nextOpen) => handleSectionOpenChange("ear", nextOpen)}
             >
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     <ExerciseCard
-                        title="Sound → Fretboard"
+                        title={t("ear.page.modes.soundToFretboard")}
                         difficulty="beginner"
                         mastery={0}
                         icon={Ear}
@@ -665,7 +682,7 @@ export default function Library() {
                         onClick={() => navigate("/ear-training/sound-to-fret")}
                     />
                     <ExerciseCard
-                        title="Interval Recognition"
+                        title={t("ear.page.modes.intervalRecognition")}
                         difficulty="intermediate"
                         mastery={0}
                         icon={Ear}
@@ -673,7 +690,7 @@ export default function Library() {
                         onClick={() => navigate("/ear-training/intervals")}
                     />
                     <ExerciseCard
-                        title="Chord Quality"
+                        title={t("ear.page.modes.chordQuality")}
                         difficulty="intermediate"
                         mastery={0}
                         icon={Ear}
@@ -681,7 +698,7 @@ export default function Library() {
                         onClick={() => navigate("/ear-training/chord-quality")}
                     />
                     <ExerciseCard
-                        title="Functional Ear"
+                        title={t("ear.page.modes.functionalEar")}
                         difficulty="intermediate"
                         mastery={0}
                         icon={Ear}
@@ -692,7 +709,7 @@ export default function Library() {
             </SectionCollapse>
 
             <SectionCollapse
-                title="Rhythm Dojo"
+                title={t('library.rhythm')}
                 summary={rhythmSummary}
                 open={sectionsOpen.rhythm}
                 onOpenChange={(nextOpen) => handleSectionOpenChange("rhythm", nextOpen)}
@@ -705,13 +722,17 @@ export default function Library() {
                                 className="absolute right-2 top-2 z-10 inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-background/95 text-muted-foreground shadow-sm transition hover:border-primary/40 hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
                                 onClick={() => togglePinned(mode.id as PinnedExerciseId)}
                                 disabled={!pinnedSet.has(mode.id as PinnedExerciseId) && isPinLimitReached}
-                                aria-label={pinnedSet.has(mode.id as PinnedExerciseId) ? `Unpin ${mode.title}` : `Pin ${mode.title}`}
+                                aria-label={
+                                    pinnedSet.has(mode.id as PinnedExerciseId)
+                                        ? t("library.unpinAria", { title: mode.title })
+                                        : t("library.pinAria", { title: mode.title })
+                                }
                                 title={
                                     !pinnedSet.has(mode.id as PinnedExerciseId) && isPinLimitReached
-                                        ? `Pin limit reached (${maxPins})`
+                                        ? t("library.pinLimitReached", { max: maxPins })
                                         : pinnedSet.has(mode.id as PinnedExerciseId)
-                                            ? "Unpin"
-                                            : "Pin"
+                                            ? t("library.unpin")
+                                            : t("library.pin")
                                 }
                             >
                                 <Star className={cn("h-3.5 w-3.5", pinnedSet.has(mode.id as PinnedExerciseId) && "fill-current text-primary")} />
@@ -723,6 +744,8 @@ export default function Library() {
                                 icon={Drum}
                                 variant="catalog"
                                 isNew={mode.isNew}
+                                isLocked={false}
+                                minLevel={mode.minLevel}
                                 onClick={() => navigate(`/rhythm/${mode.id}`, { state: { fromTrain: true } })}
                             />
                         </div>
@@ -731,15 +754,15 @@ export default function Library() {
             </SectionCollapse>
 
             <div className="rounded-xl border border-border bg-muted/40 p-4 text-sm text-muted-foreground">
-                <p className="font-medium text-foreground">Suggested next</p>
-                <p className="mt-1">Continue with the mode that feels easiest today, then add one harder block.</p>
+                <p className="font-medium text-foreground">{t('library.suggestedTitle')}</p>
+                <p className="mt-1">{t('library.suggestedDesc1')}</p>
                 <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
                     <Compass className="h-3.5 w-3.5" />
-                    <span>Use short, focused sessions for faster retention.</span>
+                    <span>{t('library.suggestedDesc2')}</span>
                 </div>
                 <div className="mt-3 flex items-center gap-2 text-xs text-primary">
                     <Sparkles className="h-3.5 w-3.5" />
-                    <span>Smart defaults are enabled in pre-session setup.</span>
+                    <span>{t('library.suggestedDesc3')}</span>
                 </div>
             </div>
         </div>

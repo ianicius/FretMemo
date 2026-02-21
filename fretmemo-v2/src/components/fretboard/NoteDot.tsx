@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import type { NoteStatus, Position } from "@/types/fretboard";
+import { useTranslation } from "react-i18next";
+import { applyPolishNotation } from "@/lib/noteNotation";
 
 interface NoteDotProps {
     noteStatus?: NoteStatus;
@@ -11,11 +13,19 @@ interface NoteDotProps {
 }
 
 export function NoteDot({ noteStatus, position, onClick, showLabel, leftHanded }: NoteDotProps) {
+    const { i18n } = useTranslation();
+    const isPolish = i18n.resolvedLanguage === 'pl' || i18n.language === 'pl';
+
     const status = noteStatus?.status || "idle";
     const isActive = status !== "idle";
     const isStrongActive = status === "active" && noteStatus?.emphasis === "strong";
     const heatOpacity = typeof noteStatus?.opacity === "number" ? Math.max(0.08, noteStatus.opacity) : null;
-    const labelText = noteStatus?.label ?? (showLabel ? position.note : null);
+    let labelText = noteStatus?.label ?? (showLabel ? position.note : null);
+
+    if (labelText && isPolish) {
+        labelText = applyPolishNotation(labelText);
+    }
+
     const feedbackText = status === "active" ? noteStatus?.feedbackText : undefined;
     const customColor = noteStatus?.color;
     const idleOpacity = heatOpacity ?? (customColor ? 0.92 : 0);

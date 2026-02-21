@@ -15,6 +15,7 @@ export interface MetronomeSchedulerOptions {
     bpm: number;
     timeSignatureTop: number;
     subdivision: number;
+    maxSteps?: number;
     clickEnabled?: boolean;
     clickEveryStep?: boolean;
     lookaheadMs?: number;
@@ -29,6 +30,7 @@ export class MetronomeScheduler {
     private readonly lookaheadMs: number;
     private readonly scheduleAheadSec: number;
     private readonly onStep?: (step: ScheduledStep) => void;
+    private readonly maxSteps: number | null;
 
     private bpm: number;
     private timeSignatureTop: number;
@@ -44,6 +46,9 @@ export class MetronomeScheduler {
         this.bpm = options.bpm;
         this.timeSignatureTop = options.timeSignatureTop;
         this.subdivision = options.subdivision;
+        this.maxSteps = Number.isFinite(options.maxSteps)
+            ? Math.max(0, Math.floor(options.maxSteps as number))
+            : null;
         this.clickEnabled = options.clickEnabled ?? true;
         this.clickEveryStep = options.clickEveryStep ?? false;
         this.lookaheadMs = options.lookaheadMs ?? 25;
@@ -84,7 +89,11 @@ export class MetronomeScheduler {
         if (!this.running) return;
 
         const now = this.clock.now();
-        while (this.nextStepTime < now + this.scheduleAheadSec) {
+        while (this.running && this.nextStepTime < now + this.scheduleAheadSec) {
+            if (this.maxSteps !== null && this.stepIndex >= this.maxSteps) {
+                this.stop();
+                return;
+            }
             const step = this.createStep(this.stepIndex, this.nextStepTime);
             if (this.clickEnabled && (this.clickEveryStep || step.isBeatStart)) {
                 this.scheduleClick(step);
@@ -136,4 +145,3 @@ export class MetronomeScheduler {
         osc.stop(step.time + 0.045);
     }
 }
-

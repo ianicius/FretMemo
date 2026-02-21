@@ -6,28 +6,35 @@ import { formatPitchClass } from "@/lib/noteNotation";
 import { Fretboard } from "@/components/fretboard/Fretboard";
 import { Select } from "@/components/ui/select";
 import type { NoteStatus, NoteName } from "@/types/fretboard";
+import { useTranslation } from "react-i18next";
 
 /* ── constants ── */
 
 const ROOTS = NOTES;
 
 const QUALITIES = [
-    { id: "major", label: "Major", intervals: [0, 4, 7] },
-    { id: "minor", label: "Minor", intervals: [0, 3, 7] },
+    { id: "major", labelKey: "theory.triads.qualityMajor", intervals: [0, 4, 7] },
+    { id: "minor", labelKey: "theory.triads.qualityMinor", intervals: [0, 3, 7] },
 ] as const;
 
 const TONE_LABELS = ["R", "3", "5"];
 const TONE_LABELS_MINOR = ["R", "♭3", "5"];
 
 type StringGroup = { id: "top" | "middle" | "bottom"; label: string; strings: [number, number, number] };
+type StringGroupId = StringGroup["id"];
+type StringGroupLabels = Record<StringGroupId, string>;
 
 /** Fixed guitar triad groups, returned as lowest→highest pitch indices. */
-function buildStringGroups(tuning: NoteName[], notation: "sharps" | "flats"): StringGroup[] {
+function buildStringGroups(
+    tuning: NoteName[],
+    notation: "sharps" | "flats",
+    groupLabels: StringGroupLabels,
+): StringGroup[] {
     const groups: StringGroup[] = [];
-    const defs: Array<{ id: StringGroup["id"]; name: string; strings: [number, number, number] }> = [
-        { id: "top", name: "Top", strings: [2, 1, 0] },
-        { id: "middle", name: "Middle", strings: [3, 2, 1] },
-        { id: "bottom", name: "Bottom", strings: [4, 3, 2] },
+    const defs: Array<{ id: StringGroupId; strings: [number, number, number] }> = [
+        { id: "top", strings: [2, 1, 0] },
+        { id: "middle", strings: [3, 2, 1] },
+        { id: "bottom", strings: [4, 3, 2] },
     ];
 
     for (const def of defs) {
@@ -35,7 +42,7 @@ function buildStringGroups(tuning: NoteName[], notation: "sharps" | "flats"): St
         const [low, mid, high] = def.strings;
         groups.push({
             id: def.id,
-            label: `${def.name} (${formatPitchClass(tuning[low], notation)}-${formatPitchClass(tuning[mid], notation)}-${formatPitchClass(tuning[high], notation)})`,
+            label: `${groupLabels[def.id]} (${formatPitchClass(tuning[low], notation)}-${formatPitchClass(tuning[mid], notation)}-${formatPitchClass(tuning[high], notation)})`,
             strings: def.strings,
         });
     }
@@ -43,7 +50,7 @@ function buildStringGroups(tuning: NoteName[], notation: "sharps" | "flats"): St
     return groups;
 }
 
-const INVERSION_NAMES = ["Root pos.", "1st inv.", "2nd inv."];
+const INVERSION_NAMES = ["theory.triads.invRoot", "theory.triads.invFirst", "theory.triads.invSecond"];
 const INVERSION_COLORS = ["#ef4444", "#3b82f6", "#22c55e"]; // red, blue, green
 
 /**
@@ -111,6 +118,7 @@ function computeShapes(
 /* ── component ── */
 
 export default function TriadVisualizer() {
+    const { t } = useTranslation();
     const [root, setRoot] = useState<NoteName>("C");
     const [qualityIdx, setQualityIdx] = useState(0);
     const quality = QUALITIES[qualityIdx];
@@ -119,7 +127,15 @@ export default function TriadVisualizer() {
     const tuning = useMemo(() => normalizeTuning(quickTuning), [quickTuning]);
     const maxFret = 15;
 
-    const stringGroups = useMemo(() => buildStringGroups(tuning, notation), [tuning, notation]);
+    const stringGroupLabels = useMemo<StringGroupLabels>(() => ({
+        top: t("theory.triads.groupTop"),
+        middle: t("theory.triads.groupMiddle"),
+        bottom: t("theory.triads.groupBottom"),
+    }), [t]);
+    const stringGroups = useMemo(
+        () => buildStringGroups(tuning, notation, stringGroupLabels),
+        [tuning, notation, stringGroupLabels],
+    );
     const [activeGroupIds, setActiveGroupIds] = useState<Set<string>>(
         () => new Set(["top", "middle", "bottom"]),
     );
@@ -184,7 +200,7 @@ export default function TriadVisualizer() {
         <div className="space-y-5">
             {stringGroups.length === 0 && (
                 <div className="rounded-xl border border-border bg-muted/40 p-4 text-sm text-muted-foreground">
-                    Triads visualizer needs at least 5 strings in tuning to show Top, Middle, and Bottom groups.
+                    {t("theory.triads.needsFiveStrings")}
                 </div>
             )}
 
@@ -192,7 +208,7 @@ export default function TriadVisualizer() {
             <div className="flex flex-wrap items-end gap-3">
                 {/* Root */}
                 <div className="space-y-1">
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Root</label>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("theory.triads.root")}</label>
                     <Select
                         value={root}
                         onChange={e => setRoot(e.target.value as NoteName)}
@@ -204,7 +220,7 @@ export default function TriadVisualizer() {
 
                 {/* Quality */}
                 <div className="space-y-1">
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Quality</label>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("theory.triads.quality")}</label>
                     <div className="flex gap-1.5">
                         {QUALITIES.map((q, i) => (
                             <button
@@ -215,7 +231,7 @@ export default function TriadVisualizer() {
                                         : "bg-card border-border text-muted-foreground"
                                     }`}
                             >
-                                {q.label}
+                                {t(q.labelKey)}
                             </button>
                         ))}
                     </div>
@@ -224,7 +240,7 @@ export default function TriadVisualizer() {
 
             {/* ── String groups ── */}
             <div className="space-y-1">
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">String Groups</label>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("theory.triads.stringGroups")}</label>
                 <div className="flex flex-wrap gap-1.5">
                     {stringGroups.map(g => (
                         <button
@@ -243,7 +259,7 @@ export default function TriadVisualizer() {
 
             {/* ── Inversions ── */}
             <div className="space-y-1">
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Inversions</label>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("theory.triads.inversions")}</label>
                 <div className="flex flex-wrap gap-1.5">
                     {INVERSION_NAMES.map((name, i) => (
                         <button
@@ -255,7 +271,7 @@ export default function TriadVisualizer() {
                                 }`}
                             style={activeInversions.has(i) ? { backgroundColor: INVERSION_COLORS[i] } : undefined}
                         >
-                            {name}
+                            {t(name)}
                         </button>
                     ))}
                 </div>
@@ -271,13 +287,8 @@ export default function TriadVisualizer() {
 
             {/* ── Legend ── */}
             <div className="rounded-xl border border-border bg-muted/40 p-4 text-sm text-muted-foreground space-y-2">
-                <p className="font-medium text-foreground">Triad Inversions</p>
-                <p>
-                    Every triad has 3 voicings per string set — <strong>Root position</strong> (R-3-5),{" "}
-                    <strong>1st inversion</strong> (3-5-R), and <strong>2nd inversion</strong> (5-R-3).
-                    Learning these shapes across all string groups gives you instant access to any
-                    chord tone anywhere on the neck.
-                </p>
+                <p className="font-medium text-foreground">{t("theory.triads.legendTitle")}</p>
+                <p>{t("theory.triads.legendBody")}</p>
                 <div className="flex flex-wrap gap-3 mt-1">
                     {INVERSION_NAMES.map((name, i) => (
                         <span key={name} className="inline-flex items-center gap-1.5 text-xs font-bold">
@@ -285,7 +296,7 @@ export default function TriadVisualizer() {
                                 className="w-3 h-3 rounded-full inline-block"
                                 style={{ backgroundColor: INVERSION_COLORS[i] }}
                             />
-                            {name}
+                            {t(name)}
                         </span>
                     ))}
                 </div>

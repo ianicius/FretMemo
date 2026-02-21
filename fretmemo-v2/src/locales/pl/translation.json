@@ -1,0 +1,1436 @@
+{
+  "fretboard": "Gryf",
+  "notes": "Nuty",
+  "language": "Język",
+  "string": "Struna",
+  "fret": "Próg",
+  "common": {
+    "locked": "ZABLOKOWANE",
+    "new": "NOWE",
+    "levelRequired": "Wymagany poziom: {{level}}",
+    "level": "Poz. {{level}}",
+    "lastPracticed": "Wcześniej: {{time}}",
+    "difficulty": {
+      "beginner": "Początkujący",
+      "intermediate": "Średnio-zaawansowany",
+      "advanced": "Zaawansowany"
+    },
+    "close": "Zamknij",
+    "openSettings": "Otwórz ustawienia"
+  },
+  "technique": {
+    "spider": {
+      "name": "Pajączek",
+      "description": "Podstawowe ćwiczenie synchronizacji rąk",
+      "instructions": [
+        "Ułóż palce 1-2-3-4 na kolejnych progach",
+        "Zagraj każdą nutę po kolei",
+        "Przejdź na kolejną strunę i powtórz",
+        "Dbaj o czystość i równe tempo"
+      ]
+    },
+    "permutation": {
+      "name": "Permutacje palców",
+      "description": "24 układy palców na niezależność",
+      "instructions": [
+        "Wybierz układ palców",
+        "Zagraj układ na wszystkich strunach",
+        "Trzymaj równe tempo",
+        "Stopniowo przyspieszaj"
+      ]
+    },
+    "linear": {
+      "name": "Przesuw liniowy",
+      "description": "Przesuw pozycji po jednej strunie",
+      "instructions": [
+        "Zagraj 4 nuty na jednej strunie",
+        "Przesuń dłoń jeden próg wyżej i powtórz",
+        "Kontynuuj w ten sposób do 12. progu",
+        "Wróć, schodząc z powrotem do główki"
+      ]
+    },
+    "diagonal": {
+      "name": "Przesuw po skosie",
+      "description": "Wzorce po skosie między strunami",
+      "instructions": [
+        "Zagraj wyznaczony układ 4-nutowy",
+        "Przesuwaj układ po skosie",
+        "Pilnuj niezależności palców",
+        "Zadbaj o płynność przejść"
+      ]
+    },
+    "stringskip": {
+      "name": "Przeskoki strun",
+      "description": "Ćwiczenie trafiania w nie-sąsiednie struny",
+      "instructions": [
+        "Zagraj na strunie 6, następnie przeskocz na 4",
+        "Kontynuuj ten sam schemat przeskoków",
+        "Skup się na precyzji prawej ręki",
+        "Trzymaj stabilną dłoń"
+      ]
+    },
+    "legato": {
+      "name": "Technika Legato",
+      "description": "Hammer-on i pull-off bez kostkowania",
+      "instructions": [
+        "Wykorzystaj kostkę tylko do pierwszego ataku",
+        "Kolejne nuty graj hammer-on",
+        "Wracaj pull-off",
+        "Postaraj się osiągnąć równe i głośne brzmienie"
+      ]
+    },
+    "status": {
+      "title": "Status",
+      "currentString": "Bieżąca struna",
+      "step": "Krok",
+      "tempo": "Tempo",
+      "speedUp": "Przyspieszanie",
+      "off": "Wył.",
+      "nextIncreaseIn": "Następny wzrost za",
+      "beat": "beat",
+      "beats": "beatów",
+      "mode": "Tryb",
+      "tier": "Poziom",
+      "strings": "Struny",
+      "direction": "Kierunek",
+      "currentAction": "Aktualna akcja",
+      "pattern": "Pattern"
+    },
+    "setup": {
+      "title": "Ustawienia sesji",
+      "cancel": "Anuluj",
+      "start": "Start",
+      "tempo": "Tempo",
+      "autoSpeedUp": "Auto przyspieszanie",
+      "autoSpeedUpDesc": "Automatycznie zwiększaj tempo.",
+      "increase": "Przyrost",
+      "every": "Co",
+      "beat": "beat",
+      "beats": "beatów",
+      "stepMode": "Tryb krokowy",
+      "stepModeDesc": "Przechodź ręcznie co beat.",
+      "startFret": "Startowy próg",
+      "advanced": "Zaawansowane"
+    },
+    "settings": {
+      "title": "Ustawienia",
+      "stepMode": "Tryb krokowy",
+      "startFret": "Startowy próg",
+      "mode": "Tryb",
+      "tier": "Poziom",
+      "tierOptions": {
+        "all": "Wszystkie poziomy (24)",
+        "tier1": "Poziom 1 - Początkujący",
+        "tier2": "Poziom 2 - Średnio zaaw.",
+        "tier3": "Poziom 3 - Zaawansowany"
+      },
+      "pattern": "Pattern",
+      "dailyModeHint": "Wyzwanie dzienne wybiera dziś stały pattern.",
+      "stringsToPlay": "Liczba strun",
+      "direction": "Kierunek",
+      "directionOptions": {
+        "ascending": "Rosnąco",
+        "descending": "Malejąco",
+        "both": "Oba"
+      },
+      "stickyFingers": "Sticky Fingers",
+      "stickyFingersHint": "Domyślnie włączone w Permutation Trainer (styl spider).",
+      "on": "Wł.",
+      "randomSwitchEvery": "Losowa zmiana co",
+      "bar": "takt",
+      "bars": "takty",
+      "diagonalPatternOptions": {
+        "ascending": "Rosnąco",
+        "descending": "Malejąco",
+        "full": "Pełny przebieg"
+      },
+      "stringsPerGroup": "Strun w grupie",
+      "pickingStyle": "Styl kostkowania",
+      "pickingStyles": {
+        "alternate": "Naprzemienne",
+        "economy": "Ekonomiczne",
+        "legato": "Legato"
+      },
+      "showPickIndicators": "Pokaż kierunek kostki",
+      "skipPattern": "Pattern przeskoków",
+      "pickingFocus": "Fokus kostkowania",
+      "pickingFocusOptions": {
+        "alternate": "Naprzemienne",
+        "inside": "Inside",
+        "outside": "Outside"
+      },
+      "startPickDirection": "Startowy kierunek kostki",
+      "pickDirectionOptions": {
+        "down": "Dół (v)",
+        "up": "Góra (^)"
+      },
+      "exerciseType": "Typ ćwiczenia",
+      "legatoTypeOptions": {
+        "trill": "Trill",
+        "hammerOnly": "Hammer Spider",
+        "pullOnly": "Pull Desc",
+        "threeNote": "3-Note"
+      },
+      "trillPair": "Para trill",
+      "legatoNotationHintPrefix": "Zapis legato zgodny ze standardem gitarowym:",
+      "legatoNotationHintMiddle": "to hammer-on,",
+      "legatoNotationHintSuffix": "to pull-off.",
+      "string": "Struna",
+      "endFret": "Końcowy próg",
+      "notesPerShift": "Nuty na przesunięcie",
+      "linearDirectionOptions": {
+        "asc": "W górę",
+        "desc": "W dół",
+        "round": "W obie"
+      },
+      "shiftAmount": "Wielkość przesunięcia",
+      "autoSpeedUp": "Auto przyspieszanie",
+      "increase": "Przyrost",
+      "every": "Co",
+      "beat": "beat",
+      "beats": "beatów"
+    },
+    "labels": {
+      "permutationMode": {
+        "single": "Pojedyncza permutacja",
+        "daily": "Wyzwanie dnia",
+        "sequential": "Tryb sekwencyjny",
+        "random": "Tryb losowy"
+      },
+      "diagonalPattern": {
+        "ascending": "Rosnąco",
+        "descending": "Malejąco",
+        "full": "Pełny przebieg"
+      },
+      "stringSkipPattern": {
+        "single": "Pojedynczy skip",
+        "octave": "Skip oktawowy",
+        "double": "Podwójny skip",
+        "wide": "Szeroki skip"
+      },
+      "legatoType": {
+        "trill": "Trill",
+        "hammerOnly": "Hammer Spider",
+        "pullOnly": "Pull Desc",
+        "threeNote": "3-Note"
+      },
+      "linearDirection": {
+        "ascending": "Rosnąco",
+        "descending": "Malejąco",
+        "roundTrip": "Tam i z powrotem"
+      }
+    },
+    "patternLabel": {
+      "diagonal": "{{label}} ({{strings}} str.)",
+      "linear": "Struna {{string}} • {{direction}}"
+    },
+    "cue": {
+      "economyPicking": "Ekonomiczne kostkowanie",
+      "alternatePicking": "Naprzemienne kostkowanie",
+      "downstroke": "Ruch w dół",
+      "upstroke": "Ruch w górę",
+      "insidePicking": "Inside picking",
+      "outsidePicking": "Outside picking",
+      "pick": "Kostka",
+      "hammerOn": "Hammer-on",
+      "pullOff": "Pull-off"
+    },
+    "cueDetail": {
+      "initialPickedNote": "Pierwsza nuta kostką",
+      "legatoAscent": "Wzrost legato",
+      "legatoDescent": "Spadek legato",
+      "firstNotePerString": "Pierwsza nuta na strunie",
+      "noAdditionalPick": "Bez dodatkowego kostkowania",
+      "pickHighNoteAnchorIndex": "Kostkuj wyższą nutę, trzymając palec 1",
+      "keepIndexAnchored": "Trzymaj palec 1 i zwolnij w dół",
+      "startEachStringWithPick": "Zaczynaj każdą strunę kostką",
+      "twoLegatoNotesPerString": "2 nuty legato na strunę",
+      "initialAttack": "Pierwszy atak kostką",
+      "legatoWithinShiftGroup": "Legato w obrębie przesunięcia"
+    },
+    "ui": {
+      "actionCue": "Wskazówka",
+      "stop": "Stop",
+      "start": "Start",
+      "nextStep": "Następny krok",
+      "sessionSetup": "Ustawienia sesji",
+      "tierLabelAll": "Wszystkie (T{{tier}})",
+      "tierLabelTier": "Poziom {{tier}}",
+      "exerciseAdvanced": "Zaawansowane ćw."
+    }
+  },
+  "quests": {
+    "dailyDedication": {
+      "title": "Codzienna regularność",
+      "description": "Zdobądź dziś 300 XP"
+    },
+    "unbreakableFocus": {
+      "title": "Niezłomne skupienie",
+      "description": "Osiągnij serię 20 poprawnych odpowiedzi"
+    },
+    "earTraining": {
+      "title": "Trening Słuchu",
+      "description": "Ukończ sesję treningu słuchu"
+    },
+    "pushingLimits": {
+      "title": "Przekraczaj limity",
+      "description": "Zdobądź dziś 500 XP"
+    },
+    "rhythmMastery": {
+      "title": "Mistrzostwo Rytmu",
+      "description": "Ukończ sesję w Rhythm Dojo"
+    },
+    "flawlessExecution": {
+      "title": "Bez błędów",
+      "description": "Osiągnij serię 50 poprawnych odpowiedzi"
+    }
+  },
+  "theory": {
+    "scaleExplorer": {
+      "title": "Eksplorator Skal",
+      "root": "Tonika",
+      "scale": "Skala",
+      "intervals": "Interwały",
+      "notes": "Nuty",
+      "scaleTypes": {
+        "major": "Durowa (jońska)",
+        "minor": "Molowa (eolska)",
+        "dorian": "Dorycka",
+        "mixolydian": "Miksolidyjska",
+        "major pentatonic": "Pentatonika durowa",
+        "minor pentatonic": "Pentatonika molowa",
+        "blues": "Bluesowa",
+        "harmonic minor": "Molowa harmoniczna",
+        "melodic minor": "Molowa melodyczna",
+        "phrygian": "Frygijska",
+        "lydian": "Lidyjska",
+        "locrian": "Lokryjska"
+      }
+    },
+    "page": {
+      "toolNotFoundTitle": "Nie znaleziono narzędzia",
+      "toolNotFoundDesc": "To narzędzie teorii jest niedostępne.",
+      "backToTrain": "Wróć do Treningu",
+      "tools": {
+        "scaleExplorer": "Eksplorator skal",
+        "circleOfFifths": "Koło kwintowe",
+        "cagedSystem": "System CAGED",
+        "triads": "Triady",
+        "chordLibrary": "Biblioteka akordów",
+        "intervalTrainer": "Interwały na gryfie"
+      }
+    },
+    "circle": {
+      "major": "dur",
+      "minor": "moll",
+      "relativeMinor": "Równoległa molowa",
+      "scaleNotes": "Nuty skali",
+      "diatonicChords": "Akordy diatoniczne"
+    },
+    "chordLibrary": {
+      "rootNote": "Tonika",
+      "notes": "Nuty",
+      "intervals": "Interwały",
+      "notFound": "Brak danych dla tego akordu.",
+      "voicings": "Chwyty",
+      "voicingLabel": "Chwyt {{index}}",
+      "playChord": "Odtwórz akord",
+      "groups": {
+        "triads": "Triady",
+        "sevenths": "Czterodźwięki",
+        "susAdd": "Sus / Add",
+        "extended": "Rozszerzone"
+      }
+    },
+    "intervalFretboard": {
+      "title": "Interwały na gryfie",
+      "description": "Wskaż nutę tworzącą podany interwał od toniki.",
+      "activeIntervals": "Aktywne interwały",
+      "findThe": "Znajdź",
+      "from": "od",
+      "correctFeedback": "Dobrze! {{interval}} od {{root}} to {{note}}",
+      "wrongFeedback": "To nie to. Szukana nuta: {{note}}"
+    },
+    "triads": {
+      "needsFiveStrings": "To narzędzie wymaga co najmniej pięciu strun w aktualnym strojeniu.",
+      "root": "Tonika",
+      "quality": "Jakość",
+      "qualityMajor": "Dur",
+      "qualityMinor": "Moll",
+      "stringGroups": "Grupy strun",
+      "groupTop": "Góra",
+      "groupMiddle": "Środek",
+      "groupBottom": "Dół",
+      "inversions": "Przewroty",
+      "invRoot": "Pozycja zasadnicza",
+      "invFirst": "1. przewrót",
+      "invSecond": "2. przewrót",
+      "legendTitle": "Legenda",
+      "legendBody": "Kolory oznaczają przewroty, a etykiety R/3/5 pokazują składniki akordu."
+    },
+    "caged": {
+      "root": "Tonika",
+      "shapes": "Kształty",
+      "systemTitle": "System CAGED",
+      "legend": "System CAGED łączy pięć otwartych kształtów akordowych na całym gryfie. Przełączaj kształty, by zobaczyć ich nakładanie dla dowolnej toniki."
+    }
+  },
+  "nav": {
+    "home": "Start",
+    "practice": "Trening",
+    "challenges": "Wyzwania",
+    "progress": "Postępy",
+    "help": "Pomoc",
+    "settings": "Ustawienia"
+  },
+  "library": {
+    "title": "Trening",
+    "description": "Jeden katalog dla ćwiczeń gryfu, techniki, teorii, treningu słuchu i rytmu.",
+    "pinned": "Przypięte",
+    "drills": "Ćwiczenia gryfu",
+    "technique": "Technika",
+    "theory": "Teoria",
+    "ear": "Trening Słuchu",
+    "rhythm": "Rhythm Dojo",
+    "summary": {
+      "modes": "{{count}} tryby • {{avg}}% śr",
+      "exercises": "{{count}} ćwiczenia • {{avg}}% śr",
+      "pinned": "{{count}}/{{max}} • {{avg}}% śr"
+    },
+    "suggestedTitle": "Sugerowane dalej",
+    "suggestedDesc1": "Kontynuuj z najłatwiejszym na dany moment trybem, po czym dodaj trudniejszy blok.",
+    "suggestedDesc2": "Używaj krótkich i skupionych sesji dla najlepszego zapamiętania.",
+    "suggestedDesc3": "Domyślne ustawienia zapiszesz przed startem sesji.",
+    "noPinnedTitle": "Brak przypiętych ćwiczeń",
+    "noPinnedDesc": "Przypnij ulubione ćwiczenia gwiazdką, żeby mieć je pod ręką.",
+    "pin": "Przypnij",
+    "unpin": "Odepnij",
+    "pinAria": "Przypnij {{title}}",
+    "unpinAria": "Odepnij {{title}}",
+    "pinLimitReached": "Limit przypięć osiągnięty ({{max}})",
+    "theorySummary": "{{count}} narzędzi",
+    "earSummary": "{{count}} tryby",
+    "soon": "Wkrótce"
+  },
+  "challenges": {
+    "title": "Wyzwania",
+    "description": "Codzienne zadania, tygodniowe cele i długoterminowe wyzwania.",
+    "featured": "Polecane",
+    "target": "Cel",
+    "reward": "Nagroda",
+    "rewardXp": "+100 XP",
+    "startDaily": "Zacznij wyzwanie",
+    "thisWeek": "W tym tygodniu",
+    "goalsCompleted": "{{done}} z {{total}} celów ukończono",
+    "hunts": "Długoterminowe",
+    "huntsDesc": "Duże cele dostępne każdego dnia.",
+    "active": "aktywnych",
+    "start": "Zacznij",
+    "showFewer": "Pokaż mniej",
+    "showAll": "Pokaż wszystkie ({{count}})",
+    "stats": {
+      "streak": "Dni serii",
+      "accuracy": "Skuteczność",
+      "events": "Wydarzenia"
+    },
+    "daily": {
+      "speed-20": {
+        "name": "Sprint na szybkość",
+        "desc": "Zidentyfikuj 20 nut najszybciej jak potrafisz"
+      },
+      "accuracy-50": {
+        "name": "Mistrz celności",
+        "desc": "Uzyskaj 50 poprawnych odpowiedzi z rzędu"
+      },
+      "coverage-all": {
+        "name": "Pełne pokrycie",
+        "desc": "Przećwicz co najmniej jedną nutę na każdej strunie"
+      },
+      "streak-10": {
+        "name": "Perfekcyjna seria",
+        "desc": "Zdobądź 10 poprawnych bez błędu"
+      },
+      "speed-30": {
+        "name": "Błyskawiczna runda",
+        "desc": "Zidentyfikuj 30 nut w mniej niż 2 minuty"
+      },
+      "accuracy-100": {
+        "name": "Klub stówy",
+        "desc": "Odpowiedz na 100 pytań z 90%+ celnością"
+      },
+      "strings-all": {
+        "name": "Mistrz strun",
+        "desc": "Ćwicz wszystkie 6 strun równo"
+      }
+    },
+    "weekly": {
+      "practice-3": "Konsekwentny trening",
+      "notes-100": "Mistrz nut",
+      "streak-7": "Wojownik Tygodnia"
+    },
+    "huntsList": {
+      "perfect-session": {
+        "name": "Perfekcyjna sesja",
+        "desc": "Uzyskaj 20 poprawnych z rzędu"
+      },
+      "speed-demon": {
+        "name": "Demon szybkości",
+        "desc": "Trening w tempie 120+ BPM"
+      },
+      "explorer": {
+        "name": "Odkrywca",
+        "desc": "Przećwicz wszystkie 6 strun"
+      },
+      "timed-blitz": {
+        "name": "Błyskawica (60s)",
+        "desc": "Zdobądź jak najwięcej punktów przez 60 sekund"
+      }
+    },
+    "units": {
+      "days": "dni",
+      "notes": "nut"
+    },
+    "rewards": {
+      "goldBadge": "Złota odznaka",
+      "speedBadge": "Odznaka szybkości",
+      "explorerBadge": "Odznaka odkrywcy",
+      "xp250": "+250 XP",
+      "survivorBadge": "Odznaka survival",
+      "navigatorBadge": "Odznaka nawigatora"
+    },
+    "modes": {
+      "blitz60": "Blitz 60s",
+      "survival": "Tryb survival",
+      "findAllA": "Znajdź wszystkie A"
+    }
+  },
+  "header": {
+    "quickActions": "Szybkie akcje",
+    "resources": "Materiały",
+    "installApp": "Zainstaluj aplikację",
+    "install": "Zainstaluj",
+    "currentStreak": "Aktualna passa",
+    "streakFreezesAvailable_one": "{{count}} zamrożenie passy dostępne",
+    "streakFreezesAvailable_few": "{{count}} zamrożenia passy dostępne",
+    "streakFreezesAvailable_many": "{{count}} zamrożeń passy dostępnych",
+    "streakFreezesAvailable_other": "{{count}} zamrożeń passy dostępnych",
+    "totalXp": "Łączne XP",
+    "switchToLight": "Przełącz na jasny motyw",
+    "switchToDark": "Przełącz na ciemny motyw",
+    "lightMode": "Jasny motyw",
+    "darkMode": "Ciemny motyw",
+    "openQuickMenu": "Otwórz szybkie menu",
+    "buyCoffee": "Postaw kawę",
+    "legacyV1": "Legacy v1",
+    "faq": "FAQ",
+    "blog": "Blog",
+    "streakFreezesAvailable": "{{count}} zamrożeń passy dostępnych"
+  },
+  "home": {
+    "welcome": "Witaj z powrotem",
+    "level": "Poziom {{level}}",
+    "xpToNext": "{{xp}} XP do kolejnego poziomu",
+    "nextStep": "Następny krok",
+    "nextStepDescDefault": "Zacznij od krótkiego treningu gryfu, żeby utrwalić pozycje nut.",
+    "nextStepDescWeak": "Struny {{minStr}}-{{maxStr}}, progi {{minFret}}-{{maxFret}} potrzebują poćwiczenia.",
+    "startFocused": "Rozpocznij trening celowany",
+    "startFirst": "Rozpocznij pierwszy trening",
+    "accuracy": "Celność",
+    "coverage": "Pokrycie gryfu",
+    "momentum": "Motywacja",
+    "dailyQuests": "Codzienne zadania",
+    "dailyQuestsDesc": "Wykonuj zadania i zdobywaj dodatkowe XP",
+    "claimed": "Odebrano",
+    "claimXp": "Odbierz {{xp}} PD",
+    "continueLast": "Wznów ostatnią sesję",
+    "lastPracticed": "Poprzednio {{time}}",
+    "masteryProgress": "Postęp opanowania",
+    "resumeSession": "Wznów sesję",
+    "pinned": "Ulubione",
+    "noPinned": "Brak przypiętych ćwiczeń",
+    "noPinnedDesc": "Przypnij ulubione ćwiczenia w Treningu, aby mieć je tutaj pod ręką.",
+    "openTrain": "Otwórz trening",
+    "continue": "Wznów",
+    "noRecent": "Brak ostatnich sesji",
+    "noRecentDesc": "Wejdź do Treningu i wybierz ćwiczenie, żeby budować regularność.",
+    "explore": "Odkrywaj",
+    "fretboardDrills": "Ćwiczenia gryfu",
+    "technique": "Techniki",
+    "theoryTools": "Narzędzia teorii",
+    "earTraining": "Trening Słuchu",
+    "momentumDay": "1 dzień",
+    "momentumDays": "{{count}} dni",
+    "momentumStart": "start",
+    "pinnedQuickLaunch": "Szybki start z przypiętych.",
+    "resumeWhereLeft": "Wznów od miejsca, gdzie skończyłeś.",
+    "unpin": "Odepnij",
+    "unpinAria": "Odepnij {{title}}",
+    "xpShort": "{{xp}} XP",
+    "time": {
+      "new": "Nowe",
+      "justNow": "Przed chwilą",
+      "minutesAgo": "{{count}} min temu",
+      "hoursAgo": "{{count}} godz temu",
+      "yesterday": "Wczoraj",
+      "daysAgo": "{{count}} dni temu"
+    }
+  },
+  "practice": {
+    "title": "Trening",
+    "subtitle": "Wybierz tryb i dopasuj sesję",
+    "instructions": "Instrukcje",
+    "dayStreak": "Seria dni",
+    "accuracy": "Celność",
+    "timePracticed": "Czas spędzony",
+    "layers": {
+      "standard": "Standard",
+      "heatmap": "Mapa cieplna",
+      "scale": "Skala",
+      "intervals": "Interwały"
+    },
+    "focus": {
+      "modeLabel": "Tryb treningu",
+      "exerciseTypeLabel": "Typ ćwiczenia",
+      "rootLabel": "Tonika",
+      "scaleLabel": "Skala",
+      "playPrompt": "Zagraj wskazaną nutę.",
+      "identifyPrompt": "Rozpoznaj nutę.",
+      "target": "Cel",
+      "targetNote": "Docelowa nuta",
+      "pickTabPosition": "Wybierz pasującą pozycję na tabulaturze",
+      "playThisNote": "Zagraj tę nutę",
+      "next": "Następny",
+      "mic": "Mikrofon",
+      "micOff": "Wył.",
+      "current": "Aktualny",
+      "noMistakes": "Bez pomyłek",
+      "heatMapOverlay": "Nakładka mapy cieplnej",
+      "startPractice": "Rozpocznij trening"
+    },
+    "setup": {
+      "title": "Ustawienia sesji",
+      "cancel": "Anuluj",
+      "start": "Rozpocznij",
+      "tempo": "Tempo",
+      "metronome": "Metronom",
+      "metronomeDesc": "Użyj metronomu w trakcie treningu.",
+      "mic": "Mikrofon",
+      "micDesc": "Włącz, by aplikacja rejestrowała dźwięki gitary z mikrofonu.",
+      "sessionMode": "Tryb sesji",
+      "scored": "Sesja punktowana",
+      "guitar": "Tryb gitary",
+      "scoredDesc": "Zakończy się automatycznie i podsumuje sesję.",
+      "guitarDesc": "Nieskończony trening. Brak limitu czasu i podsumowań.",
+      "noteSequence": "Kolejność nut",
+      "random": "Losowa",
+      "ascending": "Rosnąco",
+      "descending": "Malejąco",
+      "quickPresets": "Szybkie ustawienia",
+      "advanced": "Zaawansowane",
+      "noteDuration": "Długość nuty",
+      "fretRange": "Zakres progów",
+      "strings": "Struny",
+      "notes": "Nuty",
+      "allNotes": "Wszystkie",
+      "naturals": "Naturalne",
+      "rootNote": "Tonika",
+      "scaleType": "Skala",
+      "autoSpeedUp": "Auto-przyspieszanie",
+      "increase": "Zwiększ",
+      "everyXBeats": "Co X uderzeń",
+      "inputDevice": "Wejście audio",
+      "systemDefault": "Domyślne",
+      "refresh": "Odśwież",
+      "presets": {
+        "fullNeck": "Cały gryf",
+        "openMajor": "Otwarte durowe",
+        "aMinorPent": "A-mol pent.",
+        "naturals": "Naturalne"
+      },
+      "scaleTypes": {
+        "major": "Durowa",
+        "minor": "Molowa",
+        "majorPentatonic": "Pentatonika durowa",
+        "minorPentatonic": "Pentatonika molowa"
+      },
+      "sequenceGroups": {
+        "intervals": "Interwały",
+        "scales": "Skale"
+      },
+      "sequenceOptions": {
+        "random": "Losowo",
+        "minorThirds": "Tercje małe",
+        "majorThirds": "Tercje wielkie",
+        "fourths": "Kwarty",
+        "fifths": "Kwinty",
+        "sevenths": "Septymy",
+        "majorScale": "Skala durowa",
+        "naturalMinorScale": "Skala molowa (nat.)",
+        "majorPentatonic": "Pentatonika durowa",
+        "minorPentatonic": "Pentatonika molowa"
+      }
+    },
+    "modes": {
+      "guessNote": "Rozpoznaj nutę",
+      "guessNoteDesc": "Wizualna identyfikacja nut na gryfie i tabulaturze.",
+      "playPractice": "Graj na instrumencie",
+      "playPracticeDesc": "Graj na żywo korzystając z mikrofonu.",
+      "fretboardToNote": "Gryf → Nuta",
+      "tabToNote": "Tabulatura → Nuta",
+      "noteToTab": "Nuta → Tabulatura",
+      "playNotes": "Generator nut",
+      "playTab": "Czytanie tabulatury",
+      "fretboardToNoteDescription": "Rozpoznawaj nuty bezpośrednio z gryfu.",
+      "tabToNoteDescription": "Czytaj tabulaturę i podaj nazwę nuty.",
+      "noteToTabDescription": "Odnajduj pozycje konkretnych nut na gryfie.",
+      "playNotesDescription": "Graj wyświetlone nuty na swoim instrumencie.",
+      "playTabDescription": "Czytaj z tabulatury i graj wyświetlone pozycje na żywo."
+    },
+    "tips": {
+      "fretboardToNote": "Rozpoznaj nutę podświetloną na gryfie. Wybierz poprawną nazwę z dostępnych opcji.",
+      "tabToNote": "Standardowe strojenie. Nazwij nutę na progu pokazanym na tabulaturze.",
+      "noteToTab": "Znajdź poprawną pozycję na gryfie dla podanej nuty. Szukaj właściwej kombinacji struny i progu.",
+      "playNotes": "Zagraj na instrumencie nutę widoczną na ekranie. Aplikacja nasłuchuje przez mikrofon.",
+      "playTab": "Zagraj na instrumencie pozycję wprost z tabulatury. Aplikacja nasłuchuje przez mikrofon."
+    },
+    "tabs": {
+      "fretboard": "Gryf",
+      "earTraining": "Trening Słuchu"
+    },
+    "sessionSummary": {
+      "title": "Sesja zakończona",
+      "accuracy": "Celność",
+      "deltaVsPrevious": "{{delta}}% względem poprzedniej sesji",
+      "personalBest": "Nowy rekord osobisty",
+      "compactHint": "Gryf ma 72 pozycje. Krótkie, skupione powtórki dają szybkie efekty.",
+      "participationBonus": "Bonus za udział: +{{xp}} XP",
+      "supportTitle": "Podoba Ci się FretMemo?",
+      "buyCoffee": "Postaw kawę",
+      "focusWeakSpots": "Skup się na słabych miejscach",
+      "practiceAgain": "Ćwicz ponownie",
+      "done": "Gotowe",
+      "weakSpot": "Skup się na strunie {{string}}, próg {{fret}} ({{accuracy}}% celności).",
+      "weakSpotFallback": "Zrób krótkie ćwiczenie na jednym zakresie strun.",
+      "summary": {
+        "firstSession": "Pierwsza sesja zakończona. Każda próba buduje Twoją mapę gryfu.",
+        "zeroAccuracy": "Ćwiczyłeś {{duration}} i podjąłeś {{total}} prób. {{weakSpot}}",
+        "lowAccuracy": "{{incorrect}} nut do poprawy w tej sesji. {{weakSpot}}",
+        "decentButDown": "Wynik lekko niższy niż poprzednio. Krótka, celowana dogrywka powinna odbudować momentum.",
+        "personalBest": "Nowy rekord osobisty. Utrzymaj to tempo.",
+        "improved": "Solidna poprawa względem poprzedniej sesji."
+      },
+      "support": {
+        "personalBest": "Dziś wchodzi rekord. Jeśli FretMemo pomogło Ci tu dojść, kawa wesprze kolejne ćwiczenia i poprawki. Bez presji.",
+        "firstSession": "Jeśli to było pomocne, kawa pomaga mi rozwijać kolejne ćwiczenia, poprawki i artykuły. Bez presji.",
+        "default": "Jeśli ta sesja była pomocna, kawa wspiera nowe ćwiczenia, poprawki i dopracowanie aplikacji. Bez presji."
+      },
+      "stats": {
+        "correct": "Poprawne",
+        "review": "Do poprawy",
+        "bestStreak": "Najlepsza seria",
+        "score": "Wynik",
+        "timePracticed": "Czas ćwiczenia",
+        "xpEarned": "Zdobyte XP"
+      }
+    },
+    "controls": {
+      "microphone": "Mikrofon",
+      "inputActive": "Wejście aktywne",
+      "inputDisabled": "Wejście wyłączone",
+      "hint": "Podpowiedź",
+      "used": "zużyta",
+      "minusPoints": "-{{points}} pkt",
+      "next": "Dalej"
+    },
+    "focusHud": {
+      "sessionPausedTitle": "Sesja wstrzymana",
+      "sessionPausedDescription": "Wróć, gdy będziesz gotowy.",
+      "resume": "Wznów",
+      "endSession": "Zakończ sesję",
+      "score": "Wynik",
+      "sessionProgress": "Postęp sesji"
+    }
+  },
+  "settingsPage": {
+    "title": "Ustawienia",
+    "subtitle": "Zarządzaj ustawieniami globalnymi, domyślnymi modułów i kontrolą bezpieczeństwa.",
+    "resetAllDefaults": "Przywróć domyślne",
+    "searchPlaceholder": "Szukaj ustawień (np. strojenie, metronom, opóźnienie)",
+    "scope": {
+      "global": "Globalne",
+      "modules": "Moduły",
+      "data": "Dane i wsparcie"
+    },
+    "scopeHint": "Ustawienia globalne działają w całej aplikacji. Ustawienia modułów uzupełniają domyślne wartości przed startem ćwiczeń.",
+    "common": {
+      "on": "Wł.",
+      "off": "Wył."
+    },
+    "feedback": {
+      "exportSuccess": "Wyeksportowano dane postępów.",
+      "exportError": "Nie udało się wyeksportować danych postępów. Spróbuj ponownie.",
+      "importError": "Nie udało się zaimportować danych. Upewnij się, że plik to poprawny JSON.",
+      "resetSettingsSuccess": "Przywrócono domyślne ustawienia.",
+      "resetProgressSuccess": "Wszystkie dane postępów zostały wyzerowane."
+    },
+    "confirm": {
+      "resetSettings": {
+        "title": "Zresetować ustawienia?",
+        "description": "To przywróci domyślne ustawienia aplikacji. Dane postępów pozostaną bez zmian.",
+        "confirm": "Resetuj ustawienia"
+      },
+      "replaceImport": {
+        "title": "Zastąpić dane postępów?",
+        "description": "To nadpisze Twoje aktualne postępy danymi z importu.",
+        "confirm": "Zastąp"
+      },
+      "resetProgress": {
+        "title": "Zresetować wszystkie postępy?",
+        "description": "To usunie statystyki ćwiczeń, historię sesji i odblokowane osiągnięcia.",
+        "confirm": "Resetuj postępy"
+      }
+    },
+    "instrument": {
+      "sectionTitle": "Instrument",
+      "sectionSummary": "{{instrument}} · {{strings}} strun",
+      "cardTitle": "Instrument",
+      "cardDescription": "Skonfiguruj typ instrumentu, strojenie i orientację.",
+      "instrumentType": "Typ instrumentu",
+      "instrumentTypeHint": "Zmienia dostępne presety stroju i liczbę strun.",
+      "instrumentTypes": {
+        "guitar6": "Gitara (6)",
+        "guitar7": "Gitara (7)",
+        "guitar8": "Gitara (8)",
+        "bass4": "Bas (4)",
+        "bass5": "Bas (5)",
+        "ukulele4": "Ukulele (4)"
+      },
+      "tuningPreset": "Preset stroju",
+      "tuningPresetHint": "Dotyczy wszystkich ćwiczeń opartych na gryfie.",
+      "tuningPresets": {
+        "standard": "Standard (E-A-D-G-B-E)",
+        "drop-d": "Drop D (D-A-D-G-B-E)",
+        "dadgad": "DADGAD",
+        "open-g": "Open G",
+        "open-d": "Open D",
+        "double-drop-d": "Double Drop D",
+        "e-flat": "Pół tonu niżej (Eb)",
+        "standard-7": "Standard 7 (B-E-A-D-G-B-E)",
+        "drop-a-7": "Drop A 7 (A-E-A-D-G-B-E)",
+        "standard-8": "Standard 8 (F#-B-E-A-D-G-B-E)",
+        "bass-standard-4": "Bas standard (E-A-D-G)",
+        "bass-drop-d-4": "Bas Drop D (D-A-D-G)",
+        "bass-standard-5": "Bas standard 5 (B-E-A-D-G)",
+        "ukulele-standard": "Ukulele standard (G-C-E-A)"
+      },
+      "customCurrent": "Niestandardowy (bieżący)",
+      "activeTuning": "Aktywne strojenie ({{strings}} strun): {{tuning}}",
+      "leftHanded": "Tryb leworęczny",
+      "leftHandedHint": "Lustrzane odbicie gryfu dla osób leworęcznych.",
+      "showFretNumbers": "Pokazuj numery progów",
+      "showFretNumbersHint": "Wyświetlaj numerację progów na wizualizacji gryfu.",
+      "noteNaming": "Nazwy nut",
+      "noteNamingHint": "Wybierz, czy pokazywać krzyżyki czy bemole.",
+      "notation": {
+        "sharps": "Krzyżyki (#)",
+        "flats": "Bemole (b)"
+      }
+    },
+    "learning": {
+      "sectionTitle": "Nauka",
+      "sectionSummary": "{{tempo}} BPM · Auto-dalej {{autoAdvance}}",
+      "cardTitle": "Tryb nauki",
+      "cardDescription": "Dopasuj sposób, w jaki aplikacja wspiera naukę.",
+      "difficultyMode": "Tryb trudności",
+      "difficultyModeHint": "Tryb adaptacyjny reaguje na wyniki. Manualny utrzymuje stałe ustawienia.",
+      "difficulty": {
+        "adaptive": "Adaptacyjny",
+        "manual": "Manualny"
+      },
+      "autoAdvance": "Auto-dalej",
+      "autoAdvanceHint": "Automatycznie przechodź do następnego pytania po poprawnej odpowiedzi.",
+      "showHints": "Podpowiedzi",
+      "showHintsHint": "Pokazuj markery i podpowiedzi, gdy utkniesz.",
+      "spacedRepetition": "Powtórki rozłożone",
+      "spacedRepetitionHint": "Priorytet dla słabszych i dawno niećwiczonych elementów."
+    },
+    "audio": {
+      "sectionTitle": "Audio",
+      "sectionSummary": "Głośność {{volume}}% · ±{{tolerance}} centów",
+      "cardTitle": "Audio i wejście",
+      "cardDescription": "Zarządzaj wyjściem dźwięku i wejściem mikrofonu.",
+      "masterVolume": "Główna głośność",
+      "instrumentSound": "Brzmienie instrumentu",
+      "instrumentSoundHint": "Używane do generowanych dźwięków i tonów referencyjnych.",
+      "sounds": {
+        "acoustic": "Akustyczne",
+        "electric": "Elektryczne",
+        "clean": "Clean"
+      },
+      "pitchTolerance": "Tolerancja stroju (centy)",
+      "pitchToleranceHint": "Wyższe wartości dają większą tolerancję detekcji."
+    },
+    "appearance": {
+      "sectionTitle": "Wygląd",
+      "sectionSummary": "{{theme}} · {{layer}}",
+      "cardTitle": "Wygląd i interfejs",
+      "cardDescription": "Dostosuj wygląd i odczucie pracy z FretMemo.",
+      "theme": "Motyw",
+      "themeHint": "Wybierz jasny, ciemny albo zgodny z ustawieniami systemu.",
+      "themeOptions": {
+        "light": "Jasny",
+        "dark": "Ciemny",
+        "system": "Systemowy"
+      },
+      "defaultLayer": "Domyślna warstwa gryfu",
+      "defaultLayerHint": "Używana jako warstwa startowa w trybie Focus."
+    },
+    "gamification": {
+      "sectionTitle": "Gra",
+      "sectionSummary": "Notki XP {{xp}} · Ostrzeżenia {{warnings}}",
+      "cardTitle": "Grywalizacja",
+      "cardDescription": "Zarządzaj XP, seriami i nagrodami.",
+      "showXpAnimations": "Animacje XP",
+      "showXpAnimationsHint": "Pokazuj pływające podsumowania XP po odpowiedziach.",
+      "streakWarnings": "Ostrzeżenia serii",
+      "streakWarningsHint": "Informuj, gdy seria jest zagrożona przerwaniem.",
+      "achievementToasts": "Powiadomienia osiągnięć",
+      "achievementToastsHint": "Pokazuj odblokowania osiągnięć podczas ćwiczeń.",
+      "streakFreezes": "Zamrożenia serii",
+      "streakFreezesHint": "Chronią serię, jeśli ominiesz jeden dzień."
+    },
+    "modulePractice": {
+      "sectionTitle": "Domyślne treningu",
+      "sectionSummary": "{{tempo}} BPM · Metronom {{metronome}}",
+      "cardTitle": "Domyślne treningu",
+      "cardDescription": "Wstępnie wypełnia ustawienia sesji dla trybów gryfowych.",
+      "defaultTempo": "Domyślne tempo",
+      "metronomeDefault": "Metronom domyślnie aktywny",
+      "metronomeDefaultHint": "Automatycznie włącz klik przy starcie sesji.",
+      "defaultFretRange": "Domyślny zakres progów",
+      "defaultRootNote": "Domyślna tonika",
+      "defaultScaleType": "Domyślna skala",
+      "defaultScaleTypeHint": "Używana, gdy aktywne są ograniczenia skali.",
+      "defaultNoteSequence": "Domyślna kolejność nut"
+    },
+    "moduleTraining": {
+      "sectionTitle": "Domyślne modułów",
+      "sectionSummary": "{{technique}} nadpisań BPM techniki · {{intervals}} interwałów słuchu",
+      "cardTitle": "Technika, słuch i rytm",
+      "cardDescription": "Ustawienia specyficzne dla modułów i zachowana kalibracja treningu.",
+      "technique": {
+        "bpmOverrides": "Nadpisania startowego BPM (Technika)",
+        "bpmOverridesHint": "Zapisywane dla każdego ćwiczenia po zmianie tempa w module Technika.",
+        "noOverrides": "Brak nadpisań startowego BPM dla ćwiczeń.",
+        "clearBpmOverrides": "Wyczyść nadpisania BPM",
+        "clearTechniqueStats": "Wyczyść statystyki techniki",
+        "resetTechniqueModule": "Resetuj moduł techniki"
+      },
+      "ear": {
+        "defaultDirection": "Domyślny kierunek treningu słuchu",
+        "activeIntervals": "Aktywne interwały słuchowe",
+        "activeIntervalsHint": "Co najmniej jeden interwał musi pozostać aktywny.",
+        "resetDefaults": "Resetuj domyślne słuchu",
+        "directions": {
+          "ascending": "W górę",
+          "descending": "W dół",
+          "harmonic": "Harmonicznie"
+        }
+      },
+      "rhythm": {
+        "inputLatency": "Kompensacja opóźnienia wejścia (rytm)",
+        "inputLatencyHint": "Zwiększ, jeśli trafienia są stale oznaczane jako spóźnione mimo grania w punkt.",
+        "resetLatency": "Resetuj opóźnienie do 0 ms"
+      }
+    },
+    "data": {
+      "sectionTitle": "Dane",
+      "sectionSummary": "Eksport · Import · Reset",
+      "cardTitle": "Kopia postępów",
+      "cardDescription": "Wyeksportuj postępy do JSON i zaimportuj je później.",
+      "export": "Eksportuj postępy",
+      "importMerge": "Import (scal)",
+      "importReplace": "Import (zastąp)",
+      "mergeVsReplace": "Scalanie zachowuje bieżące postępy i dodaje dane z importu. Zastąpienie nadpisuje wszystkie bieżące postępy.",
+      "dangerTitle": "Strefa ryzyka",
+      "dangerDescription": "Trwałe operacje wpływające na historię nauki.",
+      "resetAllProgress": "Resetuj wszystkie postępy"
+    },
+    "help": {
+      "sectionTitle": "Pomoc",
+      "sectionSummary": "FAQ · Blog · Kontakt · Legacy v1",
+      "cardTitle": "Pomoc i wsparcie",
+      "cardDescription": "Szybki dostęp do FAQ, aktualności i kontaktu.",
+      "faq": "FAQ",
+      "blog": "Blog",
+      "contact": "Kontakt",
+      "legacyV1": "Legacy v1",
+      "buyCoffee": "Postaw kawę"
+    },
+    "empty": {
+      "global": "Brak dopasowania ustawień globalnych dla \"{{query}}\".",
+      "modules": "Brak dopasowania ustawień modułów dla \"{{query}}\".",
+      "data": "Brak dopasowania ustawień danych/wsparcia dla \"{{query}}\".",
+      "clearSearch": "Wyczyść wyszukiwanie"
+    }
+  },
+  "progress": {
+    "title": "Postępy",
+    "totalAnswers": "Odp.",
+    "accuracy": "Celność",
+    "coverage": "Pokrycie",
+    "streak": "Seria",
+    "streakFormat": "{{days}}d • {{freezes}} zamroż.",
+    "fretboardTitle": "Twój Gryf",
+    "fretboardDesc": "Pozycje: {{positions}} • Pokrycie: {{coverage}}%",
+    "hideHeatMap": "Ukryj mapę",
+    "showHeatMap": "Pokaż mapę",
+    "emptyFretboardTitle": "Mapa gryfu jest pusta",
+    "emptyFretboardDesc": "Rozpocznij krótką sesję by odblokować.",
+    "startPractice": "Zacznij",
+    "weak": "słabe < 60%",
+    "learning": "w trakcie 60-85%",
+    "mastered": "opanowane > 85%",
+    "accuracyTrendTitle": "Trend celności",
+    "accuracyTrendDesc": "Śledź swoją statystykę w czasie.",
+    "week": "Tydzień",
+    "month": "Miesiąc",
+    "all": "Wszystko",
+    "functionalEarTitle": "Trening Funkcjonalny",
+    "functionalEarDesc": "Rozpoznawanie stopni skali.",
+    "emptyFunctionalTitle": "Brak danych słuchu",
+    "emptyFunctionalDesc": "Ukończ pierwszą sesję w dziale Treningu Słuchu.",
+    "startFunctionalEar": "Rozpocznij trening funkcjonalny",
+    "degreeLabel": "Stopień {{degree}}",
+    "accuracyVal": "{{accuracy}}% celności",
+    "answersVal": "{{samples}} odpowiedzi",
+    "avgMs": "Średnio {{ms}} ms",
+    "focusAreasTitle": "Obszary do poprawy",
+    "focusAreasDesc": "Miejsca z najsłabszym utrwaleniem",
+    "emptyFocusTitle": "Brak stref skupienia",
+    "emptyFocusDesc": "Ukończ parę sesji, by wyświetlić błędy.",
+    "openTrain": "Treningi",
+    "stringFret": "Struna {{string}}, próg {{fret}}",
+    "practiceWeakSpots": "Poćwicz słabe punkty",
+    "achievementsTitle": "Osiągnięcia",
+    "achievementsDesc": "{{unlocked}} / {{total}} odblokowanych",
+    "practiceTime": "Czas: {{hours}}g {{minutes}}m",
+    "resetConfirmTitle": "Zresetować mapę cieplną?",
+    "resetConfirmDesc": "To usunie dane mapy na gryfie z pamięci. Tej akcji nie można cofnąć.",
+    "reset": "Zresetuj",
+    "resetSuccess": "Pomyślnie zresetowano mapę cieplną.",
+    "achievementsList": {
+      "first_note": {
+        "name": "Pierwsze kroki",
+        "desc": "Poprawnie rozpoznaj pierwszą nutę"
+      },
+      "streak_7": {
+        "name": "Wojownik tygodnia",
+        "desc": "Ćwicz 7 dni z rzędu"
+      },
+      "streak_30": {
+        "name": "Mistrz miesiąca",
+        "desc": "Ćwicz 30 dni z rzędu"
+      },
+      "perfect_session": {
+        "name": "Perfekcyjna sesja",
+        "desc": "Uzyskaj 20 poprawnych odpowiedzi z rzędu"
+      },
+      "speed_demon": {
+        "name": "Demon szybkości",
+        "desc": "Ćwicz w tempie 120 BPM lub szybciej"
+      },
+      "explorer": {
+        "name": "Odkrywca gryfu",
+        "desc": "Ćwicz na wszystkich 6 strunach"
+      }
+    },
+    "accuracyChart": {
+      "emptyTitle": "Trend celności pojawi się po 3+ sesjach",
+      "emptyDescription": "Ćwicz regularnie, aby odblokować realny wgląd w postępy.",
+      "averageAccuracy": "Średnia celność",
+      "improving": "Rośnie",
+      "declining": "Spada",
+      "stable": "Stabilnie",
+      "high": "Max: {{value}}%",
+      "low": "Min: {{value}}%",
+      "trendLegend": "Trend celności",
+      "confidenceLegend": "Strefa pewności"
+    }
+  },
+  "ear": {
+    "page": {
+      "modeNotFoundTitle": "Nie znaleziono trybu",
+      "modeNotFoundDesc": "Tryb '{{mode}}' jest niedostępny.",
+      "backToLibrary": "Wróć do Treningu",
+      "modes": {
+        "soundToFretboard": "Nuta -> Gryf",
+        "intervalRecognition": "Rozpoznawanie interwałów",
+        "chordQuality": "Jakość akordu",
+        "functionalEar": "Słuch funkcyjny"
+      }
+    },
+    "common": {
+      "startTraining": "Start",
+      "score": "Wynik",
+      "replay": "Odtwórz",
+      "hint": "Podpowiedź",
+      "hideHint": "Ukryj",
+      "next": "Dalej",
+      "end": "Zakończ",
+      "correct": "Dobrze!"
+    },
+    "soundToFretboard": {
+      "title": "Nuta -> Gryf",
+      "description": "Usłysz nutę i wskaż pasujące pozycje na gryfie.",
+      "enableAudioHint": "Kliknij start, aby odblokować audio.",
+      "noteIs": "To nuta: {{note}}",
+      "noteWas": "Poprawna nuta: {{note}}"
+    },
+    "intervals": {
+      "description": "Usłysz dwie nuty i rozpoznaj interwał.",
+      "itWas": "To był: {{interval}}",
+      "difficulty": {
+        "easy": "Łatwy",
+        "medium": "Średni",
+        "hard": "Trudny"
+      },
+      "labels": {
+        "P1": "Pryma czysta",
+        "m2": "Sekunda mała",
+        "M2": "Sekunda wielka",
+        "m3": "Tercja mała",
+        "M3": "Tercja wielka",
+        "P4": "Kwarta czysta",
+        "A4": "Tryton",
+        "P5": "Kwinta czysta",
+        "m6": "Seksta mała",
+        "M6": "Seksta wielka",
+        "m7": "Septyma mała",
+        "M7": "Septyma wielka",
+        "P8": "Oktawa"
+      }
+    },
+    "chords": {
+      "description": "Usłysz akord i rozpoznaj jego jakość.",
+      "itWas": "To był: {{quality}}",
+      "difficulty": {
+        "triads": "Triady",
+        "extended": "Rozszerzone"
+      },
+      "qualities": {
+        "major": "Dur",
+        "minor": "Moll",
+        "diminished": "Dim",
+        "augmented": "Aug",
+        "sus2": "Sus2",
+        "sus4": "Sus4",
+        "dom7": "7",
+        "maj7": "Maj7",
+        "min7": "m7"
+      }
+    },
+    "functional": {
+      "description": "Usłysz tonację i nutę docelową, a potem wskaż stopień skali.",
+      "keyMode": "Tryb tonacji",
+      "random": "Losowa",
+      "fixedKey": "Stała",
+      "activeDegrees": "Aktywne stopnie",
+      "autoNext": "Auto dalej",
+      "autoNextDesc": "Po poprawnej odpowiedzi od razu kolejne pytanie.",
+      "keyCenter": "Centrum tonalne",
+      "major": "dur",
+      "listenPrompt": "Najpierw odsłuch, potem wybór stopnia.",
+      "replayContext": "Kontekst",
+      "replayTarget": "Nuta",
+      "replayFull": "Całość",
+      "correctFeedback": "Dobrze: stopień {{degree}} w {{key}} {{major}} ({{note}})",
+      "wrongFeedback": "Nie tym razem: wybrano {{selected}}, poprawnie {{correct}} ({{note}})",
+      "sessionDegreeStats": "Statystyki stopni",
+      "degree": "Stopień {{degree}}",
+      "accuracy": "{{value}}% trafień",
+      "avgMs": "Śr. {{value}} ms",
+      "audio": {
+        "playingContextTarget": "Odtwarzanie: kontekst + nuta",
+        "replayingContext": "Odtwarzanie: sam kontekst",
+        "replayingTarget": "Odtwarzanie: sama nuta",
+        "replayingFull": "Odtwarzanie: pełny prompt"
+      }
+    }
+  },
+  "rhythm": {
+    "common": {
+      "audioClickLabel": "Klik metronomu",
+      "barsLabel": "Takty",
+      "bpm": "{{value}} BPM",
+      "editSettings": "Ustawienia",
+      "newSession": "Nowa sesja",
+      "off": "Wył.",
+      "on": "Wł.",
+      "practice": "Trening",
+      "practiceWithGuitar": "Ćwicz z gitarą",
+      "retry": "Powtórz",
+      "scored": "Punktowany",
+      "startScored": "Start punktowany",
+      "stop": "Zatrzymaj",
+      "stopPractice": "Zakończ trening",
+      "tempoBpm": "Tempo: {{bpm}} BPM",
+      "metrics": {
+        "hits": "Trafienia",
+        "misses": "Pomyłki",
+        "extras": "Nadmiarowe",
+        "avgOffset": "Śr. odchyłka",
+        "direction": "Kierunek"
+      }
+    },
+    "tapBeat": {
+      "title": "Wystukaj rytm",
+      "description": "Ćwicz trzymanie rytmu i trafiaj równo w klik.",
+      "timeSignatureLabel": "Metrum",
+      "sixEightPulse": "6/8 (rytm)",
+      "sessionScoredDesc": "Liczymy trafienia, pomyłki i dokładność czasową.",
+      "sessionPracticeDesc": "Ćwiczenie bez punktów i statystyk.",
+      "signatureBars": "{{signature}} · {{bars}} taktów",
+      "practiceHint": "Tryb treningowy: słuchaj kliku i trzymaj równy rytm.",
+      "summaryDescription": "Wynik: {{score}} pkt · Dokładność: {{accuracy}}%"
+    },
+    "strumPatterns": {
+      "title": "Rytmy bicia",
+      "description": "Ćwicz popularne wzory bicia i kontrolę kierunku kostkowania.",
+      "patternLabel": "Wzór",
+      "sessionScoredDesc": "Punktacja za timing i poprawny kierunek ruchu.",
+      "sessionPracticeDesc": "Ćwiczenie bez punktacji, tylko groove.",
+      "barsGrid": "{{bars}} taktów · siatka {{grid}}",
+      "grid16": "1/16",
+      "grid8": "1/8",
+      "practiceHint": "Tryb treningowy: graj wzór w pętli i pilnuj pulsu.",
+      "summaryDescription": "Wynik: {{score}} pkt · Dokładność: {{accuracy}}% · Kierunek: {{direction}}%",
+      "patterns": {
+        "basic-down": {
+          "title": "Same dół",
+          "genre": "Uniwersalny",
+          "description": "Stabilny puls ćwierćnut samym ruchem w dół."
+        },
+        "folk-strum": {
+          "title": "Folkowy",
+          "genre": "Folk / Country",
+          "description": "Klasyczny groove singer-songwriter."
+        },
+        "pop-rock": {
+          "title": "Pop/Rock",
+          "genre": "Pop / Rock",
+          "description": "Tłumiony akcent na trzeciej miarze dodaje napędu."
+        },
+        "island": {
+          "title": "Island",
+          "genre": "Reggae / Ska",
+          "description": "Offbeatowy feel z większą przestrzenią."
+        },
+        "syncopated": {
+          "title": "Synkopowany",
+          "genre": "Funk / R&B",
+          "description": "Gęstsze akcenty i synkopowane wejścia."
+        },
+        "sixteenth-flow": {
+          "title": "Flow 16-ek",
+          "genre": "Miks",
+          "description": "Ciągły ruch po siatce szesnastek z pauzami."
+        }
+      }
+    },
+    "rhythmReading": {
+      "title": "Czytanie rytmu",
+      "description": "Czytaj zapis i trafiaj ataki dokładnie w czasie.",
+      "exerciseLabel": "Ćwiczenie",
+      "timeLabel": "Metrum",
+      "expectedTapsLabel": "Ataki / takt",
+      "expectedPerBar": "{{count}}",
+      "gridLabel": "Siatka",
+      "gridSubdivisions": "{{count}} podział",
+      "levelLabel": "Poziom",
+      "levelValue": "Poziom {{level}}",
+      "exerciseSelectLabel": "Wariant",
+      "adaptiveTempoLabel": "Tempo adaptacyjne",
+      "adaptiveTempoDesc": "Po sesji tempo automatycznie wzrośnie albo spadnie.",
+      "adaptiveTempoUp": "Tempo adaptacyjne: +{{delta}} BPM (następna sesja: {{next}} BPM).",
+      "adaptiveTempoDown": "Tempo adaptacyjne: -{{delta}} BPM dla czystszego timingu (następna sesja: {{next}} BPM).",
+      "adaptiveTempoHold": "Tempo adaptacyjne bez zmian: {{bpm}} BPM.",
+      "randomExercise": "Losuj ćwiczenie",
+      "sessionScoredDesc": "Punktacja za timing względem zapisu.",
+      "sessionPracticeDesc": "Ćwiczenie czytania bez punktów.",
+      "headerMeta": "{{signature}} · siatka {{grid}} · {{taps}} at./takt",
+      "levelCompact": "Poziom {{level}}",
+      "barsCompact": "{{bars}} taktów",
+      "practiceHint": "Tryb treningowy: czytaj zapis i graj bez punktacji.",
+      "summaryDescription": "Wynik: {{score}} pkt · Dokładność: {{accuracy}}%",
+      "exercises": {
+        "rr-l1-quarters-a": {
+          "title": "Ćwierćnuty A",
+          "description": "Równy puls ćwierćnut z jedną pauzą ćwierćnutową."
+        },
+        "rr-l1-quarters-b": {
+          "title": "Ćwierćnuty B",
+          "description": "Wejścia ćwierćnutowe z pauzą poza mocną częścią taktu."
+        },
+        "rr-l2-eighths-a": {
+          "title": "Ósemki A",
+          "description": "Proste ósemki z jednym brakującym atakiem."
+        },
+        "rr-l2-eighths-b": {
+          "title": "Ósemki B",
+          "description": "Połączenia ćwierćnut i ósemek z pauzami."
+        },
+        "rr-l3-sixteenth-a": {
+          "title": "Szesnastki A",
+          "description": "Ustawienia ćwierćnut i szesnastek w metrum 4/4."
+        },
+        "rr-l3-sixteenth-b": {
+          "title": "Szesnastki B",
+          "description": "Mieszane wejścia szesnastkowe i ósemkowe."
+        },
+        "rr-l4-dotted-a": {
+          "title": "Rytm kropkowany A",
+          "description": "Połączenia ósemki z kropką i ćwierćnut."
+        },
+        "rr-l4-dotted-b": {
+          "title": "Rytm kropkowany B",
+          "description": "Rytm kropkowany z pauzami."
+        },
+        "rr-l5-triplets-a": {
+          "title": "Triola A",
+          "description": "Siatka triolowa w metrum 4/4."
+        },
+        "rr-l5-triplets-b": {
+          "title": "Triola B",
+          "description": "Triolowe wejścia z synkopowanymi pauzami."
+        },
+        "rr-l6-compound-a": {
+          "title": "6/8 złożone A",
+          "description": "Puls 6/8 z grupowaniem ósemkowym."
+        },
+        "rr-l6-compound-b": {
+          "title": "6/8 złożone B",
+          "description": "Akcenty 6/8 z pauzami wewnętrznymi."
+        }
+      }
+    },
+    "grooveLab": {
+      "title": "Laboratorium groove'u",
+      "description": "Buduj timing i kierunek kostkowania w stylach z sekcją rytmiczną.",
+      "presetLabel": "Preset groove'u",
+      "metronomeClickLabel": "Klik metronomu",
+      "echoModeLabel": "Tryb echo",
+      "echoModeDesc": "Najpierw słuchasz, potem odgrywasz odpowiedź.",
+      "sessionScoredDesc": "Punktacja za timing, kierunek i kontrolę groove'u.",
+      "sessionPracticeDesc": "Ćwicz groove bez punktacji.",
+      "barCounter": "Takt {{current}} / {{total}}",
+      "phaseListen": "Słuchaj",
+      "phaseReplay": "Odtwarzaj",
+      "listenPhaseHint": "Faza odsłuchu: wsłuchaj się w groove i przygotuj odpowiedź.",
+      "practiceHint": "Tryb treningowy: graj z groove'em i dopracuj puls.",
+      "summaryDescription": "Wynik: {{score}} pkt · Dokładność: {{accuracy}}% · Kierunek: {{direction}}%",
+      "headerMeta": "{{genre}} · {{feel}} · {{bpm}} BPM",
+      "feels": {
+        "straight": "prosto",
+        "shuffle": "shuffle",
+        "compound": "złożony"
+      },
+      "presets": {
+        "straight-8-rock": {
+          "title": "Rock proste 8",
+          "genre": "Rock",
+          "description": "Stabilny backbeat z akcentami na mocnych częściach."
+        },
+        "shuffle-blues": {
+          "title": "Blues shuffle",
+          "genre": "Blues",
+          "description": "Triolowa siatka z bujającym shuffle."
+        },
+        "reggae-offbeat": {
+          "title": "Reggae offbeat",
+          "genre": "Reggae",
+          "description": "Akcent na offbeatach i dużo przestrzeni."
+        },
+        "bossa-nova": {
+          "title": "Bossa nova",
+          "genre": "Latin",
+          "description": "Naprzemienny puls basu i lekkie ruchy w górę."
+        },
+        "ballad-12-8": {
+          "title": "Ballada 12/8",
+          "genre": "Ballada",
+          "description": "Wolny feel złożony z płynnym ruchem triolowym."
+        },
+        "funk-16th": {
+          "title": "Funk 16",
+          "genre": "Funk",
+          "description": "Zwarta siatka szesnastek z tłumionymi atakami."
+        }
+      }
+    },
+    "notFound": {
+      "title": "Nie znaleziono trybu rytmu",
+      "description": "Żądany tryb rytmiczny nie istnieje.",
+      "backToTrain": "Wróć do treningu"
+    },
+    "comingSoon": {
+      "description": "Ten tryb pojawi się wkrótce.",
+      "body": "Ten tryb jest zaplanowany na kolejny sprint. Na razie trenuj w Tap the Beat albo Strum Patterns."
+    },
+    "ui": {
+      "patternGrid": {
+        "title": "Siatka patternu"
+      },
+      "latency": {
+        "title": "Kompensacja opóźnienia wejścia",
+        "value": "{{value}} ms",
+        "description": "Zwiększ tę wartość, jeśli trafienia są oznaczane jako spóźnione mimo grania w punkt."
+      },
+      "tapZone": {
+        "down": "Dół",
+        "up": "Góra",
+        "keyboardLabel": "Klawiatura",
+        "tapBeat": "Wystukaj rytm"
+      },
+      "timingFeedback": {
+        "waiting": "Czekam na Twoje uderzenie...",
+        "wrongDirection": "Zły kierunek",
+        "miss": "MISS {{offset}}ms",
+        "value": "{{rating}} {{offset}}ms",
+        "rating": {
+          "perfect": "PERFECT",
+          "good": "GOOD",
+          "ok": "OK",
+          "miss": "MISS"
+        }
+      },
+      "rhythmNotation": {
+        "title": "Linia zapisu",
+        "meta": "{{signature}} · siatka {{subdivision}}",
+        "legend": {
+          "tapNotesOnly": "Uderzaj tylko w główki nut",
+          "noRests": "Nie uderzaj podczas pauz",
+          "accents": "Akcenty oznaczają mocniejszy puls"
+        }
+      }
+    }
+  },
+  "rhythmModes": {
+    "tapBeat": "Wystukaj rytm",
+    "strumPatterns": "Rytmy bicia",
+    "rhythmReading": "Czytanie rytmu",
+    "grooveLab": "Laboratorium groove'u"
+  },
+  "me": {
+    "tabs": {
+      "progress": "Postępy",
+      "settings": "Ustawienia"
+    }
+  },
+  "errorBoundary": {
+    "title": "Coś poszło nie tak",
+    "description": "Wystąpił nieoczekiwany błąd. Odśwież stronę albo spróbuj ponownie.",
+    "retry": "Ponów",
+    "reload": "Odśwież stronę"
+  }
+}

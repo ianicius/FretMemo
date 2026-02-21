@@ -2,9 +2,29 @@ import { Note } from "tonal";
 import { NOTES } from "@/lib/constants";
 import type { NoteName } from "@/types/fretboard";
 
+import i18n from "@/lib/i18n";
+
 export type NoteDisplayMode = "sharps" | "flats";
 
 const FLAT_NOTES = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"] as const;
+
+export function applyPolishNotation(noteStr: string): string {
+    // Basic replacements for full matching or starting with B/Bb (like B4, Bbm, etc.)
+    // Note: Bbm -> Bm in Polish since Bb is B and B is H.
+    // Bbmaj -> Bmaj
+    // Bmaj -> Hmaj
+
+    if (noteStr === "Bb") return "B";
+    if (noteStr === "B") return "H";
+
+    if (noteStr.startsWith("Bb")) {
+        return "B" + noteStr.slice(2);
+    }
+    if (noteStr.startsWith("B")) {
+        return "H" + noteStr.slice(1);
+    }
+    return noteStr;
+}
 
 function normalizePitchClassIndex(index: number): number {
     return ((index % 12) + 12) % 12;
@@ -45,17 +65,37 @@ export function toSharpPitchClass(input: string | number): NoteName | null {
 
 export function formatPitchClass(input: string | number, notation: NoteDisplayMode = "sharps"): string {
     const pitchClassIndex = resolvePitchClassIndex(input);
-    if (pitchClassIndex === null) return typeof input === "string" ? input : "";
-    if (notation === "flats") return FLAT_NOTES[pitchClassIndex];
-    return NOTES[pitchClassIndex];
+    let result = "";
+    if (pitchClassIndex === null) {
+        result = typeof input === "string" ? input : "";
+    } else {
+        result = notation === "flats" ? FLAT_NOTES[pitchClassIndex] : NOTES[pitchClassIndex];
+    }
+
+    if (i18n.resolvedLanguage === 'pl' || i18n.language === 'pl') {
+        return applyPolishNotation(result);
+    }
+    return result;
 }
 
 export function formatPitchClassWithEnharmonic(input: string | number, notation: NoteDisplayMode = "sharps"): string {
     const pitchClassIndex = resolvePitchClassIndex(input);
-    if (pitchClassIndex === null) return typeof input === "string" ? input : "";
+    if (pitchClassIndex === null) {
+        const str = typeof input === "string" ? input : "";
+        if (i18n.resolvedLanguage === 'pl' || i18n.language === 'pl') {
+            return applyPolishNotation(str);
+        }
+        return str;
+    }
 
-    const primary = notation === "flats" ? FLAT_NOTES[pitchClassIndex] : NOTES[pitchClassIndex];
-    const alternate = notation === "flats" ? NOTES[pitchClassIndex] : FLAT_NOTES[pitchClassIndex];
+    let primary: string = notation === "flats" ? FLAT_NOTES[pitchClassIndex] : NOTES[pitchClassIndex];
+    let alternate: string = notation === "flats" ? NOTES[pitchClassIndex] : FLAT_NOTES[pitchClassIndex];
+
+    if (i18n.resolvedLanguage === 'pl' || i18n.language === 'pl') {
+        primary = applyPolishNotation(primary);
+        alternate = applyPolishNotation(alternate);
+    }
+
     if (primary === alternate) return primary;
     return `${primary} (${alternate})`;
 }

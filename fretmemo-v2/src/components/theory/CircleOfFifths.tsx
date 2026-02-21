@@ -1,5 +1,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { Key } from "tonal";
+import { applyPolishNotation } from "@/lib/noteNotation";
+import { useTranslation } from "react-i18next";
 
 const KEYS = ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"] as const;
 const RADIUS = 140;
@@ -12,18 +14,19 @@ function polarToCartesian(cx: number, cy: number, r: number, angleDeg: number) {
 }
 
 export default function CircleOfFifths() {
+    const { t } = useTranslation();
     const [selectedKey, setSelectedKey] = useState<string>("C");
 
     const keyData = useMemo(() => {
         const major = Key.majorKey(selectedKey);
         return {
-            name: major.tonic + " Major",
-            relativeName: major.minorRelative + " minor",
+            name: `${applyPolishNotation(major.tonic)} ${t("theory.circle.major")}`,
+            relativeName: `${applyPolishNotation(major.minorRelative)} ${t("theory.circle.minor")}`,
             scale: major.scale,
             chords: major.chords,
             chordsRoman: ["I", "ii", "iii", "IV", "V", "vi", "vii°"],
         };
-    }, [selectedKey]);
+    }, [selectedKey, t]);
 
     const segments = useMemo(() => {
         return KEYS.map((key, i) => {
@@ -47,7 +50,7 @@ export default function CircleOfFifths() {
                     viewBox="0 0 360 360"
                     className="w-full max-w-[360px] select-none"
                     role="img"
-                    aria-label="Circle of Fifths"
+                    aria-label={t("theory.page.tools.circleOfFifths")}
                 >
                     {/* Background circle */}
                     <circle cx={CENTER} cy={CENTER} r={RADIUS + 20} fill="none" stroke="currentColor" strokeOpacity={0.1} strokeWidth={1} />
@@ -77,7 +80,7 @@ export default function CircleOfFifths() {
                                     className={`text-sm font-bold select-none ${isSelected ? "fill-primary" : "fill-foreground"
                                         }`}
                                 >
-                                    {seg.key}
+                                    {applyPolishNotation(seg.key)}
                                 </text>
                                 {/* Minor key label (inner) */}
                                 <text
@@ -88,7 +91,7 @@ export default function CircleOfFifths() {
                                     className={`text-[10px] select-none ${isSelected ? "fill-primary/70" : "fill-muted-foreground"
                                         }`}
                                 >
-                                    {seg.minorKey}m
+                                    {applyPolishNotation(seg.minorKey)}m
                                 </text>
                             </g>
                         );
@@ -96,7 +99,7 @@ export default function CircleOfFifths() {
 
                     {/* Center label */}
                     <text x={CENTER} y={CENTER - 8} textAnchor="middle" className="text-sm font-bold fill-primary">
-                        {selectedKey}
+                        {applyPolishNotation(selectedKey)}
                     </text>
                     <text x={CENTER} y={CENTER + 10} textAnchor="middle" className="text-[9px] fill-muted-foreground">
                         {keyData.relativeName}
@@ -108,12 +111,12 @@ export default function CircleOfFifths() {
             <div className="rounded-xl border border-border bg-card p-4 space-y-3">
                 <h3 className="font-bold text-lg">{keyData.name}</h3>
                 <p className="text-sm text-muted-foreground">
-                    Relative minor: <span className="font-semibold text-foreground">{keyData.relativeName}</span>
+                    {t("theory.circle.relativeMinor")}: <span className="font-semibold text-foreground">{keyData.relativeName}</span>
                 </p>
 
                 {/* Scale notes */}
                 <div>
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Scale Notes</p>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">{t("theory.circle.scaleNotes")}</p>
                     <div className="flex flex-wrap gap-2">
                         {keyData.scale.map((note, i) => (
                             <span
@@ -123,7 +126,7 @@ export default function CircleOfFifths() {
                                         : "bg-primary/10 text-primary border border-primary/20"
                                     }`}
                             >
-                                {note}
+                                {applyPolishNotation(note)}
                             </span>
                         ))}
                     </div>
@@ -131,7 +134,7 @@ export default function CircleOfFifths() {
 
                 {/* Diatonic chords */}
                 <div>
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Diatonic Chords</p>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">{t("theory.circle.diatonicChords")}</p>
                     <div className="grid grid-cols-4 gap-2 sm:grid-cols-7">
                         {keyData.chords.map((chord, i) => (
                             <div
@@ -139,7 +142,7 @@ export default function CircleOfFifths() {
                                 className="flex flex-col items-center gap-0.5 rounded-lg border border-border bg-muted/30 p-2"
                             >
                                 <span className="text-[10px] font-bold text-muted-foreground">{keyData.chordsRoman[i]}</span>
-                                <span className="text-xs font-bold">{chord}</span>
+                                <span className="text-xs font-bold">{applyPolishNotation(chord)}</span>
                             </div>
                         ))}
                     </div>

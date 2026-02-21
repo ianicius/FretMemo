@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Pause, Play, Square, Timer, Target, Zap } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface FocusModeHUDProps {
     isPlaying: boolean;
@@ -42,6 +43,7 @@ export function FocusModeHUD({
     showTempo = true,
     isLandscape = false,
 }: FocusModeHUDProps) {
+    const { t } = useTranslation();
     const [elapsedTime, setElapsedTime] = useState(0);
     const hudRef = useRef<HTMLDivElement | null>(null);
 
@@ -96,17 +98,17 @@ export function FocusModeHUD({
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
                 <div className="w-full max-w-sm space-y-5 rounded-xl border border-border/60 bg-card/95 p-6 text-center shadow-xl">
                     <div className="space-y-1">
-                        <p className="text-lg font-semibold">Session paused</p>
-                        <p className="text-sm text-muted-foreground">Resume when you are ready.</p>
+                        <p className="text-lg font-semibold">{t("practice.focusHud.sessionPausedTitle")}</p>
+                        <p className="text-sm text-muted-foreground">{t("practice.focusHud.sessionPausedDescription")}</p>
                     </div>
                     <div className="flex flex-wrap justify-center gap-2">
                         <Button size="sm" onClick={onResume} className="control-btn--primary">
                             <Play className="mr-2 h-4 w-4" />
-                            Resume
+                            {t("practice.focusHud.resume")}
                         </Button>
                         <Button size="sm" variant="outline" onClick={onStop} className="border-destructive text-destructive hover:bg-destructive/10">
                             <Square className="mr-2 h-4 w-4 fill-current" />
-                            End Session
+                            {t("practice.focusHud.endSession")}
                         </Button>
                     </div>
                 </div>
@@ -145,7 +147,9 @@ export function FocusModeHUD({
                             <Zap className="h-3 w-3" />
                             <span className="font-mono">{streak}</span>
                         </div>
-                        <span className="text-[10px] text-muted-foreground">Score <span className="font-mono font-semibold text-foreground">{score}</span></span>
+                        <span className="text-[10px] text-muted-foreground">
+                            {t("practice.focusHud.score")} <span className="font-mono font-semibold text-foreground">{score}</span>
+                        </span>
                         {progressValue !== null && (
                             <div className="flex-1 mx-1">
                                 <div className="h-1 overflow-hidden rounded-full bg-muted/50">
@@ -216,7 +220,7 @@ export function FocusModeHUD({
                                 <span className="font-mono">{streak}</span>
                             </div>
                             <div className="hidden items-center gap-1 rounded-full border border-border/50 bg-muted/20 px-2 py-0.5 text-xs text-muted-foreground md:flex">
-                                <span>Score</span>
+                                <span>{t("practice.focusHud.score")}</span>
                                 <span className="font-mono font-semibold text-foreground">{score}</span>
                             </div>
                             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onPause}>
@@ -235,7 +239,7 @@ export function FocusModeHUD({
                     {progressValue !== null ? (
                         <div className="space-y-1">
                             <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-                                <span>Session progress</span>
+                                <span>{t("practice.focusHud.sessionProgress")}</span>
                                 <span className="font-mono">{progressCurrent ?? total}/{progressTarget}</span>
                             </div>
                             <div className="h-1.5 overflow-hidden rounded-full bg-muted/50">

@@ -27,6 +27,7 @@ import { getExpectedStepFromSymbol, STRUM_PATTERNS } from "@/rhythm/data/strumPa
 import { useRhythmDojoStore } from "@/stores/useRhythmDojoStore";
 import { useProgressStore } from "@/stores/useProgressStore";
 import { trackEvent } from "@/lib/analytics";
+import { useTranslation } from "react-i18next";
 
 interface StrumPatternSettings {
     bpm: number;
@@ -60,12 +61,14 @@ const DEFAULT_SETTINGS: StrumPatternSettings = {
 const MATCH_WINDOW_SEC = DEFAULT_MATCH_WINDOW_SEC;
 
 export function StrumPatternsMode() {
+    const { t } = useTranslation();
     const clockRef = useRef(new RhythmClock());
     const schedulerRef = useRef<MetronomeScheduler | null>(null);
     const expectedStepsRef = useRef<ExpectedStrumStep[]>([]);
     const evaluationsRef = useRef<TapEvaluation[]>([]);
     const extrasRef = useRef(0);
     const finishTimerRef = useRef<number | null>(null);
+    const scheduleTokenRef = useRef(0);
     const startedAtRef = useRef<number | null>(null);
     const statusRef = useRef<SessionStatus>("idle");
     const sessionModeRef = useRef<SessionMode>("scored");
@@ -89,6 +92,12 @@ export function StrumPatternsMode() {
         () => STRUM_PATTERNS.find((pattern) => pattern.id === settings.patternId) ?? STRUM_PATTERNS[0],
         [settings.patternId],
     );
+    const activePatternTitle = t(`rhythm.strumPatterns.patterns.${activePattern.id}.title`, activePattern.title);
+    const activePatternGenre = t(`rhythm.strumPatterns.patterns.${activePattern.id}.genre`, activePattern.genre);
+    const activePatternDescription = t(
+        `rhythm.strumPatterns.patterns.${activePattern.id}.description`,
+        activePattern.description,
+    );
     const totalSteps = useMemo(
         () => settings.bars * activePattern.slots.length,
         [activePattern.slots.length, settings.bars],
@@ -107,6 +116,7 @@ export function StrumPatternsMode() {
     }, [sessionMode]);
 
     const stopScheduler = useCallback(() => {
+        scheduleTokenRef.current += 1;
         if (finishTimerRef.current !== null) {
             window.clearTimeout(finishTimerRef.current);
             finishTimerRef.current = null;
@@ -205,6 +215,7 @@ export function StrumPatternsMode() {
         evaluationsRef.current = [];
         extrasRef.current = 0;
         startedAtRef.current = Date.now();
+        const scheduleToken = scheduleTokenRef.current;
 
         setSummary(null);
         setLastEvaluation(null);
@@ -219,10 +230,9 @@ export function StrumPatternsMode() {
             bpm: settings.bpm,
             timeSignatureTop: 4,
             subdivision: activePattern.subdivision,
+            maxSteps: mode === "scored" ? totalSteps : undefined,
             clickEnabled: settings.clickEnabled,
             onStep: (step) => {
-                if (mode === "scored" && step.index >= totalSteps) return;
-
                 const slotIndex = step.barStepIndex % activePattern.slots.length;
                 if (mode === "scored") {
                     const symbol = activePattern.slots[slotIndex];
@@ -240,6 +250,7 @@ export function StrumPatternsMode() {
 
                 const delayMs = clockRef.current.toDelayMs(step.time);
                 window.setTimeout(() => {
+                    if (scheduleTokenRef.current !== scheduleToken) return;
                     setPlayheadStep(slotIndex);
                 }, delayMs);
             },
@@ -272,7 +283,6 @@ export function StrumPatternsMode() {
         activePattern.slots,
         activePattern.subdivision,
         checkAndUpdateStreak,
-        finalizeSession,
         inputLatencyMs,
         settings.bars,
         settings.bpm,
@@ -288,20 +298,25 @@ export function StrumPatternsMode() {
 
         const rawTapTime = clockRef.current.now();
         const tapTime = applyInputLatencyCompensation(rawTapTime, inputLatencyMs);
-        const candidate = expectedStepsRef.current
+        const nearestStep = expectedStepsRef.current
             .filter((expected) => !expected.matched)
             .map((expected) => ({
                 expected,
+                offsetSec: tapTime - expected.time,
                 absOffsetSec: Math.abs(tapTime - expected.time),
             }))
-            .filter((item) => item.absOffsetSec <= MATCH_WINDOW_SEC)
             .sort((left, right) => left.absOffsetSec - right.absOffsetSec)[0];
+
+        const candidate = nearestStep && nearestStep.absOffsetSec <= MATCH_WINDOW_SEC
+            ? nearestStep
+            : null;
 
         if (!candidate) {
             extrasRef.current += 1;
+            const offsetMs = nearestStep ? nearestStep.offsetSec * 1000 : 0;
             const extraEvaluation: TapEvaluation = {
-                offsetMs: 0,
-                absOffsetMs: 0,
+                offsetMs,
+                absOffsetMs: Math.abs(offsetMs),
                 rating: "miss",
                 isHit: false,
                 directionCorrect: true,
@@ -380,14 +395,14 @@ export function StrumPatternsMode() {
             <div className="space-y-4">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Strum Patterns</CardTitle>
+                        <CardTitle>{t("rhythm.strumPatterns.title")}</CardTitle>
                         <CardDescription>
-                            Follow the grid and strum down/up on time. Accuracy + direction both matter.
+                            {t("rhythm.strumPatterns.description")}
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid gap-3 sm:grid-cols-2">
-                            <FormField id="strum-pattern-id" label="Pattern">
+                            <FormField id="strum-pattern-id" label={t("rhythm.strumPatterns.patternLabel")}>
                                 <Select
                                     value={settings.patternId}
                                     onChange={(event) =>
@@ -399,7 +414,8 @@ export function StrumPatternsMode() {
                                 >
                                     {STRUM_PATTERNS.map((pattern) => (
                                         <option key={pattern.id} value={pattern.id}>
-                                            {pattern.title} ({pattern.difficulty})
+                                            {t(`rhythm.strumPatterns.patterns.${pattern.id}.title`, pattern.title)} (
+                                            {t(`common.difficulty.${pattern.difficulty}`, pattern.difficulty)})
                                         </option>
                                     ))}
                                 </Select>
@@ -416,7 +432,7 @@ export function StrumPatternsMode() {
                                     }))
                                 }
                             />
-                            <FormField id="strum-pattern-bars" label="Bars">
+                            <FormField id="strum-pattern-bars" label={t("rhythm.common.barsLabel")}>
                                 <Select
                                     value={settings.bars}
                                     onChange={(event) =>
@@ -432,7 +448,7 @@ export function StrumPatternsMode() {
                                     <option value={16}>16</option>
                                 </Select>
                             </FormField>
-                            <FormField id="strum-pattern-click" label="Audio Click">
+                            <FormField id="strum-pattern-click" label={t("rhythm.common.audioClickLabel")}>
                                 <Select
                                     value={settings.clickEnabled ? "on" : "off"}
                                     onChange={(event) =>
@@ -442,14 +458,14 @@ export function StrumPatternsMode() {
                                         }))
                                     }
                                 >
-                                    <option value="on">On</option>
-                                    <option value="off">Off</option>
+                                    <option value="on">{t("rhythm.common.on")}</option>
+                                    <option value="off">{t("rhythm.common.off")}</option>
                                 </Select>
                             </FormField>
                         </div>
 
                         <div className="rounded-lg border border-border bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
-                            {activePattern.genre} · {activePattern.description}
+                            {activePatternGenre} · {activePatternDescription}
                         </div>
 
                         <LatencyCompensationControl
@@ -463,18 +479,18 @@ export function StrumPatternsMode() {
                             options={[
                                 {
                                     value: "scored",
-                                    label: "Scored",
-                                    description: "Tracks timing + direction and ends with summary.",
+                                    label: t("rhythm.common.scored"),
+                                    description: t("rhythm.strumPatterns.sessionScoredDesc"),
                                 },
                                 {
                                     value: "practice",
-                                    label: "Practice",
-                                    description: "Open-ended groove to focus on feel and consistency.",
+                                    label: t("rhythm.common.practice"),
+                                    description: t("rhythm.strumPatterns.sessionPracticeDesc"),
                                 },
                             ]}
                         />
                         <SessionStartActions
-                            primaryLabel={sessionMode === "scored" ? "Start Scored Session" : "Practice with Guitar"}
+                            primaryLabel={sessionMode === "scored" ? t("rhythm.common.startScored") : t("rhythm.common.practiceWithGuitar")}
                             onPrimary={() => void startSessionWithMode(sessionMode)}
                         />
                     </CardContent>
@@ -487,10 +503,13 @@ export function StrumPatternsMode() {
         <div className="space-y-4">
             <div className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-2 text-sm">
                 <span className="font-semibold text-primary">
-                    {activePattern.title} · {settings.bpm} BPM
+                    {activePatternTitle} · {t("rhythm.common.bpm", { value: settings.bpm })}
                 </span>
                 <span className="text-muted-foreground">
-                    {settings.bars} bars · {activePattern.subdivision === 4 ? "16th grid" : "8th grid"}
+                    {t("rhythm.strumPatterns.barsGrid", {
+                        bars: settings.bars,
+                        grid: activePattern.subdivision === 4 ? t("rhythm.strumPatterns.grid16") : t("rhythm.strumPatterns.grid8"),
+                    })}
                 </span>
             </div>
 
@@ -507,22 +526,26 @@ export function StrumPatternsMode() {
                 </>
             ) : (
                 <div className="rounded-lg border border-emerald-500/35 bg-emerald-500/10 px-3 py-2 text-xs font-medium text-emerald-700 dark:text-emerald-300">
-                    Practice mode active: strum with your guitar and stop manually when you finish.
+                    {t("rhythm.strumPatterns.practiceHint")}
                 </div>
             )}
 
             {sessionMode === "scored" && summary && (
                 <SessionSummaryCard
-                    description={`Score ${summary.score} · Accuracy ${summary.accuracy}% · Direction ${summary.directionAccuracy}%`}
+                    description={t("rhythm.strumPatterns.summaryDescription", {
+                        score: summary.score,
+                        accuracy: summary.accuracy,
+                        direction: summary.directionAccuracy,
+                    })}
                     metrics={[
-                        { label: "Hits", value: summary.hits },
-                        { label: "Misses", value: summary.misses },
-                        { label: "Extras", value: summary.extras },
-                        { label: "Avg offset", value: `${summary.avgOffsetMs}ms` },
-                        { label: "Direction", value: `${summary.directionAccuracy}%` },
+                        { label: t("rhythm.common.metrics.hits"), value: summary.hits },
+                        { label: t("rhythm.common.metrics.misses"), value: summary.misses },
+                        { label: t("rhythm.common.metrics.extras"), value: summary.extras },
+                        { label: t("rhythm.common.metrics.avgOffset"), value: `${summary.avgOffsetMs}ms` },
+                        { label: t("rhythm.common.metrics.direction"), value: `${summary.directionAccuracy}%` },
                     ]}
                     primaryAction={{
-                        label: "New Session",
+                        label: t("rhythm.common.newSession"),
                         onClick: () => {
                             setStatus("idle");
                             statusRef.current = "idle";
@@ -534,7 +557,7 @@ export function StrumPatternsMode() {
             {status === "running" && (
                 <SessionStopButton
                     onStop={sessionMode === "scored" ? finalizeSession : stopPracticeSession}
-                    label={sessionMode === "scored" ? "Stop" : "Stop Practice"}
+                    label={sessionMode === "scored" ? t("rhythm.common.stop") : t("rhythm.common.stopPractice")}
                 />
             )}
         </div>

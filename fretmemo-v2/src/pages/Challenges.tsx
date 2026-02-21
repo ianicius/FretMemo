@@ -8,12 +8,18 @@ import { useProgressStore } from "@/stores/useProgressStore";
 import { useGameStore } from "@/stores/useGameStore";
 import { cn } from "@/lib/utils";
 import { ArrowRight, Calendar, ChevronDown, Flame, Play, Sparkles, Target, Zap } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 type ChallengeRouteConfig = {
     type: "timed" | "survival" | "findAll";
     label: string;
     timeLimitSec?: number;
     targetNote?: "C" | "C#" | "D" | "D#" | "E" | "F" | "F#" | "G" | "G#" | "A" | "A#" | "B";
+};
+
+type ChallengeRouteTemplate = Omit<ChallengeRouteConfig, "label"> & {
+    labelKey: string;
+    labelFallback: string;
 };
 
 type ChallengeConstraintConfig = {
@@ -42,9 +48,9 @@ function getDailyChallenge() {
 }
 
 const WEEKLY_GOALS = [
-    { id: "practice-3", name: "Consistent Practice", target: 3, current: 2, unit: "days" },
-    { id: "notes-100", name: "Note Master", target: 100, current: 67, unit: "notes" },
-    { id: "streak-7", name: "Week Warrior", target: 7, current: 5, unit: "days" },
+    { id: "practice-3", name: "Consistent Practice", target: 3, current: 2, unitKey: "days" },
+    { id: "notes-100", name: "Note Master", target: 100, current: 67, unitKey: "notes" },
+    { id: "streak-7", name: "Week Warrior", target: 7, current: 5, unitKey: "days" },
 ];
 
 const ACHIEVEMENT_HUNTS: Array<{
@@ -52,79 +58,80 @@ const ACHIEVEMENT_HUNTS: Array<{
     name: string;
     description: string;
     difficulty: "easy" | "medium" | "hard";
-    reward: string;
+    rewardKey: string;
     mode?: "fretboardToNote" | "tabToNote" | "noteToTab" | "playNotes" | "playTab";
     bpm?: number;
     constraints?: ChallengeConstraintConfig;
-    challenge?: ChallengeRouteConfig;
+    challenge?: ChallengeRouteTemplate;
 }> = [
-    {
-        id: "perfect-session",
-        name: "Perfect Session",
-        description: "Get 20 correct in a row",
-        difficulty: "medium",
-        reward: "Gold Badge",
-        mode: "fretboardToNote",
-        bpm: 80,
-        constraints: { noteFilter: "naturals", fretRange: { min: 1, max: 7 } },
-    },
-    {
-        id: "speed-demon",
-        name: "Speed Demon",
-        description: "Practice at 120+ BPM",
-        difficulty: "hard",
-        reward: "Speed Badge",
-        mode: "fretboardToNote",
-        bpm: 120,
-        constraints: { noteFilter: "all", fretRange: { min: 1, max: 12 } },
-    },
-    {
-        id: "explorer",
-        name: "Explorer",
-        description: "Practice all 6 strings",
-        difficulty: "easy",
-        reward: "Explorer Badge",
-        mode: "noteToTab",
-        constraints: {
-            enabledStrings: [true, true, true, true, true, true],
-            fretRange: { min: 1, max: 12 },
+        {
+            id: "perfect-session",
+            name: "Perfect Session",
+            description: "Get 20 correct in a row",
+            difficulty: "medium",
+            rewardKey: "goldBadge",
+            mode: "fretboardToNote",
+            bpm: 80,
+            constraints: { noteFilter: "naturals", fretRange: { min: 1, max: 7 } },
         },
-    },
-    {
-        id: "timed-blitz",
-        name: "60s Blitz",
-        description: "Score as many correct answers as possible in 60 seconds",
-        difficulty: "hard",
-        reward: "+250 XP",
-        mode: "fretboardToNote",
-        bpm: 90,
-        constraints: { noteFilter: "all", fretRange: { min: 1, max: 12 } },
-        challenge: { type: "timed", label: "60s Blitz", timeLimitSec: 60 },
-    },
-    {
-        id: "survival",
-        name: "Survival",
-        description: "One mistake ends the run",
-        difficulty: "hard",
-        reward: "Survivor Badge",
-        mode: "fretboardToNote",
-        bpm: 75,
-        constraints: { noteFilter: "naturals", fretRange: { min: 1, max: 10 } },
-        challenge: { type: "survival", label: "Survival Mode" },
-    },
-    {
-        id: "find-all-a",
-        name: "Find All A",
-        description: "Locate every A note in your active range",
-        difficulty: "medium",
-        reward: "Navigator Badge",
-        mode: "noteToTab",
-        constraints: { noteFilter: "all", fretRange: { min: 1, max: 12 } },
-        challenge: { type: "findAll", label: "Find All A", targetNote: "A" },
-    },
-];
+        {
+            id: "speed-demon",
+            name: "Speed Demon",
+            description: "Practice at 120+ BPM",
+            difficulty: "hard",
+            rewardKey: "speedBadge",
+            mode: "fretboardToNote",
+            bpm: 120,
+            constraints: { noteFilter: "all", fretRange: { min: 1, max: 12 } },
+        },
+        {
+            id: "explorer",
+            name: "Explorer",
+            description: "Practice all 6 strings",
+            difficulty: "easy",
+            rewardKey: "explorerBadge",
+            mode: "noteToTab",
+            constraints: {
+                enabledStrings: [true, true, true, true, true, true],
+                fretRange: { min: 1, max: 12 },
+            },
+        },
+        {
+            id: "timed-blitz",
+            name: "60s Blitz",
+            description: "Score as many correct answers as possible in 60 seconds",
+            difficulty: "hard",
+            rewardKey: "xp250",
+            mode: "fretboardToNote",
+            bpm: 90,
+            constraints: { noteFilter: "all", fretRange: { min: 1, max: 12 } },
+            challenge: { type: "timed", labelKey: "challenges.modes.blitz60", labelFallback: "60s Blitz", timeLimitSec: 60 },
+        },
+        {
+            id: "survival",
+            name: "Survival",
+            description: "One mistake ends the run",
+            difficulty: "hard",
+            rewardKey: "survivorBadge",
+            mode: "fretboardToNote",
+            bpm: 75,
+            constraints: { noteFilter: "naturals", fretRange: { min: 1, max: 10 } },
+            challenge: { type: "survival", labelKey: "challenges.modes.survival", labelFallback: "Survival Mode" },
+        },
+        {
+            id: "find-all-a",
+            name: "Find All A",
+            description: "Locate every A note in your active range",
+            difficulty: "medium",
+            rewardKey: "navigatorBadge",
+            mode: "noteToTab",
+            constraints: { noteFilter: "all", fretRange: { min: 1, max: 12 } },
+            challenge: { type: "findAll", labelKey: "challenges.modes.findAllA", labelFallback: "Find All A", targetNote: "A" },
+        },
+    ];
 
 export default function Challenges() {
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const { streakDays, totalCorrect, totalIncorrect } = useProgressStore();
     const { setMode, setBpm, setPracticeConstraints } = useGameStore();
@@ -210,12 +217,20 @@ export default function Challenges() {
     const handleStartHunt = (huntId: string) => {
         const hunt = ACHIEVEMENT_HUNTS.find((item) => item.id === huntId);
         if (!hunt) return;
+        const challenge = hunt.challenge
+            ? {
+                type: hunt.challenge.type,
+                label: t(hunt.challenge.labelKey, hunt.challenge.labelFallback),
+                timeLimitSec: hunt.challenge.timeLimitSec,
+                targetNote: hunt.challenge.targetNote,
+            }
+            : undefined;
         openPracticeSetup({
             source: `challenges-hunt-${huntId}`,
             mode: hunt.mode ?? "fretboardToNote",
             bpm: hunt.bpm,
             constraints: hunt.constraints,
-            challenge: hunt.challenge,
+            challenge,
         });
     };
 
@@ -224,8 +239,8 @@ export default function Challenges() {
     return (
         <div className="space-y-6 pb-8">
             <div>
-                <h1 className="type-display">Challenges</h1>
-                <p className="text-muted-foreground mt-1">Daily momentum, weekly goals, and long-term hunts.</p>
+                <h1 className="type-display">{t('challenges.title')}</h1>
+                <p className="text-muted-foreground mt-1">{t('challenges.description')}</p>
             </div>
 
             <Card className="border-gold-200 bg-gradient-to-br from-gold-50/90 via-amber-50/50 to-graphite-50 dark:border-amber-500/30 dark:from-amber-900/20 dark:via-slate-950 dark:to-slate-900">
@@ -233,30 +248,30 @@ export default function Challenges() {
                     <div className="flex items-center justify-between">
                         <Badge className="bg-primary text-primary-foreground hover:bg-primary">
                             <Zap className="mr-1 h-3 w-3" />
-                            Featured
+                            {t('challenges.featured')}
                         </Badge>
                         <span className="text-xs text-muted-foreground">
-                            {new Date().toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}
+                            {new Date().toLocaleDateString(i18n.language, { weekday: "long", month: "short", day: "numeric" })}
                         </span>
                     </div>
-                    <CardTitle className="type-h1">{dailyChallenge.name}</CardTitle>
-                    <CardDescription>{dailyChallenge.description}</CardDescription>
+                    <CardTitle className="type-h1">{t(`challenges.daily.${dailyChallenge.id}.name`, dailyChallenge.name)}</CardTitle>
+                    <CardDescription>{t(`challenges.daily.${dailyChallenge.id}.desc`, dailyChallenge.description)}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="flex flex-wrap items-center gap-4 text-sm">
                         <span className="inline-flex items-center gap-1">
                             <Target className="h-4 w-4 text-graphite-500" />
-                            Target: <strong>{dailyChallenge.target}</strong>
+                            {t('challenges.target')}: <strong>{dailyChallenge.target}</strong>
                         </span>
                         <span className="inline-flex items-center gap-1">
                             <Sparkles className="h-4 w-4 text-amber-600" />
-                            Reward: <strong>+100 XP</strong>
+                            {t('challenges.reward')}: <strong>{t('challenges.rewardXp')}</strong>
                         </span>
                     </div>
                     <Button size="lg" className="control-btn--primary w-full justify-between sm:w-auto" onClick={handleStartChallenge}>
                         <span className="inline-flex items-center gap-2">
                             <Play className="h-4 w-4" />
-                            Start Challenge
+                            {t('challenges.startDaily')}
                         </span>
                         <ArrowRight className="h-4 w-4" />
                     </Button>
@@ -265,8 +280,8 @@ export default function Challenges() {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>This Week</CardTitle>
-                    <CardDescription>{WEEKLY_GOALS.filter((goal) => goal.current >= goal.target).length} of {WEEKLY_GOALS.length} goals completed</CardDescription>
+                    <CardTitle>{t('challenges.thisWeek')}</CardTitle>
+                    <CardDescription>{t('challenges.goalsCompleted', { done: WEEKLY_GOALS.filter((goal) => goal.current >= goal.target).length, total: WEEKLY_GOALS.length })}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {WEEKLY_GOALS.map((goal) => {
@@ -275,9 +290,9 @@ export default function Challenges() {
                         return (
                             <div key={goal.id} className="space-y-1">
                                 <div className="flex items-center justify-between text-sm">
-                                    <span className="font-medium">{goal.name}</span>
+                                    <span className="font-medium">{t(`challenges.weekly.${goal.id}`, goal.name)}</span>
                                     <span className={cn("text-xs font-semibold", isComplete ? "text-emerald-600 dark:text-emerald-400" : "text-graphite-500")}>
-                                        {goal.current}/{goal.target} {goal.unit}
+                                        {goal.current}/{goal.target} {t(`challenges.units.${goal.unitKey}`, goal.unitKey)}
                                     </span>
                                 </div>
                                 <Progress value={progress} className="h-2" />
@@ -290,17 +305,17 @@ export default function Challenges() {
             <Card>
                 <CardHeader className="space-y-2">
                     <div className="flex items-center justify-between">
-                        <CardTitle>Hunts</CardTitle>
-                        <Badge variant="secondary">{ACHIEVEMENT_HUNTS.length} active</Badge>
+                        <CardTitle>{t('challenges.hunts')}</CardTitle>
+                        <Badge variant="secondary">{ACHIEVEMENT_HUNTS.length} {t('challenges.active')}</Badge>
                     </div>
-                    <CardDescription>Long-term goals that stay available every day.</CardDescription>
+                    <CardDescription>{t('challenges.huntsDesc')}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
                     {visibleHunts.map((hunt) => (
                         <div key={hunt.id} className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card p-3">
                             <div className="min-w-0">
                                 <div className="flex items-center gap-2">
-                                    <p className="truncate font-semibold">{hunt.name}</p>
+                                    <p className="truncate font-semibold">{t(`challenges.huntsList.${hunt.id}.name`, hunt.name)}</p>
                                     <Badge
                                         variant="outline"
                                         className={cn(
@@ -310,14 +325,14 @@ export default function Challenges() {
                                             hunt.difficulty === "hard" && "border-rose-300 text-rose-700 dark:border-rose-500/40 dark:text-rose-300"
                                         )}
                                     >
-                                        {hunt.difficulty}
+                                        {t(`common.difficulty.${hunt.difficulty}`, hunt.difficulty)}
                                     </Badge>
                                 </div>
-                                <p className="text-sm text-muted-foreground">{hunt.description}</p>
-                                <p className="text-xs text-muted-foreground">Reward: {hunt.reward}</p>
+                                <p className="text-sm text-muted-foreground">{t(`challenges.huntsList.${hunt.id}.desc`, hunt.description)}</p>
+                                <p className="text-xs text-muted-foreground">{t('challenges.reward')}: {t(`challenges.rewards.${hunt.rewardKey}`, hunt.rewardKey)}</p>
                             </div>
                             <Button variant="outline" size="sm" onClick={() => handleStartHunt(hunt.id)}>
-                                Start
+                                {t('challenges.start')}
                             </Button>
                         </div>
                     ))}
@@ -327,7 +342,7 @@ export default function Challenges() {
                             className="w-full justify-center gap-2 text-muted-foreground"
                             onClick={() => setShowAllHunts((prev) => !prev)}
                         >
-                            {showAllHunts ? "Show fewer hunts" : `Show all ${ACHIEVEMENT_HUNTS.length} hunts`}
+                            {showAllHunts ? t('challenges.showFewer') : t('challenges.showAll', { count: ACHIEVEMENT_HUNTS.length })}
                             <ChevronDown className={cn("h-4 w-4 transition-transform", showAllHunts && "rotate-180")} />
                         </Button>
                     )}
@@ -335,9 +350,9 @@ export default function Challenges() {
             </Card>
 
             <div className="grid grid-cols-3 gap-3">
-                <MiniStat title="Streak" value={`${streakDays}`} icon={Flame} tone="warning" />
-                <MiniStat title="Accuracy" value={`${overallAccuracy}%`} icon={Target} tone={overallAccuracy >= 75 ? "success" : overallAccuracy >= 50 ? "warning" : "danger"} />
-                <MiniStat title="Events" value={`${WEEKLY_GOALS.length + ACHIEVEMENT_HUNTS.length}`} icon={Calendar} tone="default" />
+                <MiniStat title={t('challenges.stats.streak')} value={`${streakDays}`} icon={Flame} tone="warning" />
+                <MiniStat title={t('challenges.stats.accuracy')} value={`${overallAccuracy}%`} icon={Target} tone={overallAccuracy >= 75 ? "success" : overallAccuracy >= 50 ? "warning" : "danger"} />
+                <MiniStat title={t('challenges.stats.events')} value={`${WEEKLY_GOALS.length + ACHIEVEMENT_HUNTS.length}`} icon={Calendar} tone="default" />
             </div>
         </div>
     );

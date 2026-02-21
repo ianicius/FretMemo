@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { PageSkeleton } from "@/components/ui/page-skeleton";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const SoundToFretboard = lazy(() => import("@/components/ear-training/SoundToFretboard"));
 const IntervalTrainer = lazy(() => import("@/components/ear-training/IntervalTrainer"));
@@ -12,14 +13,15 @@ const FunctionalEarTrainer = lazy(() => import("@/components/ear-training/Functi
 
 type LazyComponent = LazyExoticComponent<ComponentType<unknown>>;
 
-const MODES: Record<string, { component: LazyComponent; title: string }> = {
-    "sound-to-fret": { component: SoundToFretboard, title: "Sound → Fretboard" },
-    intervals: { component: IntervalTrainer, title: "Interval Recognition" },
-    "chord-quality": { component: ChordQualityTrainer, title: "Chord Quality" },
-    functional: { component: FunctionalEarTrainer, title: "Functional Ear Training" },
+const MODES: Record<string, { component: LazyComponent; titleKey: string }> = {
+    "sound-to-fret": { component: SoundToFretboard, titleKey: "ear.page.modes.soundToFretboard" },
+    intervals: { component: IntervalTrainer, titleKey: "ear.page.modes.intervalRecognition" },
+    "chord-quality": { component: ChordQualityTrainer, titleKey: "ear.page.modes.chordQuality" },
+    functional: { component: FunctionalEarTrainer, titleKey: "ear.page.modes.functionalEar" },
 };
 
 export default function EarTraining() {
+    const { t } = useTranslation();
     const { mode } = useParams<{ mode: string }>();
     const navigate = useNavigate();
     const tool = mode ? MODES[mode] : undefined;
@@ -27,12 +29,12 @@ export default function EarTraining() {
     if (!tool) {
         return (
             <div className="flex flex-col items-center gap-4 py-16 text-center">
-                <h2 className="type-h1">Mode Not Found</h2>
+                <h2 className="type-h1">{t("ear.page.modeNotFoundTitle")}</h2>
                 <p className="type-body text-muted-foreground">
-                    The ear training mode &ldquo;{mode}&rdquo; doesn&apos;t exist.
+                    {t("ear.page.modeNotFoundDesc", { mode })}
                 </p>
                 <Button variant="outline" onClick={() => navigate("/train")}>
-                    <ArrowLeft className="w-4 h-4 mr-2" /> Back to Library
+                    <ArrowLeft className="w-4 h-4 mr-2" /> {t("ear.page.backToLibrary")}
                 </Button>
             </div>
         );
@@ -46,7 +48,7 @@ export default function EarTraining() {
                 <Button variant="ghost" size="icon" onClick={() => navigate("/train")} className="shrink-0">
                     <ArrowLeft className="w-5 h-5" />
                 </Button>
-                <h1 className="type-h1">{tool.title}</h1>
+                <h1 className="type-h1">{t(tool.titleKey)}</h1>
             </div>
 
             <Suspense fallback={<PageSkeleton />}>

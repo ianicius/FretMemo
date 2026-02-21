@@ -1,5 +1,6 @@
 import type { TapEvaluation } from "@/rhythm/engine/InputEvaluator";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface TimingFeedbackProps {
     evaluation: TapEvaluation | null;
@@ -12,28 +13,31 @@ function feedbackClass(rating: TapEvaluation["rating"]): string {
     return "border-rose-500/40 bg-rose-500/10 text-rose-700 dark:text-rose-300";
 }
 
-function feedbackLabel(evaluation: TapEvaluation): string {
+function feedbackLabel(evaluation: TapEvaluation, t: (key: string, options?: Record<string, unknown>) => string): string {
     const sign = evaluation.offsetMs > 0 ? "+" : "";
-    const roundedOffset = Math.round(evaluation.offsetMs);
+    const roundedOffset = `${sign}${Math.round(evaluation.offsetMs)}`;
     if (evaluation.rating === "miss") {
-        return `MISS ${sign}${roundedOffset}ms`;
+        return t("rhythm.ui.timingFeedback.miss", { offset: roundedOffset });
     }
-    return `${evaluation.rating.toUpperCase()} ${sign}${roundedOffset}ms`;
+    const rating = t(`rhythm.ui.timingFeedback.rating.${evaluation.rating}`);
+    return t("rhythm.ui.timingFeedback.value", { rating, offset: roundedOffset });
 }
 
 export function TimingFeedback({ evaluation }: TimingFeedbackProps) {
+    const { t } = useTranslation();
+
     if (!evaluation) {
         return (
             <div className="rounded-lg border border-border bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
-                Waiting for your input...
+                {t("rhythm.ui.timingFeedback.waiting")}
             </div>
         );
     }
 
     return (
         <div className={cn("rounded-lg border px-3 py-2 text-xs font-semibold", feedbackClass(evaluation.rating))}>
-            {feedbackLabel(evaluation)}
-            {!evaluation.directionCorrect && " · Wrong direction"}
+            {feedbackLabel(evaluation, t)}
+            {!evaluation.directionCorrect && ` · ${t("rhythm.ui.timingFeedback.wrongDirection")}`}
         </div>
     );
 }

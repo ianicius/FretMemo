@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -46,6 +47,7 @@ export default function ProgressPage() {
     const quickTuning = useSettingsStore((state) => state.quick.tuning);
     const tuning = useMemo(() => normalizeTuning(quickTuning), [quickTuning]);
     const enqueueFeedback = useFeedbackStore((state) => state.enqueue);
+    const { t } = useTranslation();
     const [searchParams, setSearchParams] = useSearchParams();
     const [isResetHeatMapConfirmOpen, setIsResetHeatMapConfirmOpen] = useState(false);
 
@@ -183,27 +185,27 @@ export default function ProgressPage() {
     const handleResetHeatMap = () => setIsResetHeatMapConfirmOpen(true);
     const confirmResetHeatMap = () => {
         resetHeatMap();
-        showFeedback("Heat map data has been reset.", "success");
+        showFeedback(t('progress.resetSuccess'), "success");
     };
 
     return (
         <div className="space-y-6 pb-8">
             <div className="space-y-3">
-                <h1 className="type-display">Progress</h1>
+                <h1 className="type-display">{t('progress.title')}</h1>
                 <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-                    <StatLine icon={Target} label="Total Answers" value={stats.total} />
-                    <StatLine icon={TrendingUp} label="Accuracy" value={`${stats.accuracy}%`} tone={stats.accuracy >= 75 ? "success" : stats.accuracy >= 50 ? "warning" : "danger"} />
-                    <StatLine icon={BarChart3} label="Coverage" value={`${stats.coverage}%`} tone={stats.coverage >= 70 ? "success" : stats.coverage >= 40 ? "warning" : "danger"} />
-                    <StatLine icon={Flame} label="Streak" value={`${streakDays}d • ${streakFreezes} freeze`} />
+                    <StatLine icon={Target} label={t('progress.totalAnswers')} value={stats.total} />
+                    <StatLine icon={TrendingUp} label={t('progress.accuracy')} value={`${stats.accuracy}%`} tone={stats.accuracy >= 75 ? "success" : stats.accuracy >= 50 ? "warning" : "danger"} />
+                    <StatLine icon={BarChart3} label={t('progress.coverage')} value={`${stats.coverage}%`} tone={stats.coverage >= 70 ? "success" : stats.coverage >= 40 ? "warning" : "danger"} />
+                    <StatLine icon={Flame} label={t('progress.streak')} value={t('progress.streakFormat', { days: streakDays, freezes: streakFreezes })} />
                 </div>
             </div>
 
             <Card>
                 <CardHeader className="flex flex-row items-start justify-between gap-4">
                     <div>
-                        <CardTitle>Your Fretboard</CardTitle>
+                        <CardTitle>{t('progress.fretboardTitle')}</CardTitle>
                         <CardDescription>
-                            {stats.positionsPracticed} positions practiced • {stats.coverage}% coverage
+                            {t('progress.fretboardDesc', { positions: stats.positionsPracticed, coverage: stats.coverage })}
                         </CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
@@ -213,7 +215,7 @@ export default function ProgressPage() {
                             onClick={toggleHeatMap}
                             className={cn(heatMapEnabled && "border-primary/40 bg-primary/10")}
                         >
-                            {heatMapEnabled ? "Hide" : "Show"} Heat Map
+                            {heatMapEnabled ? t('progress.hideHeatMap') : t('progress.showHeatMap')}
                         </Button>
                         <Button
                             variant="ghost"
@@ -228,24 +230,24 @@ export default function ProgressPage() {
                 <CardContent className="space-y-4">
                     {stats.positionsPracticed === 0 && (
                         <EmptyState
-                            title="Your fretboard map is empty"
-                            description="Each note you practice lights up here. Start a short session to begin."
-                            ctaLabel="Start Practice"
+                            title={t('progress.emptyFretboardTitle')}
+                            description={t('progress.emptyFretboardDesc')}
+                            ctaLabel={t('progress.startPractice')}
                             onCtaClick={() => navigate("/practice", { state: { openPreFlight: true, source: "progress-heatmap-empty", mode: "fretboardToNote" } })}
                         />
                     )}
                     <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
                         <div className="inline-flex items-center gap-1">
                             <span className="h-3 w-3 rounded-full bg-rose-500/50" />
-                            weak {"<"} 60%
+                            {t('progress.weak')}
                         </div>
                         <div className="inline-flex items-center gap-1">
                             <span className="h-3 w-3 rounded-full bg-amber-400/60" />
-                            learning 60-85%
+                            {t('progress.learning')}
                         </div>
                         <div className="inline-flex items-center gap-1">
                             <span className="h-3 w-3 rounded-full bg-emerald-500/50" />
-                            mastered {">"} 85%
+                            {t('progress.mastered')}
                         </div>
                     </div>
                     <div className="rounded-xl border border-border bg-card/50 p-4">
@@ -265,18 +267,18 @@ export default function ProgressPage() {
                 <CardHeader className="space-y-3">
                     <div className="flex items-center justify-between gap-3">
                         <div>
-                            <CardTitle>Accuracy Trend</CardTitle>
-                            <CardDescription>Track consistency over time</CardDescription>
+                            <CardTitle>{t('progress.accuracyTrendTitle')}</CardTitle>
+                            <CardDescription>{t('progress.accuracyTrendDesc')}</CardDescription>
                         </div>
                         <div className="flex items-center gap-2">
                             <Button size="sm" variant={chartRange === "week" ? "secondary" : "outline"} onClick={() => setChartRange("week")}>
-                                Week
+                                {t('progress.week')}
                             </Button>
                             <Button size="sm" variant={chartRange === "month" ? "secondary" : "outline"} onClick={() => setChartRange("month")}>
-                                Month
+                                {t('progress.month')}
                             </Button>
                             <Button size="sm" variant={chartRange === "all" ? "secondary" : "outline"} onClick={() => setChartRange("all")}>
-                                All
+                                {t('progress.all')}
                             </Button>
                         </div>
                     </div>
@@ -290,23 +292,23 @@ export default function ProgressPage() {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Music2 className="h-5 w-5" />
-                        Functional Ear
+                        {t('progress.functionalEarTitle')}
                     </CardTitle>
-                    <CardDescription>Lifetime scale-degree recognition stats.</CardDescription>
+                    <CardDescription>{t('progress.functionalEarDesc')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     {functionalDegreeStats.length === 0 ? (
                         <EmptyState
-                            title="No Functional Ear stats yet"
-                            description="Complete a session in Functional Ear Training to populate degree accuracy."
-                            ctaLabel="Start Functional Ear"
+                            title={t('progress.emptyFunctionalTitle')}
+                            description={t('progress.emptyFunctionalDesc')}
+                            ctaLabel={t('progress.startFunctionalEar')}
                             onCtaClick={() => navigate("/ear-training/functional")}
                         />
                     ) : (
                         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
                             {functionalDegreeStats.map((item) => (
                                 <div key={item.degree} className="rounded-lg border border-border bg-card p-3 text-xs">
-                                    <p className="text-sm font-bold">Degree {item.degree}</p>
+                                    <p className="text-sm font-bold">{t('progress.degreeLabel', { degree: item.degree })}</p>
                                     <p className={cn(
                                         "font-semibold",
                                         item.accuracy >= 75
@@ -315,10 +317,10 @@ export default function ProgressPage() {
                                                 ? "text-amber-600 dark:text-amber-400"
                                                 : "text-rose-600 dark:text-rose-400",
                                     )}>
-                                        {item.accuracy}% accuracy
+                                        {t('progress.accuracyVal', { accuracy: item.accuracy })}
                                     </p>
-                                    <p className="text-muted-foreground">{item.samples} answers</p>
-                                    <p className="text-muted-foreground">Avg {item.avgResponseMs} ms</p>
+                                    <p className="text-muted-foreground">{t('progress.answersVal', { samples: item.samples })}</p>
+                                    <p className="text-muted-foreground">{t('progress.avgMs', { ms: item.avgResponseMs })}</p>
                                 </div>
                             ))}
                         </div>
@@ -329,15 +331,15 @@ export default function ProgressPage() {
             <div className="grid gap-6 md:grid-cols-2">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Focus Areas</CardTitle>
-                        <CardDescription>Positions with the lowest retention</CardDescription>
+                        <CardTitle>{t('progress.focusAreasTitle')}</CardTitle>
+                        <CardDescription>{t('progress.focusAreasDesc')}</CardDescription>
                     </CardHeader>
                     <CardContent>
                         {stats.weakPositions.length === 0 ? (
                             <EmptyState
-                                title="No focus areas yet"
-                                description="Complete a few sessions to identify weak spots."
-                                ctaLabel="Open Train"
+                                title={t('progress.emptyFocusTitle')}
+                                description={t('progress.emptyFocusDesc')}
+                                ctaLabel={t('progress.openTrain')}
                                 onCtaClick={() => navigate("/train")}
                             />
                         ) : (
@@ -348,7 +350,7 @@ export default function ProgressPage() {
                                     return (
                                         <div key={key} className="rounded-lg border border-border bg-card p-3">
                                             <div className="flex items-center justify-between text-sm">
-                                                <span className="font-medium">String {stringIndex + 1}, fret {fret}</span>
+                                                <span className="font-medium">{t('progress.stringFret', { string: stringIndex + 1, fret })}</span>
                                                 <span className={cn(
                                                     "font-mono",
                                                     accuracy >= 75 ? "text-emerald-600 dark:text-emerald-400" : accuracy >= 50 ? "text-amber-600 dark:text-amber-400" : "text-rose-600 dark:text-rose-400"
@@ -360,7 +362,7 @@ export default function ProgressPage() {
                                     );
                                 })}
                                 <Button variant="outline" className="w-full" onClick={() => navigate("/practice", { state: { openPreFlight: true, source: "progress-focus-spots", mode: "fretboardToNote" } })}>
-                                    Practice Weak Spots
+                                    {t('progress.practiceWeakSpots')}
                                 </Button>
                             </div>
                         )}
@@ -369,13 +371,15 @@ export default function ProgressPage() {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Achievements</CardTitle>
-                        <CardDescription>{unlockedAchievements.length} / {achievements.length} unlocked</CardDescription>
+                        <CardTitle>{t('progress.achievementsTitle')}</CardTitle>
+                        <CardDescription>{t('progress.achievementsDesc', { unlocked: unlockedAchievements.length, total: achievements.length })}</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-2">
                             {achievements.map((achievement) => {
                                 const Icon = ACHIEVEMENT_ICONS[achievement.id] ?? Award;
+                                const title = t(`progress.achievementsList.${achievement.id}.name`, achievement.name);
+                                const description = t(`progress.achievementsList.${achievement.id}.desc`, achievement.description);
                                 return (
                                     <div
                                         key={achievement.id}
@@ -390,8 +394,8 @@ export default function ProgressPage() {
                                             <Icon className="h-4 w-4" />
                                         </div>
                                         <div className="min-w-0">
-                                            <p className="truncate font-medium">{achievement.name}</p>
-                                            <p className="text-xs text-muted-foreground">{achievement.description}</p>
+                                            <p className="truncate font-medium">{title}</p>
+                                            <p className="text-xs text-muted-foreground">{description}</p>
                                         </div>
                                     </div>
                                 );
@@ -402,15 +406,15 @@ export default function ProgressPage() {
             </div>
 
             <div className="text-xs text-muted-foreground">
-                Practice time: {Math.floor(totalPracticeTime / 60)}h {totalPracticeTime % 60}m
+                {t('progress.practiceTime', { hours: Math.floor(totalPracticeTime / 60), minutes: totalPracticeTime % 60 })}
             </div>
 
             <ConfirmDialog
                 open={isResetHeatMapConfirmOpen}
                 onOpenChange={setIsResetHeatMapConfirmOpen}
-                title="Reset Heat Map Data?"
-                description="This will remove all heat map entries."
-                confirmLabel="Reset"
+                title={t('progress.resetConfirmTitle')}
+                description={t('progress.resetConfirmDesc')}
+                confirmLabel={t('progress.reset')}
                 confirmVariant="destructive"
                 onConfirm={confirmResetHeatMap}
             />

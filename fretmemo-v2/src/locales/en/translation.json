@@ -1,0 +1,1434 @@
+{
+  "fretboard": "Fretboard",
+  "notes": "Notes",
+  "language": "Language",
+  "string": "String",
+  "fret": "Fret",
+  "common": {
+    "locked": "LOCKED",
+    "new": "NEW",
+    "levelRequired": "Lvl {{level}} required",
+    "level": "Lvl {{level}}",
+    "lastPracticed": "Last: {{time}}",
+    "difficulty": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "close": "Close",
+    "openSettings": "Open settings"
+  },
+  "technique": {
+    "spider": {
+      "name": "Spider Walk",
+      "description": "Baseline synchronization exercise",
+      "instructions": [
+        "Place fingers 1-2-3-4 on adjacent frets",
+        "Play each note in sequence",
+        "Move to the next string and repeat",
+        "Focus on clean, even timing"
+      ]
+    },
+    "permutation": {
+      "name": "Permutation Trainer",
+      "description": "24 finger patterns for independence",
+      "instructions": [
+        "Choose a finger permutation pattern",
+        "Play the pattern across all strings",
+        "Maintain consistent timing",
+        "Gradually increase speed"
+      ]
+    },
+    "linear": {
+      "name": "Linear Shifter",
+      "description": "Horizontal position shifting",
+      "instructions": [
+        "Play 4 notes on one string",
+        "Shift up one fret, repeat",
+        "Continue to the 12th fret",
+        "Return descending"
+      ]
+    },
+    "diagonal": {
+      "name": "Diagonal Patterns",
+      "description": "Shape shifting across strings",
+      "instructions": [
+        "Play a 4-note pattern",
+        "Move diagonally across the fretboard",
+        "Maintain finger independence",
+        "Focus on smooth transitions"
+      ]
+    },
+    "stringskip": {
+      "name": "String Skipping",
+      "description": "Non-adjacent string targeting",
+      "instructions": [
+        "Play on string 6, then skip to 4",
+        "Continue the skip pattern",
+        "Focus on picking accuracy",
+        "Keep hand position stable"
+      ]
+    },
+    "legato": {
+      "name": "Legato Builder",
+      "description": "Hammer-ons and pull-offs",
+      "instructions": [
+        "Play first note with a pick",
+        "Hammer-on the next note",
+        "Pull-off back to first note",
+        "Focus on even volume"
+      ]
+    },
+    "status": {
+      "title": "Status",
+      "currentString": "Current string",
+      "step": "Step",
+      "tempo": "Tempo",
+      "speedUp": "Speed-Up",
+      "off": "Off",
+      "nextIncreaseIn": "Next increase in",
+      "beat": "beat",
+      "beats": "beats",
+      "mode": "Mode",
+      "tier": "Tier",
+      "strings": "Strings",
+      "direction": "Direction",
+      "currentAction": "Current action",
+      "pattern": "Pattern"
+    },
+    "setup": {
+      "title": "Session Setup",
+      "cancel": "Cancel",
+      "start": "Start",
+      "tempo": "Tempo",
+      "autoSpeedUp": "Auto Speed-Up",
+      "autoSpeedUpDesc": "Increase tempo automatically.",
+      "increase": "Increase",
+      "every": "Every",
+      "beat": "beat",
+      "beats": "beats",
+      "stepMode": "Step Mode",
+      "stepModeDesc": "Manually advance each beat.",
+      "startFret": "Start Fret",
+      "advanced": "Advanced"
+    },
+    "settings": {
+      "title": "Settings",
+      "stepMode": "Step Mode",
+      "startFret": "Start Fret",
+      "mode": "Mode",
+      "tier": "Tier",
+      "tierOptions": {
+        "all": "All Tiers (24)",
+        "tier1": "Tier 1 - Beginner",
+        "tier2": "Tier 2 - Intermediate",
+        "tier3": "Tier 3 - Advanced"
+      },
+      "pattern": "Pattern",
+      "dailyModeHint": "Daily challenge selects a fixed pattern for today.",
+      "stringsToPlay": "Strings to play",
+      "direction": "Direction",
+      "directionOptions": {
+        "ascending": "Ascending",
+        "descending": "Descending",
+        "both": "Both"
+      },
+      "stickyFingers": "Sticky Fingers",
+      "stickyFingersHint": "Enabled by default in Permutation Trainer (Spider-style).",
+      "on": "On",
+      "randomSwitchEvery": "Random switch every",
+      "bar": "bar",
+      "bars": "bars",
+      "diagonalPatternOptions": {
+        "ascending": "Ascending",
+        "descending": "Descending",
+        "full": "Full"
+      },
+      "stringsPerGroup": "Strings per group",
+      "pickingStyle": "Picking Style",
+      "pickingStyles": {
+        "alternate": "Alternate",
+        "economy": "Economy",
+        "legato": "Legato"
+      },
+      "showPickIndicators": "Show pick indicators",
+      "skipPattern": "Skip Pattern",
+      "pickingFocus": "Picking Focus",
+      "pickingFocusOptions": {
+        "alternate": "Alternate",
+        "inside": "Inside",
+        "outside": "Outside"
+      },
+      "startPickDirection": "Start Pick Direction",
+      "pickDirectionOptions": {
+        "down": "Down (v)",
+        "up": "Up (^)"
+      },
+      "exerciseType": "Exercise Type",
+      "legatoTypeOptions": {
+        "trill": "Trill",
+        "hammerOnly": "Hammer Spider",
+        "pullOnly": "Pull Desc",
+        "threeNote": "3-Note"
+      },
+      "trillPair": "Trill Pair",
+      "legatoNotationHintPrefix": "Legato notation follows guitar standard:",
+      "legatoNotationHintMiddle": "for hammer-on,",
+      "legatoNotationHintSuffix": "for pull-off.",
+      "string": "String",
+      "endFret": "End Fret",
+      "notesPerShift": "Notes per Shift",
+      "linearDirectionOptions": {
+        "asc": "Asc",
+        "desc": "Desc",
+        "round": "Round"
+      },
+      "shiftAmount": "Shift Amount",
+      "autoSpeedUp": "Auto Speed-Up",
+      "increase": "Increase",
+      "every": "Every",
+      "beat": "beat",
+      "beats": "beats"
+    },
+    "labels": {
+      "permutationMode": {
+        "single": "Single Permutation",
+        "daily": "Daily Challenge",
+        "sequential": "Sequential Trainer",
+        "random": "Random Mode"
+      },
+      "diagonalPattern": {
+        "ascending": "Ascending",
+        "descending": "Descending",
+        "full": "Full Run"
+      },
+      "stringSkipPattern": {
+        "single": "Single Skip",
+        "octave": "Octave Skip",
+        "double": "Double Skip",
+        "wide": "Wide Skip"
+      },
+      "legatoType": {
+        "trill": "Trill",
+        "hammerOnly": "Hammer-On Spider",
+        "pullOnly": "Pull-Off Descending",
+        "threeNote": "3-Note Legato"
+      },
+      "linearDirection": {
+        "ascending": "Ascending",
+        "descending": "Descending",
+        "roundTrip": "Round Trip"
+      }
+    },
+    "patternLabel": {
+      "diagonal": "{{label}} ({{strings}} str)",
+      "linear": "String {{string}} • {{direction}}"
+    },
+    "cue": {
+      "economyPicking": "Economy Picking",
+      "alternatePicking": "Alternate Picking",
+      "downstroke": "Downstroke",
+      "upstroke": "Upstroke",
+      "insidePicking": "Inside Picking",
+      "outsidePicking": "Outside Picking",
+      "pick": "Pick",
+      "hammerOn": "Hammer-On",
+      "pullOff": "Pull-Off"
+    },
+    "cueDetail": {
+      "initialPickedNote": "Initial picked note",
+      "legatoAscent": "Legato ascent",
+      "legatoDescent": "Legato descent",
+      "firstNotePerString": "First note per string",
+      "noAdditionalPick": "No additional pick",
+      "pickHighNoteAnchorIndex": "Pick high note while index stays planted",
+      "keepIndexAnchored": "Keep index anchored and release down",
+      "startEachStringWithPick": "Start each string with pick",
+      "twoLegatoNotesPerString": "2 legato notes per string",
+      "initialAttack": "Initial attack",
+      "legatoWithinShiftGroup": "Legato within shift group"
+    },
+    "ui": {
+      "actionCue": "Action Cue",
+      "stop": "Stop",
+      "start": "Start",
+      "nextStep": "Next Step",
+      "sessionSetup": "Session Setup",
+      "tierLabelAll": "All (T{{tier}})",
+      "tierLabelTier": "Tier {{tier}}",
+      "exerciseAdvanced": "Exercise Advanced"
+    }
+  },
+  "quests": {
+    "dailyDedication": {
+      "title": "Daily Dedication",
+      "description": "Earn 300 XP today"
+    },
+    "unbreakableFocus": {
+      "title": "Unbreakable Focus",
+      "description": "Achieve a streak of 20 correct answers"
+    },
+    "earTraining": {
+      "title": "Ear Training",
+      "description": "Complete a session in Ear Training"
+    },
+    "pushingLimits": {
+      "title": "Pushing Limits",
+      "description": "Earn 500 XP today"
+    },
+    "rhythmMastery": {
+      "title": "Rhythm Mastery",
+      "description": "Complete a session in Rhythm Dojo"
+    },
+    "flawlessExecution": {
+      "title": "Flawless Execution",
+      "description": "Achieve a streak of 50 correct answers"
+    }
+  },
+  "theory": {
+    "scaleExplorer": {
+      "title": "Scale Explorer",
+      "root": "Root",
+      "scale": "Scale",
+      "intervals": "Intervals",
+      "notes": "Notes",
+      "scaleTypes": {
+        "major": "Major (Ionian)",
+        "minor": "Minor (Aeolian)",
+        "dorian": "Dorian",
+        "mixolydian": "Mixolydian",
+        "major pentatonic": "Major Pentatonic",
+        "minor pentatonic": "Minor Pentatonic",
+        "blues": "Blues",
+        "harmonic minor": "Harmonic Minor",
+        "melodic minor": "Melodic Minor",
+        "phrygian": "Phrygian",
+        "lydian": "Lydian",
+        "locrian": "Locrian"
+      }
+    },
+    "page": {
+      "toolNotFoundTitle": "Tool not found",
+      "toolNotFoundDesc": "This theory tool is not available.",
+      "backToTrain": "Back to Train",
+      "tools": {
+        "scaleExplorer": "Scale Explorer",
+        "circleOfFifths": "Circle of Fifths",
+        "cagedSystem": "CAGED System",
+        "triads": "Triads",
+        "chordLibrary": "Chord Library",
+        "intervalTrainer": "Intervals on Fretboard"
+      }
+    },
+    "circle": {
+      "major": "major",
+      "minor": "minor",
+      "relativeMinor": "Relative minor",
+      "scaleNotes": "Scale notes",
+      "diatonicChords": "Diatonic chords"
+    },
+    "chordLibrary": {
+      "rootNote": "Root",
+      "notes": "Notes",
+      "intervals": "Intervals",
+      "notFound": "No chord data for this selection.",
+      "voicings": "Voicings",
+      "voicingLabel": "Voicing {{index}}",
+      "playChord": "Play chord",
+      "groups": {
+        "triads": "Triads",
+        "sevenths": "Sevenths",
+        "susAdd": "Sus / Add",
+        "extended": "Extended"
+      }
+    },
+    "intervalFretboard": {
+      "title": "Intervals on Fretboard",
+      "description": "Find the note that matches the target interval from the root.",
+      "activeIntervals": "Active intervals",
+      "findThe": "Find",
+      "from": "from",
+      "correctFeedback": "Correct! {{interval}} from {{root}} is {{note}}",
+      "wrongFeedback": "Not this one. Target note: {{note}}"
+    },
+    "triads": {
+      "needsFiveStrings": "This tool needs at least five strings in the current tuning.",
+      "root": "Root",
+      "quality": "Quality",
+      "qualityMajor": "Major",
+      "qualityMinor": "Minor",
+      "stringGroups": "String groups",
+      "groupTop": "Top",
+      "groupMiddle": "Middle",
+      "groupBottom": "Bottom",
+      "inversions": "Inversions",
+      "invRoot": "Root position",
+      "invFirst": "1st inversion",
+      "invSecond": "2nd inversion",
+      "legendTitle": "Legend",
+      "legendBody": "Colors mark inversion type, while R/3/5 labels show chord tones."
+    },
+    "caged": {
+      "root": "Root",
+      "shapes": "Shapes",
+      "systemTitle": "CAGED System",
+      "legend": "CAGED connects five open chord shapes across the neck. Toggle shapes to see how they overlap for any root."
+    }
+  },
+  "nav": {
+    "home": "Home",
+    "practice": "Train",
+    "challenges": "Challenges",
+    "progress": "Me",
+    "help": "Help",
+    "settings": "Settings"
+  },
+  "library": {
+    "title": "Train",
+    "description": "One catalog for fretboard drills, technique, theory, ear training, and rhythm.",
+    "pinned": "Pinned",
+    "drills": "Fretboard Drills",
+    "technique": "Technique",
+    "theory": "Theory",
+    "ear": "Ear Training",
+    "rhythm": "Rhythm Dojo",
+    "summary": {
+      "modes": "{{count}} modes • {{avg}}% avg",
+      "exercises": "{{count}} exercises • {{avg}}% avg",
+      "pinned": "{{count}}/{{max}} • {{avg}}% avg"
+    },
+    "suggestedTitle": "Suggested next",
+    "suggestedDesc1": "Continue with the mode that feels easiest today, then add one harder block.",
+    "suggestedDesc2": "Use short, focused sessions for faster retention.",
+    "suggestedDesc3": "Smart defaults are enabled in pre-session setup.",
+    "noPinnedTitle": "No pinned exercises yet",
+    "noPinnedDesc": "Pin your favorite drills with the star icon for quick access.",
+    "pin": "Pin",
+    "unpin": "Unpin",
+    "pinAria": "Pin {{title}}",
+    "unpinAria": "Unpin {{title}}",
+    "pinLimitReached": "Pin limit reached ({{max}})",
+    "theorySummary": "{{count}} tools",
+    "earSummary": "{{count}} modes",
+    "soon": "Soon"
+  },
+  "challenges": {
+    "title": "Challenges",
+    "description": "Daily momentum, weekly goals, and long-term hunts.",
+    "featured": "Featured",
+    "target": "Target",
+    "reward": "Reward",
+    "rewardXp": "+100 XP",
+    "startDaily": "Start Challenge",
+    "thisWeek": "This Week",
+    "goalsCompleted": "{{done}} of {{total}} goals completed",
+    "hunts": "Hunts",
+    "huntsDesc": "Long-term goals that stay available every day.",
+    "active": "active",
+    "start": "Start",
+    "showFewer": "Show fewer hunts",
+    "showAll": "Show all {{count}} hunts",
+    "stats": {
+      "streak": "Streak",
+      "accuracy": "Accuracy",
+      "events": "Events"
+    },
+    "daily": {
+      "speed-20": {
+        "name": "Speed Sprint",
+        "desc": "Identify 20 notes as fast as possible"
+      },
+      "accuracy-50": {
+        "name": "Accuracy Master",
+        "desc": "Get 50 correct answers in a row"
+      },
+      "coverage-all": {
+        "name": "Full Coverage",
+        "desc": "Practice at least one note on every string"
+      },
+      "streak-10": {
+        "name": "Perfect Streak",
+        "desc": "Get 10 correct without mistakes"
+      },
+      "speed-30": {
+        "name": "Lightning Round",
+        "desc": "Identify 30 notes in under 2 minutes"
+      },
+      "accuracy-100": {
+        "name": "Century Club",
+        "desc": "Answer 100 questions with 90%+ accuracy"
+      },
+      "strings-all": {
+        "name": "String Master",
+        "desc": "Practice all 6 strings equally"
+      }
+    },
+    "weekly": {
+      "practice-3": "Consistent Practice",
+      "notes-100": "Note Master",
+      "streak-7": "Week Warrior"
+    },
+    "huntsList": {
+      "perfect-session": {
+        "name": "Perfect Session",
+        "desc": "Get 20 correct in a row"
+      },
+      "speed-demon": {
+        "name": "Speed Demon",
+        "desc": "Practice at 120+ BPM"
+      },
+      "explorer": {
+        "name": "Explorer",
+        "desc": "Practice all 6 strings"
+      },
+      "timed-blitz": {
+        "name": "60s Blitz",
+        "desc": "Score as many correct answers as possible in 60 seconds"
+      }
+    },
+    "units": {
+      "days": "days",
+      "notes": "notes"
+    },
+    "rewards": {
+      "goldBadge": "Gold Badge",
+      "speedBadge": "Speed Badge",
+      "explorerBadge": "Explorer Badge",
+      "xp250": "+250 XP",
+      "survivorBadge": "Survivor Badge",
+      "navigatorBadge": "Navigator Badge"
+    },
+    "modes": {
+      "blitz60": "60s Blitz",
+      "survival": "Survival Mode",
+      "findAllA": "Find All A"
+    }
+  },
+  "header": {
+    "quickActions": "Quick Actions",
+    "resources": "Resources",
+    "installApp": "Install App",
+    "install": "Install",
+    "currentStreak": "Current streak",
+    "streakFreezesAvailable_one": "{{count}} streak freeze available",
+    "streakFreezesAvailable_other": "{{count}} streak freezes available",
+    "totalXp": "Total XP",
+    "switchToLight": "Switch to light mode",
+    "switchToDark": "Switch to dark mode",
+    "lightMode": "Light mode",
+    "darkMode": "Dark mode",
+    "openQuickMenu": "Open quick menu",
+    "buyCoffee": "Buy me a coffee",
+    "legacyV1": "Legacy v1",
+    "faq": "FAQ",
+    "blog": "Blog",
+    "streakFreezesAvailable": "{{count}} streak freezes available"
+  },
+  "home": {
+    "welcome": "Welcome back",
+    "level": "Level {{level}}",
+    "xpToNext": "{{xp}} XP to next level",
+    "nextStep": "Your Next Step",
+    "nextStepDescDefault": "Start with a short fretboard drill to lock in note locations.",
+    "nextStepDescWeak": "Strings {{minStr}}-{{maxStr}}, frets {{minFret}}-{{maxFret}} need extra reps.",
+    "startFocused": "Start Focused Practice",
+    "startFirst": "Start First Drill",
+    "accuracy": "Accuracy",
+    "coverage": "Coverage",
+    "momentum": "Momentum",
+    "dailyQuests": "Daily Quests",
+    "dailyQuestsDesc": "Complete tasks to earn bonus XP",
+    "claimed": "Claimed",
+    "claimXp": "Claim {{xp}} XP",
+    "continueLast": "Continue Last Session",
+    "lastPracticed": "Last practiced {{time}}",
+    "masteryProgress": "Mastery progress",
+    "resumeSession": "Resume Session",
+    "pinned": "Pinned",
+    "noPinned": "No pinned exercises yet",
+    "noPinnedDesc": "Pin your favorites in Train for quick access here.",
+    "openTrain": "Open Train",
+    "continue": "Continue",
+    "noRecent": "No recent technique sessions",
+    "noRecentDesc": "Open Train and pick a technique exercise to build consistency.",
+    "explore": "Explore",
+    "fretboardDrills": "Fretboard Drills",
+    "technique": "Technique",
+    "theoryTools": "Theory Tools",
+    "earTraining": "Ear Training",
+    "momentumDay": "1 day",
+    "momentumDays": "{{count}} days",
+    "momentumStart": "start",
+    "pinnedQuickLaunch": "Pinned quick launch.",
+    "resumeWhereLeft": "Resume where you left off.",
+    "unpin": "Unpin",
+    "unpinAria": "Unpin {{title}}",
+    "xpShort": "{{xp}} XP",
+    "time": {
+      "new": "New",
+      "justNow": "Just now",
+      "minutesAgo": "{{count}}m ago",
+      "hoursAgo": "{{count}}h ago",
+      "yesterday": "Yesterday",
+      "daysAgo": "{{count}} days ago"
+    }
+  },
+  "practice": {
+    "title": "Practice",
+    "subtitle": "Select a mode and configure your session",
+    "instructions": "Instructions",
+    "dayStreak": "Day Streak",
+    "accuracy": "Accuracy",
+    "timePracticed": "Time Practiced",
+    "layers": {
+      "standard": "Standard",
+      "heatmap": "Heatmap",
+      "scale": "Scale",
+      "intervals": "Intervals"
+    },
+    "focus": {
+      "modeLabel": "Practice Focus",
+      "exerciseTypeLabel": "Exercise Type",
+      "rootLabel": "Root",
+      "scaleLabel": "Scale",
+      "playPrompt": "Play the prompt.",
+      "identifyPrompt": "Identify the note.",
+      "target": "Target",
+      "targetNote": "Target Note",
+      "pickTabPosition": "Pick the matching tab position below",
+      "playThisNote": "Play This Note",
+      "next": "Next",
+      "mic": "Mic",
+      "micOff": "Off",
+      "current": "Current",
+      "noMistakes": "No mistakes",
+      "heatMapOverlay": "Heat Map Overlay",
+      "startPractice": "Start Practice"
+    },
+    "setup": {
+      "title": "Session Setup",
+      "cancel": "Cancel",
+      "start": "Start",
+      "tempo": "Tempo",
+      "metronome": "Metronome",
+      "metronomeDesc": "Use click track while practicing.",
+      "mic": "Microphone Input",
+      "micDesc": "Enable this to detect played guitar notes.",
+      "sessionMode": "Session Mode",
+      "scored": "Scored Session",
+      "guitar": "Guitar Mode",
+      "scoredDesc": "Auto-finishes after target count and shows summary.",
+      "guitarDesc": "Endless practice. No scoring or time limits.",
+      "noteSequence": "Note Sequence",
+      "random": "Random",
+      "ascending": "Ascending",
+      "descending": "Descending",
+      "quickPresets": "Quick Presets",
+      "advanced": "Advanced",
+      "noteDuration": "Note Duration",
+      "fretRange": "Fret Range",
+      "strings": "Strings",
+      "notes": "Notes",
+      "allNotes": "All Notes",
+      "naturals": "Naturals",
+      "rootNote": "Root Note",
+      "scaleType": "Scale Type",
+      "autoSpeedUp": "Auto Speed-Up",
+      "increase": "Increase",
+      "everyXBeats": "Every X beats",
+      "inputDevice": "Input Device",
+      "systemDefault": "System Default",
+      "refresh": "Refresh",
+      "presets": {
+        "fullNeck": "Full Neck",
+        "openMajor": "Open Major",
+        "aMinorPent": "A Minor Pent",
+        "naturals": "Naturals"
+      },
+      "scaleTypes": {
+        "major": "Major",
+        "minor": "Minor",
+        "majorPentatonic": "Major Pentatonic",
+        "minorPentatonic": "Minor Pentatonic"
+      },
+      "sequenceGroups": {
+        "intervals": "Intervals",
+        "scales": "Scales"
+      },
+      "sequenceOptions": {
+        "random": "Random",
+        "minorThirds": "Minor Thirds",
+        "majorThirds": "Major Thirds",
+        "fourths": "Fourths",
+        "fifths": "Fifths",
+        "sevenths": "Sevenths",
+        "majorScale": "Major Scale",
+        "naturalMinorScale": "Natural Minor Scale",
+        "majorPentatonic": "Major Pentatonic",
+        "minorPentatonic": "Minor Pentatonic"
+      }
+    },
+    "modes": {
+      "guessNote": "Guess Note",
+      "guessNoteDesc": "Visual note identification on fretboard and tab.",
+      "playPractice": "Play Practice",
+      "playPracticeDesc": "Instrument-first practice with mic input support.",
+      "fretboardToNote": "Fretboard → Note",
+      "tabToNote": "Tab → Note",
+      "noteToTab": "Note → Tab",
+      "playNotes": "Note Generator",
+      "playTab": "Tab Sequence",
+      "fretboardToNoteDescription": "Identify notes directly from fretboard positions.",
+      "tabToNoteDescription": "Read tablature and name the sounding note.",
+      "noteToTabDescription": "Map note names to accurate fretboard positions.",
+      "playNotesDescription": "Play prompted note names using live mic detection.",
+      "playTabDescription": "Play prompted tab positions in sequence."
+    },
+    "tips": {
+      "fretboardToNote": "Identify the note shown on the highlighted fretboard position. Select the correct note name from the options.",
+      "tabToNote": "Standard tuning. Name the note at the fret shown on the tab.",
+      "noteToTab": "Find the correct position on the fretboard for the given note. You'll see a string and fret to select.",
+      "playNotes": "Use your guitar and microphone. Play the note shown on the screen.",
+      "playTab": "Use your guitar and microphone. Play the note at the position shown on the tab."
+    },
+    "tabs": {
+      "fretboard": "Fretboard",
+      "earTraining": "Ear Training"
+    },
+    "sessionSummary": {
+      "title": "Session Complete",
+      "accuracy": "Accuracy",
+      "deltaVsPrevious": "{{delta}}% vs previous session",
+      "personalBest": "New personal best",
+      "compactHint": "The fretboard has 72 positions. Short, focused reps compound quickly.",
+      "participationBonus": "Participation bonus: +{{xp}} XP",
+      "supportTitle": "Enjoying FretMemo?",
+      "buyCoffee": "Buy me a coffee",
+      "focusWeakSpots": "Focus Weak Spots",
+      "practiceAgain": "Practice Again",
+      "done": "Done",
+      "weakSpot": "Focus string {{string}}, fret {{fret}} ({{accuracy}}% accuracy).",
+      "weakSpotFallback": "Try a focused drill on one string range.",
+      "summary": {
+        "firstSession": "First session complete. Every note attempt builds your fretboard map.",
+        "zeroAccuracy": "You practiced for {{duration}} and attempted {{total}} notes. {{weakSpot}}",
+        "lowAccuracy": "{{incorrect}} notes to review this run. {{weakSpot}}",
+        "decentButDown": "Slightly below your previous session. A focused follow-up should recover momentum.",
+        "personalBest": "New personal best. Keep this pace and lock it in.",
+        "improved": "Solid improvement from your previous session."
+      },
+      "support": {
+        "personalBest": "Personal best energy. If FretMemo helped you get here, a coffee tip helps fund the next drill and polish pass. No pressure.",
+        "firstSession": "If this felt helpful, buying me a coffee helps me keep shipping drills, fixes, and articles. No pressure.",
+        "default": "If this session was helpful, buying me a coffee helps fund new drills, fixes, and polish. No pressure."
+      },
+      "stats": {
+        "correct": "Correct",
+        "review": "Notes to review",
+        "bestStreak": "Best streak",
+        "score": "Score",
+        "timePracticed": "You practiced",
+        "xpEarned": "XP earned"
+      }
+    },
+    "controls": {
+      "microphone": "Microphone",
+      "inputActive": "Input active",
+      "inputDisabled": "Input disabled",
+      "hint": "Hint",
+      "used": "used",
+      "minusPoints": "-{{points}} pts",
+      "next": "Next"
+    },
+    "focusHud": {
+      "sessionPausedTitle": "Session paused",
+      "sessionPausedDescription": "Resume when you are ready.",
+      "resume": "Resume",
+      "endSession": "End Session",
+      "score": "Score",
+      "sessionProgress": "Session progress"
+    }
+  },
+  "settingsPage": {
+    "title": "Settings",
+    "subtitle": "Manage global defaults, module defaults, and safety controls.",
+    "resetAllDefaults": "Reset All Defaults",
+    "searchPlaceholder": "Search settings (e.g. tuning, metronome, latency)",
+    "scope": {
+      "global": "Global Defaults",
+      "modules": "Module Defaults",
+      "data": "Data & Support"
+    },
+    "scopeHint": "Global defaults affect the whole app. Module defaults prefill specific training modes.",
+    "common": {
+      "on": "On",
+      "off": "Off"
+    },
+    "feedback": {
+      "exportSuccess": "Progress data exported.",
+      "exportError": "Could not export progress data. Please try again.",
+      "importError": "Could not import progress data. Make sure the file is valid JSON.",
+      "resetSettingsSuccess": "Settings reset to defaults.",
+      "resetProgressSuccess": "All progress data has been reset."
+    },
+    "confirm": {
+      "resetSettings": {
+        "title": "Reset Settings?",
+        "description": "This restores all app settings to defaults. Progress data will not be changed.",
+        "confirm": "Reset Settings"
+      },
+      "replaceImport": {
+        "title": "Replace Progress Data?",
+        "description": "This will overwrite your current progress with imported data.",
+        "confirm": "Replace"
+      },
+      "resetProgress": {
+        "title": "Reset All Progress Data?",
+        "description": "This removes practice stats, session history, and unlocked achievements.",
+        "confirm": "Reset Progress"
+      }
+    },
+    "instrument": {
+      "sectionTitle": "Instrument",
+      "sectionSummary": "{{instrument}} · {{strings}} strings",
+      "cardTitle": "Instrument",
+      "cardDescription": "Configure instrument family, tuning, and handedness.",
+      "instrumentType": "Instrument Type",
+      "instrumentTypeHint": "Changes available tuning presets and string count.",
+      "instrumentTypes": {
+        "guitar6": "Guitar (6)",
+        "guitar7": "Guitar (7)",
+        "guitar8": "Guitar (8)",
+        "bass4": "Bass (4)",
+        "bass5": "Bass (5)",
+        "ukulele4": "Ukulele (4)"
+      },
+      "tuningPreset": "Tuning Preset",
+      "tuningPresetHint": "Applies to all fretboard-based exercises.",
+      "tuningPresets": {
+        "standard": "Standard (E-A-D-G-B-E)",
+        "drop-d": "Drop D (D-A-D-G-B-E)",
+        "dadgad": "DADGAD",
+        "open-g": "Open G",
+        "open-d": "Open D",
+        "double-drop-d": "Double Drop D",
+        "e-flat": "Half Step Down (Eb)",
+        "standard-7": "Standard 7 (B-E-A-D-G-B-E)",
+        "drop-a-7": "Drop A 7 (A-E-A-D-G-B-E)",
+        "standard-8": "Standard 8 (F#-B-E-A-D-G-B-E)",
+        "bass-standard-4": "Bass Standard (E-A-D-G)",
+        "bass-drop-d-4": "Bass Drop D (D-A-D-G)",
+        "bass-standard-5": "Bass Standard 5 (B-E-A-D-G)",
+        "ukulele-standard": "Ukulele Standard (G-C-E-A)"
+      },
+      "customCurrent": "Custom (Current)",
+      "activeTuning": "Active tuning ({{strings}} strings): {{tuning}}",
+      "leftHanded": "Left-Handed Mode",
+      "leftHandedHint": "Mirror the fretboard for left-handed playing.",
+      "showFretNumbers": "Show Fret Numbers",
+      "showFretNumbersHint": "Display numbers on the fretboard visualization.",
+      "noteNaming": "Note Naming",
+      "noteNamingHint": "Choose whether notes are displayed as sharps or flats.",
+      "notation": {
+        "sharps": "Sharps (#)",
+        "flats": "Flats (b)"
+      }
+    },
+    "learning": {
+      "sectionTitle": "Practice",
+      "sectionSummary": "{{tempo}} BPM · Auto-Advance {{autoAdvance}}",
+      "cardTitle": "Learning Behavior",
+      "cardDescription": "Adjust how the application helps you learn.",
+      "difficultyMode": "Difficulty Mode",
+      "difficultyModeHint": "Adaptive mode reacts to your results. Manual keeps fixed behavior.",
+      "difficulty": {
+        "adaptive": "Adaptive",
+        "manual": "Manual"
+      },
+      "autoAdvance": "Auto-Advance",
+      "autoAdvanceHint": "Automatically move to the next question after a correct answer.",
+      "showHints": "Show Hints",
+      "showHintsHint": "Display markers or helpers when stuck.",
+      "spacedRepetition": "Spaced Repetition",
+      "spacedRepetitionHint": "Prioritize weak areas and older items."
+    },
+    "audio": {
+      "sectionTitle": "Audio",
+      "sectionSummary": "Volume {{volume}}% · ±{{tolerance}} cents",
+      "cardTitle": "Audio & Input",
+      "cardDescription": "Manage sound output and microphone input.",
+      "masterVolume": "Master Volume",
+      "instrumentSound": "Playback Instrument Sound",
+      "instrumentSoundHint": "Used for generated tones and reference notes.",
+      "sounds": {
+        "acoustic": "Acoustic",
+        "electric": "Electric",
+        "clean": "Clean"
+      },
+      "pitchTolerance": "Pitch Tolerance (cents)",
+      "pitchToleranceHint": "Higher values make detection more forgiving."
+    },
+    "appearance": {
+      "sectionTitle": "Appearance",
+      "sectionSummary": "{{theme}} · {{layer}}",
+      "cardTitle": "Appearance & Interface",
+      "cardDescription": "Customize how FretMemo looks and feels.",
+      "theme": "Theme",
+      "themeHint": "Choose light, dark, or follow your device preference.",
+      "themeOptions": {
+        "light": "Light",
+        "dark": "Dark",
+        "system": "System"
+      },
+      "defaultLayer": "Default Fretboard Layer",
+      "defaultLayerHint": "Used as the starting layer in Focus Mode."
+    },
+    "gamification": {
+      "sectionTitle": "Game",
+      "sectionSummary": "XP Notes {{xp}} · Warnings {{warnings}}",
+      "cardTitle": "Gamification",
+      "cardDescription": "Manage XP, streaks, and rewards.",
+      "showXpAnimations": "Show XP Animations",
+      "showXpAnimationsHint": "Show floating XP summaries after answers.",
+      "streakWarnings": "Streak Warnings",
+      "streakWarningsHint": "Alert when streak is at risk of breaking.",
+      "achievementToasts": "Achievement Toasts",
+      "achievementToastsHint": "Show unlock notifications during practice sessions.",
+      "streakFreezes": "Streak Freezes",
+      "streakFreezesHint": "Protect your streak if you miss a day."
+    },
+    "modulePractice": {
+      "sectionTitle": "Practice Module Defaults",
+      "sectionSummary": "{{tempo}} BPM · Metronome {{metronome}}",
+      "cardTitle": "Practice Defaults",
+      "cardDescription": "Prefill Session Setup for fretboard practice modes.",
+      "defaultTempo": "Default Tempo",
+      "metronomeDefault": "Metronome Armed by Default",
+      "metronomeDefaultHint": "Enable click track automatically on session start.",
+      "defaultFretRange": "Default Fret Range",
+      "defaultRootNote": "Default Root Note",
+      "defaultScaleType": "Default Scale Type",
+      "defaultScaleTypeHint": "Used when scale constraints are enabled.",
+      "defaultNoteSequence": "Default Note Sequence"
+    },
+    "moduleTraining": {
+      "sectionTitle": "Training Module Defaults",
+      "sectionSummary": "{{technique}} technique BPM overrides · {{intervals}} ear intervals",
+      "cardTitle": "Technique, Ear Training & Rhythm",
+      "cardDescription": "Module-specific defaults and persisted training calibration.",
+      "technique": {
+        "bpmOverrides": "Technique Starting BPM Overrides",
+        "bpmOverridesHint": "Saved per exercise when tempo is adjusted in Technique mode.",
+        "noOverrides": "No exercise-specific starting BPM overrides yet.",
+        "clearBpmOverrides": "Clear BPM Overrides",
+        "clearTechniqueStats": "Clear Technique Stats",
+        "resetTechniqueModule": "Reset Technique Module"
+      },
+      "ear": {
+        "defaultDirection": "Ear Training Default Direction",
+        "activeIntervals": "Active Ear Intervals",
+        "activeIntervalsHint": "At least one interval must stay enabled.",
+        "resetDefaults": "Reset Ear Defaults",
+        "directions": {
+          "ascending": "Ascending",
+          "descending": "Descending",
+          "harmonic": "Harmonic"
+        }
+      },
+      "rhythm": {
+        "inputLatency": "Rhythm Input Latency Compensation",
+        "inputLatencyHint": "Increase this if taps are consistently marked late despite feeling on-beat.",
+        "resetLatency": "Reset Latency to 0 ms"
+      }
+    },
+    "data": {
+      "sectionTitle": "Data",
+      "sectionSummary": "Export · Import · Reset",
+      "cardTitle": "Progress Backup",
+      "cardDescription": "Export your practice data to JSON and import it later.",
+      "export": "Export Progress",
+      "importMerge": "Import (Merge)",
+      "importReplace": "Import (Replace)",
+      "mergeVsReplace": "Merge keeps current progress and adds imported data. Replace overwrites all current progress.",
+      "dangerTitle": "Danger Zone",
+      "dangerDescription": "Permanent actions affecting your learning history.",
+      "resetAllProgress": "Reset All Progress Data"
+    },
+    "help": {
+      "sectionTitle": "Help",
+      "sectionSummary": "FAQ · Blog · Contact · Legacy v1",
+      "cardTitle": "Help & Support",
+      "cardDescription": "Quick access to FAQ, updates, and support.",
+      "faq": "FAQ",
+      "blog": "Blog",
+      "contact": "Contact",
+      "legacyV1": "Legacy v1",
+      "buyCoffee": "Buy me a coffee"
+    },
+    "empty": {
+      "global": "No global settings match \"{{query}}\".",
+      "modules": "No module settings match \"{{query}}\".",
+      "data": "No data/support settings match \"{{query}}\".",
+      "clearSearch": "Clear Search"
+    }
+  },
+  "ear": {
+    "page": {
+      "modeNotFoundTitle": "Mode not found",
+      "modeNotFoundDesc": "The mode '{{mode}}' is not available.",
+      "backToLibrary": "Back to Train",
+      "modes": {
+        "soundToFretboard": "Sound -> Fretboard",
+        "intervalRecognition": "Interval Recognition",
+        "chordQuality": "Chord Quality",
+        "functionalEar": "Functional Ear"
+      }
+    },
+    "common": {
+      "startTraining": "Start Training",
+      "score": "Score",
+      "replay": "Replay",
+      "hint": "Hint",
+      "hideHint": "Hide",
+      "next": "Next",
+      "end": "End Session",
+      "correct": "Correct!"
+    },
+    "soundToFretboard": {
+      "title": "Sound -> Fretboard",
+      "description": "Hear the note and pick matching positions on the fretboard.",
+      "enableAudioHint": "Tap start once to unlock audio.",
+      "noteIs": "Note: {{note}}",
+      "noteWas": "Correct note: {{note}}"
+    },
+    "intervals": {
+      "description": "Hear two notes and identify the interval.",
+      "itWas": "It was: {{interval}}",
+      "difficulty": {
+        "easy": "Easy",
+        "medium": "Medium",
+        "hard": "Hard"
+      },
+      "labels": {
+        "P1": "Unison",
+        "m2": "Minor 2nd",
+        "M2": "Major 2nd",
+        "m3": "Minor 3rd",
+        "M3": "Major 3rd",
+        "P4": "Perfect 4th",
+        "A4": "Tritone",
+        "P5": "Perfect 5th",
+        "m6": "Minor 6th",
+        "M6": "Major 6th",
+        "m7": "Minor 7th",
+        "M7": "Major 7th",
+        "P8": "Octave"
+      }
+    },
+    "chords": {
+      "description": "Hear the chord and identify its quality.",
+      "itWas": "It was: {{quality}}",
+      "difficulty": {
+        "triads": "Triads",
+        "extended": "Extended"
+      },
+      "qualities": {
+        "major": "Major",
+        "minor": "Minor",
+        "diminished": "Diminished",
+        "augmented": "Augmented",
+        "sus2": "Sus2",
+        "sus4": "Sus4",
+        "dom7": "7",
+        "maj7": "Maj7",
+        "min7": "m7"
+      }
+    },
+    "functional": {
+      "description": "Hear the key center and target tone, then pick the scale degree.",
+      "keyMode": "Key mode",
+      "random": "Random",
+      "fixedKey": "Fixed",
+      "activeDegrees": "Active degrees",
+      "autoNext": "Auto-next",
+      "autoNextDesc": "Jump to the next prompt after each correct answer.",
+      "keyCenter": "Key center",
+      "major": "major",
+      "listenPrompt": "Listen first, then choose the degree.",
+      "replayContext": "Context",
+      "replayTarget": "Target",
+      "replayFull": "Full prompt",
+      "correctFeedback": "Correct: degree {{degree}} in {{key}} {{major}} ({{note}})",
+      "wrongFeedback": "Not quite: picked {{selected}}, correct is {{correct}} ({{note}})",
+      "sessionDegreeStats": "Degree stats",
+      "degree": "Degree {{degree}}",
+      "accuracy": "{{value}}% accuracy",
+      "avgMs": "Avg {{value}} ms",
+      "audio": {
+        "playingContextTarget": "Playing context + target",
+        "replayingContext": "Replaying context",
+        "replayingTarget": "Replaying target",
+        "replayingFull": "Replaying full prompt"
+      }
+    }
+  },
+  "rhythm": {
+    "common": {
+      "audioClickLabel": "Audio click",
+      "barsLabel": "Bars",
+      "bpm": "{{value}} BPM",
+      "editSettings": "Edit settings",
+      "newSession": "New session",
+      "off": "Off",
+      "on": "On",
+      "practice": "Practice",
+      "practiceWithGuitar": "Practice with guitar",
+      "retry": "Retry",
+      "scored": "Scored",
+      "startScored": "Start scored",
+      "stop": "Stop",
+      "stopPractice": "Stop practice",
+      "tempoBpm": "Tempo: {{bpm}} BPM",
+      "metrics": {
+        "hits": "Hits",
+        "misses": "Misses",
+        "extras": "Extras",
+        "avgOffset": "Avg offset",
+        "direction": "Direction"
+      }
+    },
+    "tapBeat": {
+      "title": "Tap the Beat",
+      "description": "Lock into the pulse and hit each beat in time.",
+      "timeSignatureLabel": "Time signature",
+      "sixEightPulse": "6/8 pulse",
+      "sessionScoredDesc": "Track hits, misses, and timing accuracy.",
+      "sessionPracticeDesc": "Play freely with no scoring or stats.",
+      "signatureBars": "{{signature}} · {{bars}} bars",
+      "practiceHint": "Practice mode: stay with the click and keep the pulse steady.",
+      "summaryDescription": "Score: {{score}} pts · Accuracy: {{accuracy}}%"
+    },
+    "strumPatterns": {
+      "title": "Strum Patterns",
+      "description": "Train common strumming grooves and picking direction control.",
+      "patternLabel": "Pattern",
+      "sessionScoredDesc": "Score timing and direction accuracy.",
+      "sessionPracticeDesc": "Loop the groove without scoring.",
+      "barsGrid": "{{bars}} bars · {{grid}} grid",
+      "grid16": "1/16",
+      "grid8": "1/8",
+      "practiceHint": "Practice mode: loop the pattern and focus on consistent motion.",
+      "summaryDescription": "Score: {{score}} pts · Accuracy: {{accuracy}}% · Direction: {{direction}}%",
+      "patterns": {
+        "basic-down": {
+          "title": "Basic Down",
+          "genre": "Universal",
+          "description": "Solid quarter-note downstrokes."
+        },
+        "folk-strum": {
+          "title": "Folk Strum",
+          "genre": "Folk / Country",
+          "description": "Classic singer-songwriter groove."
+        },
+        "pop-rock": {
+          "title": "Pop Rock",
+          "genre": "Pop / Rock",
+          "description": "Muted attack on beat 3 for drive."
+        },
+        "island": {
+          "title": "Island Strum",
+          "genre": "Reggae / Ska",
+          "description": "Offbeat-forward feel with space."
+        },
+        "syncopated": {
+          "title": "Syncopated",
+          "genre": "Funk / R&B",
+          "description": "Tighter accents and syncopated pushes."
+        },
+        "sixteenth-flow": {
+          "title": "16th Note Flow",
+          "genre": "Mixed",
+          "description": "Continuous 16th-grid motion with rests."
+        }
+      }
+    },
+    "rhythmReading": {
+      "title": "Rhythm Reading",
+      "description": "Read the pattern and place each attack in time.",
+      "exerciseLabel": "Exercise",
+      "timeLabel": "Time",
+      "expectedTapsLabel": "Taps / bar",
+      "expectedPerBar": "{{count}}",
+      "gridLabel": "Grid",
+      "gridSubdivisions": "{{count}} subdivisions",
+      "levelLabel": "Level",
+      "levelValue": "Level {{level}}",
+      "exerciseSelectLabel": "Variation",
+      "adaptiveTempoLabel": "Adaptive tempo",
+      "adaptiveTempoDesc": "Automatically raise or lower tempo after each run.",
+      "adaptiveTempoUp": "Adaptive tempo: +{{delta}} BPM (next run {{next}} BPM).",
+      "adaptiveTempoDown": "Adaptive tempo: -{{delta}} BPM for cleaner timing (next run {{next}} BPM).",
+      "adaptiveTempoHold": "Adaptive tempo held at {{bpm}} BPM.",
+      "randomExercise": "Random exercise",
+      "sessionScoredDesc": "Score timing accuracy against notation.",
+      "sessionPracticeDesc": "Read and play with no scoring.",
+      "headerMeta": "{{signature}} · {{grid}} grid · {{taps}} taps/bar",
+      "levelCompact": "Lvl {{level}}",
+      "barsCompact": "{{bars}} bars",
+      "practiceHint": "Practice mode: read the notation and play without scoring.",
+      "summaryDescription": "Score: {{score}} pts · Accuracy: {{accuracy}}%",
+      "exercises": {
+        "rr-l1-quarters-a": {
+          "title": "Quarter Pulse A",
+          "description": "Steady quarter notes with one quarter rest."
+        },
+        "rr-l1-quarters-b": {
+          "title": "Quarter Pulse B",
+          "description": "Quarter-note starts with off-beat silence."
+        },
+        "rr-l2-eighths-a": {
+          "title": "Eighth Stream A",
+          "description": "Simple eighths with one missing attack."
+        },
+        "rr-l2-eighths-b": {
+          "title": "Eighth Stream B",
+          "description": "Quarter and eighth combinations with rests."
+        },
+        "rr-l3-sixteenth-a": {
+          "title": "Sixteenth Entry A",
+          "description": "Quarter and sixteenth placements in 4/4."
+        },
+        "rr-l3-sixteenth-b": {
+          "title": "Sixteenth Entry B",
+          "description": "Mixed sixteenth and eighth starts."
+        },
+        "rr-l4-dotted-a": {
+          "title": "Dotted Feel A",
+          "description": "Dotted-eighth and quarter combinations."
+        },
+        "rr-l4-dotted-b": {
+          "title": "Dotted Feel B",
+          "description": "Dotted rhythm with rests."
+        },
+        "rr-l5-triplets-a": {
+          "title": "Triplet Flow A",
+          "description": "Quarter-note triplet grid in 4/4."
+        },
+        "rr-l5-triplets-b": {
+          "title": "Triplet Flow B",
+          "description": "Triplet starts with syncopated rests."
+        },
+        "rr-l6-compound-a": {
+          "title": "Compound 6/8 A",
+          "description": "6/8 pulse with grouped eighth notes."
+        },
+        "rr-l6-compound-b": {
+          "title": "Compound 6/8 B",
+          "description": "6/8 accents with internal rests."
+        }
+      }
+    },
+    "grooveLab": {
+      "title": "Groove Lab",
+      "description": "Build timing and strum-direction control with full groove contexts.",
+      "presetLabel": "Groove preset",
+      "metronomeClickLabel": "Metronome click",
+      "echoModeLabel": "Echo mode",
+      "echoModeDesc": "Listen first, then play the response phrase.",
+      "sessionScoredDesc": "Score timing, direction, and groove control.",
+      "sessionPracticeDesc": "Play grooves freely without scoring.",
+      "barCounter": "Bar {{current}} / {{total}}",
+      "phaseListen": "Listen",
+      "phaseReplay": "Replay",
+      "listenPhaseHint": "Listen phase: absorb the groove before your response.",
+      "practiceHint": "Practice mode: lock into the groove and refine your pulse.",
+      "summaryDescription": "Score: {{score}} pts · Accuracy: {{accuracy}}% · Direction: {{direction}}%",
+      "headerMeta": "{{genre}} · {{feel}} · {{bpm}} BPM",
+      "feels": {
+        "straight": "straight",
+        "shuffle": "shuffle",
+        "compound": "compound"
+      },
+      "presets": {
+        "straight-8-rock": {
+          "title": "Straight 8th Rock",
+          "genre": "Rock",
+          "description": "Solid backbeat with downbeat accents."
+        },
+        "shuffle-blues": {
+          "title": "Shuffle Blues",
+          "genre": "Blues",
+          "description": "Triplet grid with a shuffle pocket."
+        },
+        "reggae-offbeat": {
+          "title": "Reggae Offbeat",
+          "genre": "Reggae",
+          "description": "Lean on offbeats and leave space."
+        },
+        "bossa-nova": {
+          "title": "Bossa Nova",
+          "genre": "Latin",
+          "description": "Alternating bass pulse with light upstrokes."
+        },
+        "ballad-12-8": {
+          "title": "12/8 Ballad",
+          "genre": "Ballad",
+          "description": "Slow compound feel with flowing triplets."
+        },
+        "funk-16th": {
+          "title": "Funk 16th",
+          "genre": "Funk",
+          "description": "Tight sixteenth-note grid with muted attacks."
+        }
+      }
+    },
+    "notFound": {
+      "title": "Rhythm mode not found",
+      "description": "The requested rhythm mode does not exist.",
+      "backToTrain": "Back to Train"
+    },
+    "comingSoon": {
+      "description": "This mode is coming soon.",
+      "body": "This mode is queued for the next sprint. Start with Tap the Beat or Strum Patterns now."
+    },
+    "ui": {
+      "patternGrid": {
+        "title": "Pattern grid"
+      },
+      "latency": {
+        "title": "Input latency compensation",
+        "value": "{{value}} ms",
+        "description": "Increase this if your taps are consistently marked late despite feeling on-beat."
+      },
+      "tapZone": {
+        "down": "Down",
+        "up": "Up",
+        "keyboardLabel": "Keyboard",
+        "tapBeat": "Tap Beat"
+      },
+      "timingFeedback": {
+        "waiting": "Waiting for your input...",
+        "wrongDirection": "Wrong direction",
+        "miss": "MISS {{offset}}ms",
+        "value": "{{rating}} {{offset}}ms",
+        "rating": {
+          "perfect": "PERFECT",
+          "good": "GOOD",
+          "ok": "OK",
+          "miss": "MISS"
+        }
+      },
+      "rhythmNotation": {
+        "title": "Notation lane",
+        "meta": "{{signature}} · grid {{subdivision}}",
+        "legend": {
+          "tapNotesOnly": "Tap on note heads only",
+          "noRests": "Do not tap during rests",
+          "accents": "Accent marks show stronger pulse"
+        }
+      }
+    }
+  },
+  "rhythmModes": {
+    "tapBeat": "Tap the Beat",
+    "strumPatterns": "Strum Patterns",
+    "rhythmReading": "Rhythm Reading",
+    "grooveLab": "Groove Lab"
+  },
+  "progress": {
+    "title": "Progress",
+    "totalAnswers": "Answers",
+    "accuracy": "Accuracy",
+    "coverage": "Coverage",
+    "streak": "Streak",
+    "streakFormat": "{{days}}d • {{freezes}} freezes",
+    "fretboardTitle": "Your Fretboard",
+    "fretboardDesc": "Positions: {{positions}} • Coverage: {{coverage}}%",
+    "hideHeatMap": "Hide Heatmap",
+    "showHeatMap": "Show Heatmap",
+    "emptyFretboardTitle": "Your fretboard map is empty",
+    "emptyFretboardDesc": "Start a short practice session to unlock it.",
+    "startPractice": "Start Practice",
+    "weak": "weak < 60%",
+    "learning": "learning 60-85%",
+    "mastered": "mastered > 85%",
+    "accuracyTrendTitle": "Accuracy trend",
+    "accuracyTrendDesc": "Track your accuracy over time.",
+    "week": "Week",
+    "month": "Month",
+    "all": "All",
+    "functionalEarTitle": "Functional Ear",
+    "functionalEarDesc": "Scale degree recognition.",
+    "emptyFunctionalTitle": "No ear data yet",
+    "emptyFunctionalDesc": "Complete your first ear training session.",
+    "startFunctionalEar": "Start Functional Ear",
+    "degreeLabel": "Degree {{degree}}",
+    "accuracyVal": "{{accuracy}}% accuracy",
+    "answersVal": "{{samples}} answers",
+    "avgMs": "Avg {{ms}} ms",
+    "focusAreasTitle": "Focus Areas",
+    "focusAreasDesc": "Positions that need the most work",
+    "emptyFocusTitle": "No focus areas yet",
+    "emptyFocusDesc": "Play a few sessions to surface weak spots.",
+    "openTrain": "Open Train",
+    "stringFret": "String {{string}}, fret {{fret}}",
+    "practiceWeakSpots": "Practice Weak Spots",
+    "achievementsTitle": "Achievements",
+    "achievementsDesc": "{{unlocked}} / {{total}} unlocked",
+    "practiceTime": "Time: {{hours}}h {{minutes}}m",
+    "resetConfirmTitle": "Reset heatmap?",
+    "resetConfirmDesc": "This removes fretboard heatmap data from local memory. This action cannot be undone.",
+    "reset": "Reset",
+    "resetSuccess": "Heatmap reset successfully.",
+    "achievementsList": {
+      "first_note": {
+        "name": "First Steps",
+        "desc": "Correctly identify your first note"
+      },
+      "streak_7": {
+        "name": "Week Warrior",
+        "desc": "Practice for 7 days in a row"
+      },
+      "streak_30": {
+        "name": "Monthly Master",
+        "desc": "Practice for 30 days in a row"
+      },
+      "perfect_session": {
+        "name": "Perfect Session",
+        "desc": "Get 20 correct answers in a row"
+      },
+      "speed_demon": {
+        "name": "Speed Demon",
+        "desc": "Practice at 120 BPM or higher"
+      },
+      "explorer": {
+        "name": "Fretboard Explorer",
+        "desc": "Practice on all 6 strings"
+      }
+    },
+    "accuracyChart": {
+      "emptyTitle": "Your accuracy trend appears here after 3+ sessions",
+      "emptyDescription": "Keep practicing consistently to unlock real progress insights.",
+      "averageAccuracy": "Average accuracy",
+      "improving": "Improving",
+      "declining": "Declining",
+      "stable": "Stable",
+      "high": "High: {{value}}%",
+      "low": "Low: {{value}}%",
+      "trendLegend": "Accuracy trend",
+      "confidenceLegend": "Confidence zone"
+    }
+  },
+  "me": {
+    "tabs": {
+      "progress": "Progress",
+      "settings": "Settings"
+    }
+  },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "description": "An unexpected error occurred. Try refreshing or click retry.",
+    "retry": "Retry",
+    "reload": "Reload Page"
+  }
+}
