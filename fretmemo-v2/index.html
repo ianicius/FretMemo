@@ -67,8 +67,22 @@
   <script>
     (function () {
       if (!window.amplitude || !window.sessionReplay) return;
-      window.amplitude.add(window.sessionReplay.plugin({ sampleRate: 1 }));
-      window.amplitude.init("1255f59dc08d681f1d7d257f2a82e84c", {
+
+      var envReplaySampleRate = Number("%VITE_AMPLITUDE_REPLAY_SAMPLE_RATE%");
+      var replaySampleRate = Number.isFinite(envReplaySampleRate) && envReplaySampleRate >= 0 && envReplaySampleRate <= 1
+        ? envReplaySampleRate
+        : 0.2;
+      var envApiKey = "%VITE_AMPLITUDE_API_KEY%";
+      var apiKey = envApiKey && envApiKey !== "%VITE_AMPLITUDE_API_KEY%"
+        ? envApiKey
+        : "1255f59dc08d681f1d7d257f2a82e84c";
+
+      window.__fretmemoAnalyticsConfig = {
+        replaySampleRate: replaySampleRate
+      };
+
+      window.amplitude.add(window.sessionReplay.plugin({ sampleRate: replaySampleRate }));
+      window.amplitude.init(apiKey, {
         autocapture: { elementInteractions: true }
       });
     })();

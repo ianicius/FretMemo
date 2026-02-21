@@ -20,7 +20,7 @@ import { useNavigate } from "react-router-dom";
 import { useProgressStore } from "@/stores/useProgressStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { EXTERNAL_LINKS } from "@/lib/externalLinks";
-import { trackEvent } from "@/lib/analytics";
+import { trackEvent, trackNavigationClicked } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
@@ -124,19 +124,47 @@ export function Header() {
                                         {t('header.quickActions')}
                                     </p>
                                     <div className="grid gap-2">
-                                        <Button variant="outline" className="justify-start" onClick={() => navigate("/train")}>
+                                        <Button
+                                            variant="outline"
+                                            className="justify-start"
+                                            onClick={() => {
+                                                trackNavigationClicked("header_quick_actions", "/train", "practice");
+                                                navigate("/train");
+                                            }}
+                                        >
                                             <Target className="mr-2 h-4 w-4" />
                                             {t('nav.practice')}
                                         </Button>
-                                        <Button variant="outline" className="justify-start" onClick={() => navigate("/challenges")}>
+                                        <Button
+                                            variant="outline"
+                                            className="justify-start"
+                                            onClick={() => {
+                                                trackNavigationClicked("header_quick_actions", "/challenges", "challenges");
+                                                navigate("/challenges");
+                                            }}
+                                        >
                                             <Trophy className="mr-2 h-4 w-4" />
                                             {t('nav.challenges')}
                                         </Button>
-                                        <Button variant="outline" className="justify-start" onClick={() => navigate("/me?section=progress")}>
+                                        <Button
+                                            variant="outline"
+                                            className="justify-start"
+                                            onClick={() => {
+                                                trackNavigationClicked("header_quick_actions", "/me?section=progress", "progress");
+                                                navigate("/me?section=progress");
+                                            }}
+                                        >
                                             <ChartBar className="mr-2 h-4 w-4" />
                                             {t('nav.progress')}
                                         </Button>
-                                        <Button variant="outline" className="justify-start" onClick={() => navigate("/me?section=settings")}>
+                                        <Button
+                                            variant="outline"
+                                            className="justify-start"
+                                            onClick={() => {
+                                                trackNavigationClicked("header_quick_actions", "/me?section=settings", "settings");
+                                                navigate("/me?section=settings");
+                                            }}
+                                        >
                                             <Settings className="mr-2 h-4 w-4" />
                                             {t('nav.settings')}
                                         </Button>

@@ -1,10 +1,11 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import type { LazyExoticComponent, ComponentType } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { PageSkeleton } from "@/components/ui/page-skeleton";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { trackFeatureOpened } from "@/lib/analytics";
 
 const ScaleExplorer = lazy(() => import("@/components/theory/ScaleExplorer"));
 const CircleOfFifths = lazy(() => import("@/components/theory/CircleOfFifths"));
@@ -28,7 +29,15 @@ export default function TheoryTool() {
     const { t } = useTranslation();
     const { toolId } = useParams<{ toolId: string }>();
     const navigate = useNavigate();
+    const location = useLocation();
     const tool = toolId ? TOOLS[toolId] : undefined;
+    const routeState = (location.state as { entrySource?: string } | null) ?? null;
+    const entrySource = routeState?.entrySource ?? "direct";
+
+    useEffect(() => {
+        if (!toolId || !tool) return;
+        trackFeatureOpened("theory", toolId, entrySource);
+    }, [entrySource, tool, toolId]);
 
     if (!tool) {
         return (

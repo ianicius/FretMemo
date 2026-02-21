@@ -295,6 +295,30 @@ export default function Home() {
         });
     };
 
+    const openTechnique = (techniqueId: string, source: string) => {
+        navigate(`/technique/${techniqueId}`, {
+            state: { entrySource: source },
+        });
+    };
+
+    const openRhythm = (rhythmId: RhythmModeId, source: string) => {
+        navigate(`/rhythm/${rhythmId}`, {
+            state: { entrySource: source },
+        });
+    };
+
+    const openTheory = (toolId: string, source: string) => {
+        navigate(`/theory/${toolId}`, {
+            state: { entrySource: source },
+        });
+    };
+
+    const openEarTraining = (modeId: string, source: string) => {
+        navigate(`/ear-training/${modeId}`, {
+            state: { entrySource: source },
+        });
+    };
+
     const startNextStep = () => {
         if (weakSummary) {
             setMode("fretboardToNote");
@@ -443,7 +467,7 @@ export default function Home() {
                         <Button
                             size="lg"
                             className="w-full justify-between"
-                            onClick={() => navigate(`/technique/${continuePrimary.id}`)}
+                            onClick={() => openTechnique(continuePrimary.id, "home_continue_primary")}
                         >
                             <span className="inline-flex items-center gap-2">
                                 <Play className="h-4 w-4" />
@@ -492,8 +516,8 @@ export default function Home() {
                                         exercise.kind === "drill"
                                             ? openPracticeSetup(exercise.id as PracticeMode, exercise.source)
                                             : exercise.kind === "technique"
-                                                ? navigate(`/technique/${exercise.id}`)
-                                                : navigate(`/rhythm/${exercise.id}`)
+                                                ? openTechnique(exercise.id, "home_pinned_technique")
+                                                : openRhythm(exercise.id as RhythmModeId, "home_pinned_rhythm")
                                     }
                                 />
                             </div>
@@ -523,7 +547,7 @@ export default function Home() {
                                     mastery={exercise.mastery}
                                     lastPracticedLabel={exercise.lastPracticed}
                                     icon={Target}
-                                    onClick={() => navigate(`/technique/${exercise.id}`)}
+                                    onClick={() => openTechnique(exercise.id, "home_continue_list")}
                                 />
                             ))}
                         </div>
@@ -536,8 +560,8 @@ export default function Home() {
                 <div className="flex flex-wrap gap-2">
                     <Button variant="outline" onClick={() => openPracticeSetup("fretboardToNote", "home-explore-drills")}>{t('home.fretboardDrills')}</Button>
                     <Button variant="outline" onClick={() => navigate("/train")}>{t('home.technique')}</Button>
-                    <Button variant="outline" onClick={() => navigate("/theory/scales")}>{t('home.theoryTools')}</Button>
-                    <Button variant="outline" onClick={() => navigate("/ear-training/sound-to-fret")}>{t('home.earTraining')}</Button>
+                    <Button variant="outline" onClick={() => openTheory("scales", "home_explore_theory")}>{t('home.theoryTools')}</Button>
+                    <Button variant="outline" onClick={() => openEarTraining("sound-to-fret", "home_explore_ear")}>{t('home.earTraining')}</Button>
                 </div>
             </section>
         </div>

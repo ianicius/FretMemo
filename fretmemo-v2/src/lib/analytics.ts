@@ -11,9 +11,14 @@ interface AmplitudeClient {
     Identify?: new () => AmplitudeIdentify;
 }
 
+interface AnalyticsRuntimeConfig {
+    replaySampleRate?: number;
+}
+
 declare global {
     interface Window {
         amplitude?: AmplitudeClient;
+        __fretmemoAnalyticsConfig?: AnalyticsRuntimeConfig;
     }
 }
 
@@ -87,12 +92,23 @@ function getOrCreateSessionId(): string {
 }
 
 function withDefaultProps(eventProps: AnalyticsEventProps = {}): AnalyticsEventProps {
+    const replaySampleRate = window.__fretmemoAnalyticsConfig?.replaySampleRate;
+    const browserLanguage =
+        typeof navigator !== "undefined" && typeof navigator.language === "string"
+            ? navigator.language
+            : "unknown";
+
     return {
         app_version: APP_VERSION,
         app_surface: "web",
         session_id: getOrCreateSessionId(),
         page_path: window.location.pathname,
         page_url: window.location.href,
+        browser_language: browserLanguage,
+        replay_sample_rate:
+            typeof replaySampleRate === "number" && Number.isFinite(replaySampleRate)
+                ? replaySampleRate
+                : null,
         ...eventProps,
     };
 }
@@ -218,5 +234,21 @@ export function trackRouteView(pathname: string, search: string, hash: string): 
         route_path: pathname,
         route_search: search || "",
         route_hash: hash || "",
+    });
+}
+
+export function trackFeatureOpened(featureArea: string, featureId: string | null, entrySource: string | null = null): void {
+    trackEvent("fm_v2_feature_opened", {
+        feature_area: featureArea,
+        feature_id: featureId,
+        entry_source: entrySource ?? "direct",
+    });
+}
+
+export function trackNavigationClicked(sourceSurface: string, targetPath: string, targetId: string): void {
+    trackEvent("fm_v2_navigation_clicked", {
+        source_surface: sourceSurface,
+        target_path: targetPath,
+        target_id: targetId,
     });
 }

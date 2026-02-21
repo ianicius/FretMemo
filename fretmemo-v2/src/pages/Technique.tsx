@@ -16,6 +16,7 @@ import { TechniqueSettingsCard } from "@/components/technique-settings/Technique
 import { TechniqueStatusCard } from "@/components/technique-settings/TechniqueStatusCard";
 import { TechniqueSetupDialog } from "@/components/technique-settings/TechniqueSetupDialog";
 import { useTranslation } from "react-i18next";
+import { trackEvent, trackFeatureOpened } from "@/lib/analytics";
 const SPIDER_FINGERS = 4;
 const TECHNIQUE_FRETS = 12;
 const BEATS_PER_BAR = 4;
@@ -391,6 +392,8 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
+    const routeState = (location.state as { fromTrain?: boolean; entrySource?: string } | null) ?? null;
+    const entrySource = routeState?.entrySource ?? (routeState?.fromTrain ? "train" : "direct");
     const exercise = TECHNIQUE_EXERCISES[exerciseId];
     const techniqueSettings = useSettingsStore((state) => state.modules.technique);
     const quickTuning = useSettingsStore((state) => state.quick.tuning);
@@ -448,6 +451,7 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
     const speedUpBeatCounterRef = useRef(0);
     const randomModeBeatCounterRef = useRef(0);
     const stickyStateRef = useRef<StickyState>(createStickyState(startFret));
+    const sessionStartedAtRef = useRef<number | null>(null);
 
     const availablePermutationIndices = useMemo(
         () => getPermutationIndicesByTier(permutationTier),
@@ -498,6 +502,10 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
         (direction: PermutationDirection) => t(`technique.settings.directionOptions.${direction}`),
         [t]
     );
+
+    useEffect(() => {
+        trackFeatureOpened("technique", exerciseId, entrySource);
+    }, [entrySource, exerciseId]);
 
     const defaultPatternLabel = useMemo(() => {
         if (exerciseId === "permutation") return activePermutationPattern.join("-");
@@ -1193,12 +1201,42 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
     }, []);
 
     const startTechniqueSession = () => {
+        sessionStartedAtRef.current = Date.now();
+        trackEvent("fm_v2_technique_session_started", {
+            exercise_id: exerciseId,
+            entry_source: entrySource,
+            start_bpm: bpm,
+            step_mode: stepMode,
+            start_fret: startFret,
+            string_count: stringCount,
+            speed_up_enabled: speedUpEnabled,
+            speed_up_amount: speedUpAmount,
+            speed_up_interval_beats: speedUpInterval,
+        });
+
         resetTechniqueRunState();
         setIsPlaying(true);
         runTechniqueBeat();
     };
 
     const stopTechniqueSession = () => {
+        const durationSeconds = sessionStartedAtRef.current
+            ? Math.floor((Date.now() - sessionStartedAtRef.current) / 1000)
+            : 0;
+        const completedSteps = currentStep;
+
+        trackEvent("fm_v2_technique_session_ended", {
+            exercise_id: exerciseId,
+            entry_source: entrySource,
+            duration_seconds: durationSeconds,
+            completed_steps: completedSteps,
+            final_bpm: Math.round(currentBpmRef.current),
+            start_bpm: bpm,
+            step_mode: stepMode,
+            speed_up_enabled: speedUpEnabled,
+        });
+        sessionStartedAtRef.current = null;
+
         if (currentStep > 0) {
             persistTechniqueSession(currentBpmRef.current);
         }
@@ -1220,7 +1258,6 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
     };
 
     const handleBackToTrain = () => {
-        const routeState = location.state as { fromTrain?: boolean } | null;
         if (routeState?.fromTrain) {
             navigate(-1);
             return;

@@ -1,10 +1,11 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import type { LazyExoticComponent, ComponentType } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { PageSkeleton } from "@/components/ui/page-skeleton";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { trackFeatureOpened } from "@/lib/analytics";
 
 const SoundToFretboard = lazy(() => import("@/components/ear-training/SoundToFretboard"));
 const IntervalTrainer = lazy(() => import("@/components/ear-training/IntervalTrainer"));
@@ -24,7 +25,15 @@ export default function EarTraining() {
     const { t } = useTranslation();
     const { mode } = useParams<{ mode: string }>();
     const navigate = useNavigate();
+    const location = useLocation();
     const tool = mode ? MODES[mode] : undefined;
+    const routeState = (location.state as { entrySource?: string } | null) ?? null;
+    const entrySource = routeState?.entrySource ?? "direct";
+
+    useEffect(() => {
+        if (!mode || !tool) return;
+        trackFeatureOpened("ear_training", mode, entrySource);
+    }, [entrySource, mode, tool]);
 
     if (!tool) {
         return (

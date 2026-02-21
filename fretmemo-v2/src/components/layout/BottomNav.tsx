@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/useAppStore';
 import type { TabId } from '@/types';
 import { useTranslation } from 'react-i18next';
+import { trackNavigationClicked } from '@/lib/analytics';
 
 interface NavItem {
     id: TabId;
@@ -31,6 +32,7 @@ export function BottomNav() {
 
     const handleNav = (item: NavItem) => {
         setTab(item.id);
+        trackNavigationClicked("bottom_nav", item.path, item.id);
         navigate(item.path);
     };
 
