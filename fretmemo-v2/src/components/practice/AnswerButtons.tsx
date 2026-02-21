@@ -2,12 +2,14 @@ import type { NoteName, Position } from "@/types/fretboard";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
-import { applyPolishNotation } from "@/lib/noteNotation";
+import { formatPitchClass, type NoteDisplayMode } from "@/lib/noteNotation";
 
 interface NoteAnswerButtonsProps {
     noteOptions: string[];
     targetNote?: NoteName;
     selectedNote?: NoteName;
+    notation: NoteDisplayMode;
+    notationSeed?: string | number;
     isLocked: boolean;
     isCorrect?: boolean;
     isPlaying: boolean;
@@ -21,13 +23,14 @@ export function NoteAnswerButtons({
     noteOptions,
     targetNote,
     selectedNote,
+    notation,
+    notationSeed,
     isLocked,
     isCorrect,
     isPlaying,
     onSubmit,
 }: NoteAnswerButtonsProps) {
-    const { i18n } = useTranslation();
-    const isPolish = i18n.resolvedLanguage === 'pl' || i18n.language === 'pl';
+    useTranslation();
 
     return (
         <div className="mx-auto grid max-w-[19.5rem] grid-cols-2 gap-2 min-[360px]:max-w-[21rem] min-[390px]:max-w-[22rem] min-[412px]:max-w-[23rem] min-[390px]:gap-2.5 sm:max-w-3xl sm:gap-3 sm:grid-cols-4">
@@ -35,7 +38,7 @@ export function NoteAnswerButtons({
                 const isCorrectOption = isLocked && note === targetNote;
                 const isChosenOption = isLocked && note === selectedNote;
                 const isIncorrectChoice = isChosenOption && !isCorrect;
-                const displayNote = isPolish ? applyPolishNotation(note) : note;
+                const displayNote = formatPitchClass(note, notation, notationSeed);
                 return (
                     <Button
                         key={`${note}-${idx}`}
@@ -62,14 +65,15 @@ interface MiniTabProps {
     position: Position;
     tuning: NoteName[];
     leftHanded?: boolean;
+    notation: NoteDisplayMode;
+    notationSeed?: string | number;
 }
 
 /**
  * Compact tablature display for position answer options.
  */
-export function MiniTab({ position, tuning, leftHanded = false }: MiniTabProps) {
-    const { i18n } = useTranslation();
-    const isPolish = i18n.resolvedLanguage === 'pl' || i18n.language === 'pl';
+export function MiniTab({ position, tuning, leftHanded = false, notation, notationSeed }: MiniTabProps) {
+    useTranslation();
     const rows = leftHanded
         ? tuning.map((openNote, index) => ({
             openNote,
@@ -84,7 +88,7 @@ export function MiniTab({ position, tuning, leftHanded = false }: MiniTabProps) 
         <div className="space-y-1 font-mono text-[10px] leading-none">
             {rows.map(({ openNote, stringIndex }) => {
                 const isTarget = stringIndex === position.stringIndex;
-                const displayNote = isPolish ? applyPolishNotation(openNote) : openNote;
+                const displayNote = formatPitchClass(openNote, notation, notationSeed);
                 return (
                     <div key={`${openNote}-${stringIndex}`} className="flex items-center gap-1">
                         <span className="w-4 text-muted-foreground font-semibold">{displayNote}</span>
@@ -117,6 +121,8 @@ interface PositionAnswerButtonsProps {
     stringLabels: string[];
     tuning: NoteName[];
     leftHanded: boolean;
+    notation: NoteDisplayMode;
+    notationSeed?: string | number;
     onSubmit: (option: Position) => void;
     isLandscape?: boolean;
 }
@@ -134,6 +140,8 @@ export function PositionAnswerButtons({
     stringLabels,
     tuning,
     leftHanded,
+    notation,
+    notationSeed,
     onSubmit,
     isLandscape,
 }: PositionAnswerButtonsProps) {
@@ -171,7 +179,13 @@ export function PositionAnswerButtons({
                                 </span>
                             </div>
                             <div className="opacity-80 group-hover:opacity-100 transition-opacity scale-100 group-hover:scale-105 origin-left duration-300">
-                                <MiniTab position={option} tuning={tuning} leftHanded={leftHanded} />
+                                <MiniTab
+                                    position={option}
+                                    tuning={tuning}
+                                    leftHanded={leftHanded}
+                                    notation={notation}
+                                    notationSeed={notationSeed}
+                                />
                             </div>
                         </div>
                     </Button>

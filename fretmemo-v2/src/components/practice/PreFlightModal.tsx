@@ -11,7 +11,7 @@ import { SessionModeToggle } from "@/components/session-setup/session-mode-toggl
 import { SessionSetupDialogShell } from "@/components/session-setup/session-setup-dialog-shell";
 import { cn } from "@/lib/utils";
 import { NOTES } from "@/lib/constants";
-import { formatPitchClass } from "@/lib/noteNotation";
+import { formatPitchClass, resolveNoteDisplayMode } from "@/lib/noteNotation";
 import { useGameStore, type NoteFilter, type NoteSequence, type ScaleType } from "@/stores/useGameStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import type { NoteName } from "@/types/fretboard";
@@ -189,16 +189,24 @@ export function PreFlightModal({
 }: PreFlightModalProps) {
     const { t } = useTranslation();
     const notation = useSettingsStore((state) => state.full.instrument.notation);
+    const notationSeed = useMemo(
+        () => `preflight:${mode}:${rootNote}:${noteSequence}:${tuning.join("-")}`,
+        [mode, rootNote, noteSequence, tuning],
+    );
+    const displayNotation = useMemo(
+        () => resolveNoteDisplayMode(notation, notationSeed),
+        [notation, notationSeed],
+    );
     const config = MODE_CONFIG[mode];
     const [showAdvanced, setShowAdvanced] = useState(false);
     const isPlayMode = mode === "playNotes" || mode === "playTab";
     const allStringsEnabled = useMemo(() => Array.from({ length: tuning.length }, () => true), [tuning.length]);
     const stringToggleLabels = useMemo(
         () => tuning.map((note, index) => {
-            const label = formatPitchClass(note, notation);
+            const label = formatPitchClass(note, displayNotation, notationSeed);
             return index === 0 ? label.toLowerCase() : label;
         }),
-        [tuning, notation]
+        [tuning, displayNotation, notationSeed]
     );
 
     const speedUpEnabled = useGameStore((s) => s.speedUpEnabled);
@@ -513,7 +521,7 @@ export function PreFlightModal({
                                 >
                                     {NOTES.map((note) => (
                                         <option key={note} value={note}>
-                                            {formatPitchClass(note, notation)}
+                                            {formatPitchClass(note, displayNotation, notationSeed)}
                                         </option>
                                     ))}
                                 </Select>

@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { normalizeTuning } from "@/lib/tuning";
 import { getNoteAt, NOTES } from "@/lib/constants";
-import { formatPitchClass } from "@/lib/noteNotation";
+import { formatPitchClass, type NoteDisplayMode } from "@/lib/noteNotation";
 import { Fretboard } from "@/components/fretboard/Fretboard";
 import { Select } from "@/components/ui/select";
 import type { NoteStatus, NoteName } from "@/types/fretboard";
@@ -27,7 +27,7 @@ type StringGroupLabels = Record<StringGroupId, string>;
 /** Fixed guitar triad groups, returned as lowest→highest pitch indices. */
 function buildStringGroups(
     tuning: NoteName[],
-    notation: "sharps" | "flats",
+    notation: NoteDisplayMode,
     groupLabels: StringGroupLabels,
 ): StringGroup[] {
     const groups: StringGroup[] = [];

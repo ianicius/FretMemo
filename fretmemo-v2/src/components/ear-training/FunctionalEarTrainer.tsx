@@ -11,7 +11,7 @@ import {
     type FunctionalDegree,
     type FunctionalQuestion,
 } from "@/lib/functionalEar";
-import { formatPitchClass, formatPitchClassWithEnharmonic } from "@/lib/noteNotation";
+import { formatPitchClass, formatPitchClassWithEnharmonic, resolveNoteDisplayMode } from "@/lib/noteNotation";
 import { useEarTrainingStore } from "@/stores/useEarTrainingStore";
 import { useProgressStore } from "@/stores/useProgressStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
@@ -270,8 +270,15 @@ export default function FunctionalEarTrainer() {
             .filter((item) => item.samples > 0);
     }, [degreeStats]);
 
-    const keyLabel = question ? formatPitchClass(question.keyRoot, notation) : "--";
-    const targetLabel = question ? formatPitchClassWithEnharmonic(question.targetMidi, notation) : "--";
+    const notationSeed = question
+        ? `functional:${question.askedAtMs}:${question.keyRoot}:${question.targetMidi}`
+        : `functional:setup:${fixedKey}:${keyMode}`;
+    const displayNotation = useMemo(
+        () => resolveNoteDisplayMode(notation, notationSeed),
+        [notation, notationSeed],
+    );
+    const keyLabel = question ? formatPitchClass(question.keyRoot, displayNotation, notationSeed) : "--";
+    const targetLabel = question ? formatPitchClassWithEnharmonic(question.targetMidi, displayNotation, notationSeed) : "--";
 
     useEffect(() => {
         return () => {
@@ -327,7 +334,7 @@ export default function FunctionalEarTrainer() {
                             >
                                 {NOTES.map((note) => (
                                     <option key={note} value={note}>
-                                        {formatPitchClass(note, notation)}
+                                        {formatPitchClass(note, displayNotation, notationSeed)}
                                     </option>
                                 ))}
                             </Select>

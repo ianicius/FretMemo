@@ -830,10 +830,11 @@
       "showFretNumbers": "Pokazuj numery progów",
       "showFretNumbersHint": "Wyświetlaj numerację progów na wizualizacji gryfu.",
       "noteNaming": "Nazwy nut",
-      "noteNamingHint": "Wybierz, czy pokazywać krzyżyki czy bemole.",
+      "noteNamingHint": "Wybierz: krzyżyki, bemole albo losowo.",
       "notation": {
         "sharps": "Krzyżyki (#)",
-        "flats": "Bemole (b)"
+        "flats": "Bemole (b)",
+        "random": "Losowo (#/b)"
       }
     },
     "learning": {

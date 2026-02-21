@@ -5,6 +5,7 @@ import {
     formatPitchClassWithEnharmonic,
     getPitchClassIndex,
     pitchClassIndexFromMidi,
+    resolveNoteDisplayMode,
     toSharpPitchClass,
 } from "../noteNotation";
 
@@ -33,6 +34,26 @@ describe("noteNotation", () => {
         expect(formatPitchClassWithEnharmonic(6, "sharps")).toBe("F# (Gb)");
         expect(formatPitchClassWithEnharmonic(10, "flats")).toBe("Bb (A#)");
         expect(formatPitchClassWithEnharmonic(0, "flats")).toBe("C");
+    });
+
+    it("resolves random notation deterministically per seed", () => {
+        const first = resolveNoteDisplayMode("random", "question-1");
+        const second = resolveNoteDisplayMode("random", "question-1");
+        const other = resolveNoteDisplayMode("random", "question-2");
+
+        expect(first).toBe(second);
+        expect(["sharps", "flats"]).toContain(first);
+        expect(["sharps", "flats"]).toContain(other);
+    });
+
+    it("formats random notation consistently for the same prompt seed", () => {
+        const first = formatPitchClass(10, "random", "prompt-1");
+        const second = formatPitchClass("Bb", "random", "prompt-1");
+        const withDifferentPrompt = formatPitchClass(10, "random", "prompt-2");
+
+        expect(first).toBe(second);
+        expect(["A#", "Bb"]).toContain(first);
+        expect(["A#", "Bb"]).toContain(withDifferentPrompt);
     });
 
     it("converts arbitrary notes to canonical sharp pitch classes", () => {
