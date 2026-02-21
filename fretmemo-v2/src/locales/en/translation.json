@@ -833,6 +833,18 @@
         "sharps": "Sharps (#)",
         "flats": "Flats (b)",
         "random": "Random (#/b)"
+      },
+      "randomization": "Randomization Scope",
+      "randomizationHint": "For random notation: keep one style per session or reshuffle each question.",
+      "randomizationModes": {
+        "session": "Per Session",
+        "question": "Per Question"
+      },
+      "accidentalComplexity": "Accidental Complexity",
+      "accidentalComplexityHint": "Advanced mode can include double sharps and flats in generated note exercises.",
+      "accidentalComplexityModes": {
+        "standard": "Standard",
+        "advanced": "Advanced (##/bb)"
       }
     },
     "learning": {

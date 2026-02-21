@@ -42,6 +42,8 @@ function sortDegrees(degrees: FunctionalDegree[]): FunctionalDegree[] {
 export default function FunctionalEarTrainer() {
     const { t } = useTranslation();
     const notation = useSettingsStore((state) => state.full.instrument.notation);
+    const notationRandomization = useSettingsStore((state) => state.full.instrument.notationRandomization);
+    const accidentalComplexity = useSettingsStore((state) => state.full.instrument.accidentalComplexity);
     const checkAndUpdateStreak = useProgressStore((state) => state.checkAndUpdateStreak);
     const recordFunctionalEarAnswer = useProgressStore((state) => state.recordFunctionalEarAnswer);
     const recordSession = useProgressStore((state) => state.recordSession);
@@ -270,15 +272,22 @@ export default function FunctionalEarTrainer() {
             .filter((item) => item.samples > 0);
     }, [degreeStats]);
 
-    const notationSeed = question
+    const questionNotationSeed = question
         ? `functional:${question.askedAtMs}:${question.keyRoot}:${question.targetMidi}`
         : `functional:setup:${fixedKey}:${keyMode}`;
+    const notationSeed = notationRandomization === "question"
+        ? questionNotationSeed
+        : undefined;
     const displayNotation = useMemo(
         () => resolveNoteDisplayMode(notation, notationSeed),
         [notation, notationSeed],
     );
-    const keyLabel = question ? formatPitchClass(question.keyRoot, displayNotation, notationSeed) : "--";
-    const targetLabel = question ? formatPitchClassWithEnharmonic(question.targetMidi, displayNotation, notationSeed) : "--";
+    const keyLabel = question
+        ? formatPitchClass(question.keyRoot, displayNotation, notationSeed, accidentalComplexity)
+        : "--";
+    const targetLabel = question
+        ? formatPitchClassWithEnharmonic(question.targetMidi, displayNotation, notationSeed, accidentalComplexity)
+        : "--";
 
     useEffect(() => {
         return () => {
@@ -334,7 +343,7 @@ export default function FunctionalEarTrainer() {
                             >
                                 {NOTES.map((note) => (
                                     <option key={note} value={note}>
-                                        {formatPitchClass(note, displayNotation, notationSeed)}
+                                        {formatPitchClass(note, displayNotation, notationSeed, accidentalComplexity)}
                                     </option>
                                 ))}
                             </Select>

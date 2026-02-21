@@ -1,6 +1,14 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { AppSettings, QuickSettings, FullSettings, ModuleSettings, NoteNotationPreference } from '../types/settings';
+import type {
+    AppSettings,
+    QuickSettings,
+    FullSettings,
+    ModuleSettings,
+    NoteNotationPreference,
+    NotationRandomizationMode,
+    AccidentalComplexity,
+} from '../types/settings';
 import { STANDARD_TUNING } from '@/lib/constants';
 import { getDefaultTuningForInstrument, inferInstrumentTypeFromTuning, normalizeInstrumentType, normalizeTuning } from '@/lib/tuning';
 
@@ -46,6 +54,14 @@ function normalizeNotationPreference(value: unknown): NoteNotationPreference {
     return value === 'flats' || value === 'random' ? value : 'sharps';
 }
 
+function normalizeNotationRandomization(value: unknown): NotationRandomizationMode {
+    return value === 'question' ? 'question' : 'session';
+}
+
+function normalizeAccidentalComplexity(value: unknown): AccidentalComplexity {
+    return value === 'advanced' ? 'advanced' : 'standard';
+}
+
 function createDefaultSettings(): AppSettings {
     return {
     quick: {
@@ -74,6 +90,8 @@ function createDefaultSettings(): AppSettings {
             leftHanded: false,
             showFretNumbers: true,
             notation: 'sharps',
+            notationRandomization: 'question',
+            accidentalComplexity: 'standard',
         },
         audio: {
             volume: 0.8,
@@ -184,6 +202,12 @@ export const useSettingsStore = create<SettingsState>()(
                             ...(persistedFull.instrument ?? {}),
                             type: resolvedInstrumentType,
                             notation: normalizeNotationPreference(persistedInstrument.notation ?? currentState.full.instrument.notation),
+                            notationRandomization: normalizeNotationRandomization(
+                                persistedInstrument.notationRandomization ?? currentState.full.instrument.notationRandomization
+                            ),
+                            accidentalComplexity: normalizeAccidentalComplexity(
+                                persistedInstrument.accidentalComplexity ?? currentState.full.instrument.accidentalComplexity
+                            ),
                         },
                         audio: {
                             ...currentState.full.audio,

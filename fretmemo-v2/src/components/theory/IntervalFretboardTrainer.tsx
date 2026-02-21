@@ -41,6 +41,8 @@ export default function IntervalFretboardTrainer() {
     const { t } = useTranslation();
     const quickTuning = useSettingsStore((state) => state.quick.tuning);
     const notation = useSettingsStore((state) => state.full.instrument.notation);
+    const notationRandomization = useSettingsStore((state) => state.full.instrument.notationRandomization);
+    const accidentalComplexity = useSettingsStore((state) => state.full.instrument.accidentalComplexity);
     const tuning = useMemo(() => normalizeTuning(quickTuning), [quickTuning]);
     const maxFret = 12;
 
@@ -59,18 +61,25 @@ export default function IntervalFretboardTrainer() {
         if (rootPitchClass === null) return null;
         return (rootPitchClass + targetInterval.semitones) % 12;
     }, [rootNote, targetInterval]);
-    const notationSeed = `${rootNote}:${targetInterval.semitones}:${rootPosition?.s ?? "x"}:${rootPosition?.f ?? "x"}`;
+    const questionNotationSeed = `${rootNote}:${targetInterval.semitones}:${rootPosition?.s ?? "x"}:${rootPosition?.f ?? "x"}`;
+    const notationSeed = notationRandomization === "question"
+        ? questionNotationSeed
+        : undefined;
     const displayNotation = useMemo(
         () => resolveNoteDisplayMode(notation, notationSeed),
         [notation, notationSeed],
     );
     const displayedRootNote = useMemo(
-        () => formatPitchClass(rootNote, displayNotation, notationSeed),
-        [rootNote, displayNotation, notationSeed],
+        () => formatPitchClass(rootNote, displayNotation, notationSeed, accidentalComplexity),
+        [rootNote, displayNotation, notationSeed, accidentalComplexity],
     );
     const displayedTargetNote = useMemo(
-        () => (targetPitchClass === null ? "" : formatPitchClassWithEnharmonic(targetPitchClass, displayNotation, notationSeed)),
-        [targetPitchClass, displayNotation, notationSeed],
+        () => (
+            targetPitchClass === null
+                ? ""
+                : formatPitchClassWithEnharmonic(targetPitchClass, displayNotation, notationSeed, accidentalComplexity)
+        ),
+        [targetPitchClass, displayNotation, notationSeed, accidentalComplexity],
     );
 
     const generateNewQuestion = useCallback(() => {
@@ -144,7 +153,7 @@ export default function IntervalFretboardTrainer() {
         notes.push({
             position: { stringIndex: rootPosition.s, fret: rootPosition.f, note: rootFretNote },
             status: "active",
-            label: formatPitchClass(rootFretNote, displayNotation, notationSeed),
+            label: formatPitchClass(rootFretNote, displayNotation, notationSeed, accidentalComplexity),
             color: "#f59e0b",
             emphasis: "strong",
         });
@@ -159,7 +168,7 @@ export default function IntervalFretboardTrainer() {
                         notes.push({
                             position: { stringIndex: s, fret: f, note },
                             status: "correct",
-                            label: formatPitchClass(note, displayNotation, notationSeed),
+                            label: formatPitchClass(note, displayNotation, notationSeed, accidentalComplexity),
                             color: "#22c55e",
                         });
                     }
@@ -171,13 +180,13 @@ export default function IntervalFretboardTrainer() {
                 notes.push({
                     position: { stringIndex: selectedPosition.s, fret: selectedPosition.f, note: wrongNote },
                     status: "incorrect",
-                    label: formatPitchClass(wrongNote, displayNotation, notationSeed),
+                    label: formatPitchClass(wrongNote, displayNotation, notationSeed, accidentalComplexity),
                 });
             }
         }
 
         return notes;
-    }, [isPlaying, rootPosition, result, selectedPosition, tuning, targetPitchClass, maxFret, displayNotation, notationSeed]);
+    }, [isPlaying, rootPosition, result, selectedPosition, tuning, targetPitchClass, maxFret, displayNotation, notationSeed, accidentalComplexity]);
 
     if (!isPlaying) {
         return (
