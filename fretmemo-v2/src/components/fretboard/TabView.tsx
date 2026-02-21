@@ -1,5 +1,7 @@
 import { cn } from "@/lib/utils";
 import { STANDARD_TUNING } from "@/lib/constants";
+import { formatPitchClass } from "@/lib/noteNotation";
+import { useSettingsStore } from "@/stores/useSettingsStore";
 import type { NoteName, Position } from "@/types/fretboard";
 
 interface TabViewProps {
@@ -10,6 +12,7 @@ interface TabViewProps {
 }
 
 export function TabView({ tuning = STANDARD_TUNING, position, leftHanded = false, className }: TabViewProps) {
+  const notation = useSettingsStore((state) => state.full.instrument.notation);
   const rows = leftHanded
     ? tuning.map((openNote, index) => ({
         openNote,
@@ -30,7 +33,7 @@ export function TabView({ tuning = STANDARD_TUNING, position, leftHanded = false
 
             return (
               <div key={`${openNote}-${stringIndex}`} className="flex items-center gap-2">
-                <span className="w-8 text-muted-foreground font-semibold">{openNote}</span>
+                <span className="w-8 text-muted-foreground font-semibold">{formatPitchClass(openNote, notation)}</span>
                 <span className="text-muted-foreground">|--</span>
                 <span
                   className={cn(

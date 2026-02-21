@@ -14,7 +14,8 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { NOTES, getNoteAt } from "@/lib/constants";
-import { getStringLabels, normalizeTuning } from "@/lib/tuning";
+import { normalizeTuning } from "@/lib/tuning";
+import { formatPitchClass } from "@/lib/noteNotation";
 import { usePitchDetector } from "@/services/pitch";
 import { Flame, Map as MapIcon, Mic, Target, Clock } from "lucide-react";
 
@@ -30,6 +31,7 @@ import { SessionModeToggle } from "@/components/session-setup/session-mode-toggl
 import { SessionStartActions } from "@/components/session-setup/session-start-actions";
 import { useXPToast } from "@/hooks/useXPToast";
 import { useOrientation } from "@/hooks/useOrientation";
+import { useTranslation } from "react-i18next";
 
 type GuessMode = "fretboardToNote" | "tabToNote" | "noteToTab";
 type PlayMode = "playNotes" | "playTab";
@@ -56,11 +58,11 @@ type PracticeRouteState = {
     };
 };
 
-const LAYER_OPTIONS: Array<{ id: FretboardLayer; label: string }> = [
-    { id: "standard", label: "Standard" },
-    { id: "heatmap", label: "Heatmap" },
-    { id: "scale", label: "Scale" },
-    { id: "intervals", label: "Intervals" },
+const LAYER_OPTIONS: Array<{ id: FretboardLayer; labelKey: string }> = [
+    { id: "standard", labelKey: "practice.layers.standard" },
+    { id: "heatmap", labelKey: "practice.layers.heatmap" },
+    { id: "scale", labelKey: "practice.layers.scale" },
+    { id: "intervals", labelKey: "practice.layers.intervals" },
 ];
 const MAJOR_SCALE_OFFSETS = [0, 2, 4, 5, 7, 9, 11];
 const SCALE_DEGREE_COLORS = ["#fb7185", "#f97316", "#eab308", "#22c55e", "#38bdf8", "#6366f1", "#a855f7"] as const;
@@ -75,12 +77,6 @@ const SCALE_INTERVALS: Record<ScaleType, number[]> = {
     majorPentatonic: [0, 2, 4, 7, 9],
     minorPentatonic: [0, 3, 5, 7, 10],
 };
-const SCALE_LABELS: Record<ScaleType, string> = {
-    major: "Major",
-    minor: "Minor",
-    majorPentatonic: "Major Pentatonic",
-    minorPentatonic: "Minor Pentatonic",
-};
 const SEQUENCE_SCALE_MAP: Partial<Record<NoteSequence, ScaleType>> = {
     majorScale: "major",
     naturalMinorScale: "minor",
@@ -90,6 +86,7 @@ const SEQUENCE_SCALE_MAP: Partial<Record<NoteSequence, ScaleType>> = {
 
 
 export default function Practice() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
     const {
@@ -146,6 +143,7 @@ export default function Practice() {
     const showStreakWarnings = useSettingsStore((state) => state.full.gamification.showStreakWarnings);
     const showAchievements = useSettingsStore((state) => state.full.gamification.showAchievements);
     const leftHanded = useSettingsStore((state) => state.full.instrument.leftHanded);
+    const notation = useSettingsStore((state) => state.full.instrument.notation);
     const quickTuning = useSettingsStore((state) => state.quick.tuning);
     const tuning = useMemo(() => normalizeTuning(quickTuning), [quickTuning]);
     const displaySettings = useSettingsStore((state) => state.full.display);
@@ -153,7 +151,7 @@ export default function Practice() {
     const updateFullSettings = useSettingsStore((state) => state.updateFullSettings);
     const [focusLayerOverride, setFocusLayerOverride] = useState<FretboardLayer | null>(null);
     const focusLayer: FretboardLayer = focusLayerOverride ?? displaySettings.defaultLayer;
-    const stringLabels = useMemo(() => getStringLabels(tuning), [tuning]);
+    const stringLabels = useMemo(() => tuning.map((_, index) => `${index + 1}`), [tuning]);
     const routeState = (location.state as PracticeRouteState | null) ?? null;
     const routeHasCatalogContext = Boolean(routeState?.mode || routeState?.source || routeState?.challenge);
     const routePreFlightOpen = Boolean(routeState?.openPreFlight) && !isPlaying;
@@ -291,18 +289,9 @@ export default function Practice() {
 
     const isPlayModule = mode === "playNotes" || mode === "playTab";
     const moduleTab = isPlayModule ? ("play" as const) : ("guess" as const);
-    const modeLabel =
-        mode === "fretboardToNote"
-            ? "Fretboard → Note"
-            : mode === "tabToNote"
-                ? "Tab → Note"
-                : mode === "noteToTab"
-                    ? "Note → Tab"
-                    : mode === "playNotes"
-                        ? "Note Generator (Mic)"
-                        : "Tab Sequence (Mic)";
+    const modeLabel = t(`practice.modes.${mode}`);
     const layerRootNote = practiceConstraints.rootNote;
-    const layerScaleLabel = SCALE_LABELS[practiceConstraints.scaleType];
+    const layerScaleLabel = t(`practice.setup.scaleTypes.${practiceConstraints.scaleType}`);
     const manualAdvanceRequired = moduleTab === "guess" && !isMetronomeOn && !autoAdvanceEnabled && Boolean(lastAnswer);
     const isFretboardGuessMode = moduleTab === "guess" && mode === "fretboardToNote";
     const safeHudHeight = isLandscape
@@ -318,6 +307,11 @@ export default function Practice() {
         if (toast.type === "warning") return showStreakWarnings;
         return showXPNotes;
     })();
+    const layerRootLabel = formatPitchClass(layerRootNote, notation);
+    const targetNoteDisplay = targetNote ? formatPitchClass(targetNote, notation) : "?";
+    const nextNoteDisplay = nextNote ? formatPitchClass(nextNote, notation) : "--";
+    const previewTargetNoteDisplay = formatPitchClass("A", notation);
+    const previewNextNoteDisplay = formatPitchClass("C#", notation);
 
     useEffect(() => {
         if (toast.isVisible && !shouldShowToast) {
@@ -352,6 +346,7 @@ export default function Practice() {
         ? audioInputDevices.some((device) => device.id === selectedAudioInputId)
         : false;
     const resolvedAudioInputId = selectedDeviceStillExists ? selectedAudioInputId : activeAudioInputId || "";
+    const detectedNoteDisplay = detectedNote ? formatPitchClass(detectedNote, notation) : "--";
 
     const handleMicChange = useCallback((enabled: boolean) => {
         setMicEnabled(enabled);
@@ -815,7 +810,7 @@ export default function Practice() {
                                 )}
                                 onClick={() => handleLayerChange(layer.id)}
                             >
-                                {layer.label}
+                                {t(layer.labelKey)}
                             </Button>
                         ))}
                     </div>
@@ -825,7 +820,7 @@ export default function Practice() {
                         "font-medium text-muted-foreground rounded-full bg-card/80 border border-border/40 backdrop-blur",
                         isLandscape ? "text-[9px] px-2 py-0.5" : "text-[11px] px-3 py-1"
                     )}>
-                        Root: <span className="text-foreground font-semibold">{layerRootNote}</span> • Scale: <span className="text-foreground font-semibold">{layerScaleLabel}</span>
+                        {t("practice.focus.rootLabel")}: <span className="text-foreground font-semibold">{layerRootLabel}</span> • {t("practice.focus.scaleLabel")}: <span className="text-foreground font-semibold">{layerScaleLabel}</span>
                     </div>
                 )}
             </div>
@@ -842,7 +837,7 @@ export default function Practice() {
                         !feedbackMessage && "border-border/50 bg-card/50 text-muted-foreground"
                     )}
                 >
-                    {feedbackMessage ?? (moduleTab === "play" ? "Play the prompt." : "Identify the note.")}
+                    {feedbackMessage ?? (moduleTab === "play" ? t("practice.focus.playPrompt") : t("practice.focus.identifyPrompt"))}
                 </div>
             </div>
         );
@@ -909,23 +904,23 @@ export default function Practice() {
                 )}
                 {moduleTab === "guess" && mode === "noteToTab" && (
                     <div className={cn("w-full max-w-md mx-auto text-center flex flex-col items-center animate-in zoom-in-90 fade-in duration-500", isLandscape && "max-w-sm")}>
-                        <div className={cn("text-[10px] md:text-xs text-muted-foreground font-semibold tracking-wider uppercase", isLandscape ? "mb-2" : "mb-2 md:mb-6")}>Target Note</div>
+                        <div className={cn("text-[10px] md:text-xs text-muted-foreground font-semibold tracking-wider uppercase", isLandscape ? "mb-2" : "mb-2 md:mb-6")}>{t("practice.focus.targetNote")}</div>
                         <div className={cn("font-black text-primary leading-none transition-all drop-shadow-2xl", isLandscape ? "text-6xl sm:text-7xl" : "text-[8rem] sm:text-[10rem] lg:text-[12rem]")}>
-                            {targetNote ?? "?"}
+                            {targetNoteDisplay}
                         </div>
-                        <div className={cn("text-muted-foreground/80 font-light", isLandscape ? "mt-3 text-xs sm:text-sm" : "mt-4 md:mt-8 text-sm md:text-lg")}>Pick the matching tab position below</div>
+                        <div className={cn("text-muted-foreground/80 font-light", isLandscape ? "mt-3 text-xs sm:text-sm" : "mt-4 md:mt-8 text-sm md:text-lg")}>{t("practice.focus.pickTabPosition")}</div>
                     </div>
                 )}
                 {moduleTab === "play" && mode === "playNotes" && (
                     <div className={cn("w-full max-w-md mx-auto text-center animate-in zoom-in-90 fade-in duration-500", isLandscape && "max-w-sm")}>
-                        <div className={cn("text-xs text-muted-foreground font-semibold tracking-wider uppercase", isLandscape ? "mb-2" : "mb-8")}>Play This Note</div>
-                        <div className={cn("font-black text-primary leading-none transition-all drop-shadow-2xl", isLandscape ? "text-7xl" : "text-[12rem]")}>{targetNote ?? "?"}</div>
+                        <div className={cn("text-xs text-muted-foreground font-semibold tracking-wider uppercase", isLandscape ? "mb-2" : "mb-8")}>{t("practice.focus.playThisNote")}</div>
+                        <div className={cn("font-black text-primary leading-none transition-all drop-shadow-2xl", isLandscape ? "text-7xl" : "text-[12rem]")}>{targetNoteDisplay}</div>
                         <div className={cn("flex items-center justify-center gap-6 text-base text-muted-foreground", isLandscape ? "mt-3 text-sm gap-3" : "mt-12")}>
                             <span className="rounded-full border border-border/50 bg-background/40 px-6 py-2 backdrop-blur-md shadow-sm">
-                                Next: <span className="font-mono text-foreground font-bold">{nextNote ?? "--"}</span>
+                                {t("practice.focus.next")}: <span className="font-mono text-foreground font-bold">{nextNoteDisplay}</span>
                             </span>
                             <span className="rounded-full border border-border/50 bg-background/40 px-6 py-2 backdrop-blur-md shadow-sm">
-                                Mic: <span className={cn("font-mono font-bold transition-colors", micEnabled ? "text-emerald-500" : "")}>{micEnabled ? detectedNote ?? "--" : "Off"}</span>
+                                {t("practice.focus.mic")}: <span className={cn("font-mono font-bold transition-colors", micEnabled ? "text-emerald-500" : "")}>{micEnabled ? detectedNoteDisplay : t("practice.focus.micOff")}</span>
                             </span>
                         </div>
                     </div>
@@ -938,14 +933,14 @@ export default function Practice() {
                                     className="absolute -left-4 top-1/2 -translate-y-1/2 w-1 h-32 rounded-full bg-primary"
                                     style={{ boxShadow: "0 0 15px hsl(var(--primary) / 0.5)" }}
                                 />
-                                <div className="text-xs text-primary font-bold tracking-[0.2em] uppercase mb-4 pl-2 opacity-80">Current</div>
+                                <div className="text-xs text-primary font-bold tracking-[0.2em] uppercase mb-4 pl-2 opacity-80">{t("practice.focus.current")}</div>
                                 <TabView tuning={tuning} position={targetPosition} leftHanded={leftHanded} className="w-full max-w-none shadow-lg scale-105 transition-transform" />
-                                {targetPosition && <div className="mt-4 text-base font-medium text-muted-foreground pl-2">{stringLabels[targetPosition.stringIndex]} string, fret <span className="font-mono text-foreground text-lg">{targetPosition.fret}</span></div>}
+                                {targetPosition && <div className="mt-4 text-base font-medium text-muted-foreground pl-2">{t("string")} {targetPosition.stringIndex + 1}, {t("fret")} <span className="font-mono text-foreground text-lg">{targetPosition.fret}</span></div>}
                             </div>
                             <div className="opacity-50 scale-95 origin-left blur-[1px] transition-all group-hover:blur-0 group-hover:opacity-70">
-                                <div className="text-xs text-muted-foreground font-bold tracking-[0.2em] uppercase mb-4 pl-2">Next</div>
+                                <div className="text-xs text-muted-foreground font-bold tracking-[0.2em] uppercase mb-4 pl-2">{t("practice.focus.next")}</div>
                                 <TabView tuning={tuning} position={nextPosition} leftHanded={leftHanded} className="w-full max-w-none grayscale" />
-                                {nextPosition && <div className="mt-4 text-base text-muted-foreground pl-2">{stringLabels[nextPosition.stringIndex]} string, fret <span className="font-mono text-foreground">{nextPosition.fret}</span></div>}
+                                {nextPosition && <div className="mt-4 text-base text-muted-foreground pl-2">{t("string")} {nextPosition.stringIndex + 1}, {t("fret")} <span className="font-mono text-foreground">{nextPosition.fret}</span></div>}
                             </div>
                         </div>
                     </div>
@@ -996,7 +991,7 @@ export default function Practice() {
                             <span className="ml-2 font-mono text-foreground">{challengeSecondsLeft ?? activeChallenge.timeLimitSec ?? 60}s</span>
                         )}
                         {activeChallenge.type === "survival" && (
-                            <span className="ml-2 text-foreground">No mistakes</span>
+                            <span className="ml-2 text-foreground">{t("practice.focus.noMistakes")}</span>
                         )}
                         {activeChallenge.type === "findAll" && (
                             <span className="ml-2 font-mono text-foreground">
@@ -1072,10 +1067,8 @@ export default function Practice() {
         <div className="space-y-6 pb-8">
             {/* Header */}
             <div>
-                <h1 className="type-display">Practice</h1>
-                <p className="mt-1 type-body text-muted-foreground">
-                    Select a mode and configure your session
-                </p>
+                <h1 className="type-display">{t("practice.title")}</h1>
+                <p className="mt-1 type-body text-muted-foreground">{t("practice.subtitle")}</p>
             </div>
 
             <div className="grid lg:grid-cols-3 gap-6">
@@ -1083,19 +1076,19 @@ export default function Practice() {
                 <div className="lg:col-span-2 space-y-6">
                     {/* Mode Selection */}
                     <SessionModeToggle<"guess" | "play">
-                        label="Practice Focus"
+                        label={t("practice.focus.modeLabel")}
                         value={moduleTab}
                         onChange={handleSwitchModule}
                         options={[
                             {
                                 value: "guess",
-                                label: "Guess Note",
-                                description: "Visual note identification on fretboard and tab.",
+                                label: t("practice.modes.guessNote"),
+                                description: t("practice.modes.guessNoteDesc"),
                             },
                             {
                                 value: "play",
-                                label: "Play Practice",
-                                description: "Instrument-first practice with mic input support.",
+                                label: t("practice.modes.playPractice"),
+                                description: t("practice.modes.playPracticeDesc"),
                             },
                         ]}
                         className="w-full"
@@ -1103,43 +1096,43 @@ export default function Practice() {
 
                     {moduleTab === "guess" ? (
                         <SessionModeToggle<GuessMode>
-                            label="Exercise Type"
+                            label={t("practice.focus.exerciseTypeLabel")}
                             value={mode as GuessMode}
                             onChange={handleGuessModeChange}
                             options={[
                                 {
                                     value: "fretboardToNote",
-                                    label: "Fretboard -> Note",
-                                    description: "Identify notes directly from fretboard positions.",
+                                    label: t("practice.modes.fretboardToNote"),
+                                    description: t("practice.modes.fretboardToNoteDescription"),
                                 },
                                 {
                                     value: "tabToNote",
-                                    label: "Tab -> Note",
-                                    description: "Read tablature and name the sounding note.",
+                                    label: t("practice.modes.tabToNote"),
+                                    description: t("practice.modes.tabToNoteDescription"),
                                 },
                                 {
                                     value: "noteToTab",
-                                    label: "Note -> Tab",
-                                    description: "Map note names to accurate fretboard positions.",
+                                    label: t("practice.modes.noteToTab"),
+                                    description: t("practice.modes.noteToTabDescription"),
                                 },
                             ]}
                             className="w-full"
                         />
                     ) : (
                         <SessionModeToggle<PlayMode>
-                            label="Exercise Type"
+                            label={t("practice.focus.exerciseTypeLabel")}
                             value={mode as PlayMode}
                             onChange={handlePlayModeChange}
                             options={[
                                 {
                                     value: "playNotes",
-                                    label: "Note Generator",
-                                    description: "Play prompted note names using live mic detection.",
+                                    label: t("practice.modes.playNotes"),
+                                    description: t("practice.modes.playNotesDescription"),
                                 },
                                 {
                                     value: "playTab",
-                                    label: "Tab Sequence",
-                                    description: "Play prompted tab positions in sequence.",
+                                    label: t("practice.modes.playTab"),
+                                    description: t("practice.modes.playTabDescription"),
                                 },
                             ]}
                             className="w-full"
@@ -1172,11 +1165,11 @@ export default function Practice() {
                             {/* Big Note Preview */}
                             {(mode === "noteToTab" || mode === "playNotes") && (
                                 <div className="text-center space-y-4 py-8">
-                                    <div className="text-xs text-muted-foreground font-semibold tracking-wider uppercase">Target</div>
-                                    <div className="text-9xl font-black text-primary/80 animate-pulse-slow">A</div>
+                                    <div className="text-xs text-muted-foreground font-semibold tracking-wider uppercase">{t("practice.focus.target")}</div>
+                                    <div className="text-9xl font-black text-primary/80 animate-pulse-slow">{previewTargetNoteDisplay}</div>
                                     {mode === "playNotes" && (
                                         <div className="flex gap-2 justify-center mt-4">
-                                            <span className="text-sm font-mono bg-muted px-2 py-1 rounded">Next: C#</span>
+                                            <span className="text-sm font-mono bg-muted px-2 py-1 rounded">{t("practice.focus.next")}: {previewNextNoteDisplay}</span>
                                         </div>
                                     )}
                                 </div>
@@ -1190,7 +1183,7 @@ export default function Practice() {
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
-                                        <Label className="text-sm font-medium">Tempo</Label>
+                                        <Label className="text-sm font-medium">{t("practice.setup.tempo")}</Label>
                                         <span className="text-xs text-muted-foreground font-mono bg-muted px-1.5 py-0.5 rounded">{bpm} BPM</span>
                                     </div>
                                     <Switch checked={isMetronomeArmed} onCheckedChange={toggleMetronome} />
@@ -1201,10 +1194,8 @@ export default function Practice() {
                             <div className="space-y-3">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
-                                        <Label className="text-sm font-medium">Note Duration</Label>
-                                        <span className="text-xs text-muted-foreground font-mono bg-muted px-1.5 py-0.5 rounded">
-                                            {noteDuration} beat{noteDuration > 1 ? "s" : ""}
-                                        </span>
+                                        <Label className="text-sm font-medium">{t("practice.setup.noteDuration")}</Label>
+                                        <span className="text-xs text-muted-foreground font-mono bg-muted px-1.5 py-0.5 rounded">{noteDuration}</span>
                                     </div>
                                 </div>
                                 <Slider value={[noteDuration]} onValueChange={([v]) => setNoteDuration(v)} min={1} max={16} step={1} className="w-full" />
@@ -1213,7 +1204,7 @@ export default function Practice() {
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <MapIcon className="w-4 h-4 text-muted-foreground" />
-                                    <Label htmlFor="heatmap-toggle" className="text-sm cursor-pointer">Heat Map Overlay</Label>
+                                    <Label htmlFor="heatmap-toggle" className="text-sm cursor-pointer">{t("practice.focus.heatMapOverlay")}</Label>
                                 </div>
                                 <Switch id="heatmap-toggle" checked={heatMapEnabled} onCheckedChange={toggleHeatMap} />
                             </div>
@@ -1222,14 +1213,14 @@ export default function Practice() {
                                 <div className="flex items-center justify-between pt-2 border-t border-border/50">
                                     <div className="flex items-center gap-2">
                                         <Mic className="w-4 h-4 text-muted-foreground" />
-                                        <Label htmlFor="mic-toggle" className="text-sm cursor-pointer">Microphone</Label>
+                                        <Label htmlFor="mic-toggle" className="text-sm cursor-pointer">{t("practice.setup.mic")}</Label>
                                     </div>
                                     <Switch id="mic-toggle" checked={micEnabled} onCheckedChange={handleMicChange} />
                                 </div>
                             )}
 
                             <SessionStartActions
-                                primaryLabel="Start Practice"
+                                primaryLabel={t("practice.focus.startPractice")}
                                 onPrimary={handleStartClick}
                             />
                         </div>
@@ -1241,15 +1232,15 @@ export default function Practice() {
                     {/* Instructions Card */}
                     <Card>
                         <CardHeader className="pb-3">
-                            <CardTitle className="text-lg">Instructions</CardTitle>
+                            <CardTitle className="text-lg">{t('practice.instructions')}</CardTitle>
                         </CardHeader>
                         <div className="px-6 pb-6">
                             <p className="text-sm text-muted-foreground leading-relaxed">
-                                {mode === "fretboardToNote" && "Identify the note shown on the highlighted fretboard position. Select the correct note name from the options."}
-                                {mode === "tabToNote" && "Read the guitar tablature and identify the corresponding note name. Great for improving sight-reading."}
-                                {mode === "noteToTab" && "Find the correct position on the fretboard for the given note. You'll see a string and fret to select."}
-                                {mode === "playNotes" && "Use your microphone! The app listens as you play the displayed note on your real guitar."}
-                                {mode === "playTab" && "Sight-read and play the tablature sequence on your instrument. The app verifies your pitch in real-time."}
+                                {mode === "fretboardToNote" && t("practice.tips.fretboardToNote")}
+                                {mode === "tabToNote" && t("practice.tips.tabToNote")}
+                                {mode === "noteToTab" && t("practice.tips.noteToTab")}
+                                {mode === "playNotes" && t("practice.tips.playNotes")}
+                                {mode === "playTab" && t("practice.tips.playTab")}
                             </p>
                         </div>
                     </Card>
@@ -1259,19 +1250,19 @@ export default function Practice() {
                         <Card className="p-4 flex flex-col items-center justify-center bg-muted/20">
                             <Flame className="w-6 h-6 text-amber-700 dark:text-amber-300 mb-2" />
                             <div className="text-2xl font-bold">{streakDays}</div>
-                            <div className="text-xs text-muted-foreground uppercase tracking-wider">Day Streak</div>
+                            <div className="text-xs text-muted-foreground uppercase tracking-wider">{t('practice.dayStreak')}</div>
                         </Card>
                         <Card className="p-4 flex flex-col items-center justify-center bg-muted/20">
                             <Target className="w-6 h-6 text-primary mb-2" />
                             <div className={cn("text-2xl font-bold", overallAccuracy >= 75 ? "text-emerald-600 dark:text-emerald-400" : overallAccuracy >= 50 ? "text-amber-600 dark:text-amber-400" : "text-rose-600 dark:text-rose-400")}>
                                 {overallAccuracy}%
                             </div>
-                            <div className="text-xs text-muted-foreground uppercase tracking-wider">Accuracy</div>
+                            <div className="text-xs text-muted-foreground uppercase tracking-wider">{t('practice.accuracy')}</div>
                         </Card>
                         <Card className="col-span-2 p-3 flex items-center justify-between bg-muted/20">
                             <div className="flex items-center gap-2">
                                 <Clock className="w-4 h-4 text-muted-foreground" />
-                                <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Time Practiced</span>
+                                <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('practice.timePracticed')}</span>
                             </div>
                             <div className="font-bold font-mono">{Math.floor(totalPracticeTime / 60)}h {totalPracticeTime % 60}m</div>
                         </Card>

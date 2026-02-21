@@ -1,6 +1,8 @@
 import type { NoteName, Position } from "@/types/fretboard";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
+import { applyPolishNotation } from "@/lib/noteNotation";
 
 interface NoteAnswerButtonsProps {
     noteOptions: string[];
@@ -24,12 +26,16 @@ export function NoteAnswerButtons({
     isPlaying,
     onSubmit,
 }: NoteAnswerButtonsProps) {
+    const { i18n } = useTranslation();
+    const isPolish = i18n.resolvedLanguage === 'pl' || i18n.language === 'pl';
+
     return (
         <div className="mx-auto grid max-w-[19.5rem] grid-cols-2 gap-2 min-[360px]:max-w-[21rem] min-[390px]:max-w-[22rem] min-[412px]:max-w-[23rem] min-[390px]:gap-2.5 sm:max-w-3xl sm:gap-3 sm:grid-cols-4">
             {noteOptions.map((note, idx) => {
                 const isCorrectOption = isLocked && note === targetNote;
                 const isChosenOption = isLocked && note === selectedNote;
                 const isIncorrectChoice = isChosenOption && !isCorrect;
+                const displayNote = isPolish ? applyPolishNotation(note) : note;
                 return (
                     <Button
                         key={`${note}-${idx}`}
@@ -42,9 +48,9 @@ export function NoteAnswerButtons({
                         disabled={!isPlaying || isLocked}
                         onClick={() => onSubmit(note as NoteName)}
                         aria-pressed={isLocked ? isChosenOption : undefined}
-                        aria-label={`Answer ${note}`}
+                        aria-label={`Answer ${displayNote}`}
                     >
-                        {note}
+                        {displayNote}
                     </Button>
                 );
             })}
@@ -62,6 +68,8 @@ interface MiniTabProps {
  * Compact tablature display for position answer options.
  */
 export function MiniTab({ position, tuning, leftHanded = false }: MiniTabProps) {
+    const { i18n } = useTranslation();
+    const isPolish = i18n.resolvedLanguage === 'pl' || i18n.language === 'pl';
     const rows = leftHanded
         ? tuning.map((openNote, index) => ({
             openNote,
@@ -76,9 +84,10 @@ export function MiniTab({ position, tuning, leftHanded = false }: MiniTabProps) 
         <div className="space-y-1 font-mono text-[10px] leading-none">
             {rows.map(({ openNote, stringIndex }) => {
                 const isTarget = stringIndex === position.stringIndex;
+                const displayNote = isPolish ? applyPolishNotation(openNote) : openNote;
                 return (
                     <div key={`${openNote}-${stringIndex}`} className="flex items-center gap-1">
-                        <span className="w-4 text-muted-foreground font-semibold">{openNote}</span>
+                        <span className="w-4 text-muted-foreground font-semibold">{displayNote}</span>
                         <span className="text-muted-foreground">|--</span>
                         <span
                             className={cn(
@@ -128,6 +137,8 @@ export function PositionAnswerButtons({
     onSubmit,
     isLandscape,
 }: PositionAnswerButtonsProps) {
+    const { t } = useTranslation();
+
     return (
         <div className={cn("grid gap-2.5 min-[390px]:gap-3 sm:gap-4", isLandscape ? "grid-cols-1" : "grid-cols-2")}>
             {options.map((option) => {
@@ -153,10 +164,10 @@ export function PositionAnswerButtons({
                         <div className="w-full relative z-10">
                             <div className="flex items-center justify-between mb-4">
                                 <span className="text-sm font-bold tracking-wide uppercase text-muted-foreground group-hover:text-primary transition-colors">
-                                    {stringLabels[option.stringIndex]} String
+                                    {stringLabels[option.stringIndex]} {t('string')}
                                 </span>
                                 <span className="text-xs font-black font-mono bg-primary/10 text-primary px-3 py-1 rounded-full">
-                                    Fret {option.fret}
+                                    {t('fret')} {option.fret}
                                 </span>
                             </div>
                             <div className="opacity-80 group-hover:opacity-100 transition-opacity scale-100 group-hover:scale-105 origin-left duration-300">

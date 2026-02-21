@@ -17,6 +17,7 @@ import { useProgressStore } from "@/stores/useProgressStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { RotateCcw, Play, Volume2, Music2 } from "lucide-react";
 import type { NoteName } from "@/types/fretboard";
+import { useTranslation } from "react-i18next";
 
 type KeyMode = "random" | "fixed";
 
@@ -39,6 +40,7 @@ function sortDegrees(degrees: FunctionalDegree[]): FunctionalDegree[] {
 }
 
 export default function FunctionalEarTrainer() {
+    const { t } = useTranslation();
     const notation = useSettingsStore((state) => state.full.instrument.notation);
     const checkAndUpdateStreak = useProgressStore((state) => state.checkAndUpdateStreak);
     const recordFunctionalEarAnswer = useProgressStore((state) => state.recordFunctionalEarAnswer);
@@ -114,7 +116,7 @@ export default function FunctionalEarTrainer() {
         });
 
         if (!playPrompt) return;
-        await runPlayback("Playing context + target...", async () => {
+        await runPlayback(t("ear.functional.audio.playingContextTarget"), async () => {
             await playFunctionalPrompt({
                 contextChords: nextQuestion.contextChords,
                 targetMidi: nextQuestion.targetMidi,
@@ -125,7 +127,7 @@ export default function FunctionalEarTrainer() {
                 includeTarget: true,
             });
         });
-    }, [enabledDegrees, fixedKey, keyMode, runPlayback]);
+    }, [enabledDegrees, fixedKey, keyMode, runPlayback, t]);
 
     const handleStart = useCallback(async () => {
         initAudio();
@@ -182,21 +184,21 @@ export default function FunctionalEarTrainer() {
 
     const handleReplayContext = useCallback(async () => {
         if (!question || isAudioBusy) return;
-        await runPlayback("Replaying context...", async () => {
+        await runPlayback(t("ear.functional.audio.replayingContext"), async () => {
             await playCadence(question.contextChords, { chordDurationSec: 0.72, chordGapSec: 0.06 });
         });
-    }, [isAudioBusy, question, runPlayback]);
+    }, [isAudioBusy, question, runPlayback, t]);
 
     const handleReplayTarget = useCallback(async () => {
         if (!question || isAudioBusy) return;
-        await runPlayback("Replaying target...", async () => {
+        await runPlayback(t("ear.functional.audio.replayingTarget"), async () => {
             await playTone(question.targetMidi, 1.0);
         });
-    }, [isAudioBusy, question, runPlayback]);
+    }, [isAudioBusy, question, runPlayback, t]);
 
     const handleReplayFull = useCallback(async () => {
         if (!question || isAudioBusy) return;
-        await runPlayback("Replaying full prompt...", async () => {
+        await runPlayback(t("ear.functional.audio.replayingFull"), async () => {
             await playFunctionalPrompt({
                 contextChords: question.contextChords,
                 targetMidi: question.targetMidi,
@@ -207,7 +209,7 @@ export default function FunctionalEarTrainer() {
                 includeTarget: true,
             });
         });
-    }, [isAudioBusy, question, runPlayback]);
+    }, [isAudioBusy, question, runPlayback, t]);
 
     const updateDegreeStats = useCallback((degree: FunctionalDegree, correct: boolean, responseMs: number) => {
         setDegreeStats((previous) => {
@@ -284,15 +286,15 @@ export default function FunctionalEarTrainer() {
             <div className="flex flex-col items-center gap-6 py-10">
                 <div className="text-center space-y-2">
                     <Music2 className="w-12 h-12 mx-auto text-primary/60" />
-                    <h2 className="text-xl font-bold">Functional Ear Training</h2>
+                    <h2 className="text-xl font-bold">{t("ear.page.modes.functionalEar")}</h2>
                     <p className="text-muted-foreground text-sm max-w-md">
-                        Hear a cadence that establishes key center, then identify the scale degree of the target tone.
+                        {t("ear.functional.description")}
                     </p>
                 </div>
 
                 <div className="w-full max-w-lg rounded-xl border border-border bg-card p-4 space-y-4">
                     <div className="space-y-2">
-                        <label className="text-xs font-bold text-muted-foreground uppercase">Key Mode</label>
+                        <label className="text-xs font-bold text-muted-foreground uppercase">{t("ear.functional.keyMode")}</label>
                         <div className="flex gap-2">
                             <button
                                 onClick={() => setKeyMode("random")}
@@ -303,7 +305,7 @@ export default function FunctionalEarTrainer() {
                                         : "bg-card border-border text-muted-foreground",
                                 )}
                             >
-                                Random
+                                {t("ear.functional.random")}
                             </button>
                             <button
                                 onClick={() => setKeyMode("fixed")}
@@ -314,7 +316,7 @@ export default function FunctionalEarTrainer() {
                                         : "bg-card border-border text-muted-foreground",
                                 )}
                             >
-                                Fixed Key
+                                {t("ear.functional.fixedKey")}
                             </button>
                         </div>
                         {keyMode === "fixed" && (
@@ -333,7 +335,7 @@ export default function FunctionalEarTrainer() {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-xs font-bold text-muted-foreground uppercase">Active Degrees</label>
+                        <label className="text-xs font-bold text-muted-foreground uppercase">{t("ear.functional.activeDegrees")}</label>
                         <div className="grid grid-cols-4 gap-2 sm:grid-cols-7">
                             {FUNCTIONAL_DEGREES.map((degree) => (
                                 <button
@@ -354,15 +356,15 @@ export default function FunctionalEarTrainer() {
 
                     <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 p-3">
                         <div className="space-y-0.5">
-                            <p className="text-sm font-semibold">Auto Next</p>
-                            <p className="text-xs text-muted-foreground">Move to next question after correct answers.</p>
+                            <p className="text-sm font-semibold">{t("ear.functional.autoNext")}</p>
+                            <p className="text-xs text-muted-foreground">{t("ear.functional.autoNextDesc")}</p>
                         </div>
                         <Switch checked={autoNext} onCheckedChange={setAutoNext} />
                     </div>
                 </div>
 
                 <Button className="control-btn control-btn--primary" onClick={() => void handleStart()}>
-                    <Play className="w-4 h-4 mr-2" /> Start Training
+                    <Play className="w-4 h-4 mr-2" /> {t("ear.common.startTraining")}
                 </Button>
             </div>
         );
@@ -372,7 +374,7 @@ export default function FunctionalEarTrainer() {
         <div className="space-y-4">
             <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-4">
-                    <span className="font-bold text-primary">Score: {score}</span>
+                    <span className="font-bold text-primary">{t("ear.common.score")}: {score}</span>
                     <span className="text-amber-600 dark:text-amber-300">🔥 {streak}</span>
                 </div>
                 <div className="text-muted-foreground">
@@ -382,33 +384,33 @@ export default function FunctionalEarTrainer() {
 
             <div className="rounded-xl border border-border bg-primary/5 p-4 space-y-1 text-center">
                 <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
-                    Key Center
+                    {t("ear.functional.keyCenter")}
                 </p>
                 <p className="text-lg font-bold">
-                    {keyLabel} major
+                    {keyLabel} {t("ear.functional.major")}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                    Listen and identify the scale degree of the target tone.
+                    {t("ear.functional.listenPrompt")}
                 </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
                 <Button variant="outline" size="sm" onClick={() => void handleReplayContext()} disabled={!question || isAudioBusy}>
-                    <Volume2 className="w-4 h-4 mr-1" /> Replay Context
+                    <Volume2 className="w-4 h-4 mr-1" /> {t("ear.functional.replayContext")}
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => void handleReplayTarget()} disabled={!question || isAudioBusy}>
-                    <Volume2 className="w-4 h-4 mr-1" /> Replay Target
+                    <Volume2 className="w-4 h-4 mr-1" /> {t("ear.functional.replayTarget")}
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => void handleReplayFull()} disabled={!question || isAudioBusy}>
-                    <RotateCcw className="w-4 h-4 mr-1" /> Replay Full
+                    <RotateCcw className="w-4 h-4 mr-1" /> {t("ear.functional.replayFull")}
                 </Button>
                 {lastResult && (
                     <Button variant="outline" size="sm" onClick={() => void generateQuestion(true)} disabled={isAudioBusy}>
-                        <RotateCcw className="w-4 h-4 mr-1" /> Next
+                        <RotateCcw className="w-4 h-4 mr-1" /> {t("ear.common.next")}
                     </Button>
                 )}
                 <Button variant="ghost" size="sm" onClick={handleEnd} className="ml-auto text-muted-foreground">
-                    End
+                    {t("ear.common.end")}
                 </Button>
             </div>
 
@@ -428,8 +430,17 @@ export default function FunctionalEarTrainer() {
                     )}
                 >
                     {lastResult === "correct"
-                        ? `✓ Correct! Degree ${question.degree} in ${keyLabel} major is ${targetLabel}.`
-                        : `✗ Wrong. You chose ${selectedDegree ?? "?"}. Correct degree is ${currentAnswer ?? question.degree} (${targetLabel}).`}
+                        ? t("ear.functional.correctFeedback", {
+                            degree: question.degree,
+                            key: keyLabel,
+                            note: targetLabel,
+                            major: t("ear.functional.major"),
+                        })
+                        : t("ear.functional.wrongFeedback", {
+                            selected: selectedDegree ?? "?",
+                            correct: currentAnswer ?? question.degree,
+                            note: targetLabel,
+                        })}
                 </div>
             )}
 
@@ -458,15 +469,15 @@ export default function FunctionalEarTrainer() {
 
             {degreeStatsList.length > 0 && (
                 <div className="rounded-xl border border-border bg-card p-3 space-y-2">
-                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Session Degree Stats</p>
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">{t("ear.functional.sessionDegreeStats")}</p>
                     <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                         {degreeStatsList.map((item) => {
                             const accuracy = Math.round((item.correct / item.samples) * 100);
                             return (
                                 <div key={item.degree} className="rounded-lg border border-border bg-muted/20 p-2 text-xs">
-                                    <p className="font-bold text-sm">Degree {item.degree}</p>
-                                    <p className="text-muted-foreground">Accuracy: {accuracy}%</p>
-                                    <p className="text-muted-foreground">Avg: {item.avgResponseMs} ms</p>
+                                    <p className="font-bold text-sm">{t("ear.functional.degree", { degree: item.degree })}</p>
+                                    <p className="text-muted-foreground">{t("ear.functional.accuracy", { value: accuracy })}</p>
+                                    <p className="text-muted-foreground">{t("ear.functional.avgMs", { value: item.avgResponseMs })}</p>
                                 </div>
                             );
                         })}

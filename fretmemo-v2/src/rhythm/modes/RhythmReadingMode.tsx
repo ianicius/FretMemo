@@ -36,6 +36,7 @@ import { TimingFeedback } from "@/rhythm/ui/TimingFeedback";
 import { useRhythmDojoStore } from "@/stores/useRhythmDojoStore";
 import { useProgressStore } from "@/stores/useProgressStore";
 import { trackEvent } from "@/lib/analytics";
+import { useTranslation } from "react-i18next";
 
 interface RhythmReadingSettings {
     level: RhythmReadingLevel;
@@ -83,7 +84,6 @@ interface AdaptiveTempoResult {
     nextBpm: number;
     changed: boolean;
     trend: "up" | "down" | "hold";
-    message: string;
 }
 
 function clampTempo(value: number): number {
@@ -111,27 +111,22 @@ function buildAdaptiveTempoResult(
     }
 
     const changed = nextBpm !== bpm;
-    const message = trend === "up"
-        ? `Adaptive tempo: +${nextBpm - bpm} BPM (next session ${nextBpm}).`
-        : trend === "down"
-            ? `Adaptive tempo: -${bpm - nextBpm} BPM for cleaner timing (next session ${nextBpm}).`
-            : `Adaptive tempo kept ${bpm} BPM for the next run.`;
-
     return {
         nextBpm,
         changed,
         trend,
-        message,
     };
 }
 
 export function RhythmReadingMode() {
+    const { t } = useTranslation();
     const clockRef = useRef(new RhythmClock());
     const schedulerRef = useRef<MetronomeScheduler | null>(null);
     const expectedHitsRef = useRef<ExpectedHit[]>([]);
     const evaluationsRef = useRef<TapEvaluation[]>([]);
     const extrasRef = useRef(0);
     const finishTimerRef = useRef<number | null>(null);
+    const scheduleTokenRef = useRef(0);
     const startedAtRef = useRef<number | null>(null);
     const statusRef = useRef<SessionStatus>("idle");
     const sessionModeRef = useRef<SessionMode>("scored");
@@ -160,6 +155,11 @@ export function RhythmReadingMode() {
         const byId = levelExercises.find((exercise) => exercise.id === settings.exerciseId);
         return byId ?? levelExercises[0] ?? getInitialExercise(DEFAULT_LEVEL);
     }, [levelExercises, settings.exerciseId]);
+    const activeExerciseTitle = t(`rhythm.rhythmReading.exercises.${activeExercise.id}.title`, activeExercise.title);
+    const activeExerciseDescription = t(
+        `rhythm.rhythmReading.exercises.${activeExercise.id}.description`,
+        activeExercise.description,
+    );
     const expectedOnsets = useMemo(
         () => getRhythmExpectedOnsets(activeExercise),
         [activeExercise],
@@ -184,6 +184,7 @@ export function RhythmReadingMode() {
     }, [sessionMode]);
 
     const stopScheduler = useCallback(() => {
+        scheduleTokenRef.current += 1;
         if (finishTimerRef.current !== null) {
             window.clearTimeout(finishTimerRef.current);
             finishTimerRef.current = null;
@@ -204,7 +205,20 @@ export function RhythmReadingMode() {
             settings.adaptiveTempo,
         );
         setSummary(summaryResult);
-        setAdaptiveTempoMessage(adaptiveTempoResult?.message ?? null);
+        const adaptiveTempoCopy = adaptiveTempoResult
+            ? adaptiveTempoResult.trend === "up"
+                ? t("rhythm.rhythmReading.adaptiveTempoUp", {
+                    delta: adaptiveTempoResult.nextBpm - settings.bpm,
+                    next: adaptiveTempoResult.nextBpm,
+                })
+                : adaptiveTempoResult.trend === "down"
+                    ? t("rhythm.rhythmReading.adaptiveTempoDown", {
+                        delta: settings.bpm - adaptiveTempoResult.nextBpm,
+                        next: adaptiveTempoResult.nextBpm,
+                    })
+                    : t("rhythm.rhythmReading.adaptiveTempoHold", { bpm: settings.bpm })
+            : null;
+        setAdaptiveTempoMessage(adaptiveTempoCopy);
         setStatus("finished");
         statusRef.current = "finished";
         setPlayheadStep(null);
@@ -276,6 +290,7 @@ export function RhythmReadingMode() {
         settings.bpm,
         settings.adaptiveTempo,
         settings.level,
+        t,
         stopScheduler,
         totalExpected,
         updatePracticeTime,
@@ -294,6 +309,7 @@ export function RhythmReadingMode() {
         evaluationsRef.current = [];
         extrasRef.current = 0;
         startedAtRef.current = Date.now();
+        const scheduleToken = scheduleTokenRef.current;
 
         setSummary(null);
         setLastEvaluation(null);
@@ -309,10 +325,9 @@ export function RhythmReadingMode() {
             bpm: settings.bpm,
             timeSignatureTop: activeExercise.timeSignatureTop,
             subdivision: activeExercise.subdivision,
+            maxSteps: mode === "scored" ? totalSteps : undefined,
             clickEnabled: settings.clickEnabled,
             onStep: (step) => {
-                if (mode === "scored" && step.index >= totalSteps) return;
-
                 const barStep = step.barStepIndex;
                 if (mode === "scored" && expectedSet.has(barStep)) {
                     expectedHitsRef.current.push({
@@ -324,6 +339,7 @@ export function RhythmReadingMode() {
 
                 const delayMs = clockRef.current.toDelayMs(step.time);
                 window.setTimeout(() => {
+                    if (scheduleTokenRef.current !== scheduleToken) return;
                     setPlayheadStep(barStep);
                 }, delayMs);
             },
@@ -360,7 +376,6 @@ export function RhythmReadingMode() {
         activeExercise.timeSignatureTop,
         checkAndUpdateStreak,
         expectedSet,
-        finalizeSession,
         inputLatencyMs,
         settings.bars,
         settings.bpm,
@@ -378,20 +393,25 @@ export function RhythmReadingMode() {
 
         const rawTapTime = clockRef.current.now();
         const tapTime = applyInputLatencyCompensation(rawTapTime, inputLatencyMs);
-        const candidate = expectedHitsRef.current
+        const nearestHit = expectedHitsRef.current
             .filter((hit) => !hit.matched)
             .map((hit) => ({
                 hit,
+                offsetSec: tapTime - hit.time,
                 absOffsetSec: Math.abs(tapTime - hit.time),
             }))
-            .filter((item) => item.absOffsetSec <= MATCH_WINDOW_SEC)
             .sort((left, right) => left.absOffsetSec - right.absOffsetSec)[0];
+
+        const candidate = nearestHit && nearestHit.absOffsetSec <= MATCH_WINDOW_SEC
+            ? nearestHit
+            : null;
 
         if (!candidate) {
             extrasRef.current += 1;
+            const offsetMs = nearestHit ? nearestHit.offsetSec * 1000 : 0;
             const extraEvaluation: TapEvaluation = {
-                offsetMs: 0,
-                absOffsetMs: 0,
+                offsetMs,
+                absOffsetMs: Math.abs(offsetMs),
                 rating: "miss",
                 isHit: false,
                 directionCorrect: true,
@@ -489,37 +509,37 @@ export function RhythmReadingMode() {
                 <Card>
                     <CardHeader>
                         <div className="flex flex-wrap items-center gap-2">
-                            <CardTitle>Rhythm Reading</CardTitle>
+                            <CardTitle>{t("rhythm.rhythmReading.title")}</CardTitle>
                             <Badge variant="outline" className="capitalize">
-                                {activeExercise.difficulty}
+                                {t(`common.difficulty.${activeExercise.difficulty}`, activeExercise.difficulty)}
                             </Badge>
                         </div>
                         <CardDescription>
-                            Read the notation lane and tap only on note starts.
+                            {t("rhythm.rhythmReading.description")}
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
                             <div className="rounded-md border border-border bg-muted/20 px-2 py-1.5">
-                                <p className="text-muted-foreground">Exercise</p>
-                                <p className="font-semibold text-foreground">{activeExercise.title}</p>
+                                <p className="text-muted-foreground">{t("rhythm.rhythmReading.exerciseLabel")}</p>
+                                <p className="font-semibold text-foreground">{activeExerciseTitle}</p>
                             </div>
                             <div className="rounded-md border border-border bg-muted/20 px-2 py-1.5">
-                                <p className="text-muted-foreground">Time</p>
+                                <p className="text-muted-foreground">{t("rhythm.rhythmReading.timeLabel")}</p>
                                 <p className="font-semibold text-foreground">{activeExercise.timeSignatureTop}/4</p>
                             </div>
                             <div className="rounded-md border border-border bg-muted/20 px-2 py-1.5">
-                                <p className="text-muted-foreground">Expected taps</p>
-                                <p className="font-semibold text-foreground">{expectedOnsets.length} / bar</p>
+                                <p className="text-muted-foreground">{t("rhythm.rhythmReading.expectedTapsLabel")}</p>
+                                <p className="font-semibold text-foreground">{t("rhythm.rhythmReading.expectedPerBar", { count: expectedOnsets.length })}</p>
                             </div>
                             <div className="rounded-md border border-border bg-muted/20 px-2 py-1.5">
-                                <p className="text-muted-foreground">Grid</p>
-                                <p className="font-semibold text-foreground">{activeExercise.subdivision} subdivisions</p>
+                                <p className="text-muted-foreground">{t("rhythm.rhythmReading.gridLabel")}</p>
+                                <p className="font-semibold text-foreground">{t("rhythm.rhythmReading.gridSubdivisions", { count: activeExercise.subdivision })}</p>
                             </div>
                         </div>
 
                         <div className="grid gap-3 sm:grid-cols-2">
-                            <FormField id="rhythm-reading-level" label="Level">
+                            <FormField id="rhythm-reading-level" label={t("rhythm.rhythmReading.levelLabel")}>
                                 <Select
                                     value={settings.level}
                                     onChange={(event) => {
@@ -534,12 +554,12 @@ export function RhythmReadingMode() {
                                 >
                                     {LEVEL_OPTIONS.map((level) => (
                                         <option key={`rr-level-${level}`} value={level}>
-                                            Level {level}
+                                            {t("rhythm.rhythmReading.levelValue", { level })}
                                         </option>
                                     ))}
                                 </Select>
                             </FormField>
-                            <FormField id="rhythm-reading-exercise" label="Exercise">
+                            <FormField id="rhythm-reading-exercise" label={t("rhythm.rhythmReading.exerciseSelectLabel")}>
                                 <Select
                                     value={activeExercise.id}
                                     onChange={(event) =>
@@ -551,7 +571,7 @@ export function RhythmReadingMode() {
                                 >
                                     {levelExercises.map((exercise) => (
                                         <option key={exercise.id} value={exercise.id}>
-                                            {exercise.title}
+                                            {t(`rhythm.rhythmReading.exercises.${exercise.id}.title`, exercise.title)}
                                         </option>
                                     ))}
                                 </Select>
@@ -568,7 +588,7 @@ export function RhythmReadingMode() {
                                     }))
                                 }
                             />
-                            <FormField id="rhythm-reading-bars" label="Bars">
+                            <FormField id="rhythm-reading-bars" label={t("rhythm.common.barsLabel")}>
                                 <Select
                                     value={settings.bars}
                                     onChange={(event) =>
@@ -584,7 +604,7 @@ export function RhythmReadingMode() {
                                     <option value={16}>16</option>
                                 </Select>
                             </FormField>
-                            <FormField id="rhythm-reading-click" label="Audio Click" className="sm:col-span-2">
+                            <FormField id="rhythm-reading-click" label={t("rhythm.common.audioClickLabel")} className="sm:col-span-2">
                                 <Select
                                     value={settings.clickEnabled ? "on" : "off"}
                                     onChange={(event) =>
@@ -594,16 +614,16 @@ export function RhythmReadingMode() {
                                         }))
                                     }
                                 >
-                                    <option value="on">On</option>
-                                    <option value="off">Off</option>
+                                    <option value="on">{t("rhythm.common.on")}</option>
+                                    <option value="off">{t("rhythm.common.off")}</option>
                                 </Select>
                             </FormField>
                             <div className="space-y-2 sm:col-span-2">
                                 <div className="flex items-center justify-between rounded-md border border-border bg-muted/20 px-3 py-2">
                                     <div>
-                                        <Label htmlFor="rhythm-reading-adaptive">Adaptive Tempo</Label>
+                                        <Label htmlFor="rhythm-reading-adaptive">{t("rhythm.rhythmReading.adaptiveTempoLabel")}</Label>
                                         <p className="text-xs text-muted-foreground">
-                                            Auto-adjust BPM after each session based on score.
+                                            {t("rhythm.rhythmReading.adaptiveTempoDesc")}
                                         </p>
                                     </div>
                                     <Switch
@@ -627,7 +647,7 @@ export function RhythmReadingMode() {
                         </div>
 
                         <div className="rounded-lg border border-border bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
-                            {activeExercise.description}
+                            {activeExerciseDescription}
                         </div>
 
                         <RhythmNotation
@@ -640,7 +660,7 @@ export function RhythmReadingMode() {
 
                         <div className="flex flex-wrap gap-2">
                             <Button type="button" variant="outline" onClick={randomizeExercise}>
-                                Random Exercise
+                                {t("rhythm.rhythmReading.randomExercise")}
                             </Button>
                         </div>
                         <SessionModeToggle
@@ -649,18 +669,18 @@ export function RhythmReadingMode() {
                             options={[
                                 {
                                     value: "scored",
-                                    label: "Scored",
-                                    description: "Evaluates timing accuracy and auto-completes the run.",
+                                    label: t("rhythm.common.scored"),
+                                    description: t("rhythm.rhythmReading.sessionScoredDesc"),
                                 },
                                 {
                                     value: "practice",
-                                    label: "Practice",
-                                    description: "Keeps notation running continuously until you stop.",
+                                    label: t("rhythm.common.practice"),
+                                    description: t("rhythm.rhythmReading.sessionPracticeDesc"),
                                 },
                             ]}
                         />
                         <SessionStartActions
-                            primaryLabel={sessionMode === "scored" ? "Start Scored Session" : "Practice with Guitar"}
+                            primaryLabel={sessionMode === "scored" ? t("rhythm.common.startScored") : t("rhythm.common.practiceWithGuitar")}
                             onPrimary={() => void startSessionWithMode(sessionMode)}
                         />
                     </CardContent>
@@ -673,16 +693,20 @@ export function RhythmReadingMode() {
         <div className="space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm">
                 <div className="space-y-0.5">
-                    <p className="font-semibold text-primary">{activeExercise.title}</p>
+                    <p className="font-semibold text-primary">{activeExerciseTitle}</p>
                     <p className="text-xs text-muted-foreground">
-                        {activeExercise.timeSignatureTop}/4 · {activeExercise.subdivision} grid · {expectedOnsets.length} taps/bar
+                        {t("rhythm.rhythmReading.headerMeta", {
+                            signature: `${activeExercise.timeSignatureTop}/4`,
+                            grid: activeExercise.subdivision,
+                            taps: expectedOnsets.length,
+                        })}
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Badge variant="outline">L{settings.level}</Badge>
-                    <Badge variant="outline">{settings.bpm} BPM</Badge>
-                    <Badge variant="outline">{settings.bars} bars</Badge>
-                    {sessionMode === "practice" && <Badge variant="outline">Practice</Badge>}
+                    <Badge variant="outline">{t("rhythm.rhythmReading.levelCompact", { level: settings.level })}</Badge>
+                    <Badge variant="outline">{t("rhythm.common.bpm", { value: settings.bpm })}</Badge>
+                    <Badge variant="outline">{t("rhythm.rhythmReading.barsCompact", { bars: settings.bars })}</Badge>
+                    {sessionMode === "practice" && <Badge variant="outline">{t("rhythm.common.practice")}</Badge>}
                 </div>
             </div>
 
@@ -700,27 +724,27 @@ export function RhythmReadingMode() {
                 </>
             ) : (
                 <div className="rounded-lg border border-primary/35 bg-primary/10 px-3 py-2 text-xs font-medium text-primary">
-                    Practice mode: play this rhythm on guitar. The app keeps the groove running until you stop manually.
+                    {t("rhythm.rhythmReading.practiceHint")}
                 </div>
             )}
 
             {summary && (
                 <SessionSummaryCard
-                    description={`Score ${summary.score} · Accuracy ${summary.accuracy}%`}
+                    description={t("rhythm.rhythmReading.summaryDescription", { score: summary.score, accuracy: summary.accuracy })}
                     metrics={[
-                        { label: "Hits", value: summary.hits },
-                        { label: "Misses", value: summary.misses },
-                        { label: "Extras", value: summary.extras },
-                        { label: "Avg offset", value: `${summary.avgOffsetMs}ms` },
+                        { label: t("rhythm.common.metrics.hits"), value: summary.hits },
+                        { label: t("rhythm.common.metrics.misses"), value: summary.misses },
+                        { label: t("rhythm.common.metrics.extras"), value: summary.extras },
+                        { label: t("rhythm.common.metrics.avgOffset"), value: `${summary.avgOffsetMs}ms` },
                     ]}
                     notice={adaptiveTempoMessage}
                     noticeClassName={adaptiveTempoMessage ? "border-primary/30 bg-primary/10 font-medium text-primary" : undefined}
                     primaryAction={{
-                        label: "Retry",
+                        label: t("rhythm.common.retry"),
                         onClick: () => void startSessionWithMode("scored"),
                     }}
                     secondaryAction={{
-                        label: "Edit Settings",
+                        label: t("rhythm.common.editSettings"),
                         onClick: goToSetup,
                     }}
                 />
@@ -729,7 +753,7 @@ export function RhythmReadingMode() {
             {status === "running" && (
                 <SessionStopButton
                     onStop={sessionMode === "scored" ? finalizeSession : stopPracticeSession}
-                    label={sessionMode === "scored" ? "Stop" : "Stop Practice"}
+                    label={sessionMode === "scored" ? t("rhythm.common.stop") : t("rhythm.common.stopPractice")}
                 />
             )}
         </div>

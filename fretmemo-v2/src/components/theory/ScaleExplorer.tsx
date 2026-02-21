@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Scale } from "tonal";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { normalizeTuning } from "@/lib/tuning";
@@ -10,18 +11,18 @@ import type { NoteStatus, NoteName } from "@/types/fretboard";
 
 const ROOTS: NoteName[] = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 const SCALE_TYPES = [
-    { id: "major", label: "Major (Ionian)" },
-    { id: "minor", label: "Minor (Aeolian)" },
-    { id: "dorian", label: "Dorian" },
-    { id: "mixolydian", label: "Mixolydian" },
-    { id: "major pentatonic", label: "Major Pentatonic" },
-    { id: "minor pentatonic", label: "Minor Pentatonic" },
-    { id: "blues", label: "Blues" },
-    { id: "harmonic minor", label: "Harmonic Minor" },
-    { id: "melodic minor", label: "Melodic Minor" },
-    { id: "phrygian", label: "Phrygian" },
-    { id: "lydian", label: "Lydian" },
-    { id: "locrian", label: "Locrian" },
+    { id: "major" },
+    { id: "minor" },
+    { id: "dorian" },
+    { id: "mixolydian" },
+    { id: "major pentatonic" },
+    { id: "minor pentatonic" },
+    { id: "blues" },
+    { id: "harmonic minor" },
+    { id: "melodic minor" },
+    { id: "phrygian" },
+    { id: "lydian" },
+    { id: "locrian" },
 ];
 
 const DEGREE_COLORS = [
@@ -65,6 +66,7 @@ function formatInterval(interval: string): string {
 }
 
 export default function ScaleExplorer() {
+    const { t } = useTranslation();
     const [root, setRoot] = useState<NoteName>("C");
     const [scaleType, setScaleType] = useState("major");
     const [showIntervals, setShowIntervals] = useState(false);
@@ -114,7 +116,7 @@ export default function ScaleExplorer() {
             {/* Controls */}
             <div className="flex flex-wrap items-center gap-3">
                 <div className="space-y-1">
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Root</label>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("theory.scaleExplorer.root")}</label>
                     <Select
                         value={root}
                         onChange={(e) => setRoot(e.target.value as NoteName)}
@@ -127,14 +129,14 @@ export default function ScaleExplorer() {
                 </div>
 
                 <div className="space-y-1 flex-1 min-w-[180px]">
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Scale</label>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("theory.scaleExplorer.scale")}</label>
                     <Select
                         value={scaleType}
                         onChange={(e) => setScaleType(e.target.value)}
                         className="w-full rounded-lg py-2 font-bold"
                     >
                         {SCALE_TYPES.map((s) => (
-                            <option key={s.id} value={s.id}>{s.label}</option>
+                            <option key={s.id} value={s.id}>{t(`theory.scaleExplorer.scaleTypes.${s.id}`)}</option>
                         ))}
                     </Select>
                 </div>
@@ -147,7 +149,7 @@ export default function ScaleExplorer() {
                             : "bg-card border-border text-muted-foreground"
                             }`}
                     >
-                        {showIntervals ? "Intervals" : "Notes"}
+                        {showIntervals ? t("theory.scaleExplorer.intervals") : t("theory.scaleExplorer.notes")}
                     </button>
                 </div>
             </div>

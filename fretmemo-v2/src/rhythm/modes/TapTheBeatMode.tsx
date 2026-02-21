@@ -25,6 +25,7 @@ import {
 import { useRhythmDojoStore } from "@/stores/useRhythmDojoStore";
 import { useProgressStore } from "@/stores/useProgressStore";
 import { trackEvent } from "@/lib/analytics";
+import { useTranslation } from "react-i18next";
 
 interface TapTheBeatSettings {
     bpm: number;
@@ -50,12 +51,14 @@ const DEFAULT_SETTINGS: TapTheBeatSettings = {
 const MATCH_WINDOW_SEC = DEFAULT_MATCH_WINDOW_SEC;
 
 export function TapTheBeatMode() {
+    const { t } = useTranslation();
     const clockRef = useRef(new RhythmClock());
     const schedulerRef = useRef<MetronomeScheduler | null>(null);
     const expectedBeatsRef = useRef<ExpectedBeat[]>([]);
     const evaluationsRef = useRef<TapEvaluation[]>([]);
     const extrasRef = useRef(0);
     const finishTimerRef = useRef<number | null>(null);
+    const scheduleTokenRef = useRef(0);
     const startedAtRef = useRef<number | null>(null);
     const statusRef = useRef<SessionStatus>("idle");
     const sessionModeRef = useRef<SessionMode>("scored");
@@ -89,6 +92,7 @@ export function TapTheBeatMode() {
     }, [sessionMode]);
 
     const stopScheduler = useCallback(() => {
+        scheduleTokenRef.current += 1;
         if (finishTimerRef.current !== null) {
             window.clearTimeout(finishTimerRef.current);
             finishTimerRef.current = null;
@@ -175,6 +179,7 @@ export function TapTheBeatMode() {
         evaluationsRef.current = [];
         extrasRef.current = 0;
         startedAtRef.current = Date.now();
+        const scheduleToken = scheduleTokenRef.current;
 
         setSummary(null);
         setLastEvaluation(null);
@@ -189,11 +194,11 @@ export function TapTheBeatMode() {
             bpm: settings.bpm,
             timeSignatureTop: settings.timeSignatureTop,
             subdivision: 1,
+            maxSteps: mode === "scored" ? totalExpected : undefined,
             clickEnabled: true,
             clickEveryStep: true,
             onStep: (step) => {
                 if (mode === "scored") {
-                    if (step.index >= totalExpected) return;
                     expectedBeatsRef.current.push({
                         id: step.index,
                         time: step.time,
@@ -203,6 +208,7 @@ export function TapTheBeatMode() {
 
                 const delayMs = clockRef.current.toDelayMs(step.time);
                 window.setTimeout(() => {
+                    if (scheduleTokenRef.current !== scheduleToken) return;
                     setCurrentBeat(step.beatIndex);
                 }, delayMs);
             },
@@ -229,7 +235,6 @@ export function TapTheBeatMode() {
         });
     }, [
         checkAndUpdateStreak,
-        finalizeSession,
         inputLatencyMs,
         settings.bpm,
         settings.bars,
@@ -244,20 +249,25 @@ export function TapTheBeatMode() {
 
         const rawTapTime = clockRef.current.now();
         const tapTime = applyInputLatencyCompensation(rawTapTime, inputLatencyMs);
-        const candidate = expectedBeatsRef.current
+        const nearestBeat = expectedBeatsRef.current
             .filter((beat) => !beat.matched)
             .map((beat) => ({
                 beat,
+                offsetSec: tapTime - beat.time,
                 absOffsetSec: Math.abs(tapTime - beat.time),
             }))
-            .filter((item) => item.absOffsetSec <= MATCH_WINDOW_SEC)
             .sort((left, right) => left.absOffsetSec - right.absOffsetSec)[0];
+
+        const candidate = nearestBeat && nearestBeat.absOffsetSec <= MATCH_WINDOW_SEC
+            ? nearestBeat
+            : null;
 
         if (!candidate) {
             extrasRef.current += 1;
+            const offsetMs = nearestBeat ? nearestBeat.offsetSec * 1000 : 0;
             const extraEval: TapEvaluation = {
-                offsetMs: 0,
-                absOffsetMs: 0,
+                offsetMs,
+                absOffsetMs: Math.abs(offsetMs),
                 rating: "miss",
                 isHit: false,
                 directionCorrect: true,
@@ -320,9 +330,9 @@ export function TapTheBeatMode() {
             <div className="space-y-4">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Tap the Beat</CardTitle>
+                        <CardTitle>{t("rhythm.tapBeat.title")}</CardTitle>
                         <CardDescription>
-                            Keep steady time against the click. Train pulse before complexity.
+                            {t("rhythm.tapBeat.description")}
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -339,7 +349,7 @@ export function TapTheBeatMode() {
                                     }))
                                 }
                             />
-                            <FormField id="tap-beat-time-signature" label="Time Signature">
+                            <FormField id="tap-beat-time-signature" label={t("rhythm.tapBeat.timeSignatureLabel")}>
                                 <Select
                                     value={settings.timeSignatureTop}
                                     onChange={(event) =>
@@ -351,10 +361,10 @@ export function TapTheBeatMode() {
                                 >
                                     <option value={4}>4/4</option>
                                     <option value={3}>3/4</option>
-                                    <option value={6}>6/8 (pulse)</option>
+                                    <option value={6}>{t("rhythm.tapBeat.sixEightPulse")}</option>
                                 </Select>
                             </FormField>
-                            <FormField id="tap-beat-bars" label="Bars">
+                            <FormField id="tap-beat-bars" label={t("rhythm.common.barsLabel")}>
                                 <Select
                                     value={settings.bars}
                                     onChange={(event) =>
@@ -383,18 +393,18 @@ export function TapTheBeatMode() {
                             options={[
                                 {
                                     value: "scored",
-                                    label: "Scored",
-                                    description: "Auto-ends after configured bars and shows summary.",
+                                    label: t("rhythm.common.scored"),
+                                    description: t("rhythm.tapBeat.sessionScoredDesc"),
                                 },
                                 {
                                     value: "practice",
-                                    label: "Practice",
-                                    description: "Continuous groove. Stop manually when finished.",
+                                    label: t("rhythm.common.practice"),
+                                    description: t("rhythm.tapBeat.sessionPracticeDesc"),
                                 },
                             ]}
                         />
                         <SessionStartActions
-                            primaryLabel={sessionMode === "scored" ? "Start Scored Session" : "Practice with Guitar"}
+                            primaryLabel={sessionMode === "scored" ? t("rhythm.common.startScored") : t("rhythm.common.practiceWithGuitar")}
                             onPrimary={() => void startSessionWithMode(sessionMode)}
                         />
                     </CardContent>
@@ -406,9 +416,9 @@ export function TapTheBeatMode() {
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-2 text-sm">
-                <span className="font-semibold text-primary">Tempo {settings.bpm} BPM</span>
+                <span className="font-semibold text-primary">{t("rhythm.common.tempoBpm", { bpm: settings.bpm })}</span>
                 <span className="text-muted-foreground">
-                    {settings.timeSignatureTop}/4 · {settings.bars} bars
+                    {t("rhythm.tapBeat.signatureBars", { signature: `${settings.timeSignatureTop}/4`, bars: settings.bars })}
                 </span>
             </div>
 
@@ -428,21 +438,21 @@ export function TapTheBeatMode() {
                 </>
             ) : (
                 <div className="rounded-lg border border-emerald-500/35 bg-emerald-500/10 px-3 py-2 text-xs font-medium text-emerald-700 dark:text-emerald-300">
-                    Practice mode active: play with your guitar and stop manually when done.
+                    {t("rhythm.tapBeat.practiceHint")}
                 </div>
             )}
 
             {sessionMode === "scored" && summary && (
                 <SessionSummaryCard
-                    description={`Score ${summary.score} · Accuracy ${summary.accuracy}%`}
+                    description={t("rhythm.tapBeat.summaryDescription", { score: summary.score, accuracy: summary.accuracy })}
                     metrics={[
-                        { label: "Hits", value: summary.hits },
-                        { label: "Misses", value: summary.misses },
-                        { label: "Extras", value: summary.extras },
-                        { label: "Avg offset", value: `${summary.avgOffsetMs}ms` },
+                        { label: t("rhythm.common.metrics.hits"), value: summary.hits },
+                        { label: t("rhythm.common.metrics.misses"), value: summary.misses },
+                        { label: t("rhythm.common.metrics.extras"), value: summary.extras },
+                        { label: t("rhythm.common.metrics.avgOffset"), value: `${summary.avgOffsetMs}ms` },
                     ]}
                     primaryAction={{
-                        label: "New Session",
+                        label: t("rhythm.common.newSession"),
                         onClick: () => {
                             setStatus("idle");
                             statusRef.current = "idle";
@@ -454,7 +464,7 @@ export function TapTheBeatMode() {
             {status === "running" && (
                 <SessionStopButton
                     onStop={sessionMode === "scored" ? finalizeSession : stopPracticeSession}
-                    label={sessionMode === "scored" ? "Stop" : "Stop Practice"}
+                    label={sessionMode === "scored" ? t("rhythm.common.stop") : t("rhythm.common.stopPractice")}
                 />
             )}
         </div>

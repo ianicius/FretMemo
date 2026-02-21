@@ -15,12 +15,14 @@ import { Fretboard } from "@/components/fretboard/Fretboard";
 import { Button } from "@/components/ui/button";
 import { Volume2, RotateCcw, Play, Lightbulb } from "lucide-react";
 import type { NoteStatus, Position } from "@/types/fretboard";
+import { useTranslation } from "react-i18next";
 
 function getRandomMidi(minMidi: number, maxMidi: number): number {
     return Math.floor(Math.random() * (maxMidi - minMidi + 1)) + minMidi;
 }
 
 export default function SoundToFretboard() {
+    const { t } = useTranslation();
     const quickTuning = useSettingsStore((state) => state.quick.tuning);
     const notation = useSettingsStore((state) => state.full.instrument.notation);
     const tuning = useMemo(() => normalizeTuning(quickTuning), [quickTuning]);
@@ -146,16 +148,16 @@ export default function SoundToFretboard() {
             <div className="flex flex-col items-center gap-6 py-12">
                 <div className="text-center space-y-2">
                     <Volume2 className="w-12 h-12 mx-auto text-primary/60" />
-                    <h2 className="text-xl font-bold">Sound → Fretboard</h2>
+                    <h2 className="text-xl font-bold">{t("ear.soundToFretboard.title")}</h2>
                     <p className="text-muted-foreground text-sm max-w-md">
-                        Listen to a note and find it on the fretboard. Any position with the correct note is accepted.
+                        {t("ear.soundToFretboard.description")}
                     </p>
                 </div>
                 {!audioReady && (
-                    <p className="text-xs text-amber-600 dark:text-amber-400">Tap below to enable audio</p>
+                    <p className="text-xs text-amber-600 dark:text-amber-400">{t("ear.soundToFretboard.enableAudioHint")}</p>
                 )}
                 <Button className="control-btn control-btn--primary" onClick={handleStart}>
-                    <Play className="w-4 h-4 mr-2" /> Start Training
+                    <Play className="w-4 h-4 mr-2" /> {t("ear.common.startTraining")}
                 </Button>
             </div>
         );
@@ -166,7 +168,7 @@ export default function SoundToFretboard() {
             {/* Stats bar */}
             <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-4">
-                    <span className="font-bold text-primary">Score: {score}</span>
+                    <span className="font-bold text-primary">{t("ear.common.score")}: {score}</span>
                     <span className="text-amber-600 dark:text-amber-300">🔥 {streak}</span>
                 </div>
                 <div className="text-muted-foreground">
@@ -177,25 +179,25 @@ export default function SoundToFretboard() {
             {/* Controls */}
             <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" onClick={handleReplay} disabled={currentMidi === null}>
-                    <Volume2 className="w-4 h-4 mr-1" /> Replay
+                    <Volume2 className="w-4 h-4 mr-1" /> {t("ear.common.replay")}
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => setShowHint(!showHint)}>
-                    <Lightbulb className="w-4 h-4 mr-1" /> {showHint ? "Hide Hint" : "Hint"}
+                    <Lightbulb className="w-4 h-4 mr-1" /> {showHint ? t("ear.common.hideHint") : t("ear.common.hint")}
                 </Button>
                 {lastResult && (
                     <Button variant="outline" size="sm" onClick={handleNext} className="ml-auto">
-                        <RotateCcw className="w-4 h-4 mr-1" /> Next
+                        <RotateCcw className="w-4 h-4 mr-1" /> {t("ear.common.next")}
                     </Button>
                 )}
                 <Button variant="ghost" size="sm" onClick={endSession} className="ml-auto text-muted-foreground">
-                    End
+                    {t("ear.common.end")}
                 </Button>
             </div>
 
             {/* Hint */}
             {showHint && displayedTargetNote && (
                 <div className="text-center text-sm font-bold text-primary bg-primary/5 rounded-lg py-2">
-                    The note is: {displayedTargetNote}
+                    {t("ear.soundToFretboard.noteIs", { note: displayedTargetNote })}
                 </div>
             )}
 
@@ -205,7 +207,9 @@ export default function SoundToFretboard() {
                     ? "text-emerald-700 bg-emerald-500/10 dark:text-emerald-300"
                     : "text-rose-700 bg-rose-500/10 dark:text-rose-300"
                     }`}>
-                    {lastResult === "correct" ? "✓ Correct!" : `✗ The note was ${displayedTargetNote}`}
+                    {lastResult === "correct"
+                        ? t("ear.common.correct")
+                        : t("ear.soundToFretboard.noteWas", { note: displayedTargetNote })}
                 </div>
             )}
 

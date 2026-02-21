@@ -3,6 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Mic } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface PlayModeMicControlsProps {
     micEnabled: boolean;
@@ -13,6 +14,8 @@ interface PlayModeMicControlsProps {
  * Microphone controls for Play modes (playNotes, playTab).
  */
 export function PlayModeMicControls({ micEnabled, onMicChange }: PlayModeMicControlsProps) {
+    const { t } = useTranslation();
+
     return (
         <div className="flex items-center justify-center gap-4">
             <div
@@ -24,8 +27,10 @@ export function PlayModeMicControls({ micEnabled, onMicChange }: PlayModeMicCont
                 <div className="flex items-center gap-2">
                     <Mic className={cn("h-5 w-5 transition-colors", micEnabled ? "text-primary" : "text-muted-foreground")} />
                     <div className="flex flex-col">
-                        <Label htmlFor="mic-toggle-focus" className="cursor-pointer text-sm font-semibold">Microphone</Label>
-                        <span className="text-[11px] text-muted-foreground">{micEnabled ? "Input active" : "Input disabled"}</span>
+                        <Label htmlFor="mic-toggle-focus" className="cursor-pointer text-sm font-semibold">{t("practice.controls.microphone")}</Label>
+                        <span className="text-[11px] text-muted-foreground">
+                            {micEnabled ? t("practice.controls.inputActive") : t("practice.controls.inputDisabled")}
+                        </span>
                     </div>
                 </div>
                 <Switch id="mic-toggle-focus" checked={micEnabled} onCheckedChange={onMicChange} />
@@ -43,6 +48,8 @@ interface HintButtonProps {
  * Hint button for guess modes.
  */
 export function HintButton({ onHint, hintUsed }: HintButtonProps) {
+    const { t } = useTranslation();
+
     return (
         <div className="flex justify-center">
             <Button
@@ -52,7 +59,7 @@ export function HintButton({ onHint, hintUsed }: HintButtonProps) {
                 onClick={onHint}
                 disabled={hintUsed}
             >
-                ? Hint ({hintUsed ? "used" : "-5 pts"})
+                ? {t("practice.controls.hint")} ({hintUsed ? t("practice.controls.used") : t("practice.controls.minusPoints", { points: 5 })})
             </Button>
         </div>
     );
@@ -66,6 +73,8 @@ interface NextButtonProps {
  * Manual advance button shown after answering.
  */
 export function NextButton({ onNext }: NextButtonProps) {
+    const { t } = useTranslation();
+
     return (
         <div className="flex justify-center">
             <Button
@@ -74,7 +83,7 @@ export function NextButton({ onNext }: NextButtonProps) {
                 className="control-btn--primary px-8"
                 onClick={onNext}
             >
-                Next
+                {t("practice.controls.next")}
             </Button>
         </div>
     );

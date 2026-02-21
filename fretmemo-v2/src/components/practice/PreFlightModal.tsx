@@ -11,9 +11,12 @@ import { SessionModeToggle } from "@/components/session-setup/session-mode-toggl
 import { SessionSetupDialogShell } from "@/components/session-setup/session-setup-dialog-shell";
 import { cn } from "@/lib/utils";
 import { NOTES } from "@/lib/constants";
+import { formatPitchClass } from "@/lib/noteNotation";
 import { useGameStore, type NoteFilter, type NoteSequence, type ScaleType } from "@/stores/useGameStore";
+import { useSettingsStore } from "@/stores/useSettingsStore";
 import type { NoteName } from "@/types/fretboard";
 import { ChevronDown, Mic, Play, Settings2, X, Zap } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 type PracticeMode = "fretboardToNote" | "tabToNote" | "noteToTab" | "playNotes" | "playTab";
 type PlaySessionMode = "scored" | "guitar";
@@ -62,63 +65,63 @@ interface PreFlightModalProps {
 
 const MODE_CONFIG: Record<PracticeMode, { label: string; description: string }> = {
     fretboardToNote: {
-        label: "Fretboard → Note",
-        description: "Identify notes on the fretboard.",
+        label: "practice.modes.fretboardToNote",
+        description: "practice.modes.fretboardToNoteDescription",
     },
     tabToNote: {
-        label: "Tab → Note",
-        description: "Read tablature and identify notes.",
+        label: "practice.modes.tabToNote",
+        description: "practice.modes.tabToNoteDescription",
     },
     noteToTab: {
-        label: "Note → Tab",
-        description: "Find the right position for each note.",
+        label: "practice.modes.noteToTab",
+        description: "practice.modes.noteToTabDescription",
     },
     playNotes: {
-        label: "Note Generator (Mic)",
-        description: "Play the prompted note on your guitar.",
+        label: "practice.modes.playNotes",
+        description: "practice.modes.playNotesDescription",
     },
     playTab: {
-        label: "Tab Sequence (Mic)",
-        description: "Play tab prompts with microphone detection.",
+        label: "practice.modes.playTab",
+        description: "practice.modes.playTabDescription",
     },
 };
 
 const PRESETS_ENABLING_ALL_STRINGS = new Set(["full-neck", "open-major", "a-minor-pent"]);
-const SCALE_TYPE_OPTIONS: Array<{ id: ScaleType; label: string }> = [
-    { id: "major", label: "Major" },
-    { id: "minor", label: "Minor" },
-    { id: "majorPentatonic", label: "Major Pentatonic" },
-    { id: "minorPentatonic", label: "Minor Pentatonic" },
+const SCALE_TYPE_OPTIONS: Array<{ id: ScaleType; labelKey: string }> = [
+    { id: "major", labelKey: "practice.setup.scaleTypes.major" },
+    { id: "minor", labelKey: "practice.setup.scaleTypes.minor" },
+    { id: "majorPentatonic", labelKey: "practice.setup.scaleTypes.majorPentatonic" },
+    { id: "minorPentatonic", labelKey: "practice.setup.scaleTypes.minorPentatonic" },
 ];
 const NOTE_SEQUENCE_OPTIONS: Array<{
-    group: string;
-    items: Array<{ id: NoteSequence; label: string }>;
+    groupKey: string;
+    items: Array<{ id: NoteSequence; labelKey: string }>;
 }> = [
         {
-            group: "Intervals",
+            groupKey: "practice.setup.sequenceGroups.intervals",
             items: [
-                { id: "random", label: "Random" },
-                { id: "minorThirds", label: "Minor Thirds" },
-                { id: "majorThirds", label: "Major Thirds" },
-                { id: "fourths", label: "Fourths" },
-                { id: "fifths", label: "Fifths" },
-                { id: "sevenths", label: "Sevenths" },
+                { id: "random", labelKey: "practice.setup.sequenceOptions.random" },
+                { id: "minorThirds", labelKey: "practice.setup.sequenceOptions.minorThirds" },
+                { id: "majorThirds", labelKey: "practice.setup.sequenceOptions.majorThirds" },
+                { id: "fourths", labelKey: "practice.setup.sequenceOptions.fourths" },
+                { id: "fifths", labelKey: "practice.setup.sequenceOptions.fifths" },
+                { id: "sevenths", labelKey: "practice.setup.sequenceOptions.sevenths" },
             ],
         },
         {
-            group: "Scales",
+            groupKey: "practice.setup.sequenceGroups.scales",
             items: [
-                { id: "majorScale", label: "Major Scale" },
-                { id: "naturalMinorScale", label: "Natural Minor Scale" },
-                { id: "majorPentatonic", label: "Major Pentatonic" },
-                { id: "minorPentatonic", label: "Minor Pentatonic" },
+                { id: "majorScale", labelKey: "practice.setup.sequenceOptions.majorScale" },
+                { id: "naturalMinorScale", labelKey: "practice.setup.sequenceOptions.naturalMinorScale" },
+                { id: "majorPentatonic", labelKey: "practice.setup.sequenceOptions.majorPentatonic" },
+                { id: "minorPentatonic", labelKey: "practice.setup.sequenceOptions.minorPentatonic" },
             ],
         },
     ];
 
 const PRESET_OPTIONS: Array<{
     id: string;
-    label: string;
+    labelKey: string;
     values: {
         fretRange?: { min: number; max: number };
         enabledStrings?: boolean[];
@@ -129,22 +132,22 @@ const PRESET_OPTIONS: Array<{
 }> = [
         {
             id: "full-neck",
-            label: "Full Neck",
+            labelKey: "practice.setup.presets.fullNeck",
             values: { fretRange: { min: 1, max: 12 }, noteFilter: "all" },
         },
         {
             id: "open-major",
-            label: "Open Major",
+            labelKey: "practice.setup.presets.openMajor",
             values: { fretRange: { min: 1, max: 5 }, rootNote: "C", scaleType: "major", noteFilter: "all" },
         },
         {
             id: "a-minor-pent",
-            label: "A Minor Pent",
+            labelKey: "practice.setup.presets.aMinorPent",
             values: { fretRange: { min: 5, max: 8 }, rootNote: "A", scaleType: "minorPentatonic", noteFilter: "all" },
         },
         {
             id: "naturals",
-            label: "Naturals",
+            labelKey: "practice.setup.presets.naturals",
             values: { noteFilter: "naturals" },
         },
     ];
@@ -184,13 +187,18 @@ export function PreFlightModal({
     sessionMode,
     onSessionModeChange,
 }: PreFlightModalProps) {
+    const { t } = useTranslation();
+    const notation = useSettingsStore((state) => state.full.instrument.notation);
     const config = MODE_CONFIG[mode];
     const [showAdvanced, setShowAdvanced] = useState(false);
     const isPlayMode = mode === "playNotes" || mode === "playTab";
     const allStringsEnabled = useMemo(() => Array.from({ length: tuning.length }, () => true), [tuning.length]);
     const stringToggleLabels = useMemo(
-        () => tuning.map((note, index) => (index === 0 ? note.toLowerCase() : note)),
-        [tuning]
+        () => tuning.map((note, index) => {
+            const label = formatPitchClass(note, notation);
+            return index === 0 ? label.toLowerCase() : label;
+        }),
+        [tuning, notation]
     );
 
     const speedUpEnabled = useGameStore((s) => s.speedUpEnabled);
@@ -223,19 +231,19 @@ export function PreFlightModal({
             onOpenChange={(open) => {
                 if (!open) onClose();
             }}
-            title="Session Setup"
-            badgeLabel={config.label}
-            description={config.description}
+            title={t('practice.setup.title')}
+            badgeLabel={t(config.label)}
+            description={t(config.description)}
             bodyClassName="space-y-6"
             footer={
                 <DialogFooter className="shrink-0 gap-2 border-t border-border/50 bg-background px-6 py-4">
                     <Button variant="outline" onClick={onClose} className="flex-1">
                         <X className="mr-2 h-4 w-4" />
-                        Cancel
+                        {t('practice.setup.cancel')}
                     </Button>
                     <Button onClick={onStart} className="flex-1 control-btn--primary">
                         <Play className="mr-2 h-4 w-4" />
-                        Start
+                        {t('practice.setup.start')}
                     </Button>
                 </DialogFooter>
             }
@@ -243,7 +251,7 @@ export function PreFlightModal({
             <section className="space-y-3 rounded-lg border border-border/50 p-3">
                 <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                        <Label className="text-sm">Tempo</Label>
+                        <Label className="text-sm">{t('practice.setup.tempo')}</Label>
                         <span className="font-mono text-xs text-muted-foreground">{bpm} BPM</span>
                     </div>
                     <Slider value={[bpm]} onValueChange={([value]) => onBpmChange(value)} min={30} max={280} step={1} />
@@ -251,8 +259,8 @@ export function PreFlightModal({
 
                 <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                        <span className="text-sm">Metronome</span>
-                        <p className="text-xs text-muted-foreground">Use click track while practicing.</p>
+                        <span className="text-sm">{t('practice.setup.metronome')}</span>
+                        <p className="text-xs text-muted-foreground">{t('practice.setup.metronomeDesc')}</p>
                     </div>
                     <Switch
                         checked={isMetronomeOn}
@@ -267,13 +275,13 @@ export function PreFlightModal({
                         <div className="flex items-center justify-between">
                             <div className="inline-flex items-center gap-2">
                                 <Zap className="h-4 w-4 text-amber-600" />
-                                <span className="text-sm font-medium">Auto Speed-Up</span>
+                                <span className="text-sm font-medium">{t('practice.setup.autoSpeedUp')}</span>
                             </div>
                             <Switch checked={speedUpEnabled} onCheckedChange={setSpeedUpEnabled} />
                         </div>
                         {speedUpEnabled && (
                             <div className="grid grid-cols-2 gap-3">
-                                <FormField label="Increase" labelClassName="text-xs">
+                                <FormField label={t('practice.setup.increase')} labelClassName="text-xs">
                                     <NumberInput
                                         value={speedUpAmount}
                                         min={1}
@@ -284,7 +292,7 @@ export function PreFlightModal({
                                         inputClassName="h-8 px-2 text-sm"
                                     />
                                 </FormField>
-                                <FormField label="Every X beats" labelClassName="text-xs">
+                                <FormField label={t('practice.setup.everyXBeats')} labelClassName="text-xs">
                                     <NumberInput
                                         value={speedUpInterval}
                                         min={1}
@@ -306,9 +314,9 @@ export function PreFlightModal({
                             <div className="space-y-0.5">
                                 <span className="inline-flex items-center gap-2 text-sm">
                                     <Mic className="h-4 w-4 text-muted-foreground" />
-                                    Microphone Input
+                                    {t('practice.setup.mic')}
                                 </span>
-                                <p className="text-xs text-muted-foreground">Enable this to detect played guitar notes.</p>
+                                <p className="text-xs text-muted-foreground">{t('practice.setup.micDesc')}</p>
                             </div>
                             <Switch checked={Boolean(micEnabled)} onCheckedChange={onMicEnabledChange} />
                         </div>
@@ -317,11 +325,11 @@ export function PreFlightModal({
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between">
                                     <Label className="text-xs" htmlFor="preflight-audio-input">
-                                        Input Device
+                                        {t('practice.setup.inputDevice')}
                                     </Label>
                                     {onRefreshAudioInputs && (
                                         <Button type="button" variant="ghost" size="sm" className="h-6 px-2 text-[11px]" onClick={onRefreshAudioInputs}>
-                                            Refresh
+                                            {t('practice.setup.refresh')}
                                         </Button>
                                     )}
                                 </div>
@@ -331,7 +339,7 @@ export function PreFlightModal({
                                     value={selectedAudioInputId ?? ""}
                                     onChange={(event) => onAudioInputChange(event.target.value)}
                                 >
-                                    <option value="">System Default</option>
+                                    <option value="">{t('practice.setup.systemDefault')}</option>
                                     {(audioInputDevices ?? []).map((device) => (
                                         <option key={device.id} value={device.id}>
                                             {device.label}
@@ -352,13 +360,13 @@ export function PreFlightModal({
                         options={[
                             {
                                 value: "scored",
-                                label: "Scored Session",
-                                description: "Auto-finishes after target count and shows summary.",
+                                label: t('practice.setup.scored'),
+                                description: t('practice.setup.scoredDesc'),
                             },
                             {
                                 value: "guitar",
-                                label: "Guitar Mode",
-                                description: "No session limit. Keep playing until you stop manually.",
+                                label: t('practice.setup.guitar'),
+                                description: t('practice.setup.guitarDesc'),
                             },
                         ]}
                     />
@@ -366,7 +374,7 @@ export function PreFlightModal({
 
                 {isPlayMode && (
                     <FormField
-                        label="Note Sequence"
+                        label={t('practice.setup.noteSequence')}
                         labelClassName="text-sm"
                         className="space-y-2 rounded-lg border border-border/50 p-3"
                     >
@@ -376,10 +384,10 @@ export function PreFlightModal({
                             onChange={(event) => onNoteSequenceChange(event.target.value as NoteSequence)}
                         >
                             {NOTE_SEQUENCE_OPTIONS.map((group) => (
-                                <optgroup key={group.group} label={group.group}>
+                                <optgroup key={group.groupKey} label={t(group.groupKey)}>
                                     {group.items.map((option) => (
                                         <option key={option.id} value={option.id}>
-                                            {option.label}
+                                            {t(option.labelKey)}
                                         </option>
                                     ))}
                                 </optgroup>
@@ -389,7 +397,7 @@ export function PreFlightModal({
                 )}
 
                 <div className="space-y-2">
-                    <Label className="text-sm">Quick Presets</Label>
+                    <Label className="text-sm">{t('practice.setup.quickPresets')}</Label>
                     <div className="grid grid-cols-2 gap-2">
                         {PRESET_OPTIONS.map((preset) => (
                             <Button
@@ -406,7 +414,7 @@ export function PreFlightModal({
                                     )
                                 }
                             >
-                                {preset.label}
+                                {t(preset.labelKey)}
                             </Button>
                         ))}
                     </div>
@@ -422,7 +430,7 @@ export function PreFlightModal({
                 >
                     <span className="inline-flex items-center gap-2 text-sm font-medium">
                         <Settings2 className="h-4 w-4" />
-                        Advanced
+                        {t('practice.setup.advanced')}
                     </span>
                     <ChevronDown className={cn("h-4 w-4 transition-transform", showAdvanced && "rotate-180")} />
                 </Button>
@@ -432,7 +440,7 @@ export function PreFlightModal({
                         {isMetronomeOn && (
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between">
-                                    <Label className="text-sm">Note Duration</Label>
+                                    <Label className="text-sm">{t('practice.setup.noteDuration')}</Label>
                                     <span className="font-mono text-xs text-muted-foreground">{noteDuration}</span>
                                 </div>
                                 <Slider value={[noteDuration]} onValueChange={([value]) => onNoteDurationChange(value)} min={1} max={16} step={1} />
@@ -441,7 +449,7 @@ export function PreFlightModal({
 
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                                <Label className="text-sm">Fret Range</Label>
+                                <Label className="text-sm">{t('practice.setup.fretRange')}</Label>
                                 <span className="font-mono text-xs text-muted-foreground">{fretRange.min} - {fretRange.max}</span>
                             </div>
                             <Slider
@@ -459,7 +467,7 @@ export function PreFlightModal({
                         </div>
 
                         <div className="space-y-2">
-                            <Label className="text-sm">Strings</Label>
+                            <Label className="text-sm">{t('practice.setup.strings')}</Label>
                             <div
                                 className="grid gap-2"
                                 style={{
@@ -485,19 +493,19 @@ export function PreFlightModal({
                         </div>
 
                         <div className="space-y-2">
-                            <Label className="text-sm">Notes</Label>
+                            <Label className="text-sm">{t('practice.setup.notes')}</Label>
                             <div className="grid grid-cols-2 gap-2">
                                 <Button type="button" size="sm" variant={noteFilter === "all" ? "secondary" : "outline"} onClick={() => onNoteFilterChange("all")}>
-                                    All Notes
+                                    {t('practice.setup.allNotes')}
                                 </Button>
                                 <Button type="button" size="sm" variant={noteFilter === "naturals" ? "secondary" : "outline"} onClick={() => onNoteFilterChange("naturals")}>
-                                    Naturals
+                                    {t('practice.setup.naturals')}
                                 </Button>
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <FormField label="Root Note" labelClassName="text-sm">
+                            <FormField label={t('practice.setup.rootNote')} labelClassName="text-sm">
                                 <Select
                                     className="h-9 py-1"
                                     value={rootNote}
@@ -505,7 +513,7 @@ export function PreFlightModal({
                                 >
                                     {NOTES.map((note) => (
                                         <option key={note} value={note}>
-                                            {note}
+                                            {formatPitchClass(note, notation)}
                                         </option>
                                     ))}
                                 </Select>
@@ -513,7 +521,7 @@ export function PreFlightModal({
                         </div>
 
                         <div className="space-y-2">
-                            <Label className="text-sm">Scale Type</Label>
+                            <Label className="text-sm">{t('practice.setup.scaleType')}</Label>
                             <div className="grid grid-cols-2 gap-2">
                                 {SCALE_TYPE_OPTIONS.map((option) => (
                                     <Button
@@ -524,7 +532,7 @@ export function PreFlightModal({
                                         className="h-8 text-xs"
                                         onClick={() => onScaleTypeChange(option.id)}
                                     >
-                                        {option.label}
+                                        {t(option.labelKey)}
                                     </Button>
                                 ))}
                             </div>

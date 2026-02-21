@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import type { StrumDirection } from "@/rhythm/engine/InputEvaluator";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface TapZoneProps {
     disabled?: boolean;
@@ -22,6 +23,8 @@ export function TapZone({
     onTap,
     className,
 }: TapZoneProps) {
+    const { t } = useTranslation();
+
     useEffect(() => {
         if (disabled) return;
 
@@ -58,7 +61,7 @@ export function TapZone({
                     className="h-14 text-base font-bold"
                     onPointerDown={() => onTap("down")}
                 >
-                    Down ↓
+                    {t("rhythm.ui.tapZone.down")} ↓
                 </Button>
                 <Button
                     type="button"
@@ -68,10 +71,10 @@ export function TapZone({
                     className="h-14 text-base font-bold"
                     onPointerDown={() => onTap("up")}
                 >
-                    Up ↑
+                    {t("rhythm.ui.tapZone.up")} ↑
                 </Button>
                 <p className="col-span-2 text-center text-xs text-muted-foreground">
-                    Keyboard: <span className="font-mono">↓</span> / <span className="font-mono">↑</span>
+                    {t("rhythm.ui.tapZone.keyboardLabel")}: <span className="font-mono">↓</span> / <span className="font-mono">↑</span>
                 </p>
             </div>
         );
@@ -86,10 +89,10 @@ export function TapZone({
                 className="h-16 w-full text-base font-bold"
                 onPointerDown={() => onTap("tap")}
             >
-                Tap Beat
+                {t("rhythm.ui.tapZone.tapBeat")}
             </Button>
             <p className="text-center text-xs text-muted-foreground">
-                Keyboard: <span className="font-mono">Space</span> / <span className="font-mono">Enter</span>
+                {t("rhythm.ui.tapZone.keyboardLabel")}: <span className="font-mono">Space</span> / <span className="font-mono">Enter</span>
             </p>
         </div>
     );

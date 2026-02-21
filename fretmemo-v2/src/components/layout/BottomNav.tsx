@@ -3,6 +3,7 @@ import { Home, Target, Trophy, ChartBar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/useAppStore';
 import type { TabId } from '@/types';
+import { useTranslation } from 'react-i18next';
 
 interface NavItem {
     id: TabId;
@@ -19,6 +20,7 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 export function BottomNav() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
     const { setTab } = useAppStore();
@@ -61,7 +63,7 @@ export function BottomNav() {
                                 )}
                             />
                             <item.icon className="h-5 w-5" strokeWidth={isActive ? 2.5 : 2} />
-                            <span className="text-[11px] font-medium leading-none">{item.label}</span>
+                            <span className="text-[11px] font-medium leading-none">{t(`nav.${item.id}`)}</span>
                         </button>
                     );
                 })}

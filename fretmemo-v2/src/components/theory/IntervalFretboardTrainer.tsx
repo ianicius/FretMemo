@@ -13,20 +13,21 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Play, RotateCcw } from "lucide-react";
 import type { NoteStatus, NoteName, Position } from "@/types/fretboard";
+import { useTranslation } from "react-i18next";
 
 const INTERVALS = [
-    { semitones: 1, name: "m2", label: "Minor 2nd" },
-    { semitones: 2, name: "M2", label: "Major 2nd" },
-    { semitones: 3, name: "m3", label: "Minor 3rd" },
-    { semitones: 4, name: "M3", label: "Major 3rd" },
-    { semitones: 5, name: "P4", label: "Perfect 4th" },
-    { semitones: 6, name: "A4", label: "Tritone" },
-    { semitones: 7, name: "P5", label: "Perfect 5th" },
-    { semitones: 8, name: "m6", label: "Minor 6th" },
-    { semitones: 9, name: "M6", label: "Major 6th" },
-    { semitones: 10, name: "m7", label: "Minor 7th" },
-    { semitones: 11, name: "M7", label: "Major 7th" },
-    { semitones: 12, name: "P8", label: "Octave" },
+    { semitones: 1, name: "m2", labelKey: "ear.intervals.labels.m2" },
+    { semitones: 2, name: "M2", labelKey: "ear.intervals.labels.M2" },
+    { semitones: 3, name: "m3", labelKey: "ear.intervals.labels.m3" },
+    { semitones: 4, name: "M3", labelKey: "ear.intervals.labels.M3" },
+    { semitones: 5, name: "P4", labelKey: "ear.intervals.labels.P4" },
+    { semitones: 6, name: "A4", labelKey: "ear.intervals.labels.A4" },
+    { semitones: 7, name: "P5", labelKey: "ear.intervals.labels.P5" },
+    { semitones: 8, name: "m6", labelKey: "ear.intervals.labels.m6" },
+    { semitones: 9, name: "M6", labelKey: "ear.intervals.labels.M6" },
+    { semitones: 10, name: "m7", labelKey: "ear.intervals.labels.m7" },
+    { semitones: 11, name: "M7", labelKey: "ear.intervals.labels.M7" },
+    { semitones: 12, name: "P8", labelKey: "ear.intervals.labels.P8" },
 ];
 
 const ROOTS: NoteName[] = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
@@ -36,6 +37,7 @@ function getRandomItem<T>(arr: T[]): T {
 }
 
 export default function IntervalFretboardTrainer() {
+    const { t } = useTranslation();
     const quickTuning = useSettingsStore((state) => state.quick.tuning);
     const notation = useSettingsStore((state) => state.full.instrument.notation);
     const tuning = useMemo(() => normalizeTuning(quickTuning), [quickTuning]);
@@ -172,14 +174,14 @@ export default function IntervalFretboardTrainer() {
         return (
             <div className="flex flex-col items-center gap-6 py-12">
                 <div className="text-center space-y-2">
-                    <h2 className="text-xl font-bold">Interval Training on Fretboard</h2>
+                    <h2 className="text-xl font-bold">{t("theory.intervalFretboard.title")}</h2>
                     <p className="text-muted-foreground text-sm max-w-md">
-                        A root note is highlighted on the fretboard. Find the position of the requested interval.
+                        {t("theory.intervalFretboard.description")}
                     </p>
                 </div>
 
                 <div>
-                    <label className="text-xs font-bold text-muted-foreground uppercase mb-2 block text-center">Active Intervals</label>
+                    <label className="text-xs font-bold text-muted-foreground uppercase mb-2 block text-center">{t("theory.intervalFretboard.activeIntervals")}</label>
                     <div className="flex flex-wrap justify-center gap-1.5 max-w-md">
                         {INTERVALS.map(i => (
                             <button
@@ -199,7 +201,7 @@ export default function IntervalFretboardTrainer() {
                 </div>
 
                 <Button className="control-btn control-btn--primary" onClick={handleStart}>
-                    <Play className="w-4 h-4 mr-2" /> Start Training
+                    <Play className="w-4 h-4 mr-2" /> {t("ear.common.startTraining")}
                 </Button>
             </div>
         );
@@ -210,16 +212,16 @@ export default function IntervalFretboardTrainer() {
             {/* Stats + prompt */}
             <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-4">
-                    <span className="font-bold text-primary">Score: {score}</span>
+                    <span className="font-bold text-primary">{t("ear.common.score")}: {score}</span>
                     <span className="text-amber-600 dark:text-amber-300">🔥 {streak}</span>
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => setIsPlaying(false)} className="text-muted-foreground">End</Button>
+                <Button variant="ghost" size="sm" onClick={() => setIsPlaying(false)} className="text-muted-foreground">{t("ear.common.end")}</Button>
             </div>
 
             <div className="text-center rounded-xl bg-primary/5 py-3 px-4">
-                <span className="text-sm text-muted-foreground">Find the </span>
-                <span className="text-lg font-bold text-primary">{targetInterval.label}</span>
-                <span className="text-sm text-muted-foreground"> from </span>
+                <span className="text-sm text-muted-foreground">{t("theory.intervalFretboard.findThe")} </span>
+                <span className="text-lg font-bold text-primary">{t(targetInterval.labelKey)}</span>
+                <span className="text-sm text-muted-foreground"> {t("theory.intervalFretboard.from")} </span>
                 <span className="text-lg font-bold">{displayedRootNote}</span>
             </div>
 
@@ -231,11 +233,15 @@ export default function IntervalFretboardTrainer() {
                             : "text-rose-700 bg-rose-500/10 dark:text-rose-300"
                         }`}>
                         {result === "correct"
-                            ? `✓ Correct! The ${targetInterval.name} of ${displayedRootNote} is ${displayedTargetNote}`
-                            : `✗ Wrong! The answer was ${displayedTargetNote}`}
+                            ? t("theory.intervalFretboard.correctFeedback", {
+                                interval: targetInterval.name,
+                                root: displayedRootNote,
+                                note: displayedTargetNote,
+                            })
+                            : t("theory.intervalFretboard.wrongFeedback", { note: displayedTargetNote })}
                     </div>
                     <Button variant="outline" size="sm" className="ml-2" onClick={generateNewQuestion}>
-                        <RotateCcw className="w-4 h-4 mr-1" /> Next
+                        <RotateCcw className="w-4 h-4 mr-1" /> {t("ear.common.next")}
                     </Button>
                 </div>
             )}

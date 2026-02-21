@@ -26,8 +26,12 @@ interface QuestState {
 
     // Actions
     checkAndRefreshQuests: () => void;
-    updateProgress: (type: QuestType, amount: number, metadata?: any) => void;
+    updateProgress: (type: QuestType, amount: number, metadata?: QuestProgressMetadata) => void;
     claimReward: (questId: string) => void;
+}
+
+interface QuestProgressMetadata {
+    mode?: string;
 }
 
 const generateDailyQuests = (): Quest[] => {

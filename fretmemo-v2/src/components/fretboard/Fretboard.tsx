@@ -4,6 +4,8 @@ import { Fragment } from "react";
 import { StringLine } from "./StringLine";
 import { NoteDot } from "./NoteDot";
 import type { FretboardProps, Position } from "@/types/fretboard";
+import { useTranslation } from "react-i18next";
+import { applyPolishNotation } from "@/lib/noteNotation";
 
 export function Fretboard({
     tuning = STANDARD_TUNING,
@@ -19,6 +21,9 @@ export function Fretboard({
     className?: string;
     fitContainer?: boolean;
 }) {
+    const { i18n } = useTranslation();
+    const isPolish = i18n.resolvedLanguage === 'pl' || i18n.language === 'pl';
+
     // tuning array: [E, B, G, D, A, E] where [0] is High E (string 1)
     // We display High E at the TOP (visual row 0)
 
@@ -142,7 +147,7 @@ export function Fretboard({
                                                         leftHanded && "transform scale-x-[-1]"
                                                     )}
                                                 >
-                                                    {openNote}
+                                                    {isPolish ? applyPolishNotation(openNote) : openNote}
                                                 </span>
                                             );
                                         })()}

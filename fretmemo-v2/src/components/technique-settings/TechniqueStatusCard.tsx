@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useTranslation } from "react-i18next";
 
 interface TechniqueActionCue {
     label: string;
@@ -42,60 +43,62 @@ export function TechniqueStatusCard({
     techniqueCue,
     displayedPatternLabel,
 }: TechniqueStatusCardProps) {
+    const { t } = useTranslation();
+
     return (
         <Card>
             <CardHeader>
-                <CardTitle className="text-lg">Status</CardTitle>
+                <CardTitle className="text-lg">{t("technique.status.title")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
                 <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Current String</span>
+                    <span className="text-muted-foreground">{t("technique.status.currentString")}</span>
                     <span className="font-medium">{currentStringLabel}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Step</span>
+                    <span className="text-muted-foreground">{t("technique.status.step")}</span>
                     <span className="font-medium">{currentStep}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Tempo</span>
+                    <span className="text-muted-foreground">{t("technique.status.tempo")}</span>
                     <span className="font-medium">{tempoBpm} BPM</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Speed-Up</span>
-                    <span className="font-medium">{speedUpEnabled ? `+${speedUpAmount}/${speedUpInterval}b` : "Off"}</span>
+                    <span className="text-muted-foreground">{t("technique.status.speedUp")}</span>
+                    <span className="font-medium">{speedUpEnabled ? `+${speedUpAmount}/${speedUpInterval}b` : t("technique.status.off")}</span>
                 </div>
                 {speedUpEnabled && isPlaying && (
                     <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Next Increase In</span>
+                        <span className="text-muted-foreground">{t("technique.status.nextIncreaseIn")}</span>
                         <span className="font-medium">
-                            {nextIncreaseInBeats} beat{nextIncreaseInBeats !== 1 ? "s" : ""}
+                            {nextIncreaseInBeats} {nextIncreaseInBeats !== 1 ? t("technique.status.beats") : t("technique.status.beat")}
                         </span>
                     </div>
                 )}
                 {showPermutationMeta && (
                     <>
                         <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Mode</span>
+                            <span className="text-muted-foreground">{t("technique.status.mode")}</span>
                             <span className="font-medium">{permutationModeLabel}</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Tier</span>
+                            <span className="text-muted-foreground">{t("technique.status.tier")}</span>
                             <span className="font-medium">{permutationTierLabel}</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Strings</span>
+                            <span className="text-muted-foreground">{t("technique.status.strings")}</span>
                             <span className="font-medium">{permutationStringsToPlay}</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Direction</span>
-                            <span className="font-medium capitalize">{permutationDirection}</span>
+                            <span className="text-muted-foreground">{t("technique.status.direction")}</span>
+                            <span className="font-medium">{permutationDirection}</span>
                         </div>
                     </>
                 )}
                 {techniqueCue && (
                     <div className="space-y-1 rounded-md border border-primary/20 bg-primary/5 p-2">
                         <div className="flex items-center justify-between text-xs">
-                            <span className="text-muted-foreground">Current Action</span>
+                            <span className="text-muted-foreground">{t("technique.status.currentAction")}</span>
                             <Badge variant="secondary">{techniqueCue.label}</Badge>
                         </div>
                         <div className="font-mono text-sm">{techniqueCue.notation}</div>
@@ -103,7 +106,7 @@ export function TechniqueStatusCard({
                     </div>
                 )}
                 <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Pattern</span>
+                    <span className="text-muted-foreground">{t("technique.status.pattern")}</span>
                     <Badge variant="secondary">{displayedPatternLabel}</Badge>
                 </div>
             </CardContent>

@@ -138,10 +138,14 @@ export function playTone(midi: number, durationSec = 1.2): Promise<void> {
  * Play multiple MIDI notes simultaneously (chord).
  * Slightly staggered for a natural strum effect.
  */
-export function playChord(midis: number[], durationSec = 1.5): Promise<void> {
+export interface PlayChordOptions {
+    strumDelaySec?: number;
+}
+
+export function playChord(midis: number[], durationSec = 1.5, options: PlayChordOptions = {}): Promise<void> {
     const ctx = getAudioContext();
     const now = ctx.currentTime;
-    const strumDelay = 0.025; // 25ms between strings — natural strum
+    const strumDelay = Math.max(0, options.strumDelaySec ?? 0.025); // natural strum by default
 
     const promises = midis.map((midi, i) => {
         const freq = midiToFrequency(midi);
@@ -206,12 +210,42 @@ export function playChord(midis: number[], durationSec = 1.5): Promise<void> {
 }
 
 /**
- * Play two notes sequentially (interval).
+ * Play two notes sequentially (ascending interval).
  */
 export async function playInterval(midi1: number, midi2: number, noteDuration = 0.8, gap = 0.12): Promise<void> {
     await playTone(midi1, noteDuration);
     await new Promise((r) => setTimeout(r, gap * 1000));
     await playTone(midi2, noteDuration);
+}
+
+export type IntervalPlaybackDirection = "ascending" | "descending" | "harmonic";
+
+export interface IntervalPlaybackOptions {
+    direction?: IntervalPlaybackDirection;
+    noteDuration?: number;
+    gap?: number;
+}
+
+export async function playIntervalPrompt(
+    midi1: number,
+    midi2: number,
+    options: IntervalPlaybackOptions = {},
+): Promise<void> {
+    const direction = options.direction ?? "ascending";
+    const noteDuration = options.noteDuration ?? 0.8;
+    const gap = options.gap ?? 0.12;
+
+    if (direction === "descending") {
+        await playInterval(midi2, midi1, noteDuration, gap);
+        return;
+    }
+
+    if (direction === "harmonic") {
+        await playChord([midi1, midi2], noteDuration, { strumDelaySec: 0 });
+        return;
+    }
+
+    await playInterval(midi1, midi2, noteDuration, gap);
 }
 
 export interface CadencePlaybackOptions {

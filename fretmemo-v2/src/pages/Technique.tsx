@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 import { TechniqueSettingsCard } from "@/components/technique-settings/TechniqueSettingsCard";
 import { TechniqueStatusCard } from "@/components/technique-settings/TechniqueStatusCard";
 import { TechniqueSetupDialog } from "@/components/technique-settings/TechniqueSetupDialog";
-
+import { useTranslation } from "react-i18next";
 const SPIDER_FINGERS = 4;
 const TECHNIQUE_FRETS = 12;
 const BEATS_PER_BAR = 4;
@@ -74,17 +74,17 @@ const PERMUTATIONS: PermutationPattern[] = [
     { pattern: [4, 3, 2, 1], tier: 1 },
 ];
 
-const PERMUTATION_MODE_LABELS: Record<PermutationMode, string> = {
-    single: "Single Permutation",
-    daily: "Daily Challenge",
-    sequential: "Sequential Trainer",
-    random: "Random Mode",
+const PERMUTATION_MODE_KEYS: Record<PermutationMode, string> = {
+    single: "technique.labels.permutationMode.single",
+    daily: "technique.labels.permutationMode.daily",
+    sequential: "technique.labels.permutationMode.sequential",
+    random: "technique.labels.permutationMode.random",
 };
 
-const DIAGONAL_PATTERN_LABELS: Record<DiagonalPattern, string> = {
-    ascending: "Ascending",
-    descending: "Descending",
-    full: "Full Run",
+const DIAGONAL_PATTERN_KEYS: Record<DiagonalPattern, string> = {
+    ascending: "technique.labels.diagonalPattern.ascending",
+    descending: "technique.labels.diagonalPattern.descending",
+    full: "technique.labels.diagonalPattern.full",
 };
 
 const STRING_SKIP_PATTERNS: Record<StringSkipPattern, number[]> = {
@@ -94,11 +94,11 @@ const STRING_SKIP_PATTERNS: Record<StringSkipPattern, number[]> = {
     wide: [6, 1, 5, 2, 4, 3],
 };
 
-const STRING_SKIP_PATTERN_LABELS: Record<StringSkipPattern, string> = {
-    single: "Single Skip",
-    octave: "Octave Skip",
-    double: "Double Skip",
-    wide: "Wide Skip",
+const STRING_SKIP_PATTERN_KEYS: Record<StringSkipPattern, string> = {
+    single: "technique.labels.stringSkipPattern.single",
+    octave: "technique.labels.stringSkipPattern.octave",
+    double: "technique.labels.stringSkipPattern.double",
+    wide: "technique.labels.stringSkipPattern.wide",
 };
 
 const LEGATO_TRILL_PAIRS: Record<LegatoTrillPair, [number, number]> = {
@@ -110,11 +110,17 @@ const LEGATO_TRILL_PAIRS: Record<LegatoTrillPair, [number, number]> = {
     "3-4": [3, 4],
 };
 
-const LEGATO_EXERCISE_LABELS: Record<LegatoExerciseType, string> = {
-    trill: "Trill",
-    hammerOnly: "Hammer-On Spider",
-    pullOnly: "Pull-Off Descending",
-    threeNote: "3-Note Legato",
+const LEGATO_EXERCISE_KEYS: Record<LegatoExerciseType, string> = {
+    trill: "technique.labels.legatoType.trill",
+    hammerOnly: "technique.labels.legatoType.hammerOnly",
+    pullOnly: "technique.labels.legatoType.pullOnly",
+    threeNote: "technique.labels.legatoType.threeNote",
+};
+
+const LINEAR_DIRECTION_KEYS: Record<LinearDirection, string> = {
+    ascending: "technique.labels.linearDirection.ascending",
+    descending: "technique.labels.linearDirection.descending",
+    roundTrip: "technique.labels.linearDirection.roundTrip",
 };
 
 function getPermutationIndicesByTier(tier: PermutationTierFilter): number[] {
@@ -382,6 +388,7 @@ export default function Technique() {
 }
 
 function TechniqueSession({ exerciseId }: { exerciseId: string }) {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
     const exercise = TECHNIQUE_EXERCISES[exerciseId];
@@ -394,7 +401,7 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
     const initialBpm = techniqueSettings.startingBpm?.[exerciseId] ?? exercise.defaultBpm;
     const stringCount = tuning.length;
     const stringLabels = useMemo(() => getStringLabels(tuning), [tuning]);
-    
+
     const [isPlaying, setIsPlaying] = useState(false);
     const [bpm, setBpm] = useState(initialBpm);
     const [currentStep, setCurrentStep] = useState(0);
@@ -467,16 +474,41 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
         exerciseId === "linear";
     const stringSkipSequence = STRING_SKIP_PATTERNS[stringSkipPattern];
     const activeTrillPair = LEGATO_TRILL_PAIRS[legatoTrillPair];
+    const getPermutationModeLabel = useCallback(
+        (mode: PermutationMode) => t(PERMUTATION_MODE_KEYS[mode]),
+        [t]
+    );
+    const getDiagonalPatternLabel = useCallback(
+        (pattern: DiagonalPattern) => t(DIAGONAL_PATTERN_KEYS[pattern]),
+        [t]
+    );
+    const getStringSkipPatternLabel = useCallback(
+        (pattern: StringSkipPattern) => t(STRING_SKIP_PATTERN_KEYS[pattern]),
+        [t]
+    );
+    const getLegatoExerciseLabel = useCallback(
+        (type: LegatoExerciseType) => t(LEGATO_EXERCISE_KEYS[type]),
+        [t]
+    );
+    const getLinearDirectionLabel = useCallback(
+        (direction: LinearDirection) => t(LINEAR_DIRECTION_KEYS[direction]),
+        [t]
+    );
+    const getPermutationDirectionLabel = useCallback(
+        (direction: PermutationDirection) => t(`technique.settings.directionOptions.${direction}`),
+        [t]
+    );
+
     const defaultPatternLabel = useMemo(() => {
         if (exerciseId === "permutation") return activePermutationPattern.join("-");
-        if (exerciseId === "diagonal") return `${DIAGONAL_PATTERN_LABELS[diagonalPattern]} (${diagonalStringsPerGroup} str)`;
-        if (exerciseId === "stringskip") return STRING_SKIP_PATTERN_LABELS[stringSkipPattern];
+        if (exerciseId === "diagonal") return t("technique.patternLabel.diagonal", { label: getDiagonalPatternLabel(diagonalPattern), strings: diagonalStringsPerGroup });
+        if (exerciseId === "stringskip") return getStringSkipPatternLabel(stringSkipPattern);
         if (exerciseId === "legato") {
             return legatoExerciseType === "trill"
-                ? `${LEGATO_EXERCISE_LABELS[legatoExerciseType]} ${legatoTrillPair}`
-                : LEGATO_EXERCISE_LABELS[legatoExerciseType];
+                ? `${getLegatoExerciseLabel(legatoExerciseType)} ${legatoTrillPair}`
+                : getLegatoExerciseLabel(legatoExerciseType);
         }
-        if (exerciseId === "linear") return `String ${linearString} • ${linearDirection}`;
+        if (exerciseId === "linear") return t("technique.patternLabel.linear", { string: linearString, direction: getLinearDirectionLabel(linearDirection) });
         return "1-2-3-4";
     }, [
         exerciseId,
@@ -488,15 +520,20 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
         legatoTrillPair,
         linearString,
         linearDirection,
+        t,
+        getDiagonalPatternLabel,
+        getStringSkipPatternLabel,
+        getLegatoExerciseLabel,
+        getLinearDirectionLabel,
     ]);
     const displayedPatternLabel = isPlaying ? activePatternLabel : defaultPatternLabel;
     const permutationModeOptions = useMemo(
         () =>
-            Object.entries(PERMUTATION_MODE_LABELS).map(([value, label]) => ({
+            Object.keys(PERMUTATION_MODE_KEYS).map((value) => ({
                 value,
-                label,
+                label: getPermutationModeLabel(value as PermutationMode),
             })),
-        []
+        [getPermutationModeLabel]
     );
     const permutationPatternOptions = useMemo(
         () =>
@@ -511,11 +548,11 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
     );
     const stringSkipPatternOptions = useMemo(
         () =>
-            Object.entries(STRING_SKIP_PATTERN_LABELS).map(([value, label]) => ({
+            Object.keys(STRING_SKIP_PATTERN_KEYS).map((value) => ({
                 value,
-                label,
+                label: getStringSkipPatternLabel(value as StringSkipPattern),
             })),
-        []
+        [getStringSkipPatternLabel]
     );
     const legatoTrillPairOptions = useMemo(
         () => Object.keys(LEGATO_TRILL_PAIRS),
@@ -769,16 +806,16 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
                     ? getAlternatingPickDirection(step, "down")
                     : (ascendingMode ? "down" : "up");
                 cue = {
-                    label: diagonalPickingStyle === "economy" ? "Economy Picking" : "Alternate Picking",
+                    label: diagonalPickingStyle === "economy" ? t("technique.cue.economyPicking") : t("technique.cue.alternatePicking"),
                     notation: getPickGlyph(pickDirection),
-                    detail: pickDirection === "down" ? "Downstroke" : "Upstroke",
+                    detail: pickDirection === "down" ? t("technique.cue.downstroke") : t("technique.cue.upstroke"),
                 };
             }
 
             setCurrentString(stringIndex);
             setActiveNotes(notes);
             setTechniqueCue(cue);
-            setActivePatternLabel(`${DIAGONAL_PATTERN_LABELS[diagonalPattern]} (${groupSize} str)`);
+            setActivePatternLabel(t("technique.patternLabel.diagonal", { label: getDiagonalPatternLabel(diagonalPattern), strings: groupSize }));
             setCurrentStep((prev) => prev + 1);
             return;
         }
@@ -833,18 +870,18 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
             const cue: TechniqueActionCue = {
                 label:
                     stringSkipPickingFocus === "alternate"
-                        ? "Alternate Picking"
+                        ? t("technique.cue.alternatePicking")
                         : stringSkipPickingFocus === "inside"
-                            ? "Inside Picking"
-                            : "Outside Picking",
+                            ? t("technique.cue.insidePicking")
+                            : t("technique.cue.outsidePicking"),
                 notation: getPickGlyph(pickDirection),
-                detail: pickDirection === "down" ? "Downstroke" : "Upstroke",
+                detail: pickDirection === "down" ? t("technique.cue.downstroke") : t("technique.cue.upstroke"),
             };
 
             setCurrentString(stringIndex);
             setActiveNotes(notes);
             setTechniqueCue(cue);
-            setActivePatternLabel(STRING_SKIP_PATTERN_LABELS[stringSkipPattern]);
+            setActivePatternLabel(getStringSkipPatternLabel(stringSkipPattern));
             setCurrentStep((prev) => prev + 1);
             return;
         }
@@ -876,11 +913,11 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
                 notes.push(makeNote(stringIndex, highFret, onUpperNote ? "active" : "correct", highLabel));
 
                 if (step === 0) {
-                    cue = { label: "Pick", notation: `${lowFret}`, detail: "Initial picked note" };
+                    cue = { label: t("technique.cue.pick"), notation: `${lowFret}`, detail: t("technique.cueDetail.initialPickedNote") };
                 } else if (onUpperNote) {
-                    cue = { label: "Hammer-On", notation: `${lowFret}h${highFret}`, detail: "Legato ascent" };
+                    cue = { label: t("technique.cue.hammerOn"), notation: `${lowFret}h${highFret}`, detail: t("technique.cueDetail.legatoAscent") };
                 } else {
-                    cue = { label: "Pull-Off", notation: `${highFret}p${lowFret}`, detail: "Legato descent" };
+                    cue = { label: t("technique.cue.pullOff"), notation: `${highFret}p${lowFret}`, detail: t("technique.cueDetail.legatoDescent") };
                 }
             } else if (legatoExerciseType === "hammerOnly") {
                 const notesPerString = 4;
@@ -901,11 +938,11 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
                 }
 
                 if (stepInString === 0) {
-                    cue = { label: "Pick", notation: `${baseFret}`, detail: "First note per string" };
+                    cue = { label: t("technique.cue.pick"), notation: `${baseFret}`, detail: t("technique.cueDetail.firstNotePerString") };
                 } else {
                     const fromFret = baseFret + fingerPatternAscending[stepInString - 1] - 1;
                     const toFret = baseFret + fingerPatternAscending[stepInString] - 1;
-                    cue = { label: "Hammer-On", notation: `${fromFret}h${toFret}`, detail: "No additional pick" };
+                    cue = { label: t("technique.cue.hammerOn"), notation: `${fromFret}h${toFret}`, detail: t("technique.cueDetail.noAdditionalPick") };
                 }
             } else if (legatoExerciseType === "pullOnly") {
                 const notesPerString = 4;
@@ -937,11 +974,11 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
 
                 if (stepInString === 0) {
                     const pickedFret = baseFret + fingerPatternDescending[0] - 1;
-                    cue = { label: "Pick", notation: `${pickedFret}`, detail: "Pick high note while index stays planted" };
+                    cue = { label: t("technique.cue.pick"), notation: `${pickedFret}`, detail: t("technique.cueDetail.pickHighNoteAnchorIndex") };
                 } else {
                     const fromFret = baseFret + fingerPatternDescending[stepInString - 1] - 1;
                     const toFret = baseFret + fingerPatternDescending[stepInString] - 1;
-                    cue = { label: "Pull-Off", notation: `${fromFret}p${toFret}`, detail: "Keep index anchored and release down" };
+                    cue = { label: t("technique.cue.pullOff"), notation: `${fromFret}p${toFret}`, detail: t("technique.cueDetail.keepIndexAnchored") };
                 }
             } else {
                 const notesPerString = 3;
@@ -970,11 +1007,11 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
                 }
 
                 if (stepInString === 0) {
-                    cue = { label: "Pick", notation: `${baseFret}`, detail: "Start each string with pick" };
+                    cue = { label: t("technique.cue.pick"), notation: `${baseFret}`, detail: t("technique.cueDetail.startEachStringWithPick") };
                 } else {
                     const fromFret = baseFret + offsets[stepInString - 1];
                     const toFret = baseFret + offsets[stepInString];
-                    cue = { label: "Hammer-On", notation: `${fromFret}h${toFret}`, detail: "2 legato notes per string" };
+                    cue = { label: t("technique.cue.hammerOn"), notation: `${fromFret}h${toFret}`, detail: t("technique.cueDetail.twoLegatoNotesPerString") };
                 }
             }
 
@@ -983,8 +1020,8 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
             setTechniqueCue(cue);
             setActivePatternLabel(
                 legatoExerciseType === "trill"
-                    ? `${LEGATO_EXERCISE_LABELS[legatoExerciseType]} ${legatoTrillPair}`
-                    : LEGATO_EXERCISE_LABELS[legatoExerciseType]
+                    ? `${getLegatoExerciseLabel(legatoExerciseType)} ${legatoTrillPair}`
+                    : getLegatoExerciseLabel(legatoExerciseType)
             );
             setCurrentStep((prev) => prev + 1);
             return;
@@ -1030,28 +1067,28 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
                 }
 
                 if (stepInGroup === 0) {
-                    cue = { label: "Pick", notation: `${baseFret}`, detail: "Initial attack" };
+                    cue = { label: t("technique.cue.pick"), notation: `${baseFret}`, detail: t("technique.cueDetail.initialAttack") };
                 } else {
                     cue = {
-                        label: "Hammer-On",
+                        label: t("technique.cue.hammerOn"),
                         notation: `${baseFret + stepInGroup - 1}h${baseFret + stepInGroup}`,
-                        detail: "Legato within shift group",
+                        detail: t("technique.cueDetail.legatoWithinShiftGroup"),
                     };
                 }
             } else {
                 notes.push(makeNote(stringIndex, fret, "active", `${finger}`));
                 const pickDirection = getAlternatingPickDirection(step, "down");
                 cue = {
-                    label: "Alternate Picking",
+                    label: t("technique.cue.alternatePicking"),
                     notation: getPickGlyph(pickDirection),
-                    detail: pickDirection === "down" ? "Downstroke" : "Upstroke",
+                    detail: pickDirection === "down" ? t("technique.cue.downstroke") : t("technique.cue.upstroke"),
                 };
             }
 
             setCurrentString(stringIndex);
             setActiveNotes(notes);
             setTechniqueCue(cue);
-            setActivePatternLabel(`String ${linearString} • ${linearDirection}`);
+            setActivePatternLabel(t("technique.patternLabel.linear", { string: linearString, direction: getLinearDirectionLabel(linearDirection) }));
             setCurrentStep((prev) => prev + 1);
             return;
         }
@@ -1092,6 +1129,11 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
         linearPickingStyle,
         stringCount,
         tuning,
+        t,
+        getDiagonalPatternLabel,
+        getStringSkipPatternLabel,
+        getLegatoExerciseLabel,
+        getLinearDirectionLabel,
     ]);
 
     const runTechniqueBeat = useCallback(() => {
@@ -1335,8 +1377,8 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
                     <ArrowLeft className="w-5 h-5" />
                 </Button>
                 <div>
-                    <h1 className="type-display">{exercise.name}</h1>
-                    <p className="type-body text-muted-foreground">{exercise.description}</p>
+                    <h1 className="type-display">{t(`technique.${exerciseId}.name`, exercise.name)}</h1>
+                    <p className="type-body text-muted-foreground">{t(`technique.${exerciseId}.description`, exercise.description)}</p>
                     <div className="mt-2 max-w-xl">
                         <ContextPill onOpenSettings={() => navigate("/me?section=settings")} />
                     </div>
@@ -1363,7 +1405,7 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
                         <Card className="border-primary/30 bg-primary/5">
                             <CardContent className="p-3">
                                 <div className="flex items-center justify-between gap-3">
-                                    <span className="text-xs uppercase tracking-wide text-muted-foreground">Action Cue</span>
+                                    <span className="text-xs uppercase tracking-wide text-muted-foreground">{t("technique.ui.actionCue")}</span>
                                     <Badge variant="secondary">{techniqueCue.label}</Badge>
                                 </div>
                                 <div className="mt-1 font-mono text-lg">{techniqueCue.notation}</div>
@@ -1388,19 +1430,19 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
                                         onClick={handlePlayButton}
                                     >
                                         {isPlaying ? (
-                                            <><Square className="mr-2 h-4 w-4 fill-current" /> Stop</>
+                                            <><Square className="mr-2 h-4 w-4 fill-current" /> {t("technique.ui.stop")}</>
                                         ) : (
-                                            <><Play className="mr-2 h-4 w-4" /> Start</>
+                                            <><Play className="mr-2 h-4 w-4" /> {t("technique.ui.start")}</>
                                         )}
                                     </Button>
-                                    
+
                                     {stepMode && isPlaying && (
                                         <Button
                                             variant="outline"
                                             onClick={handleNextStep}
                                         >
                                             <SkipForward className="mr-2 h-4 w-4" />
-                                            Next Step
+                                            {t("technique.ui.nextStep")}
                                         </Button>
                                     )}
                                 </div>
@@ -1417,7 +1459,7 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
                                         disabled={isPlaying}
                                     >
                                         <Settings2 className="mr-2 h-4 w-4" />
-                                        Session Setup
+                                        {t("technique.ui.sessionSetup")}
                                     </Button>
                                 </div>
                             </div>
@@ -1430,7 +1472,7 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
                     {/* Instructions */}
                     <Card>
                         <CardHeader>
-                            <CardTitle className="text-lg">Instructions</CardTitle>
+                            <CardTitle className="text-lg">{t("practice.instructions")}</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <ol className="space-y-2 list-decimal list-inside">
@@ -1452,14 +1494,14 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
                         isPlaying={isPlaying}
                         nextIncreaseInBeats={Math.max(0, speedUpInterval - speedUpBeatCounter)}
                         showPermutationMeta={isPermutationExercise}
-                        permutationModeLabel={PERMUTATION_MODE_LABELS[permutationMode]}
+                        permutationModeLabel={getPermutationModeLabel(permutationMode)}
                         permutationTierLabel={
                             permutationTier === "all"
-                                ? `All (T${activePermutationTier})`
-                                : `Tier ${activePermutationTier}`
+                                ? t("technique.ui.tierLabelAll", { tier: activePermutationTier })
+                                : t("technique.ui.tierLabelTier", { tier: activePermutationTier })
                         }
                         permutationStringsToPlay={permutationStringsToPlay}
-                        permutationDirection={permutationDirection}
+                        permutationDirection={getPermutationDirectionLabel(permutationDirection)}
                         techniqueCue={techniqueCue}
                         displayedPatternLabel={displayedPatternLabel}
                     />
@@ -1485,7 +1527,7 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
                 onSpeedUpAmountChange={setSpeedUpAmount}
                 speedUpInterval={speedUpInterval}
                 onSpeedUpIntervalChange={setSpeedUpInterval}
-                advancedLabel="Exercise Advanced"
+                advancedLabel={t("technique.ui.exerciseAdvanced")}
                 advancedContent={hasExerciseSpecificSetup ? (
                     <TechniqueSettingsCard
                         isPlaying={false}
@@ -1568,5 +1610,3 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
         </div>
     );
 }
-
-

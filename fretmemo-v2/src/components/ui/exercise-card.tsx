@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { MasteryBar } from "@/components/ui/mastery-bar";
 import { cn } from "@/lib/utils";
 import { Clock, ArrowRight, Lock } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 type ExerciseDifficulty = "beginner" | "intermediate" | "advanced";
 type ExerciseCardVariant = "standard" | "catalog";
@@ -41,12 +42,13 @@ export function ExerciseCard({
     isLocked = false,
     minLevel,
 }: ExerciseCardProps) {
+    const { t } = useTranslation();
     const Component = (onClick && !isLocked) ? "button" : "div";
     const safeMastery = Math.max(0, Math.min(100, Math.round(mastery)));
     const masteryLabel = isLocked ? (
-        <Badge variant="outline" className="border-muted bg-muted text-[10px] text-muted-foreground uppercase opacity-70">LOCKED</Badge>
+        <Badge variant="outline" className="border-muted bg-muted text-[10px] text-muted-foreground uppercase opacity-70">{t("common.locked", "LOCKED")}</Badge>
     ) : isNew ? (
-        <Badge className="bg-amber-500 text-amber-950 hover:bg-amber-400 font-bold uppercase tracking-widest text-[10px] px-1.5 py-0">NEW</Badge>
+        <Badge className="bg-amber-500 text-amber-950 hover:bg-amber-400 font-bold uppercase tracking-widest text-[10px] px-1.5 py-0">{t("common.new", "NEW")}</Badge>
     ) : (
         `${safeMastery}%`
     );
@@ -85,12 +87,12 @@ export function ExerciseCard({
 
                 <div className="mt-2 flex items-center gap-2">
                     <Badge variant="outline" className={cn("h-5 px-2 text-[11px] capitalize", isLocked ? "border-muted text-muted-foreground" : DIFFICULTY_STYLES[difficulty])}>
-                        {difficulty}
+                        {t(`common.difficulty.${difficulty}`, difficulty)}
                     </Badge>
                     {isLocked && minLevel && (
                         <div className="flex items-center gap-1 text-[11px] font-medium text-amber-600 dark:text-amber-500">
                             <Lock className="h-3 w-3" />
-                            <span>Lvl {minLevel} required</span>
+                            <span>{t("common.levelRequired", { level: minLevel, defaultValue: `Lvl ${minLevel} required` })}</span>
                         </div>
                     )}
                 </div>
@@ -131,11 +133,11 @@ export function ExerciseCard({
                 {isLocked ? (
                     <Badge variant="outline" className="border-muted px-2 py-0 text-[10px] text-muted-foreground">
                         <Lock className="mr-1 h-3 w-3 inline" />
-                        Lvl {minLevel}
+                        {t("common.level", { level: minLevel, defaultValue: `Lvl ${minLevel}` })}
                     </Badge>
                 ) : (
                     <Badge variant="outline" className={cn("capitalize", DIFFICULTY_STYLES[difficulty])}>
-                        {difficulty}
+                        {t(`common.difficulty.${difficulty}`, difficulty)}
                     </Badge>
                 )}
             </div>
@@ -148,7 +150,7 @@ export function ExerciseCard({
                 {lastPracticedLabel ? (
                     <div className="flex items-center gap-1">
                         <Clock className="h-3.5 w-3.5" />
-                        <span>Last: {lastPracticedLabel}</span>
+                        <span>{t("common.lastPracticed", { time: lastPracticedLabel, defaultValue: `Last: ${lastPracticedLabel}` })}</span>
                     </div>
                 ) : (
                     <span />

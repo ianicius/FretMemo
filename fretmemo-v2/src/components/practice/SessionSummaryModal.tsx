@@ -5,6 +5,7 @@ import { useProgressStore } from "@/stores/useProgressStore";
 import { ArrowUpRight, Coffee, HandHeart, RotateCcw, Trophy, Wand2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { EXTERNAL_LINKS } from "@/lib/externalLinks";
+import { useTranslation } from "react-i18next";
 
 interface SessionSummaryModalProps {
     isOpen: boolean;
@@ -46,6 +47,7 @@ export function SessionSummaryModal({
     stats,
     xpEarned,
 }: SessionSummaryModalProps) {
+    const { t } = useTranslation();
     const positionStats = useProgressStore((state) => state.positionStats);
 
     if (!stats) return null;
@@ -64,9 +66,13 @@ export function SessionSummaryModal({
             const [key, entry] = weakestEntry;
             const [stringIndex, fret] = key.split("-").map(Number);
             const weakAccuracy = Math.round((entry.correct / entry.total) * 100);
-            return `Focus string ${stringIndex + 1}, fret ${fret} (${weakAccuracy}% accuracy).`;
+            return t("practice.sessionSummary.weakSpot", {
+                string: stringIndex + 1,
+                fret,
+                accuracy: weakAccuracy,
+            });
         })()
-        : "Try a focused drill on one string range.";
+        : t("practice.sessionSummary.weakSpotFallback");
 
     const summaryState: SummaryState = (() => {
         if (stats.isFirstSession) return "first_session";
@@ -79,40 +85,47 @@ export function SessionSummaryModal({
 
     const summaryMessage = (() => {
         if (summaryState === "first_session") {
-            return "First session complete. Every note attempt builds your fretboard map.";
+            return t("practice.sessionSummary.summary.firstSession");
         }
         if (summaryState === "zero_accuracy") {
-            return `You practiced for ${formatDuration(stats.duration)} and attempted ${total} notes. ${weakSpotText}`;
+            return t("practice.sessionSummary.summary.zeroAccuracy", {
+                duration: formatDuration(stats.duration),
+                total,
+                weakSpot: weakSpotText,
+            });
         }
         if (summaryState === "low_accuracy") {
-            return `${stats.incorrect} notes to review this run. ${weakSpotText}`;
+            return t("practice.sessionSummary.summary.lowAccuracy", {
+                incorrect: stats.incorrect,
+                weakSpot: weakSpotText,
+            });
         }
         if (summaryState === "decent_but_down") {
-            return "Slightly below your previous session. A focused follow-up should recover momentum.";
+            return t("practice.sessionSummary.summary.decentButDown");
         }
         if (summaryState === "personal_best") {
-            return "New personal best. Keep this pace and lock it in.";
+            return t("practice.sessionSummary.summary.personalBest");
         }
-        return "Solid improvement from your previous session.";
+        return t("practice.sessionSummary.summary.improved");
     })();
 
     const supportMessage = (() => {
         if (summaryState === "personal_best") {
-            return "Personal best energy. If FretMemo helped you get here, a coffee tip helps fund the next drill and polish pass. No pressure.";
+            return t("practice.sessionSummary.support.personalBest");
         }
         if (summaryState === "first_session") {
-            return "If this felt helpful, buying me a coffee helps me keep shipping drills, fixes, and articles. No pressure.";
+            return t("practice.sessionSummary.support.firstSession");
         }
-        return "If this session was helpful, buying me a coffee helps fund new drills, fixes, and polish. No pressure.";
+        return t("practice.sessionSummary.support.default");
     })();
 
     const statRows = [
-        stats.correct > 0 ? { label: "Correct", value: `${stats.correct}` } : null,
-        stats.incorrect > 0 ? { label: "Notes to review", value: `${stats.incorrect}` } : null,
-        stats.maxStreak > 0 ? { label: "Best streak", value: `${stats.maxStreak}` } : null,
-        stats.score > 0 ? { label: "Score", value: `${stats.score}` } : null,
-        { label: "You practiced", value: formatDuration(stats.duration) },
-        { label: "XP earned", value: `+${displayXp}` },
+        stats.correct > 0 ? { label: t("practice.sessionSummary.stats.correct"), value: `${stats.correct}` } : null,
+        stats.incorrect > 0 ? { label: t("practice.sessionSummary.stats.review"), value: `${stats.incorrect}` } : null,
+        stats.maxStreak > 0 ? { label: t("practice.sessionSummary.stats.bestStreak"), value: `${stats.maxStreak}` } : null,
+        stats.score > 0 ? { label: t("practice.sessionSummary.stats.score"), value: `${stats.score}` } : null,
+        { label: t("practice.sessionSummary.stats.timePracticed"), value: formatDuration(stats.duration) },
+        { label: t("practice.sessionSummary.stats.xpEarned"), value: `+${displayXp}` },
     ].filter((row): row is { label: string; value: string } => Boolean(row));
 
     const showCompactMessageOnly = summaryState === "first_session" || summaryState === "zero_accuracy";
@@ -125,14 +138,14 @@ export function SessionSummaryModal({
                 <DialogHeader>
                     <DialogTitle className="flex items-center justify-center gap-2 text-center">
                         <Trophy className="h-6 w-6 text-primary" />
-                        Session Complete
+                        {t("practice.sessionSummary.title")}
                     </DialogTitle>
                 </DialogHeader>
 
                 <div className="space-y-4 py-2">
                     {!showCompactMessageOnly && (
                         <div className="rounded-xl border border-border bg-muted/40 p-4 text-center">
-                            <div className="text-xs uppercase tracking-wide text-muted-foreground">Accuracy</div>
+                            <div className="text-xs uppercase tracking-wide text-muted-foreground">{t("practice.sessionSummary.accuracy")}</div>
                             <div className="mt-1 text-4xl font-black text-foreground">{accuracy}%</div>
                             {delta !== null && (
                                 <div
@@ -142,14 +155,18 @@ export function SessionSummaryModal({
                                     )}
                                 >
                                     <ArrowUpRight className={cn("h-4 w-4", delta < 0 && "rotate-90")} />
-                                    {delta >= 0 ? "+" : ""}{delta}% vs previous session
+                                    {t("practice.sessionSummary.deltaVsPrevious", {
+                                        delta: `${delta >= 0 ? "+" : ""}${delta}`,
+                                    })}
                                 </div>
                             )}
                             <div className="mt-3">
                                 <MasteryBar value={accuracy} showLabel={false} />
                             </div>
                             {summaryState === "personal_best" && (
-                                <p className="mt-2 text-sm font-medium text-emerald-600 dark:text-emerald-400">New personal best</p>
+                                <p className="mt-2 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                                    {t("practice.sessionSummary.personalBest")}
+                                </p>
                             )}
                         </div>
                     )}
@@ -157,15 +174,19 @@ export function SessionSummaryModal({
                     <div className="rounded-xl border border-border bg-card p-3 text-sm">
                         <div className="font-medium text-card-foreground">{summaryMessage}</div>
                         {showCompactMessageOnly && (
-                            <div className="mt-2 text-muted-foreground">The fretboard has 72 positions. Short, focused reps compound quickly.</div>
+                            <div className="mt-2 text-muted-foreground">{t("practice.sessionSummary.compactHint")}</div>
                         )}
-                        <div className="mt-2 text-xs font-medium text-muted-foreground">Participation bonus: +{displayXp} XP</div>
+                        <div className="mt-2 text-xs font-medium text-muted-foreground">
+                            {t("practice.sessionSummary.participationBonus", { xp: displayXp })}
+                        </div>
 
                         <div className="mt-3 rounded-lg border border-border/60 bg-muted/20 p-3">
                             <div className="flex items-start gap-2">
                                 <HandHeart className="mt-0.5 h-4 w-4 text-primary" />
                                 <div className="flex-1">
-                                    <div className="text-sm font-semibold text-card-foreground">Enjoying FretMemo?</div>
+                                    <div className="text-sm font-semibold text-card-foreground">
+                                        {t("practice.sessionSummary.supportTitle")}
+                                    </div>
                                     <p className="mt-0.5 text-xs text-muted-foreground">{supportMessage}</p>
                                 </div>
                             </div>
@@ -174,7 +195,7 @@ export function SessionSummaryModal({
                                 <Button asChild className="control-btn--primary w-full sm:w-auto">
                                     <a href={EXTERNAL_LINKS.buyMeCoffee} target="_blank" rel="noreferrer noopener">
                                         <Coffee className="mr-2 h-4 w-4" />
-                                        Buy me a coffee
+                                        {t("practice.sessionSummary.buyCoffee")}
                                     </a>
                                 </Button>
                             </div>
@@ -198,7 +219,7 @@ export function SessionSummaryModal({
                             onClick={onFocusWeakSpots}
                         >
                             <Wand2 className="mr-2 h-4 w-4" />
-                            Focus Weak Spots
+                            {t("practice.sessionSummary.focusWeakSpots")}
                         </Button>
                     )}
                     <Button
@@ -207,7 +228,7 @@ export function SessionSummaryModal({
                         onClick={onRestart}
                     >
                         <RotateCcw className="mr-2 h-4 w-4" />
-                        Practice Again
+                        {t("practice.sessionSummary.practiceAgain")}
                     </Button>
                     {!showFocusPrimary && showFocusAction && (
                         <Button
@@ -216,12 +237,12 @@ export function SessionSummaryModal({
                             onClick={onFocusWeakSpots}
                         >
                             <Wand2 className="mr-2 h-4 w-4" />
-                            Focus Weak Spots
+                            {t("practice.sessionSummary.focusWeakSpots")}
                         </Button>
                     )}
                     <Button variant="outline" className="w-full sm:w-auto" onClick={onClose}>
                         <X className="mr-2 h-4 w-4" />
-                        Done
+                        {t("practice.sessionSummary.done")}
                     </Button>
                 </DialogFooter>
             </DialogContent>

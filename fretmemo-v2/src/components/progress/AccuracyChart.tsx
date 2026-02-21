@@ -1,6 +1,7 @@
 import { useId, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export interface AccuracyChartPoint {
     date: string;
@@ -14,6 +15,7 @@ interface AccuracyChartProps {
 }
 
 export function AccuracyChart({ data, className }: AccuracyChartProps) {
+    const { t } = useTranslation();
     const gradientId = useId().replace(/:/g, "");
     const chartData = useMemo(() => {
         if (!data) return [];
@@ -58,9 +60,9 @@ export function AccuracyChart({ data, className }: AccuracyChartProps) {
                         ))}
                     </svg>
                 </div>
-                <div className="mt-3 text-sm font-medium">Your accuracy trend appears here after 3+ sessions</div>
+                <div className="mt-3 text-sm font-medium">{t("progress.accuracyChart.emptyTitle")}</div>
                 <div className="mt-1 text-xs text-muted-foreground">
-                    Keep practicing consistently to unlock real progress insights.
+                    {t("progress.accuracyChart.emptyDescription")}
                 </div>
             </div>
         );
@@ -114,30 +116,30 @@ export function AccuracyChart({ data, className }: AccuracyChartProps) {
                 <div className="flex items-center gap-4">
                     <div>
                         <div className="text-2xl font-bold">{avgAccuracy}%</div>
-                        <div className="text-xs text-muted-foreground">Average accuracy</div>
+                        <div className="text-xs text-muted-foreground">{t("progress.accuracyChart.averageAccuracy")}</div>
                     </div>
                     <div className="flex items-center gap-1 text-sm">
                         {trend === "up" ? (
                             <>
                                 <TrendingUp className="w-4 h-4 text-emerald-500" />
-                                <span className="text-emerald-500 font-medium">Improving</span>
+                                <span className="text-emerald-500 font-medium">{t("progress.accuracyChart.improving")}</span>
                             </>
                         ) : trend === "down" ? (
                             <>
                                 <TrendingDown className="w-4 h-4 text-rose-500" />
-                                <span className="text-rose-500 font-medium">Declining</span>
+                                <span className="text-rose-500 font-medium">{t("progress.accuracyChart.declining")}</span>
                             </>
                         ) : (
                             <>
                                 <Minus className="w-4 h-4 text-muted-foreground" />
-                                <span className="text-muted-foreground font-medium">Stable</span>
+                                <span className="text-muted-foreground font-medium">{t("progress.accuracyChart.stable")}</span>
                             </>
                         )}
                     </div>
                 </div>
                 <div className="text-right text-xs text-muted-foreground">
-                    <div>High: {maxAccuracy}%</div>
-                    <div>Low: {minAccuracy}%</div>
+                    <div>{t("progress.accuracyChart.high", { value: maxAccuracy })}</div>
+                    <div>{t("progress.accuracyChart.low", { value: minAccuracy })}</div>
                 </div>
             </div>
 
@@ -212,11 +214,11 @@ export function AccuracyChart({ data, className }: AccuracyChartProps) {
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
                 <div className="flex items-center gap-1.5">
                     <div className="w-3 h-1 rounded-full bg-primary" />
-                    <span>Accuracy trend</span>
+                    <span>{t("progress.accuracyChart.trendLegend")}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                     <div className="w-3 h-3 rounded-full bg-primary/20" />
-                    <span>Confidence zone</span>
+                    <span>{t("progress.accuracyChart.confidenceLegend")}</span>
                 </div>
             </div>
         </div>

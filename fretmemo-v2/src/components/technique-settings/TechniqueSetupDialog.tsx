@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { SessionSetupDialogShell } from "@/components/session-setup/session-setup-dialog-shell";
 import { cn } from "@/lib/utils";
 import { ChevronDown, Play, Settings2, Zap } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface TechniqueSetupDialogProps {
     isOpen: boolean;
@@ -49,9 +50,11 @@ export function TechniqueSetupDialog({
     speedUpInterval,
     onSpeedUpIntervalChange,
     advancedContent,
-    advancedLabel = "Advanced",
+    advancedLabel,
 }: TechniqueSetupDialogProps) {
+    const { t } = useTranslation();
     const [showAdvanced, setShowAdvanced] = useState(false);
+    const resolvedAdvancedLabel = advancedLabel ?? t("technique.setup.advanced");
 
     return (
         <SessionSetupDialogShell
@@ -62,18 +65,18 @@ export function TechniqueSetupDialog({
                 }
                 onOpenChange(open);
             }}
-            title="Session Setup"
+            title={t("technique.setup.title")}
             badgeLabel={exerciseName}
             description={exerciseDescription}
             bodyClassName="space-y-4"
             footer={
                 <DialogFooter className="shrink-0 border-t border-border/50 px-6 py-4 sm:justify-between sm:space-x-0">
                     <Button variant="outline" onClick={() => onOpenChange(false)}>
-                        Cancel
+                        {t("technique.setup.cancel")}
                     </Button>
                     <Button className="control-btn--primary" onClick={onStart}>
                         <Play className="mr-2 h-4 w-4" />
-                        Start
+                        {t("technique.setup.start")}
                     </Button>
                 </DialogFooter>
             }
@@ -81,7 +84,7 @@ export function TechniqueSetupDialog({
             <section className="space-y-3 rounded-lg border border-border/50 p-3">
                 <div className={cn("space-y-2", stepMode && "opacity-50 pointer-events-none")}>
                     <div className="flex items-center justify-between">
-                        <Label className="text-sm">Tempo</Label>
+                        <Label className="text-sm">{t("technique.setup.tempo")}</Label>
                         <span className="font-mono text-xs text-muted-foreground">{bpm} BPM</span>
                     </div>
                     <Slider
@@ -100,9 +103,9 @@ export function TechniqueSetupDialog({
                             <div className="space-y-0.5">
                                 <span className="inline-flex items-center gap-2 text-sm font-medium">
                                     <Zap className="h-4 w-4 text-amber-600" />
-                                    Auto Speed-Up
+                                    {t("technique.setup.autoSpeedUp")}
                                 </span>
-                                <p className="text-xs text-muted-foreground">Increase tempo automatically.</p>
+                                <p className="text-xs text-muted-foreground">{t("technique.setup.autoSpeedUpDesc")}</p>
                             </div>
                             <Switch checked={speedUpEnabled} onCheckedChange={onSpeedUpEnabledChange} />
                         </div>
@@ -110,7 +113,7 @@ export function TechniqueSetupDialog({
                         <div className={cn("space-y-3", !speedUpEnabled && "hidden")}>
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between text-sm">
-                                    <Label className="text-xs">Increase</Label>
+                                    <Label className="text-xs">{t("technique.setup.increase")}</Label>
                                     <span className="font-mono text-xs">+{speedUpAmount} BPM</span>
                                 </div>
                                 <Slider
@@ -124,9 +127,9 @@ export function TechniqueSetupDialog({
 
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between text-sm">
-                                    <Label className="text-xs">Every</Label>
+                                    <Label className="text-xs">{t("technique.setup.every")}</Label>
                                     <span className="font-mono text-xs">
-                                        {speedUpInterval} beat{speedUpInterval > 1 ? "s" : ""}
+                                        {speedUpInterval} {speedUpInterval > 1 ? t("technique.setup.beats") : t("technique.setup.beat")}
                                     </span>
                                 </div>
                                 <Slider
@@ -143,14 +146,14 @@ export function TechniqueSetupDialog({
 
                 <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                        <Label className="text-sm">Step Mode</Label>
-                        <p className="text-xs text-muted-foreground">Manually advance each beat.</p>
+                        <Label className="text-sm">{t("technique.setup.stepMode")}</Label>
+                        <p className="text-xs text-muted-foreground">{t("technique.setup.stepModeDesc")}</p>
                     </div>
                     <Switch checked={stepMode} onCheckedChange={onStepModeChange} />
                 </div>
 
                 <div className="space-y-2">
-                    <Label className="text-sm">Start Fret</Label>
+                    <Label className="text-sm">{t("technique.setup.startFret")}</Label>
                     <div className="flex gap-2">
                         {[1, 3, 5, 7].map((fret) => (
                             <Button
@@ -179,7 +182,7 @@ export function TechniqueSetupDialog({
                     >
                         <span className="inline-flex items-center gap-2 text-sm font-medium">
                             <Settings2 className="h-4 w-4" />
-                            {advancedLabel}
+                            {resolvedAdvancedLabel}
                         </span>
                         <ChevronDown className={cn("h-4 w-4 transition-transform", showAdvanced && "rotate-180")} />
                     </Button>
