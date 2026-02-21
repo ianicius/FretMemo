@@ -464,6 +464,40 @@ export default function Library() {
         });
     };
 
+    const openTechnique = (techniqueId: string, source: string) => {
+        navigate(`/technique/${techniqueId}`, {
+            state: {
+                fromTrain: true,
+                entrySource: source,
+            },
+        });
+    };
+
+    const openRhythm = (rhythmId: RhythmModeId, source: string) => {
+        navigate(`/rhythm/${rhythmId}`, {
+            state: {
+                fromTrain: true,
+                entrySource: source,
+            },
+        });
+    };
+
+    const openTheory = (toolId: string, source: string) => {
+        navigate(`/theory/${toolId}`, {
+            state: {
+                entrySource: source,
+            },
+        });
+    };
+
+    const openEarTraining = (modeId: string, source: string) => {
+        navigate(`/ear-training/${modeId}`, {
+            state: {
+                entrySource: source,
+            },
+        });
+    };
+
     return (
         <div className="space-y-5 pb-8">
             <div>
@@ -510,8 +544,8 @@ export default function Library() {
                                         card.kind === "drill"
                                             ? openPracticeSetup(card.id as PracticeMode, card.source)
                                             : card.kind === "technique"
-                                                ? navigate(`/technique/${card.id}`, { state: { fromTrain: true } })
-                                                : navigate(`/rhythm/${card.id}`, { state: { fromTrain: true } })
+                                                ? openTechnique(card.id, "train_pinned_technique")
+                                                : openRhythm(card.id as RhythmModeId, "train_pinned_rhythm")
                                     }
                                 />
                             </div>
@@ -601,7 +635,7 @@ export default function Library() {
                                 icon={Guitar}
                                 variant="catalog"
                                 isNew={exercise.isNew}
-                                onClick={() => navigate(`/technique/${exercise.id}`, { state: { fromTrain: true } })}
+                                onClick={() => openTechnique(exercise.id, "train_technique_card")}
                             />
                         </div>
                     ))}
@@ -621,7 +655,7 @@ export default function Library() {
                         mastery={0}
                         icon={Music2}
                         variant="catalog"
-                        onClick={() => navigate("/theory/scales")}
+                        onClick={() => openTheory("scales", "train_theory_scales")}
                     />
                     <ExerciseCard
                         title={t("theory.page.tools.circleOfFifths")}
@@ -629,7 +663,7 @@ export default function Library() {
                         mastery={0}
                         icon={Compass}
                         variant="catalog"
-                        onClick={() => navigate("/theory/circle")}
+                        onClick={() => openTheory("circle", "train_theory_circle")}
                     />
                     <ExerciseCard
                         title={t("theory.page.tools.cagedSystem")}
@@ -637,7 +671,7 @@ export default function Library() {
                         mastery={0}
                         icon={Guitar}
                         variant="catalog"
-                        onClick={() => navigate("/theory/caged")}
+                        onClick={() => openTheory("caged", "train_theory_caged")}
                     />
                     <ExerciseCard
                         title={t("theory.page.tools.triads")}
@@ -645,7 +679,7 @@ export default function Library() {
                         mastery={0}
                         icon={Guitar}
                         variant="catalog"
-                        onClick={() => navigate("/theory/triads")}
+                        onClick={() => openTheory("triads", "train_theory_triads")}
                     />
                     <ExerciseCard
                         title={t("theory.page.tools.chordLibrary")}
@@ -653,7 +687,7 @@ export default function Library() {
                         mastery={0}
                         icon={Music2}
                         variant="catalog"
-                        onClick={() => navigate("/theory/chords")}
+                        onClick={() => openTheory("chords", "train_theory_chords")}
                     />
                     <ExerciseCard
                         title={t("theory.page.tools.intervalTrainer")}
@@ -661,7 +695,7 @@ export default function Library() {
                         mastery={0}
                         icon={Target}
                         variant="catalog"
-                        onClick={() => navigate("/theory/intervals")}
+                        onClick={() => openTheory("intervals", "train_theory_intervals")}
                     />
                 </div>
             </SectionCollapse>
@@ -679,7 +713,7 @@ export default function Library() {
                         mastery={0}
                         icon={Ear}
                         variant="catalog"
-                        onClick={() => navigate("/ear-training/sound-to-fret")}
+                        onClick={() => openEarTraining("sound-to-fret", "train_ear_sound_to_fret")}
                     />
                     <ExerciseCard
                         title={t("ear.page.modes.intervalRecognition")}
@@ -687,7 +721,7 @@ export default function Library() {
                         mastery={0}
                         icon={Ear}
                         variant="catalog"
-                        onClick={() => navigate("/ear-training/intervals")}
+                        onClick={() => openEarTraining("intervals", "train_ear_intervals")}
                     />
                     <ExerciseCard
                         title={t("ear.page.modes.chordQuality")}
@@ -695,7 +729,7 @@ export default function Library() {
                         mastery={0}
                         icon={Ear}
                         variant="catalog"
-                        onClick={() => navigate("/ear-training/chord-quality")}
+                        onClick={() => openEarTraining("chord-quality", "train_ear_chord_quality")}
                     />
                     <ExerciseCard
                         title={t("ear.page.modes.functionalEar")}
@@ -703,7 +737,7 @@ export default function Library() {
                         mastery={0}
                         icon={Ear}
                         variant="catalog"
-                        onClick={() => navigate("/ear-training/functional")}
+                        onClick={() => openEarTraining("functional", "train_ear_functional")}
                     />
                 </div>
             </SectionCollapse>
@@ -746,7 +780,7 @@ export default function Library() {
                                 isNew={mode.isNew}
                                 isLocked={false}
                                 minLevel={mode.minLevel}
-                                onClick={() => navigate(`/rhythm/${mode.id}`, { state: { fromTrain: true } })}
+                                onClick={() => openRhythm(mode.id as RhythmModeId, "train_rhythm_card")}
                             />
                         </div>
                     ))}

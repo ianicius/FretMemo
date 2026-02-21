@@ -1,11 +1,12 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import type { ComponentType, LazyExoticComponent } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Clock4 } from "lucide-react";
 import { PageSkeleton } from "@/components/ui/page-skeleton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTranslation } from "react-i18next";
+import { trackFeatureOpened } from "@/lib/analytics";
 
 const TapTheBeatMode = lazy(() => import("@/rhythm/modes/TapTheBeatMode"));
 const StrumPatternsMode = lazy(() => import("@/rhythm/modes/StrumPatternsMode"));
@@ -58,7 +59,15 @@ export default function RhythmDojo() {
     const { t } = useTranslation();
     const { mode } = useParams<{ mode: string }>();
     const navigate = useNavigate();
+    const location = useLocation();
     const currentMode = mode ? MODES[mode] : undefined;
+    const routeState = (location.state as { entrySource?: string } | null) ?? null;
+    const entrySource = routeState?.entrySource ?? "direct";
+
+    useEffect(() => {
+        if (!mode || !currentMode) return;
+        trackFeatureOpened("rhythm", mode, entrySource);
+    }, [currentMode, entrySource, mode]);
 
     if (!currentMode) {
         return (

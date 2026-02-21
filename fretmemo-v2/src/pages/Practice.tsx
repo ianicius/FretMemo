@@ -18,6 +18,7 @@ import { normalizeTuning } from "@/lib/tuning";
 import { formatPitchClass, resolveNoteDisplayMode } from "@/lib/noteNotation";
 import { usePitchDetector } from "@/services/pitch";
 import { Flame, Map as MapIcon, Mic, Target, Clock } from "lucide-react";
+import { trackFeatureOpened } from "@/lib/analytics";
 
 // Focus Mode Components
 import { PreFlightModal } from "@/components/practice/PreFlightModal";
@@ -160,6 +161,7 @@ export default function Practice() {
     const routePreFlightOpen = Boolean(routeState?.openPreFlight) && !isPlaying;
     const [activeChallenge, setActiveChallenge] = useState<ChallengeConfig | null>(routeState?.challenge ?? null);
     const enteredViaCatalogRef = useRef(routeHasCatalogContext);
+    const practiceOpenTrackedRef = useRef(false);
     const [challengeSecondsLeft, setChallengeSecondsLeft] = useState<number | null>(
         routeState?.challenge?.type === "timed" ? (routeState.challenge.timeLimitSec ?? 60) : null
     );
@@ -191,6 +193,18 @@ export default function Practice() {
 
     const { toast, showToast, hideToast } = useXPToast();
     const isPreFlightOpen = showPreFlight;
+    const entrySource =
+        routeState?.source
+        ?? (routeState?.challenge ? `challenge_${routeState.challenge.type}` : null)
+        ?? (routeState?.mode ? "catalog_mode" : null)
+        ?? "direct";
+
+    useEffect(() => {
+        if (practiceOpenTrackedRef.current) return;
+        practiceOpenTrackedRef.current = true;
+
+        trackFeatureOpened("practice", routeState?.mode ?? mode, entrySource);
+    }, [entrySource, mode, routeState?.mode]);
 
     useEffect(() => {
         if (!routeState || isPlaying) return;

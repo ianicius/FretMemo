@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { trackEvent } from "@/lib/analytics";
 
 interface BeforeInstallPromptEvent extends Event {
     readonly platforms: Array<string>;
@@ -24,6 +25,7 @@ export function usePWAInstall() {
             setDeferredPrompt(e as BeforeInstallPromptEvent);
             // Update UI notify the user they can install the PWA
             setIsInstallable(true);
+            trackEvent("fm_v2_pwa_install_available");
         };
 
         const handleAppInstalled = () => {
@@ -31,6 +33,7 @@ export function usePWAInstall() {
             setDeferredPrompt(null);
             setIsInstallable(false);
             setIsInstalled(true);
+            trackEvent("fm_v2_pwa_installed");
         };
 
         window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -52,6 +55,7 @@ export function usePWAInstall() {
 
         // Wait for the user to respond to the prompt
         const { outcome } = await deferredPrompt.userChoice;
+        trackEvent("fm_v2_pwa_install_prompt_result", { outcome });
 
         if (outcome === "accepted") {
             setDeferredPrompt(null);
