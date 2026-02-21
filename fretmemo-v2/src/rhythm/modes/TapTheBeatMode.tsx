@@ -82,6 +82,8 @@ export function TapTheBeatMode() {
         () => settings.timeSignatureTop * settings.bars,
         [settings.timeSignatureTop, settings.bars],
     );
+    const timeSignatureBottom = settings.timeSignatureTop === 6 ? 8 : 4;
+    const timeSignatureLabel = `${settings.timeSignatureTop}/${timeSignatureBottom}`;
 
     useEffect(() => {
         statusRef.current = status;
@@ -142,7 +144,7 @@ export function TapTheBeatMode() {
         trackEvent("fm_v2_rhythm_session_ended", {
             mode: "tap-beat",
             tempo: settings.bpm,
-            time_signature: `${settings.timeSignatureTop}/4`,
+            time_signature: timeSignatureLabel,
             bars: settings.bars,
             total_expected: summaryResult.totalExpected,
             hits: summaryResult.hits,
@@ -160,7 +162,7 @@ export function TapTheBeatMode() {
         recordSession,
         settings.bpm,
         settings.bars,
-        settings.timeSignatureTop,
+        timeSignatureLabel,
         stopScheduler,
         totalExpected,
         updatePracticeTime,
@@ -227,7 +229,7 @@ export function TapTheBeatMode() {
         trackEvent("fm_v2_rhythm_session_started", {
             mode: "tap-beat",
             tempo: settings.bpm,
-            time_signature: `${settings.timeSignatureTop}/4`,
+            time_signature: timeSignatureLabel,
             bars: settings.bars,
             total_expected: mode === "scored" ? totalExpected : 0,
             input_latency_ms: inputLatencyMs,
@@ -239,6 +241,7 @@ export function TapTheBeatMode() {
         settings.bpm,
         settings.bars,
         settings.timeSignatureTop,
+        timeSignatureLabel,
         stopScheduler,
         totalExpected,
     ]);
@@ -305,7 +308,7 @@ export function TapTheBeatMode() {
         trackEvent("fm_v2_rhythm_session_ended", {
             mode: "tap-beat",
             tempo: settings.bpm,
-            time_signature: `${settings.timeSignatureTop}/4`,
+            time_signature: timeSignatureLabel,
             bars: settings.bars,
             total_expected: 0,
             hits: 0,
@@ -317,7 +320,7 @@ export function TapTheBeatMode() {
             input_latency_ms: inputLatencyMs,
             session_mode: "practice",
         });
-    }, [inputLatencyMs, settings.bpm, settings.bars, settings.timeSignatureTop, stopScheduler, updatePracticeTime]);
+    }, [inputLatencyMs, settings.bpm, settings.bars, timeSignatureLabel, stopScheduler, updatePracticeTime]);
 
     useEffect(() => {
         return () => {
@@ -418,7 +421,7 @@ export function TapTheBeatMode() {
             <div className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-2 text-sm">
                 <span className="font-semibold text-primary">{t("rhythm.common.tempoBpm", { bpm: settings.bpm })}</span>
                 <span className="text-muted-foreground">
-                    {t("rhythm.tapBeat.signatureBars", { signature: `${settings.timeSignatureTop}/4`, bars: settings.bars })}
+                    {t("rhythm.tapBeat.signatureBars", { signature: timeSignatureLabel, bars: settings.bars })}
                 </span>
             </div>
 

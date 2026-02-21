@@ -160,6 +160,8 @@ export function RhythmReadingMode() {
         `rhythm.rhythmReading.exercises.${activeExercise.id}.description`,
         activeExercise.description,
     );
+    const activeTimeSignatureBottom = activeExercise.timeSignatureBottom ?? 4;
+    const activeTimeSignatureLabel = `${activeExercise.timeSignatureTop}/${activeTimeSignatureBottom}`;
     const expectedOnsets = useMemo(
         () => getRhythmExpectedOnsets(activeExercise),
         [activeExercise],
@@ -264,7 +266,7 @@ export function RhythmReadingMode() {
             exercise_id: activeExercise.id,
             tempo: settings.bpm,
             bars: settings.bars,
-            time_signature: `${activeExercise.timeSignatureTop}/4`,
+            time_signature: activeTimeSignatureLabel,
             subdivision: activeExercise.subdivision,
             total_expected: summaryResult.totalExpected,
             hits: summaryResult.hits,
@@ -282,7 +284,7 @@ export function RhythmReadingMode() {
     }, [
         activeExercise.id,
         activeExercise.subdivision,
-        activeExercise.timeSignatureTop,
+        activeTimeSignatureLabel,
         inputLatencyMs,
         recordRhythmSession,
         recordSession,
@@ -363,7 +365,7 @@ export function RhythmReadingMode() {
             tempo: settings.bpm,
             bars: settings.bars,
             click_enabled: settings.clickEnabled,
-            time_signature: `${activeExercise.timeSignatureTop}/4`,
+            time_signature: activeTimeSignatureLabel,
             subdivision: activeExercise.subdivision,
             total_expected: mode === "scored" ? totalExpected : 0,
             adaptive_tempo_enabled: settings.adaptiveTempo,
@@ -374,6 +376,7 @@ export function RhythmReadingMode() {
         activeExercise.id,
         activeExercise.subdivision,
         activeExercise.timeSignatureTop,
+        activeTimeSignatureLabel,
         checkAndUpdateStreak,
         expectedSet,
         inputLatencyMs,
@@ -453,7 +456,7 @@ export function RhythmReadingMode() {
             exercise_id: activeExercise.id,
             tempo: settings.bpm,
             bars: settings.bars,
-            time_signature: `${activeExercise.timeSignatureTop}/4`,
+            time_signature: activeTimeSignatureLabel,
             subdivision: activeExercise.subdivision,
             total_expected: 0,
             hits: 0,
@@ -471,7 +474,7 @@ export function RhythmReadingMode() {
     }, [
         activeExercise.id,
         activeExercise.subdivision,
-        activeExercise.timeSignatureTop,
+        activeTimeSignatureLabel,
         inputLatencyMs,
         settings.adaptiveTempo,
         settings.bars,
@@ -526,7 +529,7 @@ export function RhythmReadingMode() {
                             </div>
                             <div className="rounded-md border border-border bg-muted/20 px-2 py-1.5">
                                 <p className="text-muted-foreground">{t("rhythm.rhythmReading.timeLabel")}</p>
-                                <p className="font-semibold text-foreground">{activeExercise.timeSignatureTop}/4</p>
+                                <p className="font-semibold text-foreground">{activeTimeSignatureLabel}</p>
                             </div>
                             <div className="rounded-md border border-border bg-muted/20 px-2 py-1.5">
                                 <p className="text-muted-foreground">{t("rhythm.rhythmReading.expectedTapsLabel")}</p>
@@ -653,6 +656,7 @@ export function RhythmReadingMode() {
                         <RhythmNotation
                             tokens={activeExercise.tokens}
                             timeSignatureTop={activeExercise.timeSignatureTop}
+                            timeSignatureBottom={activeTimeSignatureBottom}
                             subdivision={activeExercise.subdivision}
                             playheadStep={null}
                             showLegend
@@ -696,7 +700,7 @@ export function RhythmReadingMode() {
                     <p className="font-semibold text-primary">{activeExerciseTitle}</p>
                     <p className="text-xs text-muted-foreground">
                         {t("rhythm.rhythmReading.headerMeta", {
-                            signature: `${activeExercise.timeSignatureTop}/4`,
+                            signature: activeTimeSignatureLabel,
                             grid: activeExercise.subdivision,
                             taps: expectedOnsets.length,
                         })}
@@ -713,6 +717,7 @@ export function RhythmReadingMode() {
             <RhythmNotation
                 tokens={activeExercise.tokens}
                 timeSignatureTop={activeExercise.timeSignatureTop}
+                timeSignatureBottom={activeTimeSignatureBottom}
                 subdivision={activeExercise.subdivision}
                 playheadStep={playheadStep}
             />

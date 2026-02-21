@@ -86,7 +86,13 @@ export function ExerciseCard({
                 </div>
 
                 <div className="mt-2 flex items-center gap-2">
-                    <Badge variant="outline" className={cn("h-5 px-2 text-[11px] capitalize", isLocked ? "border-muted text-muted-foreground" : DIFFICULTY_STYLES[difficulty])}>
+                    <Badge
+                        variant="outline"
+                        className={cn(
+                            "h-auto max-w-full px-2 py-0.5 text-[11px] leading-tight text-left whitespace-normal capitalize",
+                            isLocked ? "border-muted text-muted-foreground" : DIFFICULTY_STYLES[difficulty]
+                        )}
+                    >
                         {t(`common.difficulty.${difficulty}`, difficulty)}
                     </Badge>
                     {isLocked && minLevel && (
@@ -136,7 +142,10 @@ export function ExerciseCard({
                         {t("common.level", { level: minLevel, defaultValue: `Lvl ${minLevel}` })}
                     </Badge>
                 ) : (
-                    <Badge variant="outline" className={cn("capitalize", DIFFICULTY_STYLES[difficulty])}>
+                    <Badge
+                        variant="outline"
+                        className={cn("h-auto max-w-full px-2 py-0.5 leading-tight text-left whitespace-normal capitalize", DIFFICULTY_STYLES[difficulty])}
+                    >
                         {t(`common.difficulty.${difficulty}`, difficulty)}
                     </Badge>
                 )}

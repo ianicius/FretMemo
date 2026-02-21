@@ -62,7 +62,11 @@ export const useEarTrainingStore = create<EarTrainingState>((set, get) => ({
     },
 
     endSession: () => {
-        const { mode, totalCorrect, totalIncorrect, sessionStartedAt } = get();
+        const { isPlaying, mode, totalCorrect, totalIncorrect, sessionStartedAt } = get();
+        if (!isPlaying) {
+            return;
+        }
+
         const durationMs = sessionStartedAt ? Math.max(0, Date.now() - sessionStartedAt) : 0;
         const totalAnswers = totalCorrect + totalIncorrect;
         const accuracy = totalAnswers > 0 ? Math.round((totalCorrect / totalAnswers) * 100) : 0;

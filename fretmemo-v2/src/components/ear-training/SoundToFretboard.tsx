@@ -44,6 +44,7 @@ export default function SoundToFretboard() {
         setCurrentNote,
         audioReady,
         setAudioReady,
+        setMode,
     } = useEarTrainingStore();
 
     const [showHint, setShowHint] = useState(false);
@@ -95,13 +96,14 @@ export default function SoundToFretboard() {
 
     const handleStart = useCallback(() => {
         handleInitAudio();
+        setMode("sound-to-fret");
         startSession();
         setTimeout(() => {
             const midi = getRandomMidi(40, 72);
             setQuestion(midi);
             playTone(midi);
         }, 300);
-    }, [handleInitAudio, startSession, setQuestion]);
+    }, [handleInitAudio, setMode, setQuestion, startSession]);
 
     const handleReplay = useCallback(() => {
         if (currentMidi !== null) playTone(currentMidi);

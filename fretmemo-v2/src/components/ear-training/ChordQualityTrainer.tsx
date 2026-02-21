@@ -34,7 +34,7 @@ export default function ChordQualityTrainer() {
     const {
         isPlaying, lastResult, score, streak, totalCorrect, totalIncorrect,
         currentChordMidis, currentAnswer,
-        startSession, endSession, setCurrentChord, setAudioReady,
+        startSession, endSession, setCurrentChord, setAudioReady, setMode,
     } = useEarTrainingStore();
 
     const activeQualities = CHORD_QUALITIES.filter(q => DIFFICULTY_SETS[difficulty].includes(q.name));
@@ -53,9 +53,10 @@ export default function ChordQualityTrainer() {
     const handleStart = useCallback(() => {
         initAudio();
         setAudioReady(true);
+        setMode("chord-quality");
         startSession();
         setTimeout(() => generateNewQuestion(), 300);
-    }, [startSession, setAudioReady, generateNewQuestion]);
+    }, [generateNewQuestion, setAudioReady, setMode, startSession]);
 
     const handleReplay = useCallback(() => {
         if (currentChordMidis) {

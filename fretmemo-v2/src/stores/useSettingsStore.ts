@@ -12,6 +12,11 @@ import type {
 import { STANDARD_TUNING } from '@/lib/constants';
 import { getDefaultTuningForInstrument, inferInstrumentTypeFromTuning, normalizeInstrumentType, normalizeTuning } from '@/lib/tuning';
 
+const EAR_INTERVAL_OPTION_TOKENS = ["P1", "m2", "M2", "m3", "M3", "P4", "TT", "P5", "m6", "M6", "m7", "M7", "P8"] as const;
+const LEGACY_DEFAULT_EAR_INTERVAL_TOKENS = ["P1", "P5", "P8"] as const;
+const EAR_INTERVAL_TOKEN_MAP = new Map(
+    EAR_INTERVAL_OPTION_TOKENS.map((token) => [token.toUpperCase(), token]),
+);
 
 interface SettingsState extends AppSettings {
     // Actions
@@ -24,7 +29,7 @@ interface SettingsState extends AppSettings {
 
 const DEFAULT_MODULE_SETTINGS: ModuleSettings = {
     earTraining: {
-        intervals: ['P1', 'P5', 'P8'],
+        intervals: [...EAR_INTERVAL_OPTION_TOKENS],
         direction: 'ascending',
     },
     technique: {
@@ -60,6 +65,37 @@ function normalizeNotationRandomization(value: unknown): NotationRandomizationMo
 
 function normalizeAccidentalComplexity(value: unknown): AccidentalComplexity {
     return value === 'advanced' ? 'advanced' : 'standard';
+}
+
+function normalizeEarTrainingDirection(value: unknown): ModuleSettings["earTraining"]["direction"] {
+    if (value === "descending" || value === "harmonic") return value;
+    return "ascending";
+}
+
+function normalizeEarTrainingIntervals(value: unknown): string[] {
+    if (!Array.isArray(value)) {
+        return [...EAR_INTERVAL_OPTION_TOKENS];
+    }
+
+    const normalized: string[] = [];
+    const seen = new Set<string>();
+    for (const token of value) {
+        if (typeof token !== "string") continue;
+        const resolved = EAR_INTERVAL_TOKEN_MAP.get(token.trim().toUpperCase());
+        if (!resolved || seen.has(resolved)) continue;
+        seen.add(resolved);
+        normalized.push(resolved);
+    }
+
+    return normalized.length > 0 ? normalized : [...EAR_INTERVAL_OPTION_TOKENS];
+}
+
+function isLegacyDefaultEarIntervals(intervals: string[]): boolean {
+    const normalized = new Set(intervals.map((token) => token.trim().toUpperCase()));
+    return (
+        normalized.size === LEGACY_DEFAULT_EAR_INTERVAL_TOKENS.length &&
+        LEGACY_DEFAULT_EAR_INTERVAL_TOKENS.every((token) => normalized.has(token))
+    );
 }
 
 function createDefaultSettings(): AppSettings {
@@ -168,6 +204,7 @@ export const useSettingsStore = create<SettingsState>()(
                 const persistedFull = (persisted.full ?? {}) as Partial<FullSettings>;
                 const persistedModules = (persisted.modules ?? {}) as Partial<ModuleSettings>;
                 const persistedTechnique = (persistedModules.technique ?? {}) as Partial<ModuleSettings['technique']>;
+                const persistedEarTraining = (persistedModules.earTraining ?? {}) as Partial<ModuleSettings['earTraining']>;
                 const persistedInstrument = (persistedFull.instrument ?? {}) as Partial<FullSettings['instrument']>;
                 const mergedQuickTuning = normalizeTuning(
                     (persisted.quick as Partial<QuickSettings> | undefined)?.tuning ?? currentState.quick.tuning
@@ -177,6 +214,13 @@ export const useSettingsStore = create<SettingsState>()(
                     getDefaultTuningForInstrument(mergedInstrumentType).length === mergedQuickTuning.length
                         ? mergedInstrumentType
                         : inferInstrumentTypeFromTuning(mergedQuickTuning);
+                const normalizedEarIntervals = normalizeEarTrainingIntervals(persistedEarTraining.intervals);
+                const mergedEarIntervals = isLegacyDefaultEarIntervals(normalizedEarIntervals)
+                    ? [...DEFAULT_MODULE_SETTINGS.earTraining.intervals]
+                    : normalizedEarIntervals;
+                const mergedEarDirection = normalizeEarTrainingDirection(
+                    persistedEarTraining.direction ?? currentState.modules.earTraining.direction,
+                );
 
                 return {
                     ...currentState,
@@ -223,7 +267,9 @@ export const useSettingsStore = create<SettingsState>()(
                         ...persistedModules,
                         earTraining: {
                             ...currentState.modules.earTraining,
-                            ...(persistedModules.earTraining ?? {}),
+                            ...persistedEarTraining,
+                            intervals: mergedEarIntervals,
+                            direction: mergedEarDirection,
                         },
                         technique: {
                             ...currentState.modules.technique,

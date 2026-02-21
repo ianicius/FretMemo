@@ -27,7 +27,7 @@ export default function IntervalTrainer() {
     const {
         isPlaying, lastResult, score, streak, totalCorrect, totalIncorrect,
         currentInterval, currentAnswer,
-        startSession, endSession, setCurrentInterval, setAudioReady,
+        startSession, endSession, setCurrentInterval, setAudioReady, setMode,
     } = useEarTrainingStore();
 
     const configured = getEarIntervalsFromTokens(configuredIntervals);
@@ -52,11 +52,12 @@ export default function IntervalTrainer() {
     const handleStart = useCallback(() => {
         initAudio();
         setAudioReady(true);
+        setMode("intervals");
         startSession();
         setTimeout(() => {
             void generateNewQuestion();
         }, 300);
-    }, [startSession, setAudioReady, generateNewQuestion]);
+    }, [generateNewQuestion, setAudioReady, setMode, startSession]);
 
     const handleReplay = useCallback(() => {
         if (currentInterval) {
