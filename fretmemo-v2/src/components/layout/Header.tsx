@@ -48,12 +48,12 @@ export function Header() {
 
     return (
         <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="container flex h-14 items-center justify-between px-4 md:px-6">
-                <div className="min-w-0">
-                    <span className="truncate text-lg font-bold tracking-tight text-primary">FretMemo</span>
+            <div className="container flex h-14 items-center gap-1 px-2.5 min-[390px]:px-3 md:px-6">
+                <div className="min-w-0 flex-1">
+                    <span className="block truncate text-base font-bold tracking-tight text-primary min-[390px]:text-lg">FretMemo</span>
                 </div>
 
-                <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/40 px-2.5 py-1">
+                <div className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-muted/40 px-2 py-1 max-[359px]:hidden min-[390px]:px-2.5">
                     <span
                         className="inline-flex items-center gap-1 text-amber-700 dark:text-amber-300"
                         title={t("header.currentStreak")}
@@ -76,10 +76,11 @@ export function Header() {
                     </span>
                 </div>
 
-                <div className="flex items-center gap-1">
+                <div className="ml-auto flex shrink-0 items-center gap-0.5 min-[390px]:gap-1">
                     <Button
                         variant="ghost"
                         size="icon"
+                        className="hidden h-9 w-9 min-[390px]:inline-flex"
                         onClick={toggleDarkMode}
                         title={isDark ? t("header.switchToLight") : t("header.switchToDark")}
                     >
@@ -111,7 +112,7 @@ export function Header() {
 
                     <Sheet>
                         <SheetTrigger asChild>
-                            <Button variant="ghost" size="icon" className="md:hidden h-12 w-12 rounded-full p-2">
+                            <Button variant="ghost" size="icon" className="md:hidden h-9 w-9 min-[390px]:h-10 min-[390px]:w-10 rounded-full p-1">
                                 <Menu className="h-6 w-6" />
                                 <span className="sr-only">{t("header.openQuickMenu")}</span>
                             </Button>

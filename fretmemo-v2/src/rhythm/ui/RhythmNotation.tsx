@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 interface RhythmNotationProps {
     tokens: RhythmNotationToken[];
     timeSignatureTop: number;
+    timeSignatureBottom?: number;
     subdivision: number;
     playheadStep: number | null;
     showLegend?: boolean;
@@ -19,6 +20,7 @@ interface TokenSegment {
 export function RhythmNotation({
     tokens,
     timeSignatureTop,
+    timeSignatureBottom = 4,
     subdivision,
     playheadStep,
     showLegend = false,
@@ -59,7 +61,7 @@ export function RhythmNotation({
             <div className="flex items-center justify-between gap-2">
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("rhythm.ui.rhythmNotation.title")}</p>
                 <p className="text-xs text-muted-foreground">
-                    {t("rhythm.ui.rhythmNotation.meta", { signature: `${timeSignatureTop}/4`, subdivision })}
+                    {t("rhythm.ui.rhythmNotation.meta", { signature: `${timeSignatureTop}/${timeSignatureBottom}`, subdivision })}
                 </p>
             </div>
 

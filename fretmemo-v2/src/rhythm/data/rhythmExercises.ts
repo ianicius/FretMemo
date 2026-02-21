@@ -15,6 +15,7 @@ export interface RhythmReadingExercise {
     description: string;
     difficulty: RhythmTokenDifficulty;
     timeSignatureTop: 3 | 4 | 6;
+    timeSignatureBottom?: 4 | 8;
     subdivision: 2 | 3 | 4;
     tokens: RhythmNotationToken[];
 }
@@ -135,6 +136,7 @@ export const RHYTHM_READING_EXERCISES: RhythmReadingExercise[] = [
         description: "6/8 pulse with eighth-note groupings.",
         difficulty: "advanced",
         timeSignatureTop: 6,
+        timeSignatureBottom: 8,
         subdivision: 2,
         tokens: [n(2, true), n(1), n(1), r(2), n(2), n(2), n(2)],
     },
@@ -145,6 +147,7 @@ export const RHYTHM_READING_EXERCISES: RhythmReadingExercise[] = [
         description: "6/8 accents with internal rests.",
         difficulty: "advanced",
         timeSignatureTop: 6,
+        timeSignatureBottom: 8,
         subdivision: 2,
         tokens: [n(2, true), r(1), n(1), n(2), n(2), r(2), n(2)],
     },
