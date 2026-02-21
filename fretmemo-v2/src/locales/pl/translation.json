@@ -835,6 +835,18 @@
         "sharps": "Krzyżyki (#)",
         "flats": "Bemole (b)",
         "random": "Losowo (#/b)"
+      },
+      "randomization": "Zakres losowania",
+      "randomizationHint": "Dla notacji losowej: jeden wariant na sesję albo nowe losowanie w każdym pytaniu.",
+      "randomizationModes": {
+        "session": "Na sesję",
+        "question": "Na pytanie"
+      },
+      "accidentalComplexity": "Złożoność znaków",
+      "accidentalComplexityHint": "Tryb advanced może dodawać podwójne krzyżyki i bemole w generowanych ćwiczeniach nutowych.",
+      "accidentalComplexityModes": {
+        "standard": "Standard",
+        "advanced": "Advanced (##/bb)"
       }
     },
     "learning": {

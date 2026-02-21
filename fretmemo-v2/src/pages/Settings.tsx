@@ -392,6 +392,64 @@ export default function Settings() {
                                 ))}
                             </div>
                         </div>
+
+                        {full.instrument.notation === "random" && (
+                            <div className="space-y-2">
+                                <div className="space-y-0.5">
+                                    <Label>{t("settingsPage.instrument.randomization")}</Label>
+                                    <p className="text-sm text-muted-foreground">{t("settingsPage.instrument.randomizationHint")}</p>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2 sm:w-80">
+                                    {[
+                                        { id: "session", label: t("settingsPage.instrument.randomizationModes.session") },
+                                        { id: "question", label: t("settingsPage.instrument.randomizationModes.question") },
+                                    ].map((modeOption) => (
+                                        <Button
+                                            key={modeOption.id}
+                                            type="button"
+                                            size="sm"
+                                            variant={full.instrument.notationRandomization === modeOption.id ? "secondary" : "outline"}
+                                            onClick={() => updateFullSettings({
+                                                instrument: {
+                                                    ...full.instrument,
+                                                    notationRandomization: modeOption.id as typeof full.instrument.notationRandomization,
+                                                },
+                                            })}
+                                        >
+                                            {modeOption.label}
+                                        </Button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="space-y-2">
+                            <div className="space-y-0.5">
+                                <Label>{t("settingsPage.instrument.accidentalComplexity")}</Label>
+                                <p className="text-sm text-muted-foreground">{t("settingsPage.instrument.accidentalComplexityHint")}</p>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2 sm:w-80">
+                                {[
+                                    { id: "standard", label: t("settingsPage.instrument.accidentalComplexityModes.standard") },
+                                    { id: "advanced", label: t("settingsPage.instrument.accidentalComplexityModes.advanced") },
+                                ].map((complexityOption) => (
+                                    <Button
+                                        key={complexityOption.id}
+                                        type="button"
+                                        size="sm"
+                                        variant={full.instrument.accidentalComplexity === complexityOption.id ? "secondary" : "outline"}
+                                        onClick={() => updateFullSettings({
+                                            instrument: {
+                                                ...full.instrument,
+                                                accidentalComplexity: complexityOption.id as typeof full.instrument.accidentalComplexity,
+                                            },
+                                        })}
+                                    >
+                                        {complexityOption.label}
+                                    </Button>
+                                ))}
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
             </SectionCollapse>

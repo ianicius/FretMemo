@@ -56,6 +56,23 @@ describe("noteNotation", () => {
         expect(["A#", "Bb"]).toContain(withDifferentPrompt);
     });
 
+    it("supports advanced accidental complexity with deterministic naming", () => {
+        const advancedOne = formatPitchClass(1, "sharps", "advanced-seed", "advanced");
+        const advancedTwo = formatPitchClass("C#", "sharps", "advanced-seed", "advanced");
+        const standard = formatPitchClass(1, "sharps", "advanced-seed", "standard");
+
+        expect(advancedOne).toBe(advancedTwo);
+        expect(["C#", "B##"]).toContain(advancedOne);
+        expect(standard).toBe("C#");
+    });
+
+    it("shows advanced accidental as primary with standard enharmonic fallback", () => {
+        const label = formatPitchClassWithEnharmonic(10, "sharps", "advanced-enharmonic", "advanced");
+        const firstToken = label.split(" ")[0];
+        expect(["A#", "Cbb"]).toContain(firstToken);
+        expect(label.includes("(Bb)")).toBe(true);
+    });
+
     it("converts arbitrary notes to canonical sharp pitch classes", () => {
         expect(toSharpPitchClass("Bb")).toBe("A#");
         expect(toSharpPitchClass("Db")).toBe("C#");

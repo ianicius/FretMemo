@@ -145,6 +145,8 @@ export default function Practice() {
     const showAchievements = useSettingsStore((state) => state.full.gamification.showAchievements);
     const leftHanded = useSettingsStore((state) => state.full.instrument.leftHanded);
     const notation = useSettingsStore((state) => state.full.instrument.notation);
+    const notationRandomization = useSettingsStore((state) => state.full.instrument.notationRandomization);
+    const accidentalComplexity = useSettingsStore((state) => state.full.instrument.accidentalComplexity);
     const quickTuning = useSettingsStore((state) => state.quick.tuning);
     const tuning = useMemo(() => normalizeTuning(quickTuning), [quickTuning]);
     const displaySettings = useSettingsStore((state) => state.full.display);
@@ -301,7 +303,10 @@ export default function Practice() {
     const selectedGuessNote = lastAnswer?.selectedNote;
     const sessionTotal = sessionCorrect + sessionIncorrect;
     const currentPromptKey = `${mode}:${targetPosition?.stringIndex ?? "x"}-${targetPosition?.fret ?? "x"}:${targetNote ?? "x"}`;
-    const notationSeed = targetPresentedAt ?? currentPromptKey;
+    const questionNotationSeed = targetPresentedAt ?? currentPromptKey;
+    const notationSeed = notationRandomization === "question"
+        ? questionNotationSeed
+        : undefined;
     const displayNotation = useMemo(
         () => resolveNoteDisplayMode(notation, notationSeed),
         [notation, notationSeed],
@@ -313,11 +318,11 @@ export default function Practice() {
         if (toast.type === "warning") return showStreakWarnings;
         return showXPNotes;
     })();
-    const layerRootLabel = formatPitchClass(layerRootNote, displayNotation, notationSeed);
-    const targetNoteDisplay = targetNote ? formatPitchClass(targetNote, displayNotation, notationSeed) : "?";
-    const nextNoteDisplay = nextNote ? formatPitchClass(nextNote, displayNotation, notationSeed) : "--";
-    const previewTargetNoteDisplay = formatPitchClass("A", displayNotation, notationSeed);
-    const previewNextNoteDisplay = formatPitchClass("C#", displayNotation, notationSeed);
+    const layerRootLabel = formatPitchClass(layerRootNote, displayNotation, notationSeed, accidentalComplexity);
+    const targetNoteDisplay = targetNote ? formatPitchClass(targetNote, displayNotation, notationSeed, accidentalComplexity) : "?";
+    const nextNoteDisplay = nextNote ? formatPitchClass(nextNote, displayNotation, notationSeed, accidentalComplexity) : "--";
+    const previewTargetNoteDisplay = formatPitchClass("A", displayNotation, notationSeed, accidentalComplexity);
+    const previewNextNoteDisplay = formatPitchClass("C#", displayNotation, notationSeed, accidentalComplexity);
 
     useEffect(() => {
         if (toast.isVisible && !shouldShowToast) {
@@ -352,7 +357,9 @@ export default function Practice() {
         ? audioInputDevices.some((device) => device.id === selectedAudioInputId)
         : false;
     const resolvedAudioInputId = selectedDeviceStillExists ? selectedAudioInputId : activeAudioInputId || "";
-    const detectedNoteDisplay = detectedNote ? formatPitchClass(detectedNote, displayNotation, notationSeed) : "--";
+    const detectedNoteDisplay = detectedNote
+        ? formatPitchClass(detectedNote, displayNotation, notationSeed, accidentalComplexity)
+        : "--";
 
     const handleMicChange = useCallback((enabled: boolean) => {
         setMicEnabled(enabled);
@@ -415,7 +422,7 @@ export default function Practice() {
                 position: lastAnswer.position,
                 status: lastAnswer.correct ? "correct" : "incorrect",
                 label: lastAnswer.correct && targetPosition?.note
-                    ? formatPitchClass(targetPosition.note, displayNotation, notationSeed)
+                    ? formatPitchClass(targetPosition.note, displayNotation, notationSeed, accidentalComplexity)
                     : undefined,
             });
 
@@ -423,7 +430,7 @@ export default function Practice() {
                 put({
                     position: targetPosition,
                     status: "correct",
-                    label: formatPitchClass(targetPosition.note, displayNotation, notationSeed),
+                    label: formatPitchClass(targetPosition.note, displayNotation, notationSeed, accidentalComplexity),
                 });
             }
         }
@@ -546,6 +553,7 @@ export default function Practice() {
         tuning,
         displayNotation,
         notationSeed,
+        accidentalComplexity,
     ]);
 
     const findAllTargetCount = useMemo(() => {
@@ -861,6 +869,7 @@ export default function Practice() {
                         selectedNote={selectedGuessNote}
                         notation={displayNotation}
                         notationSeed={notationSeed}
+                        accidentalComplexity={accidentalComplexity}
                         isLocked={Boolean(lastAnswer)}
                         isCorrect={lastAnswer?.correct}
                         isPlaying={isPlaying}
@@ -880,6 +889,7 @@ export default function Practice() {
                         leftHanded={leftHanded}
                         notation={displayNotation}
                         notationSeed={notationSeed}
+                        accidentalComplexity={accidentalComplexity}
                         onSubmit={handlePositionGuess}
                         isLandscape={isLandscape}
                     />
@@ -919,6 +929,7 @@ export default function Practice() {
                             leftHanded={leftHanded}
                             notation={displayNotation}
                             notationSeed={notationSeed}
+                            accidentalComplexity={accidentalComplexity}
                             className="w-full shadow-xl rounded-xl border border-border/20 bg-card/40 backdrop-blur-sm"
                         />
                     </div>
@@ -955,12 +966,28 @@ export default function Practice() {
                                     style={{ boxShadow: "0 0 15px hsl(var(--primary) / 0.5)" }}
                                 />
                                 <div className="text-xs text-primary font-bold tracking-[0.2em] uppercase mb-4 pl-2 opacity-80">{t("practice.focus.current")}</div>
-                                <TabView tuning={tuning} position={targetPosition} leftHanded={leftHanded} className="w-full max-w-none shadow-lg scale-105 transition-transform" />
+                                <TabView
+                                    tuning={tuning}
+                                    position={targetPosition}
+                                    leftHanded={leftHanded}
+                                    notation={displayNotation}
+                                    notationSeed={notationSeed}
+                                    accidentalComplexity={accidentalComplexity}
+                                    className="w-full max-w-none shadow-lg scale-105 transition-transform"
+                                />
                                 {targetPosition && <div className="mt-4 text-base font-medium text-muted-foreground pl-2">{t("string")} {targetPosition.stringIndex + 1}, {t("fret")} <span className="font-mono text-foreground text-lg">{targetPosition.fret}</span></div>}
                             </div>
                             <div className="opacity-50 scale-95 origin-left blur-[1px] transition-all group-hover:blur-0 group-hover:opacity-70">
                                 <div className="text-xs text-muted-foreground font-bold tracking-[0.2em] uppercase mb-4 pl-2">{t("practice.focus.next")}</div>
-                                <TabView tuning={tuning} position={nextPosition} leftHanded={leftHanded} className="w-full max-w-none grayscale" />
+                                <TabView
+                                    tuning={tuning}
+                                    position={nextPosition}
+                                    leftHanded={leftHanded}
+                                    notation={displayNotation}
+                                    notationSeed={notationSeed}
+                                    accidentalComplexity={accidentalComplexity}
+                                    className="w-full max-w-none grayscale"
+                                />
                                 {nextPosition && <div className="mt-4 text-base text-muted-foreground pl-2">{t("string")} {nextPosition.stringIndex + 1}, {t("fret")} <span className="font-mono text-foreground">{nextPosition.fret}</span></div>}
                             </div>
                         </div>
@@ -1179,7 +1206,15 @@ export default function Practice() {
                             {/* Tab Preview */}
                             {(mode === "tabToNote" || mode === "playTab") && (
                                 <div className="w-full max-w-xl mx-auto opacity-90">
-                                    <TabView tuning={tuning} position={{ stringIndex: 1, fret: 3, note: 'D' }} leftHanded={leftHanded} className="w-full scale-110 origin-center" />
+                                    <TabView
+                                        tuning={tuning}
+                                        position={{ stringIndex: 1, fret: 3, note: 'D' }}
+                                        leftHanded={leftHanded}
+                                        notation={displayNotation}
+                                        notationSeed={notationSeed}
+                                        accidentalComplexity={accidentalComplexity}
+                                        className="w-full scale-110 origin-center"
+                                    />
                                 </div>
                             )}
 

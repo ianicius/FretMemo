@@ -26,6 +26,8 @@ export default function SoundToFretboard() {
     const { t } = useTranslation();
     const quickTuning = useSettingsStore((state) => state.quick.tuning);
     const notation = useSettingsStore((state) => state.full.instrument.notation);
+    const notationRandomization = useSettingsStore((state) => state.full.instrument.notationRandomization);
+    const accidentalComplexity = useSettingsStore((state) => state.full.instrument.accidentalComplexity);
     const tuning = useMemo(() => normalizeTuning(quickTuning), [quickTuning]);
     const maxFret = 12;
 
@@ -51,16 +53,23 @@ export default function SoundToFretboard() {
         () => (currentMidi === null ? null : pitchClassIndexFromMidi(currentMidi)),
         [currentMidi],
     );
-    const notationSeed = currentMidi === null
+    const questionNotationSeed = currentMidi === null
         ? "sound-to-fretboard:idle"
         : `sound-to-fretboard:${currentMidi}:${totalCorrect + totalIncorrect}`;
+    const notationSeed = notationRandomization === "question"
+        ? questionNotationSeed
+        : undefined;
     const displayNotation = useMemo(
         () => resolveNoteDisplayMode(notation, notationSeed),
         [notation, notationSeed],
     );
     const displayedTargetNote = useMemo(
-        () => (targetPitchClass === null ? "" : formatPitchClassWithEnharmonic(targetPitchClass, displayNotation, notationSeed)),
-        [targetPitchClass, displayNotation, notationSeed],
+        () => (
+            targetPitchClass === null
+                ? ""
+                : formatPitchClassWithEnharmonic(targetPitchClass, displayNotation, notationSeed, accidentalComplexity)
+        ),
+        [targetPitchClass, displayNotation, notationSeed, accidentalComplexity],
     );
 
     const handleInitAudio = useCallback(() => {
@@ -129,7 +138,7 @@ export default function SoundToFretboard() {
                     notes.push({
                         position: { stringIndex: s, fret: f, note },
                         status: "correct",
-                        label: formatPitchClass(note, displayNotation, notationSeed),
+                        label: formatPitchClass(note, displayNotation, notationSeed, accidentalComplexity),
                         color: "#22c55e",
                     });
                 }
@@ -143,13 +152,13 @@ export default function SoundToFretboard() {
                 notes.push({
                     position: { stringIndex: selectedPosition.s, fret: selectedPosition.f, note: wrongNote },
                     status: "incorrect",
-                    label: formatPitchClass(wrongNote, displayNotation, notationSeed),
+                    label: formatPitchClass(wrongNote, displayNotation, notationSeed, accidentalComplexity),
                 });
             }
         }
 
         return notes;
-    }, [isPlaying, lastResult, selectedPosition, tuning, targetPitchClass, maxFret, displayNotation, notationSeed]);
+    }, [isPlaying, lastResult, selectedPosition, tuning, targetPitchClass, maxFret, displayNotation, notationSeed, accidentalComplexity]);
 
     if (!isPlaying) {
         return (

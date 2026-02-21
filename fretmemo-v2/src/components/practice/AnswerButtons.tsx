@@ -2,7 +2,7 @@ import type { NoteName, Position } from "@/types/fretboard";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
-import { formatPitchClass, type NoteDisplayMode } from "@/lib/noteNotation";
+import { formatPitchClass, type NoteDisplayMode, type AccidentalComplexity } from "@/lib/noteNotation";
 
 interface NoteAnswerButtonsProps {
     noteOptions: string[];
@@ -10,6 +10,7 @@ interface NoteAnswerButtonsProps {
     selectedNote?: NoteName;
     notation: NoteDisplayMode;
     notationSeed?: string | number;
+    accidentalComplexity?: AccidentalComplexity;
     isLocked: boolean;
     isCorrect?: boolean;
     isPlaying: boolean;
@@ -25,6 +26,7 @@ export function NoteAnswerButtons({
     selectedNote,
     notation,
     notationSeed,
+    accidentalComplexity = "standard",
     isLocked,
     isCorrect,
     isPlaying,
@@ -38,7 +40,7 @@ export function NoteAnswerButtons({
                 const isCorrectOption = isLocked && note === targetNote;
                 const isChosenOption = isLocked && note === selectedNote;
                 const isIncorrectChoice = isChosenOption && !isCorrect;
-                const displayNote = formatPitchClass(note, notation, notationSeed);
+                const displayNote = formatPitchClass(note, notation, notationSeed, accidentalComplexity);
                 return (
                     <Button
                         key={`${note}-${idx}`}
@@ -67,12 +69,20 @@ interface MiniTabProps {
     leftHanded?: boolean;
     notation: NoteDisplayMode;
     notationSeed?: string | number;
+    accidentalComplexity?: AccidentalComplexity;
 }
 
 /**
  * Compact tablature display for position answer options.
  */
-export function MiniTab({ position, tuning, leftHanded = false, notation, notationSeed }: MiniTabProps) {
+export function MiniTab({
+    position,
+    tuning,
+    leftHanded = false,
+    notation,
+    notationSeed,
+    accidentalComplexity = "standard",
+}: MiniTabProps) {
     useTranslation();
     const rows = leftHanded
         ? tuning.map((openNote, index) => ({
@@ -88,7 +98,7 @@ export function MiniTab({ position, tuning, leftHanded = false, notation, notati
         <div className="space-y-1 font-mono text-[10px] leading-none">
             {rows.map(({ openNote, stringIndex }) => {
                 const isTarget = stringIndex === position.stringIndex;
-                const displayNote = formatPitchClass(openNote, notation, notationSeed);
+                const displayNote = formatPitchClass(openNote, notation, notationSeed, accidentalComplexity);
                 return (
                     <div key={`${openNote}-${stringIndex}`} className="flex items-center gap-1">
                         <span className="w-4 text-muted-foreground font-semibold">{displayNote}</span>
@@ -123,6 +133,7 @@ interface PositionAnswerButtonsProps {
     leftHanded: boolean;
     notation: NoteDisplayMode;
     notationSeed?: string | number;
+    accidentalComplexity?: AccidentalComplexity;
     onSubmit: (option: Position) => void;
     isLandscape?: boolean;
 }
@@ -142,6 +153,7 @@ export function PositionAnswerButtons({
     leftHanded,
     notation,
     notationSeed,
+    accidentalComplexity = "standard",
     onSubmit,
     isLandscape,
 }: PositionAnswerButtonsProps) {
@@ -185,6 +197,7 @@ export function PositionAnswerButtons({
                                     leftHanded={leftHanded}
                                     notation={notation}
                                     notationSeed={notationSeed}
+                                    accidentalComplexity={accidentalComplexity}
                                 />
                             </div>
                         </div>
