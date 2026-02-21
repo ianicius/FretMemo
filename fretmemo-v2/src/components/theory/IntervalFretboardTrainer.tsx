@@ -7,6 +7,7 @@ import {
     formatPitchClass,
     formatPitchClassWithEnharmonic,
     getPitchClassIndex,
+    resolveNoteDisplayMode,
 } from "@/lib/noteNotation";
 import { Fretboard } from "@/components/fretboard/Fretboard";
 import { Button } from "@/components/ui/button";
@@ -58,10 +59,18 @@ export default function IntervalFretboardTrainer() {
         if (rootPitchClass === null) return null;
         return (rootPitchClass + targetInterval.semitones) % 12;
     }, [rootNote, targetInterval]);
-    const displayedRootNote = useMemo(() => formatPitchClass(rootNote, notation), [rootNote, notation]);
+    const notationSeed = `${rootNote}:${targetInterval.semitones}:${rootPosition?.s ?? "x"}:${rootPosition?.f ?? "x"}`;
+    const displayNotation = useMemo(
+        () => resolveNoteDisplayMode(notation, notationSeed),
+        [notation, notationSeed],
+    );
+    const displayedRootNote = useMemo(
+        () => formatPitchClass(rootNote, displayNotation, notationSeed),
+        [rootNote, displayNotation, notationSeed],
+    );
     const displayedTargetNote = useMemo(
-        () => (targetPitchClass === null ? "" : formatPitchClassWithEnharmonic(targetPitchClass, notation)),
-        [targetPitchClass, notation],
+        () => (targetPitchClass === null ? "" : formatPitchClassWithEnharmonic(targetPitchClass, displayNotation, notationSeed)),
+        [targetPitchClass, displayNotation, notationSeed],
     );
 
     const generateNewQuestion = useCallback(() => {
@@ -135,7 +144,7 @@ export default function IntervalFretboardTrainer() {
         notes.push({
             position: { stringIndex: rootPosition.s, fret: rootPosition.f, note: rootFretNote },
             status: "active",
-            label: formatPitchClass(rootFretNote, notation),
+            label: formatPitchClass(rootFretNote, displayNotation, notationSeed),
             color: "#f59e0b",
             emphasis: "strong",
         });
@@ -150,7 +159,7 @@ export default function IntervalFretboardTrainer() {
                         notes.push({
                             position: { stringIndex: s, fret: f, note },
                             status: "correct",
-                            label: formatPitchClass(note, notation),
+                            label: formatPitchClass(note, displayNotation, notationSeed),
                             color: "#22c55e",
                         });
                     }
@@ -162,13 +171,13 @@ export default function IntervalFretboardTrainer() {
                 notes.push({
                     position: { stringIndex: selectedPosition.s, fret: selectedPosition.f, note: wrongNote },
                     status: "incorrect",
-                    label: formatPitchClass(wrongNote, notation),
+                    label: formatPitchClass(wrongNote, displayNotation, notationSeed),
                 });
             }
         }
 
         return notes;
-    }, [isPlaying, rootPosition, result, selectedPosition, tuning, targetPitchClass, maxFret, notation]);
+    }, [isPlaying, rootPosition, result, selectedPosition, tuning, targetPitchClass, maxFret, displayNotation, notationSeed]);
 
     if (!isPlaying) {
         return (

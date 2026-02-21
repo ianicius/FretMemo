@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { NOTES, getNoteAt } from "@/lib/constants";
 import { normalizeTuning } from "@/lib/tuning";
-import { formatPitchClass } from "@/lib/noteNotation";
+import { formatPitchClass, resolveNoteDisplayMode } from "@/lib/noteNotation";
 import { usePitchDetector } from "@/services/pitch";
 import { Flame, Map as MapIcon, Mic, Target, Clock } from "lucide-react";
 
@@ -96,6 +96,7 @@ export default function Practice() {
         mode,
         targetNote,
         targetPosition,
+        targetPresentedAt,
         nextNote,
         nextPosition,
         noteOptions,
@@ -300,6 +301,11 @@ export default function Practice() {
     const selectedGuessNote = lastAnswer?.selectedNote;
     const sessionTotal = sessionCorrect + sessionIncorrect;
     const currentPromptKey = `${mode}:${targetPosition?.stringIndex ?? "x"}-${targetPosition?.fret ?? "x"}:${targetNote ?? "x"}`;
+    const notationSeed = targetPresentedAt ?? currentPromptKey;
+    const displayNotation = useMemo(
+        () => resolveNoteDisplayMode(notation, notationSeed),
+        [notation, notationSeed],
+    );
     const hintUsedForPrompt = hintPromptKey === currentPromptKey;
     const shouldShowToast = (() => {
         if (!toast.isVisible) return false;
@@ -307,11 +313,11 @@ export default function Practice() {
         if (toast.type === "warning") return showStreakWarnings;
         return showXPNotes;
     })();
-    const layerRootLabel = formatPitchClass(layerRootNote, notation);
-    const targetNoteDisplay = targetNote ? formatPitchClass(targetNote, notation) : "?";
-    const nextNoteDisplay = nextNote ? formatPitchClass(nextNote, notation) : "--";
-    const previewTargetNoteDisplay = formatPitchClass("A", notation);
-    const previewNextNoteDisplay = formatPitchClass("C#", notation);
+    const layerRootLabel = formatPitchClass(layerRootNote, displayNotation, notationSeed);
+    const targetNoteDisplay = targetNote ? formatPitchClass(targetNote, displayNotation, notationSeed) : "?";
+    const nextNoteDisplay = nextNote ? formatPitchClass(nextNote, displayNotation, notationSeed) : "--";
+    const previewTargetNoteDisplay = formatPitchClass("A", displayNotation, notationSeed);
+    const previewNextNoteDisplay = formatPitchClass("C#", displayNotation, notationSeed);
 
     useEffect(() => {
         if (toast.isVisible && !shouldShowToast) {
@@ -346,7 +352,7 @@ export default function Practice() {
         ? audioInputDevices.some((device) => device.id === selectedAudioInputId)
         : false;
     const resolvedAudioInputId = selectedDeviceStillExists ? selectedAudioInputId : activeAudioInputId || "";
-    const detectedNoteDisplay = detectedNote ? formatPitchClass(detectedNote, notation) : "--";
+    const detectedNoteDisplay = detectedNote ? formatPitchClass(detectedNote, displayNotation, notationSeed) : "--";
 
     const handleMicChange = useCallback((enabled: boolean) => {
         setMicEnabled(enabled);
@@ -408,14 +414,16 @@ export default function Practice() {
             put({
                 position: lastAnswer.position,
                 status: lastAnswer.correct ? "correct" : "incorrect",
-                label: lastAnswer.correct ? targetPosition?.note : undefined,
+                label: lastAnswer.correct && targetPosition?.note
+                    ? formatPitchClass(targetPosition.note, displayNotation, notationSeed)
+                    : undefined,
             });
 
             if (!lastAnswer.correct && mode === "noteToTab" && targetPosition) {
                 put({
                     position: targetPosition,
                     status: "correct",
-                    label: targetPosition.note,
+                    label: formatPitchClass(targetPosition.note, displayNotation, notationSeed),
                 });
             }
         }
@@ -536,6 +544,8 @@ export default function Practice() {
         feedbackMessage,
         targetPosition,
         tuning,
+        displayNotation,
+        notationSeed,
     ]);
 
     const findAllTargetCount = useMemo(() => {
@@ -849,6 +859,8 @@ export default function Practice() {
                         noteOptions={noteOptions}
                         targetNote={targetPosition?.note}
                         selectedNote={selectedGuessNote}
+                        notation={displayNotation}
+                        notationSeed={notationSeed}
                         isLocked={Boolean(lastAnswer)}
                         isCorrect={lastAnswer?.correct}
                         isPlaying={isPlaying}
@@ -866,6 +878,8 @@ export default function Practice() {
                         stringLabels={stringLabels}
                         tuning={tuning}
                         leftHanded={leftHanded}
+                        notation={displayNotation}
+                        notationSeed={notationSeed}
                         onSubmit={handlePositionGuess}
                         isLandscape={isLandscape}
                     />
@@ -899,7 +913,14 @@ export default function Practice() {
                 )}
                 {moduleTab === "guess" && mode === "tabToNote" && (
                     <div className="w-full transition-all duration-500 ease-out animate-in slide-in-from-bottom-4 fade-in">
-                        <TabView tuning={tuning} position={targetPosition} leftHanded={leftHanded} className="w-full shadow-xl rounded-xl border border-border/20 bg-card/40 backdrop-blur-sm" />
+                        <TabView
+                            tuning={tuning}
+                            position={targetPosition}
+                            leftHanded={leftHanded}
+                            notation={displayNotation}
+                            notationSeed={notationSeed}
+                            className="w-full shadow-xl rounded-xl border border-border/20 bg-card/40 backdrop-blur-sm"
+                        />
                     </div>
                 )}
                 {moduleTab === "guess" && mode === "noteToTab" && (

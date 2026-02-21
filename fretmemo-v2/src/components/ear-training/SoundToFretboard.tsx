@@ -10,6 +10,7 @@ import {
     formatPitchClassWithEnharmonic,
     getPitchClassIndex,
     pitchClassIndexFromMidi,
+    resolveNoteDisplayMode,
 } from "@/lib/noteNotation";
 import { Fretboard } from "@/components/fretboard/Fretboard";
 import { Button } from "@/components/ui/button";
@@ -50,9 +51,16 @@ export default function SoundToFretboard() {
         () => (currentMidi === null ? null : pitchClassIndexFromMidi(currentMidi)),
         [currentMidi],
     );
+    const notationSeed = currentMidi === null
+        ? "sound-to-fretboard:idle"
+        : `sound-to-fretboard:${currentMidi}:${totalCorrect + totalIncorrect}`;
+    const displayNotation = useMemo(
+        () => resolveNoteDisplayMode(notation, notationSeed),
+        [notation, notationSeed],
+    );
     const displayedTargetNote = useMemo(
-        () => (targetPitchClass === null ? "" : formatPitchClassWithEnharmonic(targetPitchClass, notation)),
-        [targetPitchClass, notation],
+        () => (targetPitchClass === null ? "" : formatPitchClassWithEnharmonic(targetPitchClass, displayNotation, notationSeed)),
+        [targetPitchClass, displayNotation, notationSeed],
     );
 
     const handleInitAudio = useCallback(() => {
@@ -121,7 +129,7 @@ export default function SoundToFretboard() {
                     notes.push({
                         position: { stringIndex: s, fret: f, note },
                         status: "correct",
-                        label: formatPitchClass(note, notation),
+                        label: formatPitchClass(note, displayNotation, notationSeed),
                         color: "#22c55e",
                     });
                 }
@@ -135,13 +143,13 @@ export default function SoundToFretboard() {
                 notes.push({
                     position: { stringIndex: selectedPosition.s, fret: selectedPosition.f, note: wrongNote },
                     status: "incorrect",
-                    label: formatPitchClass(wrongNote, notation),
+                    label: formatPitchClass(wrongNote, displayNotation, notationSeed),
                 });
             }
         }
 
         return notes;
-    }, [isPlaying, lastResult, selectedPosition, tuning, targetPitchClass, maxFret, notation]);
+    }, [isPlaying, lastResult, selectedPosition, tuning, targetPitchClass, maxFret, displayNotation, notationSeed]);
 
     if (!isPlaying) {
         return (

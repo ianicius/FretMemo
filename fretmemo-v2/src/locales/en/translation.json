@@ -828,10 +828,11 @@
       "showFretNumbers": "Show Fret Numbers",
       "showFretNumbersHint": "Display numbers on the fretboard visualization.",
       "noteNaming": "Note Naming",
-      "noteNamingHint": "Choose whether notes are displayed as sharps or flats.",
+      "noteNamingHint": "Choose sharps, flats, or random note naming.",
       "notation": {
         "sharps": "Sharps (#)",
-        "flats": "Flats (b)"
+        "flats": "Flats (b)",
+        "random": "Random (#/b)"
       }
     },
     "learning": {

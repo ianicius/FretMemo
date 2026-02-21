@@ -1,6 +1,7 @@
 import type { NoteName } from "@/types/fretboard";
 
 export type PracticeScaleType = "major" | "minor" | "majorPentatonic" | "minorPentatonic";
+export type NoteNotationPreference = "sharps" | "flats" | "random";
 export type PracticeNoteSequence =
     | "random"
     | "minorThirds"
@@ -40,7 +41,7 @@ export interface FullSettings {
         type: InstrumentType;
         leftHanded: boolean;
         showFretNumbers: boolean;
-        notation: 'sharps' | 'flats';
+        notation: NoteNotationPreference;
     };
     audio: {
         volume: number; // 0-1

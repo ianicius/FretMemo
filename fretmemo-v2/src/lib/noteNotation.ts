@@ -4,9 +4,11 @@ import type { NoteName } from "@/types/fretboard";
 
 import i18n from "@/lib/i18n";
 
-export type NoteDisplayMode = "sharps" | "flats";
+export type NoteDisplayMode = "sharps" | "flats" | "random";
+export type ResolvedNoteDisplayMode = "sharps" | "flats";
 
 const FLAT_NOTES = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"] as const;
+const RANDOM_SESSION_SEED = `session:${Math.floor(Math.random() * 1_000_000_000)}`;
 
 export function applyPolishNotation(noteStr: string): string {
     // Basic replacements for full matching or starting with B/Bb (like B4, Bbm, etc.)
@@ -36,6 +38,28 @@ function resolvePitchClassIndex(input: string | number): number | null {
     return typeof chroma === "number" ? chroma : null;
 }
 
+function hashSeed(seed: string): number {
+    let hash = 0;
+    for (let index = 0; index < seed.length; index += 1) {
+        hash = (hash * 31 + seed.charCodeAt(index)) >>> 0;
+    }
+    return hash;
+}
+
+function resolveRandomSeed(seed: string | number | undefined): string {
+    if (seed !== undefined) return String(seed);
+    return RANDOM_SESSION_SEED;
+}
+
+export function resolveNoteDisplayMode(
+    notation: NoteDisplayMode = "sharps",
+    seed?: string | number,
+): ResolvedNoteDisplayMode {
+    if (notation !== "random") return notation;
+    const effectiveSeed = seed === undefined ? RANDOM_SESSION_SEED : String(seed);
+    return hashSeed(effectiveSeed) % 2 === 0 ? "sharps" : "flats";
+}
+
 export function getPitchClassIndex(note: string | null | undefined): number | null {
     if (!note) return null;
     const chroma = Note.chroma(note);
@@ -63,13 +87,18 @@ export function toSharpPitchClass(input: string | number): NoteName | null {
     return NOTES[pitchClassIndex];
 }
 
-export function formatPitchClass(input: string | number, notation: NoteDisplayMode = "sharps"): string {
+export function formatPitchClass(
+    input: string | number,
+    notation: NoteDisplayMode = "sharps",
+    seed?: string | number,
+): string {
     const pitchClassIndex = resolvePitchClassIndex(input);
+    const resolvedNotation = resolveNoteDisplayMode(notation, resolveRandomSeed(seed));
     let result = "";
     if (pitchClassIndex === null) {
         result = typeof input === "string" ? input : "";
     } else {
-        result = notation === "flats" ? FLAT_NOTES[pitchClassIndex] : NOTES[pitchClassIndex];
+        result = resolvedNotation === "flats" ? FLAT_NOTES[pitchClassIndex] : NOTES[pitchClassIndex];
     }
 
     if (i18n.resolvedLanguage === 'pl' || i18n.language === 'pl') {
@@ -78,8 +107,13 @@ export function formatPitchClass(input: string | number, notation: NoteDisplayMo
     return result;
 }
 
-export function formatPitchClassWithEnharmonic(input: string | number, notation: NoteDisplayMode = "sharps"): string {
+export function formatPitchClassWithEnharmonic(
+    input: string | number,
+    notation: NoteDisplayMode = "sharps",
+    seed?: string | number,
+): string {
     const pitchClassIndex = resolvePitchClassIndex(input);
+    const resolvedNotation = resolveNoteDisplayMode(notation, resolveRandomSeed(seed));
     if (pitchClassIndex === null) {
         const str = typeof input === "string" ? input : "";
         if (i18n.resolvedLanguage === 'pl' || i18n.language === 'pl') {
@@ -88,8 +122,8 @@ export function formatPitchClassWithEnharmonic(input: string | number, notation:
         return str;
     }
 
-    let primary: string = notation === "flats" ? FLAT_NOTES[pitchClassIndex] : NOTES[pitchClassIndex];
-    let alternate: string = notation === "flats" ? NOTES[pitchClassIndex] : FLAT_NOTES[pitchClassIndex];
+    let primary: string = resolvedNotation === "flats" ? FLAT_NOTES[pitchClassIndex] : NOTES[pitchClassIndex];
+    let alternate: string = resolvedNotation === "flats" ? NOTES[pitchClassIndex] : FLAT_NOTES[pitchClassIndex];
 
     if (i18n.resolvedLanguage === 'pl' || i18n.language === 'pl') {
         primary = applyPolishNotation(primary);

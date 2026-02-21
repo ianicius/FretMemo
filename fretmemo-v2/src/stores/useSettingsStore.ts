@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { AppSettings, QuickSettings, FullSettings, ModuleSettings } from '../types/settings';
+import type { AppSettings, QuickSettings, FullSettings, ModuleSettings, NoteNotationPreference } from '../types/settings';
 import { STANDARD_TUNING } from '@/lib/constants';
 import { getDefaultTuningForInstrument, inferInstrumentTypeFromTuning, normalizeInstrumentType, normalizeTuning } from '@/lib/tuning';
 
@@ -40,6 +40,10 @@ function cloneDefaultModules(): ModuleSettings {
             lastPracticedAt: {},
         },
     };
+}
+
+function normalizeNotationPreference(value: unknown): NoteNotationPreference {
+    return value === 'flats' || value === 'random' ? value : 'sharps';
 }
 
 function createDefaultSettings(): AppSettings {
@@ -179,6 +183,7 @@ export const useSettingsStore = create<SettingsState>()(
                             ...currentState.full.instrument,
                             ...(persistedFull.instrument ?? {}),
                             type: resolvedInstrumentType,
+                            notation: normalizeNotationPreference(persistedInstrument.notation ?? currentState.full.instrument.notation),
                         },
                         audio: {
                             ...currentState.full.audio,

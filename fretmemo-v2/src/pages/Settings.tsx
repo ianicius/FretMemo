@@ -369,10 +369,11 @@ export default function Settings() {
                                 <Label>{t("settingsPage.instrument.noteNaming")}</Label>
                                 <p className="text-sm text-muted-foreground">{t("settingsPage.instrument.noteNamingHint")}</p>
                             </div>
-                            <div className="grid grid-cols-2 gap-2 sm:w-56">
+                            <div className="grid grid-cols-3 gap-2 sm:w-80">
                                 {[
                                     { id: "sharps", label: t("settingsPage.instrument.notation.sharps") },
                                     { id: "flats", label: t("settingsPage.instrument.notation.flats") },
+                                    { id: "random", label: t("settingsPage.instrument.notation.random") },
                                 ].map((notationOption) => (
                                     <Button
                                         key={notationOption.id}
