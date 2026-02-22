@@ -1,11 +1,11 @@
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef } from "react";
 import type { LazyExoticComponent, ComponentType } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { PageSkeleton } from "@/components/ui/page-skeleton";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { trackFeatureOpened } from "@/lib/analytics";
+import { trackEvent, trackFeatureOpened } from "@/lib/analytics";
 
 const ScaleExplorer = lazy(() => import("@/components/theory/ScaleExplorer"));
 const CircleOfFifths = lazy(() => import("@/components/theory/CircleOfFifths"));
@@ -33,11 +33,50 @@ export default function TheoryTool() {
     const tool = toolId ? TOOLS[toolId] : undefined;
     const routeState = (location.state as { entrySource?: string } | null) ?? null;
     const entrySource = routeState?.entrySource ?? "direct";
+    const sessionStartedAtRef = useRef<number | null>(null);
+    const interactionCountRef = useRef(0);
 
     useEffect(() => {
         if (!toolId || !tool) return;
         trackFeatureOpened("theory", toolId, entrySource);
     }, [entrySource, tool, toolId]);
+
+    const handleToolInteraction = useCallback(() => {
+        if (!toolId || !tool) return;
+
+        interactionCountRef.current += 1;
+        if (sessionStartedAtRef.current !== null) return;
+
+        sessionStartedAtRef.current = Date.now();
+        trackEvent("fm_v2_theory_session_started", {
+            tool_id: toolId,
+            entry_source: entrySource,
+        });
+    }, [entrySource, tool, toolId]);
+
+    useEffect(() => {
+        sessionStartedAtRef.current = null;
+        interactionCountRef.current = 0;
+
+        return () => {
+            if (!toolId || sessionStartedAtRef.current === null) return;
+
+            const durationSeconds = Math.max(
+                0,
+                Math.floor((Date.now() - sessionStartedAtRef.current) / 1000)
+            );
+
+            trackEvent("fm_v2_theory_session_ended", {
+                tool_id: toolId,
+                entry_source: entrySource,
+                duration_seconds: durationSeconds,
+                interaction_count: interactionCountRef.current,
+            });
+
+            sessionStartedAtRef.current = null;
+            interactionCountRef.current = 0;
+        };
+    }, [entrySource, toolId]);
 
     if (!tool) {
         return (
@@ -67,7 +106,9 @@ export default function TheoryTool() {
                 <h1 className="type-display">{t(tool.titleKey)}</h1>
             </div>
             <Suspense fallback={<PageSkeleton />}>
-                <ToolComponent />
+                <div onPointerDownCapture={handleToolInteraction} onKeyDownCapture={handleToolInteraction}>
+                    <ToolComponent />
+                </div>
             </Suspense>
         </div>
     );

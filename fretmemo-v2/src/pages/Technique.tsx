@@ -452,6 +452,7 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
     const randomModeBeatCounterRef = useRef(0);
     const stickyStateRef = useRef<StickyState>(createStickyState(startFret));
     const sessionStartedAtRef = useRef<number | null>(null);
+    const previousSetupDialogOpenRef = useRef<boolean | null>(null);
 
     const availablePermutationIndices = useMemo(
         () => getPermutationIndicesByTier(permutationTier),
@@ -506,6 +507,18 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
     useEffect(() => {
         trackFeatureOpened("technique", exerciseId, entrySource);
     }, [entrySource, exerciseId]);
+
+    useEffect(() => {
+        const previousOpen = previousSetupDialogOpenRef.current;
+        if (showSetupDialog && previousOpen !== true) {
+            trackEvent("fm_v2_preflight_opened", {
+                module: "technique",
+                mode: exerciseId,
+                entry_source: entrySource,
+            });
+        }
+        previousSetupDialogOpenRef.current = showSetupDialog;
+    }, [entrySource, exerciseId, showSetupDialog]);
 
     const defaultPatternLabel = useMemo(() => {
         if (exerciseId === "permutation") return activePermutationPattern.join("-");
@@ -1253,8 +1266,29 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
     };
 
     const handleStartFromSetup = () => {
+        trackEvent("fm_v2_preflight_started", {
+            module: "technique",
+            mode: exerciseId,
+            entry_source: entrySource,
+            start_bpm: bpm,
+            step_mode: stepMode,
+            start_fret: startFret,
+            speed_up_enabled: speedUpEnabled,
+        });
         setShowSetupDialog(false);
         startTechniqueSession();
+    };
+
+    const handleSetupDialogOpenChange = (open: boolean) => {
+        if (!open && showSetupDialog) {
+            trackEvent("fm_v2_preflight_cancelled", {
+                module: "technique",
+                mode: exerciseId,
+                entry_source: entrySource,
+                cancel_reason: "dismissed",
+            });
+        }
+        setShowSetupDialog(open);
     };
 
     const handleBackToTrain = () => {
@@ -1548,7 +1582,7 @@ function TechniqueSession({ exerciseId }: { exerciseId: string }) {
 
             <TechniqueSetupDialog
                 isOpen={showSetupDialog}
-                onOpenChange={setShowSetupDialog}
+                onOpenChange={handleSetupDialogOpenChange}
                 onStart={handleStartFromSetup}
                 exerciseName={exercise.name}
                 exerciseDescription={exercise.description}
