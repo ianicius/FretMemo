@@ -18,7 +18,7 @@ import { normalizeTuning } from "@/lib/tuning";
 import { formatPitchClass, resolveNoteDisplayMode } from "@/lib/noteNotation";
 import { usePitchDetector } from "@/services/pitch";
 import { Flame, Map as MapIcon, Mic, Target, Clock } from "lucide-react";
-import { trackFeatureOpened } from "@/lib/analytics";
+import { trackEvent, trackFeatureOpened } from "@/lib/analytics";
 
 // Focus Mode Components
 import { PreFlightModal } from "@/components/practice/PreFlightModal";
@@ -190,6 +190,7 @@ export default function Practice() {
     const prevXpStreakRef = useRef(0);
     const prevWarningStreakRef = useRef(0);
     const prevUnlockedCountRef = useRef<number | null>(null);
+    const previousPreFlightOpenRef = useRef<boolean | null>(null);
 
     const { toast, showToast, hideToast } = useXPToast();
     const isPreFlightOpen = showPreFlight;
@@ -400,6 +401,20 @@ export default function Practice() {
     const hudModeLabel = isPlayModule && effectivePlaySessionMode === "guitar"
         ? `${modeLabel} · Guitar Mode`
         : modeLabel;
+
+    useEffect(() => {
+        const previousOpen = previousPreFlightOpenRef.current;
+        if (isPreFlightOpen && previousOpen !== true) {
+            trackEvent("fm_v2_preflight_opened", {
+                module: "practice",
+                mode,
+                session_mode: isPlayModule ? effectivePlaySessionMode : null,
+                challenge_type: activeChallenge?.type ?? null,
+                entry_source: entrySource,
+            });
+        }
+        previousPreFlightOpenRef.current = isPreFlightOpen;
+    }, [activeChallenge?.type, effectivePlaySessionMode, entrySource, isPlayModule, isPreFlightOpen, mode]);
 
     useEffect(() => {
         if (!isPreFlightOpen || !isPlayModule) return;
@@ -648,6 +663,13 @@ export default function Practice() {
     };
 
     const handlePreFlightStart = () => {
+        trackEvent("fm_v2_preflight_started", {
+            module: "practice",
+            mode,
+            session_mode: isPlayModule ? effectivePlaySessionMode : null,
+            challenge_type: activeChallenge?.type ?? null,
+            entry_source: entrySource,
+        });
         setShowPreFlight(false);
         maxStreakRef.current = 0;
         prevXpStreakRef.current = 0;
@@ -665,6 +687,14 @@ export default function Practice() {
     };
 
     const handlePreFlightClose = () => {
+        trackEvent("fm_v2_preflight_cancelled", {
+            module: "practice",
+            mode,
+            session_mode: isPlayModule ? effectivePlaySessionMode : null,
+            challenge_type: activeChallenge?.type ?? null,
+            entry_source: entrySource,
+            cancel_reason: "dismissed",
+        });
         setShowPreFlight(false);
         if (enteredViaCatalogRef.current && !isPlaying) {
             navigate("/train", { replace: true });
