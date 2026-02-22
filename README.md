@@ -103,7 +103,8 @@ Contributing
 Contributions, issues, and feature requests are welcome! Feel free to check the issues page.
 
 License
-This project is licensed under the MIT License. See the LICENSE file for details.
+All Rights Reserved.
+You may not copy, distribute, modify, or make derivative works of this code without explicit written permission from the copyright holder.
 
 Contact
 Feel free to share any feedback at raf.janicki@gmail.com.
