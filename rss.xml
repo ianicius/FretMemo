@@ -6,7 +6,7 @@
     <description>Insights on theory, practice, and the art of the guitar.</description>
     <language>en</language>
     <atom:link href="https://fretmemo.net/rss.xml" rel="self" type="application/rss+xml" />
-    <lastBuildDate>Sun, 25 Jan 2026 00:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Fri, 30 Jan 2026 00:00:00 GMT</lastBuildDate>
 
     <item>
       <title>I Played Guitar for 8 Years Before I Actually Knew the Fretboard</title>
@@ -55,6 +55,31 @@
       <pubDate>Sun, 25 Jan 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[Learn how to visualize the fretboard and practice anywhere: commute, boring meetings, or before bed.]]></description>
     </item>
+
+    <item>
+      <title>5 Technique Exercises That Actually Make You Better</title>
+      <link>https://fretmemo.net/blog/post-7.html</link>
+      <guid isPermaLink="true">https://fretmemo.net/blog/post-7.html</guid>
+      <pubDate>Wed, 28 Jan 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Beyond the spider walk: Permutation, String Skipping, Diagonal Patterns, Legato, and Linear shifting.]]></description>
+    </item>
+
+    <item>
+      <title>What Guitarists Actually Need From a Trainer</title>
+      <link>https://fretmemo.net/blog/post-8.html</link>
+      <guid isPermaLink="true">https://fretmemo.net/blog/post-8.html</guid>
+      <pubDate>Fri, 30 Jan 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Why most apps fail (subscriptions, bad mics) and what a focused practice tool should actually look like.]]></description>
+    </item>
+
+    <item>
+      <title>What's Coming to FretMemo</title>
+      <link>https://fretmemo.net/blog/post-9.html</link>
+      <guid isPermaLink="true">https://fretmemo.net/blog/post-9.html</guid>
+      <pubDate>Fri, 30 Jan 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Streaks, Heat Maps, Ear Training, PWA support, and more. The roadmap for the future of FretMemo.]]></description>
+    </item>
+
   </channel>
 </rss>
 
