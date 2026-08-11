@@ -112,7 +112,7 @@ export function AppShell() {
                 href="#app-main-scroll"
                 className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-background focus:text-foreground focus:border focus:rounded-md focus:shadow-md outline-none focus:ring-2 focus:ring-primary"
             >
-                Skip to main content
+                {t("accessibility.skipToMain")}
             </a>
 
             <aside className="hidden md:flex w-16 lg:w-64 border-r border-border flex-col bg-card/30 sticky top-0 h-screen">

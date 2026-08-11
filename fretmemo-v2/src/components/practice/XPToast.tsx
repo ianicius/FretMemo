@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Star, Zap, Flame, Trophy, AlertTriangle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface XPToastProps {
     xp: number;
@@ -20,6 +21,7 @@ export function XPToast({
     type = "correct",
     message,
 }: XPToastProps) {
+    const { t } = useTranslation();
     useEffect(() => {
         if (!isVisible) return;
         const closeTimer = setTimeout(() => {
@@ -41,7 +43,7 @@ export function XPToast({
             borderColor: "border-primary/30",
             bgGradient: "from-primary/20 to-primary/5",
             progressColor: "bg-primary",
-            defaultMessage: "Correct!",
+            defaultMessage: t("practice.xpToast.correct"),
         },
         streak: {
             icon: Flame,
@@ -51,7 +53,7 @@ export function XPToast({
             borderColor: "border-amber-500/30",
             bgGradient: "from-amber-500/20 to-amber-500/5",
             progressColor: "bg-amber-500",
-            defaultMessage: `${streak} streak!`,
+            defaultMessage: t("practice.xpToast.streak", { count: streak }),
         },
         achievement: {
             icon: Trophy,
@@ -61,7 +63,7 @@ export function XPToast({
             borderColor: "border-emerald-500/30",
             bgGradient: "from-emerald-500/20 to-emerald-500/5",
             progressColor: "bg-emerald-500",
-            defaultMessage: "Achievement Unlocked!",
+            defaultMessage: t("practice.xpToast.achievement"),
         },
         levelup: {
             icon: Zap,
@@ -71,7 +73,7 @@ export function XPToast({
             borderColor: "border-primary/30",
             bgGradient: "from-primary/20 to-primary/5",
             progressColor: "bg-primary",
-            defaultMessage: "Level Up!",
+            defaultMessage: t("practice.xpToast.levelUp"),
         },
         warning: {
             icon: AlertTriangle,
@@ -81,7 +83,7 @@ export function XPToast({
             borderColor: "border-rose-500/30",
             bgGradient: "from-rose-500/20 to-rose-500/5",
             progressColor: "bg-rose-500",
-            defaultMessage: "Streak lost",
+            defaultMessage: t("practice.xpToast.warning"),
         },
     };
 

@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import type { NoteStatus, Position } from "@/types/fretboard";
 import { useTranslation } from "react-i18next";
-import { applyPolishNotation } from "@/lib/noteNotation";
+import { applyPolishNotation, formatLocalizedNoteToken } from "@/lib/noteNotation";
 
 interface NoteDotProps {
     noteStatus?: NoteStatus;
@@ -13,7 +13,7 @@ interface NoteDotProps {
 }
 
 export function NoteDot({ noteStatus, position, onClick, showLabel, leftHanded }: NoteDotProps) {
-    const { i18n } = useTranslation();
+    const { t, i18n } = useTranslation();
     const isPolish = i18n.resolvedLanguage === 'pl' || i18n.language === 'pl';
 
     const status = noteStatus?.status || "idle";
@@ -36,7 +36,14 @@ export function NoteDot({ noteStatus, position, onClick, showLabel, leftHanded }
             color: "var(--graphite-900)",
         }
         : undefined;
-    const dotAriaLabel = `Note at string ${position.stringIndex + 1}, fret ${position.fret}${position.note ? `, ${position.note}` : ""}`;
+    const localizedNoteSuffix = position.note
+        ? `, ${formatLocalizedNoteToken(position.note, i18n.resolvedLanguage ?? i18n.language)}`
+        : "";
+    const dotAriaLabel = t("accessibility.noteAt", {
+        string: position.stringIndex + 1,
+        fret: position.fret,
+        note: localizedNoteSuffix,
+    });
 
     // Determine styling based on status
     const getStatusClasses = () => {
