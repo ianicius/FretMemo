@@ -4,6 +4,18 @@
   "language": "Language",
   "string": "String",
   "fret": "Fret",
+  "accessibility": {
+    "skipToMain": "Skip to main content",
+    "switchToLightMode": "Switch to Light Mode",
+    "switchToDarkMode": "Switch to Dark Mode",
+    "lightMode": "Light Mode",
+    "darkMode": "Dark Mode",
+    "noteAt": "Note at string {{string}}, fret {{fret}}{{note}}"
+  },
+  "mastery": {
+    "progress": "Mastery progress",
+    "value": "{{value}}% mastery"
+  },
   "common": {
     "locked": "LOCKED",
     "new": "NEW",
@@ -393,8 +405,10 @@
     "ear": "Ear Training",
     "rhythm": "Rhythm Dojo",
     "summary": {
-      "modes": "{{count}} modes • {{avg}}% avg",
-      "exercises": "{{count}} exercises • {{avg}}% avg",
+      "modes_one": "{{count}} mode • {{avg}}% avg",
+      "modes_other": "{{count}} modes • {{avg}}% avg",
+      "exercises_one": "{{count}} exercise • {{avg}}% avg",
+      "exercises_other": "{{count}} exercises • {{avg}}% avg",
       "pinned": "{{count}}/{{max}} • {{avg}}% avg"
     },
     "suggestedTitle": "Suggested next",
@@ -408,8 +422,10 @@
     "pinAria": "Pin {{title}}",
     "unpinAria": "Unpin {{title}}",
     "pinLimitReached": "Pin limit reached ({{max}})",
-    "theorySummary": "{{count}} tools",
-    "earSummary": "{{count}} modes",
+    "theorySummary_one": "{{count}} tool",
+    "theorySummary_other": "{{count}} tools",
+    "earSummary_one": "{{count}} mode",
+    "earSummary_other": "{{count}} modes",
     "soon": "Soon"
   },
   "challenges": {
@@ -519,6 +535,7 @@
     "darkMode": "Dark mode",
     "openQuickMenu": "Open quick menu",
     "buyCoffee": "Buy me a coffee",
+    "openFaq": "Open FAQ",
     "legacyV1": "Legacy v1",
     "faq": "FAQ",
     "blog": "Blog",
@@ -580,11 +597,40 @@
     "dayStreak": "Day Streak",
     "accuracy": "Accuracy",
     "timePracticed": "Time Practiced",
+    "answerAria": "Answer {{note}}",
+    "positionAnswerAria": "String {{string}}, fret {{fret}}",
+    "milestones": {
+      "five": "5 streak! Keep it up!",
+      "ten": "Amazing! 10 streak!",
+      "twenty": "Perfect Session! 20 streak!",
+      "broken": "Streak broken at {{count}}"
+    },
+    "xpToast": {
+      "correct": "Correct!",
+      "streak": "{{count}} streak!",
+      "achievement": "Achievement Unlocked!",
+      "levelUp": "Level Up!",
+      "warning": "Streak lost"
+    },
     "layers": {
       "standard": "Standard",
       "heatmap": "Heatmap",
       "scale": "Scale",
       "intervals": "Intervals"
+    },
+    "feedback": {
+      "prompts": {
+        "identifyNote": "Identify the note!",
+        "pickTab": "Pick the correct tab position!",
+        "playNote": "Play the note (mic)!",
+        "playSequence": "Play the tab sequence (mic)!"
+      },
+      "correct": "Correct!",
+      "incorrectNote": "Incorrect! It was {{note}}",
+      "incorrectPosition": "Incorrect! Correct: string {{string}}, fret {{fret}}",
+      "tooSlow": "Too slow!",
+      "incorrectDetected": "Incorrect ({{note}})!",
+      "hint": "Hint: {{note}} (-{{penalty}})"
     },
     "focus": {
       "modeLabel": "Practice Focus",

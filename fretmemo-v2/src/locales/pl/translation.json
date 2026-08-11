@@ -4,6 +4,18 @@
   "language": "Język",
   "string": "Struna",
   "fret": "Próg",
+  "accessibility": {
+    "skipToMain": "Przejdź do głównej treści",
+    "switchToLightMode": "Przełącz na jasny motyw",
+    "switchToDarkMode": "Przełącz na ciemny motyw",
+    "lightMode": "Jasny motyw",
+    "darkMode": "Ciemny motyw",
+    "noteAt": "Nuta na strunie {{string}}, próg {{fret}}{{note}}"
+  },
+  "mastery": {
+    "progress": "Postęp opanowania",
+    "value": "Opanowanie: {{value}}%"
+  },
   "common": {
     "locked": "ZABLOKOWANE",
     "new": "NOWE",
@@ -393,8 +405,14 @@
     "ear": "Trening Słuchu",
     "rhythm": "Rhythm Dojo",
     "summary": {
-      "modes": "{{count}} tryby • {{avg}}% śr",
-      "exercises": "{{count}} ćwiczenia • {{avg}}% śr",
+      "modes_one": "{{count}} tryb • {{avg}}% śr",
+      "modes_few": "{{count}} tryby • {{avg}}% śr",
+      "modes_many": "{{count}} trybów • {{avg}}% śr",
+      "modes_other": "{{count}} trybu • {{avg}}% śr",
+      "exercises_one": "{{count}} ćwiczenie • {{avg}}% śr",
+      "exercises_few": "{{count}} ćwiczenia • {{avg}}% śr",
+      "exercises_many": "{{count}} ćwiczeń • {{avg}}% śr",
+      "exercises_other": "{{count}} ćwiczenia • {{avg}}% śr",
       "pinned": "{{count}}/{{max}} • {{avg}}% śr"
     },
     "suggestedTitle": "Sugerowane dalej",
@@ -408,8 +426,14 @@
     "pinAria": "Przypnij {{title}}",
     "unpinAria": "Odepnij {{title}}",
     "pinLimitReached": "Limit przypięć osiągnięty ({{max}})",
-    "theorySummary": "{{count}} narzędzi",
-    "earSummary": "{{count}} tryby",
+    "theorySummary_one": "{{count}} narzędzie",
+    "theorySummary_few": "{{count}} narzędzia",
+    "theorySummary_many": "{{count}} narzędzi",
+    "theorySummary_other": "{{count}} narzędzia",
+    "earSummary_one": "{{count}} tryb",
+    "earSummary_few": "{{count}} tryby",
+    "earSummary_many": "{{count}} trybów",
+    "earSummary_other": "{{count}} trybu",
     "soon": "Wkrótce"
   },
   "challenges": {
@@ -521,6 +545,7 @@
     "darkMode": "Ciemny motyw",
     "openQuickMenu": "Otwórz szybkie menu",
     "buyCoffee": "Postaw kawę",
+    "openFaq": "Otwórz FAQ",
     "legacyV1": "Legacy v1",
     "faq": "FAQ",
     "blog": "Blog",
@@ -582,11 +607,40 @@
     "dayStreak": "Seria dni",
     "accuracy": "Celność",
     "timePracticed": "Czas spędzony",
+    "answerAria": "Odpowiedź {{note}}",
+    "positionAnswerAria": "Struna {{string}}, próg {{fret}}",
+    "milestones": {
+      "five": "Seria 5! Tak trzymaj!",
+      "ten": "Niesamowita seria 10!",
+      "twenty": "Idealna sesja! Seria 20!",
+      "broken": "Seria przerwana na {{count}}"
+    },
+    "xpToast": {
+      "correct": "Poprawnie!",
+      "streak": "Seria: {{count}}!",
+      "achievement": "Osiągnięcie odblokowane!",
+      "levelUp": "Nowy poziom!",
+      "warning": "Seria przerwana"
+    },
     "layers": {
       "standard": "Standard",
       "heatmap": "Mapa cieplna",
       "scale": "Skala",
       "intervals": "Interwały"
+    },
+    "feedback": {
+      "prompts": {
+        "identifyNote": "Rozpoznaj nutę!",
+        "pickTab": "Wybierz poprawną pozycję na tabulaturze!",
+        "playNote": "Zagraj nutę (mikrofon)!",
+        "playSequence": "Zagraj sekwencję z tabulatury (mikrofon)!"
+      },
+      "correct": "Poprawnie!",
+      "incorrectNote": "Niepoprawnie! Prawidłowa nuta: {{note}}",
+      "incorrectPosition": "Niepoprawnie! Prawidłowo: struna {{string}}, próg {{fret}}",
+      "tooSlow": "Za wolno!",
+      "incorrectDetected": "Niepoprawnie ({{note}})!",
+      "hint": "Podpowiedź: {{note}} (-{{penalty}})"
     },
     "focus": {
       "modeLabel": "Tryb treningu",
@@ -808,19 +862,19 @@
       "tuningPreset": "Preset stroju",
       "tuningPresetHint": "Dotyczy wszystkich ćwiczeń opartych na gryfie.",
       "tuningPresets": {
-        "standard": "Standard (E-A-D-G-B-E)",
-        "drop-d": "Drop D (D-A-D-G-B-E)",
+        "standard": "Standard (E-A-D-G-H-E)",
+        "drop-d": "Drop D (D-A-D-G-H-E)",
         "dadgad": "DADGAD",
         "open-g": "Open G",
         "open-d": "Open D",
         "double-drop-d": "Double Drop D",
         "e-flat": "Pół tonu niżej (Eb)",
-        "standard-7": "Standard 7 (B-E-A-D-G-B-E)",
-        "drop-a-7": "Drop A 7 (A-E-A-D-G-B-E)",
-        "standard-8": "Standard 8 (F#-B-E-A-D-G-B-E)",
+        "standard-7": "Standard 7 (H-E-A-D-G-H-E)",
+        "drop-a-7": "Drop A 7 (A-E-A-D-G-H-E)",
+        "standard-8": "Standard 8 (F#-H-E-A-D-G-H-E)",
         "bass-standard-4": "Bas standard (E-A-D-G)",
         "bass-drop-d-4": "Bas Drop D (D-A-D-G)",
-        "bass-standard-5": "Bas standard 5 (B-E-A-D-G)",
+        "bass-standard-5": "Bas standard 5 (H-E-A-D-G)",
         "ukulele-standard": "Ukulele standard (G-C-E-A)"
       },
       "customCurrent": "Niestandardowy (bieżący)",

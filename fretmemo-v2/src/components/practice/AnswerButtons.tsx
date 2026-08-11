@@ -32,7 +32,7 @@ export function NoteAnswerButtons({
     isPlaying,
     onSubmit,
 }: NoteAnswerButtonsProps) {
-    useTranslation();
+    const { t } = useTranslation();
 
     return (
         <div className="mx-auto grid max-w-[19.5rem] grid-cols-2 gap-2 min-[360px]:max-w-[21rem] min-[390px]:max-w-[22rem] min-[412px]:max-w-[23rem] min-[390px]:gap-2.5 sm:max-w-3xl sm:gap-3 sm:grid-cols-4">
@@ -53,7 +53,7 @@ export function NoteAnswerButtons({
                         disabled={!isPlaying || isLocked}
                         onClick={() => onSubmit(note as NoteName)}
                         aria-pressed={isLocked ? isChosenOption : undefined}
-                        aria-label={`Answer ${displayNote}`}
+                        aria-label={t("practice.answerAria", { note: displayNote })}
                     >
                         {displayNote}
                     </Button>
@@ -179,7 +179,10 @@ export function PositionAnswerButtons({
                         disabled={!isPlaying || isLocked}
                         onClick={() => onSubmit(option)}
                         aria-pressed={isLocked ? !!isChosenOption : undefined}
-                        aria-label={`${stringLabels[option.stringIndex]} string, fret ${option.fret}`}
+                        aria-label={t("practice.positionAnswerAria", {
+                            string: stringLabels[option.stringIndex],
+                            fret: option.fret,
+                        })}
                     >
                         <div className="w-full relative z-10">
                             <div className="flex items-center justify-between mb-4">

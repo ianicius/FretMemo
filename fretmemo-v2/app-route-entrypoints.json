@@ -1,0 +1,31 @@
+{
+  "routes": [
+    "/train",
+    "/practice",
+    "/library",
+    "/challenges",
+    "/me",
+    "/progress",
+    "/settings",
+    "/technique/spider",
+    "/technique/permutation",
+    "/technique/linear",
+    "/technique/diagonal",
+    "/technique/stringskip",
+    "/technique/legato",
+    "/theory/scales",
+    "/theory/circle",
+    "/theory/caged",
+    "/theory/triads",
+    "/theory/chords",
+    "/theory/intervals",
+    "/ear-training/sound-to-fret",
+    "/ear-training/intervals",
+    "/ear-training/chord-quality",
+    "/ear-training/functional",
+    "/rhythm/tap-beat",
+    "/rhythm/strum-patterns",
+    "/rhythm/rhythm-reading",
+    "/rhythm/groove-lab"
+  ]
+}

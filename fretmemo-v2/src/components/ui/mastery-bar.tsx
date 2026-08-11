@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface MasteryBarProps {
     value: number;
@@ -18,6 +19,7 @@ function getToneClass(value: number): string {
 }
 
 export function MasteryBar({ value, className, showLabel = true }: MasteryBarProps) {
+    const { t } = useTranslation();
     const safeValue = clamp(value);
 
     return (
@@ -25,11 +27,11 @@ export function MasteryBar({ value, className, showLabel = true }: MasteryBarPro
             <div
                 className="h-2 w-full overflow-hidden rounded-full bg-muted"
                 role="progressbar"
-                aria-label="Mastery progress"
+                aria-label={t("mastery.progress")}
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-valuenow={safeValue}
-                aria-valuetext={showLabel ? `${safeValue}% mastery` : `${safeValue}%`}
+                aria-valuetext={showLabel ? t("mastery.value", { value: safeValue }) : `${safeValue}%`}
             >
                 <div
                     className={cn("h-full rounded-full transition-all duration-500", getToneClass(safeValue))}
@@ -37,7 +39,7 @@ export function MasteryBar({ value, className, showLabel = true }: MasteryBarPro
                 />
             </div>
             {showLabel && (
-                <div className="text-xs font-medium text-muted-foreground">{safeValue}% mastery</div>
+                <div className="text-xs font-medium text-muted-foreground">{t("mastery.value", { value: safeValue })}</div>
             )}
         </div>
     );

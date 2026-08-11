@@ -7,7 +7,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { downloadProgressExport, parseJsonFile } from "@/lib/progressTransfer";
 import { trackEvent } from "@/lib/analytics";
 import { NOTES } from "@/lib/constants";
-import { formatPitchClass } from "@/lib/noteNotation";
+import { formatPitchClass, formatTuningSummary } from "@/lib/noteNotation";
 import { TECHNIQUE_EXERCISES } from "@/data/techniqueExercises";
 import {
     INSTRUMENT_LABELS,
@@ -203,7 +203,10 @@ export default function Settings() {
         return instrumentPresets.some((preset) => preset.id === presetId) ? presetId : "custom";
     })();
     const selectedInstrumentLabel = t(`settingsPage.instrument.instrumentTypes.${instrumentType}`, INSTRUMENT_LABELS[instrumentType]);
-    const selectedTuningSummary = selectedTuning.slice().reverse().join("-");
+    const selectedTuningSummary = formatTuningSummary(
+        selectedTuning.slice().reverse(),
+        full.instrument.notation,
+    );
     const normalizedQuery = searchQuery.trim().toLowerCase();
     const matchesQuery = (keywords: string[]) => {
         if (!normalizedQuery) return true;

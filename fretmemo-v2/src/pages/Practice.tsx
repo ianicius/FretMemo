@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { NOTES, getNoteAt } from "@/lib/constants";
 import { normalizeTuning } from "@/lib/tuning";
 import { formatPitchClass, resolveNoteDisplayMode } from "@/lib/noteNotation";
+import { getPracticeFeedbackTone, translatePracticeFeedback } from "@/lib/practiceFeedback";
 import { usePitchDetector } from "@/services/pitch";
 import { Flame, Map as MapIcon, Mic, Target, Clock } from "lucide-react";
 import { trackEvent, trackFeatureOpened } from "@/lib/analytics";
@@ -103,7 +104,7 @@ export default function Practice() {
         noteOptions,
         noteToTabOptions,
         practiceConstraints,
-        feedbackMessage,
+        feedback,
         lastAnswer,
         bpm,
         noteDuration,
@@ -251,19 +252,19 @@ export default function Practice() {
 
             if (streak === 5) {
                 toastType = "streak";
-                message = "5 streak! Keep it up!";
+                message = t("practice.milestones.five");
             } else if (streak === 10) {
                 toastType = "streak";
-                message = "Amazing! 10 streak!";
+                message = t("practice.milestones.ten");
             } else if (streak === 20) {
                 toastType = "streak";
-                message = "Perfect Session! 20 streak!";
+                message = t("practice.milestones.twenty");
             }
 
             showToast(totalXP, toastType, streak, message);
         }
         prevXpStreakRef.current = streak;
-    }, [streak, isPlaying, showToast, showXPNotes]);
+    }, [streak, isPlaying, showToast, showXPNotes, t]);
 
     useEffect(() => {
         if (!isPlaying) {
@@ -273,14 +274,14 @@ export default function Practice() {
 
         const prev = prevWarningStreakRef.current;
         const streakBroken = prev >= 5 && streak === 0 && prev > streak;
-        const wrongAttempt = Boolean(lastAnswer && !lastAnswer.correct) || feedbackMessage === "Too slow!";
+        const wrongAttempt = Boolean(lastAnswer && !lastAnswer.correct) || feedback?.kind === "too-slow";
 
         if (showStreakWarnings && streakBroken && wrongAttempt) {
-            showToast(0, "warning", prev, `Streak broken at ${prev}`);
+            showToast(0, "warning", prev, t("practice.milestones.broken", { count: prev }));
         }
 
         prevWarningStreakRef.current = streak;
-    }, [streak, isPlaying, lastAnswer, feedbackMessage, showStreakWarnings, showToast]);
+    }, [streak, isPlaying, lastAnswer, feedback, showStreakWarnings, showToast, t]);
 
     useEffect(() => {
         const unlocked = achievements.filter((achievement) => achievement.unlockedAt);
@@ -326,6 +327,12 @@ export default function Practice() {
         () => resolveNoteDisplayMode(notation, notationSeed),
         [notation, notationSeed],
     );
+    const feedbackText = translatePracticeFeedback(
+        feedback,
+        t,
+        (note) => formatPitchClass(note, displayNotation, notationSeed, accidentalComplexity),
+    );
+    const feedbackTone = feedback ? getPracticeFeedbackTone(feedback) : null;
     const hintUsedForPrompt = hintPromptKey === currentPromptKey;
     const shouldShowToast = (() => {
         if (!toast.isVisible) return false;
@@ -399,7 +406,7 @@ export default function Practice() {
     const effectivePlaySessionMode: PlaySessionMode =
         isPlayModule && !activeChallenge ? playSessionMode : "scored";
     const hudModeLabel = isPlayModule && effectivePlaySessionMode === "guitar"
-        ? `${modeLabel} · Guitar Mode`
+        ? `${modeLabel} · ${t("practice.setup.guitar")}`
         : modeLabel;
 
     useEffect(() => {
@@ -468,7 +475,7 @@ export default function Practice() {
                 position: targetPosition,
                 status: "active",
                 label: "?",
-                feedbackText: feedbackMessage === "Too slow!" ? "Too slow!" : undefined,
+                feedbackText: feedback?.kind === "too-slow" ? feedbackText : undefined,
             });
         }
 
@@ -577,7 +584,8 @@ export default function Practice() {
         practiceConstraints.fretRange.min,
         practiceConstraints.rootNote,
         practiceConstraints.scaleType,
-        feedbackMessage,
+        feedback,
+        feedbackText,
         targetPosition,
         tuning,
         displayNotation,
@@ -894,12 +902,12 @@ export default function Practice() {
                     className={cn(
                         "rounded-full border px-3 py-1 font-medium backdrop-blur-sm transition-colors",
                         isLandscape ? "text-xs min-h-6" : "text-sm min-h-8",
-                        feedbackMessage?.includes("Correct") && "border-emerald-500/45 bg-emerald-500/10 text-emerald-400",
-                        (feedbackMessage?.includes("Incorrect") || feedbackMessage?.includes("Too slow")) && "border-rose-500/45 bg-rose-500/10 text-rose-300",
-                        !feedbackMessage && "border-border/50 bg-card/50 text-muted-foreground"
+                        feedbackTone === "success" && "border-emerald-500/45 bg-emerald-500/10 text-emerald-400",
+                        feedbackTone === "error" && "border-rose-500/45 bg-rose-500/10 text-rose-300",
+                        !feedbackTone && "border-border/50 bg-card/50 text-muted-foreground"
                     )}
                 >
-                    {feedbackMessage ?? (moduleTab === "play" ? t("practice.focus.playPrompt") : t("practice.focus.identifyPrompt"))}
+                    {feedbackText || (moduleTab === "play" ? t("practice.focus.playPrompt") : t("practice.focus.identifyPrompt"))}
                 </div>
             </div>
         );
@@ -1069,7 +1077,7 @@ export default function Practice() {
                     isVisible={shouldShowToast}
                     onClose={hideToast}
                 />
-                <AriaLiveAnnouncer message={feedbackMessage} />
+                <AriaLiveAnnouncer message={feedbackText} />
                 {activeChallenge && (
                     <div
                         className={cn(
