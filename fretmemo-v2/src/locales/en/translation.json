@@ -586,6 +586,20 @@
       "scale": "Scale",
       "intervals": "Intervals"
     },
+    "feedback": {
+      "prompts": {
+        "identifyNote": "Identify the note!",
+        "pickTab": "Pick the correct tab position!",
+        "playNote": "Play the note (mic)!",
+        "playSequence": "Play the tab sequence (mic)!"
+      },
+      "correct": "Correct!",
+      "incorrectNote": "Incorrect! It was {{note}}",
+      "incorrectPosition": "Incorrect! Correct: string {{string}}, fret {{fret}}",
+      "tooSlow": "Too slow!",
+      "incorrectDetected": "Incorrect ({{note}})!",
+      "hint": "Hint: {{note}} (-{{penalty}})"
+    },
     "focus": {
       "modeLabel": "Practice Focus",
       "exerciseTypeLabel": "Exercise Type",

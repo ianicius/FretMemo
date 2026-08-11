@@ -588,6 +588,20 @@
       "scale": "Skala",
       "intervals": "Interwały"
     },
+    "feedback": {
+      "prompts": {
+        "identifyNote": "Rozpoznaj nutę!",
+        "pickTab": "Wybierz poprawną pozycję na tabulaturze!",
+        "playNote": "Zagraj nutę (mikrofon)!",
+        "playSequence": "Zagraj sekwencję z tabulatury (mikrofon)!"
+      },
+      "correct": "Poprawnie!",
+      "incorrectNote": "Niepoprawnie! Prawidłowa nuta: {{note}}",
+      "incorrectPosition": "Niepoprawnie! Prawidłowo: struna {{string}}, próg {{fret}}",
+      "tooSlow": "Za wolno!",
+      "incorrectDetected": "Niepoprawnie ({{note}})!",
+      "hint": "Podpowiedź: {{note}} (-{{penalty}})"
+    },
     "focus": {
       "modeLabel": "Tryb treningu",
       "exerciseTypeLabel": "Typ ćwiczenia",
