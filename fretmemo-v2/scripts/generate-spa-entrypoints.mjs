@@ -15,7 +15,8 @@ export function validateSpaRoute(route) {
   if (segments.length === 0 || segments.some((segment) => segment === "." || segment === "..")) {
     throw new Error(`Unsafe SPA route: ${route}`);
   }
-  if (EXCLUDED_ROOTS.has(segments[0])) {
+  const staticRoot = segments[0].toLowerCase().replace(/[. ]+$/u, "");
+  if ([...EXCLUDED_ROOTS].some((excludedRoot) => staticRoot === excludedRoot || staticRoot.startsWith(`${excludedRoot}.`))) {
     throw new Error(`Excluded static route: ${route}`);
   }
   return `/${segments.join("/")}`;

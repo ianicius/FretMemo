@@ -2,6 +2,7 @@ import path from "path"
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { createSpaNavigationFallbackAllowlist } from './scripts/spa-navigation-policy.ts'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -45,16 +46,7 @@ export default defineConfig({
         cleanupOutdatedCaches: true,
         skipWaiting: true,
         clientsClaim: true,
-        navigateFallbackDenylist: [
-          /^\/v1(?:\/|$)/,
-          /^\/v2(?:\/|$)/,
-          /^\/blog(?:\/|\.html$)/,
-          /^\/faq(?:\.html$|\/$)/,
-          /^\/rss\.xml$/,
-          /^\/sitemap\.xml$/,
-          /^\/robots\.txt$/,
-          /^\/BingSiteAuth\.xml$/,
-        ],
+        navigateFallbackAllowlist: createSpaNavigationFallbackAllowlist(),
       }
     })
   ],
