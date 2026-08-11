@@ -2,7 +2,10 @@ import path from "path"
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
-import { createSpaNavigationFallbackAllowlist } from './scripts/spa-navigation-policy.ts'
+import {
+  SPA_PRECACHE_GLOB_PATTERNS,
+  createSpaNavigationFallbackAllowlist,
+} from './scripts/spa-navigation-policy.ts'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -42,7 +45,7 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        globPatterns: [...SPA_PRECACHE_GLOB_PATTERNS],
         cleanupOutdatedCaches: true,
         skipWaiting: true,
         clientsClaim: true,
