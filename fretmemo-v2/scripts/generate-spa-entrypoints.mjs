@@ -8,7 +8,7 @@ const manifest = JSON.parse(await readFile(resolve(packageDirectory, "app-route-
 const EXCLUDED_ROOTS = new Set(["blog", "faq", "v1", "v2"]);
 
 export function validateSpaRoute(route) {
-  if (typeof route !== "string" || !route.startsWith("/") || route === "/" || isAbsolute(route.slice(1))) {
+  if (typeof route !== "string" || !route.startsWith("/") || route === "/" || route.includes("\\") || isAbsolute(route.slice(1))) {
     throw new Error(`Invalid SPA route: ${String(route)}`);
   }
   const segments = route.split("/").filter(Boolean);
