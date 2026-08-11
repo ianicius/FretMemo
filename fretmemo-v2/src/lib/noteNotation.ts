@@ -57,6 +57,23 @@ export function applyPolishNotation(noteStr: string): string {
     return noteStr;
 }
 
+export function formatLocalizedNoteToken(
+    value: string,
+    language: string | null | undefined,
+): string {
+    const baseLanguage = language?.toLowerCase().split("-")[0];
+    return baseLanguage === "pl" ? applyPolishNotation(value) : value;
+}
+
+export function formatTuningSummary(
+    notesLowToHigh: readonly string[],
+    notation: NoteDisplayMode = "sharps",
+): string {
+    return notesLowToHigh
+        .map((note, index) => formatPitchClass(note, notation, `tuning:${index}:${note}`))
+        .join("-");
+}
+
 function normalizePitchClassIndex(index: number): number {
     return ((index % 12) + 12) % 12;
 }
@@ -163,10 +180,7 @@ export function formatPitchClass(
         result = getPitchClassLabel(pitchClassIndex, resolvedNotation, resolvedSeed, accidentalComplexity);
     }
 
-    if (i18n.resolvedLanguage === 'pl' || i18n.language === 'pl') {
-        return applyPolishNotation(result);
-    }
-    return result;
+    return formatLocalizedNoteToken(result, i18n.resolvedLanguage ?? i18n.language);
 }
 
 export function formatPitchClassWithEnharmonic(
@@ -180,20 +194,16 @@ export function formatPitchClassWithEnharmonic(
     const resolvedNotation = resolveNoteDisplayMode(notation, resolvedSeed);
     if (pitchClassIndex === null) {
         const str = typeof input === "string" ? input : "";
-        if (i18n.resolvedLanguage === 'pl' || i18n.language === 'pl') {
-            return applyPolishNotation(str);
-        }
-        return str;
+        return formatLocalizedNoteToken(str, i18n.resolvedLanguage ?? i18n.language);
     }
 
     const alternateNotation: ResolvedNoteDisplayMode = resolvedNotation === "flats" ? "sharps" : "flats";
     let primary = getPitchClassLabel(pitchClassIndex, resolvedNotation, resolvedSeed, accidentalComplexity);
     let alternate = getPitchClassLabel(pitchClassIndex, alternateNotation, resolvedSeed, "standard");
 
-    if (i18n.resolvedLanguage === 'pl' || i18n.language === 'pl') {
-        primary = applyPolishNotation(primary);
-        alternate = applyPolishNotation(alternate);
-    }
+    const language = i18n.resolvedLanguage ?? i18n.language;
+    primary = formatLocalizedNoteToken(primary, language);
+    alternate = formatLocalizedNoteToken(alternate, language);
 
     if (primary === alternate) return primary;
     return `${primary} (${alternate})`;

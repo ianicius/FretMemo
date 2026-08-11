@@ -1,15 +1,32 @@
 import { describe, expect, it } from "vitest";
 import {
     areEnharmonic,
+    formatLocalizedNoteToken,
     formatPitchClass,
     formatPitchClassWithEnharmonic,
+    formatTuningSummary,
     getPitchClassIndex,
     pitchClassIndexFromMidi,
     resolveNoteDisplayMode,
     toSharpPitchClass,
 } from "../noteNotation";
+import i18n from "@/lib/i18n";
 
 describe("noteNotation", () => {
+    it.each([
+        ["B", "en", "B"],
+        ["Bb", "en", "Bb"],
+        ["Bm7b5", "en", "Bm7b5"],
+        ["Bbmaj7", "en", "Bbmaj7"],
+        ["B", "pl", "H"],
+        ["Bb", "pl", "B"],
+        ["Bm7b5", "pl", "Hm7b5"],
+        ["Bbmaj7", "pl-PL", "Bmaj7"],
+        ["F#", "pl", "F#"],
+    ])("formats %s for %s as %s", (input, language, expected) => {
+        expect(formatLocalizedNoteToken(input, language)).toBe(expected);
+    });
+
     it("normalizes enharmonic pitch classes to the same index", () => {
         expect(getPitchClassIndex("A#")).toBe(10);
         expect(getPitchClassIndex("Bb")).toBe(10);
@@ -28,6 +45,28 @@ describe("noteNotation", () => {
         expect(formatPitchClass(10, "flats")).toBe("Bb");
         expect(formatPitchClass("Bb", "sharps")).toBe("A#");
         expect(formatPitchClass("A#", "flats")).toBe("Bb");
+    });
+
+    it("formats every note in a Polish tuning summary", async () => {
+        const previousLanguage = i18n.resolvedLanguage ?? i18n.language;
+        try {
+            await i18n.changeLanguage("pl");
+            expect(["E", "A", "D", "G", "B", "E"].map((note) => formatPitchClass(note)).join("-"))
+                .toBe("E-A-D-G-H-E");
+        } finally {
+            await i18n.changeLanguage(previousLanguage || "en");
+        }
+    });
+
+    it("builds a localized tuning summary through the shared formatter", async () => {
+        const previousLanguage = i18n.resolvedLanguage ?? i18n.language;
+        try {
+            await i18n.changeLanguage("pl");
+            expect(formatTuningSummary(["E", "A", "D", "G", "B", "E"], "sharps"))
+                .toBe("E-A-D-G-H-E");
+        } finally {
+            await i18n.changeLanguage(previousLanguage || "en");
+        }
     });
 
     it("shows enharmonic companion for accidental notes", () => {

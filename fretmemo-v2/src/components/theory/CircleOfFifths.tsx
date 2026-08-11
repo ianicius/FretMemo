@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
 import { Key } from "tonal";
-import { applyPolishNotation } from "@/lib/noteNotation";
+import { formatLocalizedNoteToken } from "@/lib/noteNotation";
 import { useTranslation } from "react-i18next";
 
 const KEYS = ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"] as const;
@@ -14,19 +14,20 @@ function polarToCartesian(cx: number, cy: number, r: number, angleDeg: number) {
 }
 
 export default function CircleOfFifths() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const language = i18n.resolvedLanguage ?? i18n.language;
     const [selectedKey, setSelectedKey] = useState<string>("C");
 
     const keyData = useMemo(() => {
         const major = Key.majorKey(selectedKey);
         return {
-            name: `${applyPolishNotation(major.tonic)} ${t("theory.circle.major")}`,
-            relativeName: `${applyPolishNotation(major.minorRelative)} ${t("theory.circle.minor")}`,
+            name: `${formatLocalizedNoteToken(major.tonic, language)} ${t("theory.circle.major")}`,
+            relativeName: `${formatLocalizedNoteToken(major.minorRelative, language)} ${t("theory.circle.minor")}`,
             scale: major.scale,
             chords: major.chords,
             chordsRoman: ["I", "ii", "iii", "IV", "V", "vi", "vii°"],
         };
-    }, [selectedKey, t]);
+    }, [selectedKey, t, language]);
 
     const segments = useMemo(() => {
         return KEYS.map((key, i) => {
@@ -80,7 +81,7 @@ export default function CircleOfFifths() {
                                     className={`text-sm font-bold select-none ${isSelected ? "fill-primary" : "fill-foreground"
                                         }`}
                                 >
-                                    {applyPolishNotation(seg.key)}
+                                    {formatLocalizedNoteToken(seg.key, language)}
                                 </text>
                                 {/* Minor key label (inner) */}
                                 <text
@@ -91,7 +92,7 @@ export default function CircleOfFifths() {
                                     className={`text-[10px] select-none ${isSelected ? "fill-primary/70" : "fill-muted-foreground"
                                         }`}
                                 >
-                                    {applyPolishNotation(seg.minorKey)}m
+                                    {formatLocalizedNoteToken(seg.minorKey, language)}m
                                 </text>
                             </g>
                         );
@@ -99,7 +100,7 @@ export default function CircleOfFifths() {
 
                     {/* Center label */}
                     <text x={CENTER} y={CENTER - 8} textAnchor="middle" className="text-sm font-bold fill-primary">
-                        {applyPolishNotation(selectedKey)}
+                        {formatLocalizedNoteToken(selectedKey, language)}
                     </text>
                     <text x={CENTER} y={CENTER + 10} textAnchor="middle" className="text-[9px] fill-muted-foreground">
                         {keyData.relativeName}
@@ -126,7 +127,7 @@ export default function CircleOfFifths() {
                                         : "bg-primary/10 text-primary border border-primary/20"
                                     }`}
                             >
-                                {applyPolishNotation(note)}
+                                {formatLocalizedNoteToken(note, language)}
                             </span>
                         ))}
                     </div>
@@ -142,7 +143,7 @@ export default function CircleOfFifths() {
                                 className="flex flex-col items-center gap-0.5 rounded-lg border border-border bg-muted/30 p-2"
                             >
                                 <span className="text-[10px] font-bold text-muted-foreground">{keyData.chordsRoman[i]}</span>
-                                <span className="text-xs font-bold">{applyPolishNotation(chord)}</span>
+                                <span className="text-xs font-bold">{formatLocalizedNoteToken(chord, language)}</span>
                             </div>
                         ))}
                     </div>
