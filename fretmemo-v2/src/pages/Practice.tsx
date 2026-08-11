@@ -406,7 +406,7 @@ export default function Practice() {
     const effectivePlaySessionMode: PlaySessionMode =
         isPlayModule && !activeChallenge ? playSessionMode : "scored";
     const hudModeLabel = isPlayModule && effectivePlaySessionMode === "guitar"
-        ? `${modeLabel} · Guitar Mode`
+        ? `${modeLabel} · ${t("practice.setup.guitar")}`
         : modeLabel;
 
     useEffect(() => {
