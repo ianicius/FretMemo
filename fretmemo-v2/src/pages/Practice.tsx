@@ -252,19 +252,19 @@ export default function Practice() {
 
             if (streak === 5) {
                 toastType = "streak";
-                message = "5 streak! Keep it up!";
+                message = t("practice.milestones.five");
             } else if (streak === 10) {
                 toastType = "streak";
-                message = "Amazing! 10 streak!";
+                message = t("practice.milestones.ten");
             } else if (streak === 20) {
                 toastType = "streak";
-                message = "Perfect Session! 20 streak!";
+                message = t("practice.milestones.twenty");
             }
 
             showToast(totalXP, toastType, streak, message);
         }
         prevXpStreakRef.current = streak;
-    }, [streak, isPlaying, showToast, showXPNotes]);
+    }, [streak, isPlaying, showToast, showXPNotes, t]);
 
     useEffect(() => {
         if (!isPlaying) {
@@ -277,11 +277,11 @@ export default function Practice() {
         const wrongAttempt = Boolean(lastAnswer && !lastAnswer.correct) || feedback?.kind === "too-slow";
 
         if (showStreakWarnings && streakBroken && wrongAttempt) {
-            showToast(0, "warning", prev, `Streak broken at ${prev}`);
+            showToast(0, "warning", prev, t("practice.milestones.broken", { count: prev }));
         }
 
         prevWarningStreakRef.current = streak;
-    }, [streak, isPlaying, lastAnswer, feedback, showStreakWarnings, showToast]);
+    }, [streak, isPlaying, lastAnswer, feedback, showStreakWarnings, showToast, t]);
 
     useEffect(() => {
         const unlocked = achievements.filter((achievement) => achievement.unlockedAt);
