@@ -48,7 +48,7 @@ describe("generateSpaEntrypoints", () => {
     expect(await readFile(join(outDir, "faq.html"), "utf8")).toBe("faq-sentinel");
   });
 
-  it.each(["../escape", "/../escape", "/blog", "/faq", "/v1/tool", "/v2/tool"])(
+  it.each(["../escape", "/../escape", "/blog", "/faq", "/v1/tool", "/v2/tool", "/blog\\tool", "/foo\\..\\v1"])(
     "rejects unsafe or excluded route %s",
     (route) => expect(() => validateSpaRoute(route)).toThrow(),
   );
