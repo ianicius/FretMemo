@@ -52,4 +52,13 @@ describe("generateSpaEntrypoints", () => {
     "rejects unsafe or excluded route %s",
     (route) => expect(() => validateSpaRoute(route)).toThrow(),
   );
+
+  it.each([
+    "/BLOG", "/FAQ", "/V1", "/V2",
+    "/blog.html", "/faq.html", "/v1.html", "/v2.html",
+    "/blog.", "/faq.", "/v1.", "/v2.",
+    "/BLOG.HTML", "/FAQ.HTML", "/V1.HTML", "/V2.HTML",
+  ])("rejects excluded static file or Windows alias %s", (route) => {
+    expect(() => validateSpaRoute(route)).toThrow();
+  });
 });
