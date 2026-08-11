@@ -15,12 +15,12 @@ function normalizePluralKey(key: string): string {
 }
 
 const forbiddenLiterals = {
-  "components/layout/AppShell.tsx": ["Skip to main content"],
+  "components/layout/AppShell.tsx": ["Skip to main content", "Buy me a coffee", "Open FAQ"],
   "components/layout/DarkModeToggle.tsx": ["Switch to Light Mode", "Switch to Dark Mode", "Light Mode", "Dark Mode"],
   "components/ui/mastery-bar.tsx": ["Mastery progress", "% mastery"],
   "components/fretboard/NoteDot.tsx": ["Note at string"],
   "components/practice/AnswerButtons.tsx": ["Answer ${displayNote}"],
-  "pages/Practice.tsx": ["5 streak! Keep it up!", "Amazing! 10 streak!", "Perfect Session! 20 streak!", "Streak broken at"],
+  "pages/Practice.tsx": ["5 streak! Keep it up!", "Amazing! 10 streak!", "Perfect Session! 20 streak!", "Streak broken at", "Guitar Mode"],
 };
 
 describe("P1 localization", () => {
