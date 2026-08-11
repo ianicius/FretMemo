@@ -8,6 +8,7 @@ import { useAppStore } from './useAppStore';
 import { normalizeTuning } from '@/lib/tuning';
 import { trackEvent } from '@/lib/analytics';
 import { calculateDynamicXP } from '../lib/progression';
+import { getPromptFeedback, type PracticeFeedback } from '@/lib/practiceFeedback';
 
 export type PracticeMode = 'fretboardToNote' | 'tabToNote' | 'noteToTab' | 'playNotes' | 'playTab';
 export type PracticeModeId = PracticeMode;
@@ -83,7 +84,7 @@ interface GameState {
     isPlaying: boolean;
     score: number;
     streak: number;
-    feedbackMessage: string | null;
+    feedback: PracticeFeedback | null;
     sessionStartTime: number | null;
     sessionCorrect: number;
     sessionIncorrect: number;
@@ -341,20 +342,6 @@ const initialPracticeConstraints = normalizePracticeConstraints({
     noteSequence: initialQuick?.noteSequence ?? DEFAULT_NOTE_SEQUENCE,
 });
 
-function getPromptForMode(mode: PracticeMode): string {
-    switch (mode) {
-        case 'fretboardToNote':
-        case 'tabToNote':
-            return 'Identify the note!';
-        case 'noteToTab':
-            return 'Pick the correct tab position!';
-        case 'playNotes':
-            return 'Play the note (mic)!';
-        case 'playTab':
-            return 'Play the tab sequence (mic)!';
-    }
-}
-
 function shuffle<T>(arr: T[]): T[] {
     const copy = [...arr];
     for (let i = copy.length - 1; i > 0; i--) {
@@ -419,7 +406,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     isPlaying: false,
     score: 0,
     streak: 0,
-    feedbackMessage: null,
+    feedback: null,
     sessionStartTime: null,
     sessionCorrect: 0,
     sessionIncorrect: 0,
@@ -528,7 +515,7 @@ export const useGameStore = create<GameState>((set, get) => ({
             sessionStartTime: Date.now(),
             sessionCorrect: 0,
             sessionIncorrect: 0,
-            feedbackMessage: getPromptForMode(mode),
+            feedback: getPromptFeedback(mode),
             speedUpTickCounter: 0,
             noteTickCounter: 0,
             playCycleAnswered: false,
@@ -606,7 +593,7 @@ export const useGameStore = create<GameState>((set, get) => ({
             noteToTabOptions: [],
             nextNote: null,
             nextPosition: null,
-            feedbackMessage: null,  // Clear to prevent erroneous popups
+            feedback: null,  // Clear to prevent erroneous popups
             isMetronomeOn: false,
             metronomeInterval: null,
             sessionStartTime: null,
@@ -715,10 +702,10 @@ export const useGameStore = create<GameState>((set, get) => ({
                 set({
                     streak: 0,
                     sessionIncorrect: sessionIncorrect + 1,
-                    feedbackMessage: "Too slow!",
+                    feedback: { kind: "too-slow" },
                 });
             } else {
-                set({ feedbackMessage: getPromptForMode(mode) });
+                set({ feedback: getPromptFeedback(mode) });
             }
             get().generateNewTarget();
         }
@@ -730,10 +717,10 @@ export const useGameStore = create<GameState>((set, get) => ({
                 set({
                     streak: 0,
                     sessionIncorrect: sessionIncorrect + 1,
-                    feedbackMessage: "Too slow!",
+                    feedback: { kind: "too-slow" },
                 });
             } else {
-                set({ feedbackMessage: getPromptForMode(mode) });
+                set({ feedback: getPromptFeedback(mode) });
             }
             get().generateNewTarget();
         }
@@ -986,7 +973,7 @@ export const useGameStore = create<GameState>((set, get) => ({
 
         set({
             lastAnswer: null,
-            feedbackMessage: getPromptForMode(mode),
+            feedback: getPromptFeedback(mode),
         });
         generateNewTarget();
     },
@@ -1030,7 +1017,7 @@ export const useGameStore = create<GameState>((set, get) => ({
                 streak: newStreak,
                 lastAnswer: { position: targetPosition, correct: true, selectedNote: note },
                 sessionCorrect: get().sessionCorrect + 1,
-                feedbackMessage: "Correct!"
+                feedback: { kind: "correct" }
             });
 
             // Update local session stats
@@ -1043,12 +1030,12 @@ export const useGameStore = create<GameState>((set, get) => ({
 
             if (shouldAutoAdvanceByClick) {
                 setTimeout(() => {
-                    set({ lastAnswer: null, feedbackMessage: getPromptForMode(mode) });
+                    set({ lastAnswer: null, feedback: getPromptFeedback(mode) });
                     generateNewTarget();
                 }, 700);
             } else if (!shouldAutoAdvanceByMetronome && !isManualAdvanceMode) {
                 setTimeout(() => {
-                    set({ lastAnswer: null, feedbackMessage: getPromptForMode(mode) });
+                    set({ lastAnswer: null, feedback: getPromptFeedback(mode) });
                     generateNewTarget();
                 }, 800);
             }
@@ -1057,7 +1044,7 @@ export const useGameStore = create<GameState>((set, get) => ({
                 streak: 0,
                 lastAnswer: { position: targetPosition, correct: false, selectedNote: note },
                 sessionIncorrect: get().sessionIncorrect + 1,
-                feedbackMessage: `Incorrect! It was ${actualNote}`
+                feedback: { kind: "incorrect-note", actualNote }
             });
 
             const appStore = useAppStore.getState();
@@ -1067,7 +1054,7 @@ export const useGameStore = create<GameState>((set, get) => ({
 
             if (shouldAutoAdvanceByClick) {
                 setTimeout(() => {
-                    set({ lastAnswer: null, feedbackMessage: getPromptForMode(mode) });
+                    set({ lastAnswer: null, feedback: getPromptFeedback(mode) });
                     generateNewTarget();
                 }, 1200);
             } else if (!shouldAutoAdvanceByMetronome && !isManualAdvanceMode) {
@@ -1115,7 +1102,7 @@ export const useGameStore = create<GameState>((set, get) => ({
                 streak: newStreak,
                 lastAnswer: { position: pos, correct: true },
                 sessionCorrect: get().sessionCorrect + 1,
-                feedbackMessage: "Correct!"
+                feedback: { kind: "correct" }
             });
 
             const appStore = useAppStore.getState();
@@ -1127,12 +1114,12 @@ export const useGameStore = create<GameState>((set, get) => ({
 
             if (shouldAutoAdvanceByClick) {
                 setTimeout(() => {
-                    set({ lastAnswer: null, feedbackMessage: getPromptForMode(mode) });
+                    set({ lastAnswer: null, feedback: getPromptFeedback(mode) });
                     generateNewTarget();
                 }, 700);
             } else if (!shouldAutoAdvanceByMetronome && !isManualAdvanceMode) {
                 setTimeout(() => {
-                    set({ lastAnswer: null, feedbackMessage: getPromptForMode(mode) });
+                    set({ lastAnswer: null, feedback: getPromptFeedback(mode) });
                     generateNewTarget();
                 }, 800);
             }
@@ -1141,7 +1128,11 @@ export const useGameStore = create<GameState>((set, get) => ({
                 streak: 0,
                 lastAnswer: { position: pos, correct: false },
                 sessionIncorrect: get().sessionIncorrect + 1,
-                feedbackMessage: `Incorrect! Correct: string ${targetPosition.stringIndex + 1}, fret ${targetPosition.fret}`
+                feedback: {
+                    kind: "incorrect-position",
+                    stringNumber: targetPosition.stringIndex + 1,
+                    fret: targetPosition.fret,
+                }
             });
 
             const appStore = useAppStore.getState();
@@ -1151,7 +1142,7 @@ export const useGameStore = create<GameState>((set, get) => ({
 
             if (shouldAutoAdvanceByClick) {
                 setTimeout(() => {
-                    set({ lastAnswer: null, feedbackMessage: getPromptForMode(mode) });
+                    set({ lastAnswer: null, feedback: getPromptFeedback(mode) });
                     generateNewTarget();
                 }, 1200);
             } else if (!shouldAutoAdvanceByMetronome && !isManualAdvanceMode) {
@@ -1180,12 +1171,12 @@ export const useGameStore = create<GameState>((set, get) => ({
                     score: score + 10 + (streak * 2),
                     streak: newStreak,
                     sessionCorrect: get().sessionCorrect + 1,
-                    feedbackMessage: "Correct!",
+                    feedback: { kind: "correct" },
                     playCycleAnswered: true,
                 });
                 if (!isMetronomeOn) {
                     setTimeout(() => {
-                        set({ feedbackMessage: getPromptForMode(mode) });
+                        set({ feedback: getPromptFeedback(mode) });
                         generateNewTarget();
                     }, 350);
                 }
@@ -1194,7 +1185,7 @@ export const useGameStore = create<GameState>((set, get) => ({
                     set({
                         streak: 0,
                         sessionIncorrect: get().sessionIncorrect + 1,
-                        feedbackMessage: `Incorrect(${note})`
+                        feedback: { kind: "incorrect-detected", note }
                     });
                 }
                 const appStore = useAppStore.getState();
@@ -1228,7 +1219,7 @@ export const useGameStore = create<GameState>((set, get) => ({
                     score: score + 10 + (streak * 2),
                     streak: newStreak,
                     sessionCorrect: get().sessionCorrect + 1,
-                    feedbackMessage: "Correct!",
+                    feedback: { kind: "correct" },
                     playCycleAnswered: true,
                 });
 
@@ -1241,7 +1232,7 @@ export const useGameStore = create<GameState>((set, get) => ({
 
                 if (!isMetronomeOn) {
                     setTimeout(() => {
-                        set({ feedbackMessage: getPromptForMode(mode) });
+                        set({ feedback: getPromptFeedback(mode) });
                         generateNewTarget();
                     }, 350);
                 }
@@ -1250,7 +1241,7 @@ export const useGameStore = create<GameState>((set, get) => ({
                     set({
                         streak: 0,
                         sessionIncorrect: get().sessionIncorrect + 1,
-                        feedbackMessage: `Incorrect(${note})`
+                        feedback: { kind: "incorrect-detected", note }
                     });
                 }
                 const appStore = useAppStore.getState();
@@ -1270,7 +1261,7 @@ export const useGameStore = create<GameState>((set, get) => ({
 
         set({
             score: Math.max(0, score - 5),
-            feedbackMessage: `Hint: ${hintedNote} (-5)`,
+            feedback: { kind: "hint", note: hintedNote, penalty: 5 },
         });
     },
 
