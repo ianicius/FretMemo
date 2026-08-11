@@ -17,3 +17,6 @@ Thumbs.db
 
 # Internal plans
 plans/
+
+# Isolated agent worktrees
+.worktrees/
