@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { Chord, Note } from "tonal";
 import { cn } from "@/lib/utils";
 import { playChord } from "@/lib/audio";
-import { applyPolishNotation, formatPitchClass } from "@/lib/noteNotation";
+import { formatLocalizedNoteToken, formatPitchClass } from "@/lib/noteNotation";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { useTranslation } from "react-i18next";
 
@@ -116,7 +116,8 @@ function ChordDiagram({ frets, label }: { frets: number[]; label: string }) {
 }
 
 export default function ChordLibrary() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const language = i18n.resolvedLanguage ?? i18n.language;
     const notation = useSettingsStore((state) => state.full.instrument.notation);
     const [root, setRoot] = useState("C");
     const [selectedType, setSelectedType] = useState("major");
@@ -130,7 +131,7 @@ export default function ChordLibrary() {
     }, [chordData.notes, notation]);
 
     const voicings = COMMON_VOICINGS[chordName] ?? [];
-    const displayChordName = applyPolishNotation(chordData.symbol || chordName);
+    const displayChordName = formatLocalizedNoteToken(chordData.symbol || chordName, language);
 
     return (
         <div className="space-y-5">

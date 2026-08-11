@@ -112,7 +112,7 @@ export function AppShell() {
                 href="#app-main-scroll"
                 className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-background focus:text-foreground focus:border focus:rounded-md focus:shadow-md outline-none focus:ring-2 focus:ring-primary"
             >
-                Skip to main content
+                {t("accessibility.skipToMain")}
             </a>
 
             <aside className="hidden md:flex w-16 lg:w-64 border-r border-border flex-col bg-card/30 sticky top-0 h-screen">
@@ -176,7 +176,7 @@ export function AppShell() {
                     <Button asChild className="hidden lg:flex w-full control-btn--primary justify-start">
                         <a href={EXTERNAL_LINKS.buyMeCoffee} target="_blank" rel="noreferrer noopener">
                             <Coffee className="w-4 h-4" />
-                            Buy me a coffee
+                            {t("header.buyCoffee")}
                         </a>
                     </Button>
                     <Button asChild variant="link" size="sm" className="hidden lg:flex h-auto w-full justify-start px-1 text-xs text-muted-foreground">
@@ -187,12 +187,12 @@ export function AppShell() {
                     </Button>
                     <div className="flex items-center gap-1.5 w-full">
                         <Button asChild variant="ghost" size="icon" className="lg:hidden shrink-0">
-                            <a href={EXTERNAL_LINKS.buyMeCoffee} target="_blank" rel="noreferrer noopener" aria-label="Buy me a coffee">
+                            <a href={EXTERNAL_LINKS.buyMeCoffee} target="_blank" rel="noreferrer noopener" aria-label={t("header.buyCoffee")}>
                                 <Coffee className="w-5 h-5" />
                             </a>
                         </Button>
                         <Button asChild variant="ghost" size="icon" className="lg:hidden shrink-0">
-                            <a href={EXTERNAL_LINKS.faq} target="_blank" rel="noreferrer noopener" aria-label="Open FAQ">
+                            <a href={EXTERNAL_LINKS.faq} target="_blank" rel="noreferrer noopener" aria-label={t("header.openFaq")}>
                                 <CircleHelp className="w-5 h-5" />
                             </a>
                         </Button>
