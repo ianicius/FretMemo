@@ -935,7 +935,21 @@
         "clean": "Clean"
       },
       "pitchTolerance": "Tolerancja stroju (centy)",
-      "pitchToleranceHint": "Wyższe wartości dają większą tolerancję detekcji."
+      "pitchToleranceHint": "Wyższe wartości dają większą tolerancję detekcji.",
+      "latency": {
+        "title": "Opóźnienie wejścia (mikrofon)",
+        "current": "{{ms}} ms",
+        "hint": "Zagraj lub klaśnij na każdy klik — zmierzony offset kompensuje czas oceny odpowiedzi rytmicznych. Tę samą wartość zmienisz w trybach Rhythm Dojo.",
+        "calibrate": "Kalibruj",
+        "listening": "Słucham… graj na każdy klik",
+        "measuringProgress": "{{hit}} / {{target}}",
+        "measuredMs": "Zmierzono: {{ms}} ms",
+        "apply": "Zastosuj",
+        "applied": "Zastosowano — ocena rytmu używa tej wartości.",
+        "retry": "Ponów",
+        "noMic": "Nie znaleziono mikrofonu albo odmówiono dostępu.",
+        "tooFewHits": "Za mało wyraźnych onsetów. Graj głośniej, dokładnie na klik."
+      }
     },
     "appearance": {
       "sectionTitle": "Wygląd",

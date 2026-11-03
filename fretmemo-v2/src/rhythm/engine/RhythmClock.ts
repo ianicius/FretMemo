@@ -22,6 +22,14 @@ export class RhythmClock {
         return this.getContext().currentTime;
     }
 
+    /** Closes the underlying context; the next getContext() opens a fresh one. */
+    close(): void {
+        if (this.ctx) {
+            void this.ctx.close();
+            this.ctx = null;
+        }
+    }
+
     toDelayMs(targetTimeSec: number): number {
         return Math.max(0, (targetTimeSec - this.now()) * 1000);
     }
