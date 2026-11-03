@@ -103,6 +103,7 @@ function createDefaultSettings(): AppSettings {
     quick: {
         tempo: 60,
         isMetronomeOn: false,
+        countInEnabled: false,
         tuning: [...STANDARD_TUNING],
         fretRange: { min: 0, max: 12 },
         practiceRootNote: 'C',

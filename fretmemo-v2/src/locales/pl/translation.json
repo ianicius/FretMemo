@@ -601,6 +601,7 @@
     }
   },
   "practice": {
+    "countInLabel": "Wstęp (count-in)",
     "title": "Trening",
     "subtitle": "Wybierz tryb i dopasuj sesję",
     "instructions": "Instrukcje",
@@ -668,6 +669,8 @@
       "tempo": "Tempo",
       "metronome": "Metronom",
       "metronomeDesc": "Użyj metronomu w trakcie treningu.",
+      "countIn": "Wstęp (count-in)",
+      "countInDesc": "Zagraj jeden takt klików przed startem sesji.",
       "mic": "Mikrofon",
       "micDesc": "Włącz, by aplikacja rejestrowała dźwięki gitary z mikrofonu.",
       "sessionMode": "Tryb sesji",

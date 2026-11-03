@@ -7,6 +7,7 @@ import { useSettingsStore } from './useSettingsStore';
 import { useAppStore } from './useAppStore';
 import { normalizeTuning } from '@/lib/tuning';
 import { trackEvent } from '@/lib/analytics';
+import { playCountInClicks } from '@/lib/audio';
 import { calculateDynamicXP } from '../lib/progression';
 import { getPromptFeedback, type PracticeFeedback } from '@/lib/practiceFeedback';
 
@@ -110,6 +111,11 @@ interface GameState {
     isMetronomeArmed: boolean;  // User enabled, will start with session
     metronomeInterval: number | null;
 
+    // Count-in (one bar of clicks before the session's first beat)
+    isCountInActive: boolean;
+    countInBeat: number;  // 4..1 while counting in, 0 otherwise
+    countInTimers: number[];
+
     // Acceleration
     speedUpEnabled: boolean;
     speedUpAmount: number;  // BPM to add
@@ -133,6 +139,7 @@ interface GameState {
     advanceAfterAnswer: () => void;
     toggleMetronome: () => void;
     tickMetronome: () => void;
+    finishCountIn: () => void;
     setSpeedUpEnabled: (enabled: boolean) => void;
     setSpeedUpAmount: (amount: number) => void;
     setSpeedUpInterval: (interval: number) => void;
@@ -428,6 +435,9 @@ export const useGameStore = create<GameState>((set, get) => ({
     isMetronomeOn: false,
     isMetronomeArmed: initialQuick?.isMetronomeOn ?? false,
     metronomeInterval: null,
+    isCountInActive: false,
+    countInBeat: 0,
+    countInTimers: [],
     speedUpEnabled: false,
     speedUpAmount: 5,
     speedUpInterval: 8,
@@ -503,6 +513,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         const { mode, isMetronomeArmed, bpm, noteDuration, practiceConstraints } = get();
         const isPlayMode = mode === 'playNotes' || mode === 'playTab';
         const deferPlayTargetToFirstBeat = isMetronomeArmed && isPlayMode;
+        const countInEnabled = Boolean(useSettingsStore.getState().quick.countInEnabled);
 
         // Check streak when starting practice
         useProgressStore.getState().checkAndUpdateStreak();
@@ -512,13 +523,17 @@ export const useGameStore = create<GameState>((set, get) => ({
             score: 0,
             streak: 0,
             lastAnswer: null,
-            sessionStartTime: Date.now(),
+            // During count-in the session has not musically begun yet.
+            sessionStartTime: countInEnabled ? null : Date.now(),
             sessionCorrect: 0,
             sessionIncorrect: 0,
             feedback: getPromptFeedback(mode),
             speedUpTickCounter: 0,
             noteTickCounter: 0,
             playCycleAnswered: false,
+            isCountInActive: countInEnabled,
+            countInBeat: countInEnabled ? 4 : 0,
+            countInTimers: [],
         });
 
         trackEvent('fm_v2_practice_session_started', {
@@ -526,6 +541,7 @@ export const useGameStore = create<GameState>((set, get) => ({
             bpm,
             note_duration_beats: noteDuration,
             metronome_armed: isMetronomeArmed,
+            count_in_enabled: countInEnabled,
             fret_min: practiceConstraints.fretRange.min,
             fret_max: practiceConstraints.fretRange.max,
             enabled_strings_count: practiceConstraints.enabledStrings.filter(Boolean).length,
@@ -533,7 +549,49 @@ export const useGameStore = create<GameState>((set, get) => ({
             note_sequence: practiceConstraints.noteSequence,
         });
 
+        if (countInEnabled) {
+            const beatMs = Math.round(60000 / Math.max(1, bpm));
+            const timers: number[] = [];
+            for (let beat = 1; beat <= 3; beat += 1) {
+                timers.push(window.setTimeout(() => {
+                    useGameStore.setState({ countInBeat: 4 - beat });
+                }, beatMs * beat));
+            }
+            timers.push(window.setTimeout(() => get().finishCountIn(), beatMs * 4));
+            playCountInClicks(bpm, 4);
+            set({ countInTimers: timers });
+            return;
+        }
+
         // Start metronome only if it was armed
+        if (isMetronomeArmed) {
+            set({ isMetronomeOn: true });
+            get().tickMetronome();
+        }
+
+        // In Play Practice with metronome ON, the first target appears on beat 1.
+        if (!deferPlayTargetToFirstBeat) {
+            get().generateNewTarget();
+        }
+    },
+
+    finishCountIn: () => {
+        const { countInTimers, isMetronomeArmed, mode } = get();
+        const isPlayMode = mode === 'playNotes' || mode === 'playTab';
+        const deferPlayTargetToFirstBeat = isMetronomeArmed && isPlayMode;
+
+        for (const timerId of countInTimers) {
+            clearTimeout(timerId);
+        }
+
+        set({
+            isCountInActive: false,
+            countInBeat: 0,
+            countInTimers: [],
+            sessionStartTime: Date.now(),
+        });
+
+        // The session's beat 1 lands where the count-in ended.
         if (isMetronomeArmed) {
             set({ isMetronomeOn: true });
             get().tickMetronome();
@@ -579,10 +637,13 @@ export const useGameStore = create<GameState>((set, get) => ({
             accuracy,
         });
 
-        // Clear metronome interval if running
-        const { metronomeInterval } = get();
+        // Clear metronome interval and pending count-in timers if running
+        const { metronomeInterval, countInTimers } = get();
         if (metronomeInterval) {
             clearTimeout(metronomeInterval);
+        }
+        for (const timerId of countInTimers) {
+            clearTimeout(timerId);
         }
 
         set({
@@ -596,6 +657,9 @@ export const useGameStore = create<GameState>((set, get) => ({
             feedback: null,  // Clear to prevent erroneous popups
             isMetronomeOn: false,
             metronomeInterval: null,
+            isCountInActive: false,
+            countInBeat: 0,
+            countInTimers: [],
             sessionStartTime: null,
             speedUpTickCounter: 0,
             noteTickCounter: 0,
