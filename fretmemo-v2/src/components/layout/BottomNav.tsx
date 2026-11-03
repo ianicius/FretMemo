@@ -41,7 +41,7 @@ export function BottomNav() {
             <div className="mx-auto flex h-16 max-w-md items-center px-2">
                 {NAV_ITEMS.map((item) => {
                     const isActive = item.id === 'practice'
-                        ? activePath.startsWith('/train') || activePath.startsWith('/practice')
+                        ? activePath.startsWith('/train') || activePath.startsWith('/practice') || activePath.startsWith('/scores')
                         : item.id === 'progress'
                             ? activePath.startsWith('/me') || activePath.startsWith('/progress') || activePath.startsWith('/settings')
                             : activePath === item.path || (item.path !== '/' && activePath.startsWith(item.path));

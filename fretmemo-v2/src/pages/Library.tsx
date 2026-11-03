@@ -8,12 +8,18 @@ import { SectionCollapse } from "@/components/ui/section-collapse";
 import { ExerciseCard } from "@/components/ui/exercise-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
-import { Compass, Drum, Ear, Guitar, Music2, Sparkles, Star, Target } from "lucide-react";
+import { Compass, Drum, Ear, Guitar, Loader2, Music, Music2, Sparkles, Star, Target, Trash2, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import type { ChangeEvent } from "react";
+import { Button } from "@/components/ui/button";
+import { trackEvent } from "@/lib/analytics";
+import { formatScoreMetaLine } from "@/lib/scoreDisplay";
+import { useScoresStore, type ScoreImportError } from "@/stores/useScoresStore";
+import type { ScoreSummary } from "@/types/scores";
 
 type TechniqueDifficulty = "beginner" | "intermediate" | "advanced";
 type PracticeMode = "fretboardToNote" | "tabToNote" | "noteToTab" | "playNotes" | "playTab";
-type TrainSectionKey = "pinned" | "drills" | "technique" | "theory" | "ear" | "rhythm";
+type TrainSectionKey = "pinned" | "scores" | "drills" | "technique" | "theory" | "ear" | "rhythm";
 type TrainSectionsOpenState = Record<TrainSectionKey, boolean>;
 
 type CatalogCard = {
@@ -116,6 +122,7 @@ const TRAIN_UI_STATE_KEY = "fretmemo.train.ui";
 
 const DEFAULT_SECTIONS_OPEN: TrainSectionsOpenState = {
     pinned: false,
+    scores: true,
     drills: true,
     technique: true,
     theory: true,
@@ -129,6 +136,7 @@ function normalizeSectionsOpen(
 ): TrainSectionsOpenState {
     return {
         pinned: typeof sectionsOpen?.pinned === "boolean" ? sectionsOpen.pinned : pinnedDefaultOpen,
+        scores: typeof sectionsOpen?.scores === "boolean" ? sectionsOpen.scores : DEFAULT_SECTIONS_OPEN.scores,
         drills: typeof sectionsOpen?.drills === "boolean" ? sectionsOpen.drills : DEFAULT_SECTIONS_OPEN.drills,
         technique: typeof sectionsOpen?.technique === "boolean" ? sectionsOpen.technique : DEFAULT_SECTIONS_OPEN.technique,
         theory: typeof sectionsOpen?.theory === "boolean" ? sectionsOpen.theory : DEFAULT_SECTIONS_OPEN.theory,
@@ -221,8 +229,19 @@ function getAverageMastery(items: Array<{ mastery: number }>): number {
     return Math.round(total / items.length);
 }
 
+function getScoreErrorKey(error: ScoreImportError): string {
+    switch (error) {
+        case "unsupported-format":
+            return "library.scoresErrorUnsupported";
+        case "parse-error":
+            return "library.scoresErrorParse";
+        default:
+            return "library.scoresErrorStorage";
+    }
+}
+
 export default function Library() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
     const navigationType = useNavigationType();
@@ -241,6 +260,39 @@ export default function Library() {
         return normalizeSectionsOpen(savedState?.sectionsOpen, pinnedIds.length > 0);
     });
     const sectionsOpenRef = useRef(sectionsOpen);
+    const scores = useScoresStore((state) => state.scores);
+    const scoresLoading = useScoresStore((state) => state.isLoading);
+    const scoresLoaded = useScoresStore((state) => state.isLoaded);
+    const scoresLastError = useScoresStore((state) => state.lastError);
+    const loadScores = useScoresStore((state) => state.loadScores);
+    const addScore = useScoresStore((state) => state.addScore);
+    const removeScore = useScoresStore((state) => state.removeScore);
+    const clearError = useScoresStore((state) => state.clearError);
+    const scoreFileInputRef = useRef<HTMLInputElement | null>(null);
+    const [isImportingScore, setIsImportingScore] = useState(false);
+
+    useEffect(() => {
+        if (!scoresLoaded) {
+            void loadScores();
+        }
+    }, [scoresLoaded, loadScores]);
+
+    const handleScoreFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0] ?? null;
+        // Reset so re-importing the same file re-triggers onChange.
+        event.target.value = "";
+        if (!file) return;
+        setIsImportingScore(true);
+        await addScore(file);
+        setIsImportingScore(false);
+    };
+
+    const openScore = (score: ScoreSummary) => {
+        trackEvent("fm_v2_score_opened", { score_id: score.id, format: score.format });
+        navigate(`/scores?id=${encodeURIComponent(score.id)}`, {
+            state: { source: "train_scores_card" },
+        });
+    };
 
     useEffect(() => {
         sectionsOpenRef.current = sectionsOpen;
@@ -552,6 +604,99 @@ export default function Library() {
                         ))}
                     </div>
                 )}
+            </SectionCollapse>
+
+            <SectionCollapse
+                title={t('library.scores')}
+                summary={t("library.scoresSummary", { count: scores.length })}
+                open={sectionsOpen.scores}
+                onOpenChange={(nextOpen) => handleSectionOpenChange("scores", nextOpen)}
+            >
+                <div className="space-y-3">
+                    <input
+                        ref={scoreFileInputRef}
+                        type="file"
+                        accept=".gp3,.gp4,.gp5,.gpx,.gp"
+                        className="hidden"
+                        onChange={(event) => void handleScoreFileChange(event)}
+                    />
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="text-xs text-muted-foreground">
+                            {t("library.scoresImportHint")}
+                        </p>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={isImportingScore}
+                            onClick={() => scoreFileInputRef.current?.click()}
+                        >
+                            {isImportingScore ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                                <Music className="h-4 w-4" />
+                            )}
+                            {isImportingScore
+                                ? t("library.scoresImporting")
+                                : t("library.scoresImport")}
+                        </Button>
+                    </div>
+
+                    {scoresLastError !== null && (
+                        <div
+                            className="flex items-start justify-between gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive"
+                            role="alert"
+                        >
+                            <span>{t(getScoreErrorKey(scoresLastError))}</span>
+                            <button
+                                type="button"
+                                className="shrink-0 rounded p-0.5 transition hover:bg-destructive/20"
+                                onClick={clearError}
+                                aria-label={t("library.scoresErrorDismiss")}
+                            >
+                                <X className="h-3.5 w-3.5" />
+                            </button>
+                        </div>
+                    )}
+
+                    {!scoresLoading && scores.length === 0 ? (
+                        <EmptyState
+                            title={t("library.scoresEmptyTitle")}
+                            description={t("library.scoresEmptyDesc")}
+                        />
+                    ) : (
+                        <div className="space-y-2">
+                            {scores.map((score) => (
+                                <div key={score.id} className="relative">
+                                    <button
+                                        type="button"
+                                        className="w-full rounded-lg border border-border/60 bg-card/60 px-3 py-2.5 pr-12 text-left transition hover:bg-accent/50"
+                                        onClick={() => openScore(score)}
+                                        aria-label={t("library.scoresOpenAria", { title: score.title })}
+                                    >
+                                        <div className="flex items-center gap-2.5">
+                                            <Music className="h-4 w-4 shrink-0 text-primary" />
+                                            <div className="min-w-0">
+                                                <p className="truncate text-sm font-medium">{score.title}</p>
+                                                <p className="truncate text-xs text-muted-foreground">
+                                                    {formatScoreMetaLine(score, t, i18n.language)}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="absolute right-2 top-2 z-10 inline-flex h-7 w-7 items-center justify-center rounded-full border border-destructive/40 bg-destructive/10 text-destructive shadow-sm transition hover:bg-destructive/20"
+                                        onClick={() => void removeScore(score.id)}
+                                        aria-label={t("library.scoresDeleteAria", { title: score.title })}
+                                    >
+                                        <Trash2 className="h-3.5 w-3.5" />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </SectionCollapse>
 
             <SectionCollapse

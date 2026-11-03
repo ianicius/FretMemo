@@ -46,6 +46,10 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: [...SPA_PRECACHE_GLOB_PATTERNS],
+        // alphaTab's worker chunk is emitted but never fetched while playback
+        // is out of scope (useWorkers: false); keep it out of the precache
+        // until R-02 starts loading it.
+        globIgnores: ["assets/alphaTab.worker-*.js"],
         cleanupOutdatedCaches: true,
         skipWaiting: true,
         clientsClaim: true,

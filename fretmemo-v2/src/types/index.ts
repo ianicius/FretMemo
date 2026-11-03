@@ -1,6 +1,7 @@
 export * from './fretboard';
 export * from './settings';
 export * from './progress';
+export * from './scores';
 
 export type TabId = 'home' | 'practice' | 'challenges' | 'progress';
 
