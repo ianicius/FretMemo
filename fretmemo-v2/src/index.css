@@ -594,3 +594,99 @@
 .dark ::-webkit-scrollbar-thumb:hover {
   background: rgba(168, 162, 158, 0.6);
 }
+/* ─── Fret highway (playTab falling positions) ─── */
+.fret-highway {
+  width: 100%;
+  margin-bottom: 1.25rem;
+}
+.fret-highway__lanes {
+  position: relative;
+  /* height = (LANE_COUNT + 1) slots; keep in sync with FretHighway.tsx */
+  height: calc(4 * 3.5rem);
+  margin-bottom: 0.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid hsl(var(--border) / 0.4);
+  overflow: hidden;
+  background: hsl(var(--card) / 0.3);
+}
+.fret-highway__lane-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: hsl(var(--border) / 0.35);
+}
+.fret-highway__dot {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-left: -1.25rem;
+  border-radius: 9999px;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  line-height: 1;
+  box-shadow: 0 2px 10px hsl(var(--primary) / 0.45);
+  will-change: transform;
+  z-index: 1;
+}
+.fret-highway__dot-fret {
+  font-size: 1rem;
+  font-weight: 700;
+}
+.fret-highway__dot-string {
+  font-size: 0.55rem;
+  opacity: 0.8;
+}
+.fret-highway__dot--hit {
+  background: hsl(142 71% 45%);
+  animation: fret-highway-hit 0.45s ease-out;
+}
+.fret-highway__dot--miss {
+  background: hsl(0 72% 51%);
+  animation: fret-highway-miss 0.45s ease-out;
+}
+@keyframes fret-highway-hit {
+  0% { box-shadow: 0 0 0 0 hsl(142 71% 45% / 0.7); }
+  100% { box-shadow: 0 0 0 16px hsl(142 71% 45% / 0); }
+}
+@keyframes fret-highway-miss {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.fret-highway__board {
+  display: grid;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 1px solid hsl(var(--border) / 0.5);
+}
+.fret-highway__cell {
+  position: relative;
+  height: 2.4rem;
+  border-left: 1px solid var(--fret-wire-light);
+}
+.dark .fret-highway__cell {
+  border-left-color: var(--fret-wire-dark);
+}
+.fret-highway__cell:first-child,
+.fret-highway__cell--nut {
+  background: hsl(var(--foreground) / 0.08);
+}
+.fret-highway__cell--landing {
+  background: hsl(var(--primary) / 0.16);
+  box-shadow: inset 0 0 0 2px hsl(var(--primary) / 0.6);
+}
+.fret-highway__open-note {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: hsl(var(--muted-foreground));
+}
