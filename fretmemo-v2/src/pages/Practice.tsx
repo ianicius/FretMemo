@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Fretboard } from "@/components/fretboard/Fretboard";
 import { TabView } from "@/components/fretboard/TabView";
+import { FretHighway } from "@/components/fretboard/FretHighway";
 import type { NoteName, Position, NoteStatus, FretboardLayer } from "@/types/fretboard";
 import { useGameStore, type ScaleType, type NoteFilter, type NoteSequence } from "@/stores/useGameStore";
 import { useProgressStore } from "@/stores/useProgressStore";
@@ -98,6 +99,10 @@ export default function Practice() {
         score,
         streak,
         mode,
+        upcomingPositions,
+        lastBeatAt,
+        lastCycleMissed,
+        playCycleAnswered,
         targetNote,
         targetPosition,
         targetPresentedAt,
@@ -1017,6 +1022,16 @@ export default function Practice() {
                 )}
                 {moduleTab === "play" && mode === "playTab" && (
                     <div className={cn("w-full mx-auto backdrop-blur-sm bg-background/30 rounded-3xl border border-border/20 shadow-2xl", isLandscape ? "p-4 max-w-4xl" : "p-8 max-w-6xl")}>
+                        <FretHighway
+                            target={targetPosition}
+                            upcoming={upcomingPositions}
+                            beatMs={Math.round(60000 / Math.max(1, bpm))}
+                            lastBeatAt={lastBeatAt}
+                            clockRunning={isMetronomeOn}
+                            answered={playCycleAnswered}
+                            missed={lastCycleMissed}
+                            tuning={tuning}
+                        />
                         <div className={cn("grid items-center", isLandscape ? "gap-6 grid-cols-2" : "gap-12 lg:grid-cols-2")}>
                             <div className="relative group">
                                 <div

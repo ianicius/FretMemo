@@ -116,6 +116,11 @@ interface GameState {
     countInBeat: number;  // 4..1 while counting in, 0 otherwise
     countInTimers: number[];
 
+    // Fret highway (playTab falling-position visualization)
+    upcomingPositions: Position[];  // next 3 positions after the target
+    lastBeatAt: number | null;  // wall-clock ms of the last metronome tick
+    lastCycleMissed: boolean;  // target expired unanswered — miss flash fuel
+
     // Acceleration
     speedUpEnabled: boolean;
     speedUpAmount: number;  // BPM to add
@@ -140,6 +145,7 @@ interface GameState {
     toggleMetronome: () => void;
     tickMetronome: () => void;
     finishCountIn: () => void;
+    // (no new actions — highway state is driven by existing actions)
     setSpeedUpEnabled: (enabled: boolean) => void;
     setSpeedUpAmount: (amount: number) => void;
     setSpeedUpInterval: (interval: number) => void;
@@ -438,6 +444,9 @@ export const useGameStore = create<GameState>((set, get) => ({
     isCountInActive: false,
     countInBeat: 0,
     countInTimers: [],
+    upcomingPositions: [],
+    lastBeatAt: null,
+    lastCycleMissed: false,
     speedUpEnabled: false,
     speedUpAmount: 5,
     speedUpInterval: 8,
@@ -455,6 +464,9 @@ export const useGameStore = create<GameState>((set, get) => ({
         noteToTabOptions: [],
         nextNote: null,
         nextPosition: null,
+        upcomingPositions: [],
+        lastBeatAt: null,
+        lastCycleMissed: false,
         playCycleAnswered: false,
         forcedTargetNote: null,
         sessionCorrect: 0,
@@ -534,6 +546,9 @@ export const useGameStore = create<GameState>((set, get) => ({
             isCountInActive: countInEnabled,
             countInBeat: countInEnabled ? 4 : 0,
             countInTimers: [],
+            upcomingPositions: [],
+            lastBeatAt: null,
+            lastCycleMissed: false,
         });
 
         trackEvent('fm_v2_practice_session_started', {
@@ -589,6 +604,7 @@ export const useGameStore = create<GameState>((set, get) => ({
             countInBeat: 0,
             countInTimers: [],
             sessionStartTime: Date.now(),
+            lastBeatAt: Date.now(),
         });
 
         // The session's beat 1 lands where the count-in ended.
@@ -660,6 +676,9 @@ export const useGameStore = create<GameState>((set, get) => ({
             isCountInActive: false,
             countInBeat: 0,
             countInTimers: [],
+            upcomingPositions: [],
+            lastBeatAt: null,
+            lastCycleMissed: false,
             sessionStartTime: null,
             speedUpTickCounter: 0,
             noteTickCounter: 0,
@@ -682,6 +701,7 @@ export const useGameStore = create<GameState>((set, get) => ({
                 metronomeInterval: null,
                 noteTickCounter: 0,
                 speedUpTickCounter: 0,
+                lastBeatAt: null,
             });
             useSettingsStore.getState().updateQuickSettings({ isMetronomeOn: false });
         } else {
@@ -754,7 +774,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         }
 
         const nextNoteTickCounter = noteTickCounter + 1 >= noteDuration ? 0 : noteTickCounter + 1;
-        set({ bpm: newBpm, speedUpTickCounter: newCounter, noteTickCounter: nextNoteTickCounter });
+        set({ bpm: newBpm, speedUpTickCounter: newCounter, noteTickCounter: nextNoteTickCounter, lastBeatAt: Date.now() });
 
         // Original behavior for Guess Note with metronome:
         // at each cycle boundary, unanswered question counts as miss, then next question appears.
@@ -769,7 +789,7 @@ export const useGameStore = create<GameState>((set, get) => ({
                     feedback: { kind: "too-slow" },
                 });
             } else {
-                set({ feedback: getPromptFeedback(mode) });
+                set({ feedback: getPromptFeedback(mode), lastCycleMissed: false });
             }
             get().generateNewTarget();
         }
@@ -782,9 +802,11 @@ export const useGameStore = create<GameState>((set, get) => ({
                     streak: 0,
                     sessionIncorrect: sessionIncorrect + 1,
                     feedback: { kind: "too-slow" },
+                    // Flash the miss on the departing target, not the incoming one.
+                    lastCycleMissed: true,
                 });
             } else {
-                set({ feedback: getPromptFeedback(mode) });
+                set({ feedback: getPromptFeedback(mode), lastCycleMissed: false });
             }
             get().generateNewTarget();
         }
@@ -996,6 +1018,7 @@ export const useGameStore = create<GameState>((set, get) => ({
 
         const currentPos = get().targetPosition;
         const existingNextPos = get().nextPosition;
+        const queue = [...get().upcomingPositions];
 
         const initPos = () => {
             for (let i = 0; i < 40; i += 1) {
@@ -1011,19 +1034,27 @@ export const useGameStore = create<GameState>((set, get) => ({
             return pickRandom(fallbackOcc);
         };
 
-        const newCurrent = existingNextPos ?? currentPos ?? initPos();
-        const desiredNextNote = pickNextPlayNote(newCurrent.note);
-        const newNext =
-            pickClosestPosition(newCurrent, desiredNextNote, 12, occurrenceOptions, tuning) ??
-            pickClosestPosition(newCurrent, desiredNextNote, 12, {}, tuning) ??
-            initPos();
+        const newCurrent = queue.shift() ?? existingNextPos ?? currentPos ?? initPos();
+        // Keep the highway stocked: chain each new tail off the previous one
+        // so consecutive positions stay close, matching the one-step lookahead
+        // this drill always used.
+        while (queue.length < 3) {
+            const chainPrev = queue[queue.length - 1] ?? newCurrent;
+            const desiredNextNote = pickNextPlayNote(chainPrev.note);
+            const chainedNext =
+                pickClosestPosition(chainPrev, desiredNextNote, 12, occurrenceOptions, tuning) ??
+                pickClosestPosition(chainPrev, desiredNextNote, 12, {}, tuning) ??
+                initPos();
+            queue.push(chainedNext);
+        }
 
         set({
             targetPosition: newCurrent,
             targetNote: newCurrent.note,
             targetPresentedAt: Date.now(),
-            nextPosition: newNext,
-            nextNote: newNext.note,
+            nextPosition: queue[0],
+            nextNote: queue[0].note,
+            upcomingPositions: [...queue],
             noteOptions: [],
             noteToTabOptions: [],
             lastAnswer: null,
