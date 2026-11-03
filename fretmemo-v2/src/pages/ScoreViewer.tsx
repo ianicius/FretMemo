@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { trackFeatureOpened } from "@/lib/analytics";
 import { formatScoreMetaLine } from "@/lib/scoreDisplay";
 import { getScoreBytes, listScoreMeta } from "@/lib/scoreStore";
+import { useSettingsStore } from "@/stores/useSettingsStore";
 import type { ScoreSummary } from "@/types/scores";
 // Type-only import: erased at build time, keeps alphaTab out of the entry chunk.
 import type { AlphaTabApi, model } from "@coderline/alphatab";
@@ -60,6 +61,7 @@ export default function ScoreViewer() {
     const [volume, setVolume] = useState(0.8);
     const [metronomeOn, setMetronomeOn] = useState(false);
     const [reloadKey, setReloadKey] = useState(0);
+    const displayTheme = useSettingsStore((state) => state.full.display.theme);
     const playerStateRef = useRef(1); // alphatab.synth.PlayerState.Playing, refreshed on import
 
     const entrySource =
@@ -106,6 +108,20 @@ export default function ScoreViewer() {
                 // Guitar-first default: always show standard notation plus
                 // tablature, regardless of what the file declares.
                 settings.display.staveProfile = alphatab.StaveProfile.ScoreTab;
+                // alphaTab draws glyphs black by default — invisible on the
+                // dark theme's near-black background. Re-color the notation
+                // to match the app palette when the document is dark.
+                const isDarkTheme = document.documentElement.classList.contains("dark");
+                if (isDarkTheme) {
+                    const resourceColor = (hex: string) =>
+                        alphatab.model.Color.fromJson(hex)!;
+                    settings.display.resources.mainGlyphColor = resourceColor("#e5e7eb");
+                    settings.display.resources.secondaryGlyphColor = resourceColor("#9ca3af");
+                    settings.display.resources.staffLineColor = resourceColor("#6b7280");
+                    settings.display.resources.barSeparatorColor = resourceColor("#6b7280");
+                    settings.display.resources.barNumberColor = resourceColor("#9ca3af");
+                    settings.display.resources.scoreInfoColor = resourceColor("#e5e7eb");
+                }
                 settings.player.playerMode = alphatab.PlayerMode.EnabledSynthesizer;
                 settings.player.soundFont = SOUNDFONT_URL;
 
@@ -191,7 +207,7 @@ export default function ScoreViewer() {
             apiRef.current = null;
             scoreRef.current = null;
         };
-    }, [id, entrySource, reloadKey]);
+    }, [id, entrySource, reloadKey, displayTheme]);
 
     const handleTrackChange = (index: number) => {
         setTrackIndex(index);
