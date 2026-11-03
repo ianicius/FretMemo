@@ -452,7 +452,19 @@
     "trackLabel": "Track",
     "tempoLabel": "{{bpm}} BPM",
     "tracksLabel_one": "{{count}} track",
-    "tracksLabel_other": "{{count}} tracks"
+    "tracksLabel_other": "{{count}} tracks",
+    "playback": {
+      "play": "Play",
+      "pause": "Pause",
+      "stop": "Stop",
+      "speed": "Speed",
+      "volume": "Volume",
+      "metronome": "Metronome",
+      "loadingSoundfont": "Loading instrument sounds…",
+      "playerError": "Playback could not start. Check your connection — the instrument sounds (38 MB) load once and are then cached.",
+      "retry": "Retry",
+      "playbackPosition": "Playback position"
+    }
   },
   "challenges": {
     "title": "Challenges",

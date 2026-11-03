@@ -2,6 +2,7 @@ import path from "path"
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { alphaTab } from '@coderline/alphatab-vite'
 import {
   SPA_PRECACHE_GLOB_PATTERNS,
   createSpaNavigationFallbackAllowlist,
@@ -16,6 +17,9 @@ export default defineConfig({
   },
   plugins: [
     react(),
+    // Resolves alphaTab's worker/worklet asset URLs in dev and build —
+    // without it the AlphaSynth worker never boots in dev (silent stall).
+    alphaTab(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'icon.svg', 'fretmemo-preview.jpg', 'robots.txt', 'sitemap.xml', 'BingSiteAuth.xml'],
@@ -46,10 +50,24 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: [...SPA_PRECACHE_GLOB_PATTERNS],
-        // alphaTab's worker chunk is emitted but never fetched while playback
-        // is out of scope (useWorkers: false); keep it out of the precache
-        // until R-02 starts loading it.
+        // alphaTab's worker chunk is emitted but never fetched while the
+        // synth runs through AudioWorklets instead; keep it out of the
+        // precache. The AudioWorklet chunk itself (alphaTab.worklet-*.js)
+        // is precached via the assets glob — playback needs it offline.
         globIgnores: ["assets/alphaTab.worker-*.js"],
+        // The soundfont is far too large to precache; cache it on first use
+        // so offline playback works after one online session.
+        runtimeCaching: [
+          {
+            urlPattern: /\/soundfont\/.+\.(sf2|sf3)$/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "soundfonts",
+              expiration: { maxEntries: 4, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+        ],
         cleanupOutdatedCaches: true,
         skipWaiting: true,
         clientsClaim: true,

@@ -407,7 +407,19 @@
     "tracksLabel_one": "{{count}} ścieżka",
     "tracksLabel_few": "{{count}} ścieżki",
     "tracksLabel_many": "{{count}} ścieżek",
-    "tracksLabel_other": "{{count}} ścieżki"
+    "tracksLabel_other": "{{count}} ścieżki",
+    "playback": {
+      "play": "Graj",
+      "pause": "Pauza",
+      "stop": "Stop",
+      "speed": "Tempo odtwarzania",
+      "volume": "Głośność",
+      "metronome": "Metronom",
+      "loadingSoundfont": "Wczytywanie brzmień…",
+      "playerError": "Nie udało się uruchomić odtwarzania. Sprawdź połączenie — brzmienia (38 MB) ładują się raz i są potem cache’owane.",
+      "retry": "Ponów",
+      "playbackPosition": "Pozycja odtwarzania"
+    }
   },
   "library": {
     "title": "Trening",

@@ -24,7 +24,7 @@ describe("SPA navigation fallback policy", () => {
   it("precaches only deployed application bundles and the root shell", () => {
     expect(SPA_PRECACHE_GLOB_PATTERNS).toEqual([
       "assets/**/*.{js,css}",
-      "font/**/*.woff2",
+      "font/bravura/*.woff2",
       "index.html",
     ]);
   });

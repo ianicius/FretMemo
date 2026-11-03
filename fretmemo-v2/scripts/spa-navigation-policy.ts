@@ -3,9 +3,9 @@ import routeManifest from "../app-route-entrypoints.json";
 export const SPA_PRECACHE_GLOB_PATTERNS = [
   "assets/**/*.{js,css}",
   // Bravura music glyphs are fetched at runtime by alphaTab; precaching them
-  // keeps offline /scores rendering intact. (Plain extension glob: single-value
-  // brace expansion does not match in the workbox glob setup.)
-  "font/**/*.woff2",
+  // keeps offline /scores rendering intact. Narrowed to the app's own copy —
+  // the alphaTab vite plugin also emits a flat root copy that nothing loads.
+  "font/bravura/*.woff2",
   "index.html",
 ] as const;
 
