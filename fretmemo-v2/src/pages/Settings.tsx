@@ -27,6 +27,7 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { SectionCollapse } from "@/components/ui/section-collapse";
+import { MicLatencyCalibration } from "@/components/settings/MicLatencyCalibration";
 import { RotateCcw, Volume2, Gamepad2, GraduationCap, Palette, Guitar, Database, CircleHelp, Newspaper, HandHeart, Coffee, Mail, ExternalLink, Search, Settings2, History } from "lucide-react";
 import { EXTERNAL_LINKS } from "@/lib/externalLinks";
 import { useTranslation } from "react-i18next";
@@ -603,6 +604,7 @@ export default function Settings() {
                             />
                             <p className="text-xs text-muted-foreground">{t("settingsPage.audio.pitchToleranceHint")}</p>
                         </div>
+                        <MicLatencyCalibration />
                     </CardContent>
                 </Card>
             </SectionCollapse>

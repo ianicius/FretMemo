@@ -954,7 +954,21 @@
         "clean": "Clean"
       },
       "pitchTolerance": "Pitch Tolerance (cents)",
-      "pitchToleranceHint": "Higher values make detection more forgiving."
+      "pitchToleranceHint": "Higher values make detection more forgiving.",
+      "latency": {
+        "title": "Input latency (microphone)",
+        "current": "{{ms}} ms",
+        "hint": "Play or clap on each click — the measured offset compensates rhythm answer timing. The same value is adjustable in Rhythm Dojo modes.",
+        "calibrate": "Calibrate",
+        "listening": "Listening… play on each click",
+        "measuringProgress": "{{hit}} / {{target}}",
+        "measuredMs": "Measured: {{ms}} ms",
+        "apply": "Apply",
+        "applied": "Applied — rhythm timing now uses this value.",
+        "retry": "Retry",
+        "noMic": "No microphone was found or access was denied.",
+        "tooFewHits": "Not enough clean onsets. Play louder, right on the clicks."
+      }
     },
     "appearance": {
       "sectionTitle": "Appearance",
