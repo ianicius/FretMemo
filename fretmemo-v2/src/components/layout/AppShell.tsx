@@ -49,7 +49,7 @@ export function AppShell() {
 
     const activePath = location.pathname;
     const isPracticeSessionRoute = activePath === "/practice" || activePath.startsWith("/practice/");
-    const isTrainRoute = activePath === "/train" || activePath.startsWith("/train") || activePath.startsWith("/technique/");
+    const isTrainRoute = activePath === "/train" || activePath.startsWith("/train") || activePath.startsWith("/technique/") || activePath.startsWith("/scores");
     const isFocusMode = isPracticeSessionRoute && isPlaying;
 
     const handleNav = (item: NavItem) => {

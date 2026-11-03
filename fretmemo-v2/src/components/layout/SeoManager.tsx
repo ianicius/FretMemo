@@ -53,6 +53,15 @@ function getRouteMeta(pathname: string): SeoRouteMeta {
         };
     }
 
+    if (pathname === "/scores") {
+        return {
+            title: "Guitar Pro Song Viewer | FretMemo",
+            description:
+                "Open your imported Guitar Pro songs as interactive tablature and study them track by track.",
+            path: "/scores",
+        };
+    }
+
     if (pathname.startsWith("/technique/")) {
         return {
             title: "Technique Exercise Trainer | FretMemo",
