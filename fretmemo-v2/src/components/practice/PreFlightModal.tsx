@@ -188,6 +188,8 @@ export function PreFlightModal({
     onSessionModeChange,
 }: PreFlightModalProps) {
     const { t } = useTranslation();
+    const countInEnabled = useSettingsStore((state) => state.quick.countInEnabled);
+    const updateQuickSettings = useSettingsStore((state) => state.updateQuickSettings);
     const notation = useSettingsStore((state) => state.full.instrument.notation);
     const notationSeed = useMemo(
         () => `preflight:${mode}:${rootNote}:${noteSequence}:${tuning.join("-")}`,
@@ -275,6 +277,18 @@ export function PreFlightModal({
                         onCheckedChange={(checked) => {
                             if (checked !== isMetronomeOn) onMetronomeToggle();
                         }}
+                    />
+                </div>
+
+                <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                        <span className="text-sm">{t('practice.setup.countIn')}</span>
+                        <p className="text-xs text-muted-foreground">{t('practice.setup.countInDesc')}</p>
+                    </div>
+                    <Switch
+                        checked={countInEnabled}
+                        aria-label={t('practice.setup.countIn')}
+                        onCheckedChange={(checked) => updateQuickSettings({ countInEnabled: checked })}
                     />
                 </div>
 

@@ -93,6 +93,8 @@ export default function Practice() {
     const location = useLocation();
     const {
         isPlaying,
+        isCountInActive,
+        countInBeat,
         score,
         streak,
         mode,
@@ -744,7 +746,7 @@ export default function Practice() {
     }, [exitFullscreen, hideToast, score, sessionCorrect, sessionHistory, sessionIncorrect, sessionStartTime, setForcedTargetNote, stopGame]);
 
     useEffect(() => {
-        if (!isPlaying || activeChallenge?.type !== "timed" || isPaused) return;
+        if (!isPlaying || isCountInActive || activeChallenge?.type !== "timed" || isPaused) return;
         const interval = window.setInterval(() => {
             setChallengeSecondsLeft((prev) => {
                 const fallback = activeChallenge.timeLimitSec ?? 60;
@@ -754,7 +756,7 @@ export default function Practice() {
         }, 1000);
 
         return () => window.clearInterval(interval);
-    }, [activeChallenge, isPaused, isPlaying]);
+    }, [activeChallenge, isCountInActive, isPaused, isPlaying]);
 
     useEffect(() => {
         if (!isPlaying || activeChallenge?.type !== "timed") return;
@@ -800,7 +802,11 @@ export default function Practice() {
         finalizeSession();
     };
 
-    const handlePause = () => setIsPaused(true);
+    const handlePause = () => {
+        // Count-in timers are not pausable; the bar is a few seconds long.
+        if (isCountInActive) return;
+        setIsPaused(true);
+    };
     const handleResume = () => setIsPaused(false);
     const handleHint = () => {
         if (hintUsedForPrompt || Boolean(lastAnswer)) return;
@@ -1069,6 +1075,17 @@ export default function Practice() {
                     showTempo={isMetronomeOn}
                     isLandscape={isLandscape}
                 />
+                {isCountInActive && (
+                    <div
+                        className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-background/60 backdrop-blur-sm"
+                        role="status"
+                    >
+                        <div className="flex flex-col items-center gap-2">
+                            <span className="text-7xl font-bold tabular-nums text-primary">{countInBeat}</span>
+                            <span className="text-sm text-muted-foreground">{t("practice.countInLabel")}</span>
+                        </div>
+                    </div>
+                )}
                 <XPToast
                     xp={toast.xp}
                     streak={toast.streak}

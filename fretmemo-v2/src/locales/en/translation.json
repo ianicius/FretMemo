@@ -591,6 +591,7 @@
     }
   },
   "practice": {
+    "countInLabel": "Count-in",
     "title": "Practice",
     "subtitle": "Select a mode and configure your session",
     "instructions": "Instructions",
@@ -658,6 +659,8 @@
       "tempo": "Tempo",
       "metronome": "Metronome",
       "metronomeDesc": "Use click track while practicing.",
+      "countIn": "Count-in",
+      "countInDesc": "Play one bar of clicks before the session starts.",
       "mic": "Microphone Input",
       "micDesc": "Enable this to detect played guitar notes.",
       "sessionMode": "Session Mode",

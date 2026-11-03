@@ -301,3 +301,36 @@ export async function playFunctionalPrompt(options: FunctionalPromptOptions): Pr
 export function initAudio(): void {
     getAudioContext();
 }
+
+/**
+ * Schedule one bar of metronome count-in clicks (accent on beat 1).
+ *
+ * Uses the same click voice as the practice metronome in `useGameStore`
+ * (triangle, 1040 Hz accent / 760 Hz beat) so the count-in flows into the
+ * session seamlessly. Safe when no AudioContext exists (tests, blocked
+ * autoplay): the call degrades to a no-op and visual count-in still runs.
+ */
+export function playCountInClicks(bpm: number, beats = 4): void {
+    try {
+        const audioContext = getAudioContext();
+        const beatSec = 60 / Math.max(1, bpm);
+        // Small margin so the first click never lands on `currentTime`.
+        const startAt = audioContext.currentTime + 0.08;
+        for (let beat = 0; beat < beats; beat += 1) {
+            const isAccent = beat === 0;
+            const when = startAt + beatSec * beat;
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.type = "triangle";
+            oscillator.frequency.setValueAtTime(isAccent ? 1040 : 760, when);
+            gainNode.gain.setValueAtTime(isAccent ? 0.14 : 0.08, when);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, when + 0.05);
+            oscillator.start(when);
+            oscillator.stop(when + 0.05);
+        }
+    } catch {
+        // Audio unavailable: visual count-in still runs.
+    }
+}

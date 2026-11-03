@@ -20,6 +20,7 @@ export type InstrumentType = "guitar6" | "guitar7" | "guitar8" | "bass4" | "bass
 export interface QuickSettings {
     tempo: number;
     isMetronomeOn: boolean;
+    countInEnabled: boolean;
     tuning: NoteName[]; // High E -> Low E
     fretRange: { min: number; max: number };
     practiceRootNote: NoteName;
