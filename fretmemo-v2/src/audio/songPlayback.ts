@@ -15,6 +15,8 @@
 import { getSoundEngineContext, getSoundEngineVoiceBus } from './engine';
 
 export const SONG_SAMPLE_RATE = 44100;
+/** alphaTab's exporter writes stereo-interleaved samples (SynthConstants.AudioChannels = 2). */
+export const SONG_AUDIO_CHANNELS = 2;
 /** Hard cap for the offline render loop (~50 min at 500 ms chunks). */
 const MAX_RENDER_ITERATIONS = 6000;
 
@@ -105,13 +107,22 @@ export async function renderSongToBuffer(
         if (chunks.length === 0) {
             throw new Error('songPlayback: no audio rendered — is the soundfont loaded?');
         }
-        const totalSamples = chunks.reduce((sum, chunk) => sum + chunk.samples.length, 0);
-        const buffer = ctx.createBuffer(1, totalSamples, SONG_SAMPLE_RATE);
-        const data = buffer.getChannelData(0);
-        let offset = 0;
+        // The exporter emits stereo-INTERLEAVED samples: frames = length / 2.
+        const totalFrames = chunks.reduce((sum, chunk) => sum + chunk.samples.length / SONG_AUDIO_CHANNELS, 0);
+        const buffer = ctx.createBuffer(SONG_AUDIO_CHANNELS, totalFrames, SONG_SAMPLE_RATE);
+        const channels: Float32Array[] = [];
+        for (let channel = 0; channel < SONG_AUDIO_CHANNELS; channel += 1) {
+            channels.push(buffer.getChannelData(channel));
+        }
+        let frameOffset = 0;
         for (const chunk of chunks) {
-            data.set(chunk.samples, offset);
-            offset += chunk.samples.length;
+            const frames = chunk.samples.length / SONG_AUDIO_CHANNELS;
+            for (let frame = 0; frame < frames; frame += 1) {
+                for (let channel = 0; channel < SONG_AUDIO_CHANNELS; channel += 1) {
+                    channels[channel][frameOffset + frame] = chunk.samples[frame * SONG_AUDIO_CHANNELS + channel];
+                }
+            }
+            frameOffset += frames;
         }
         return buffer;
     } finally {

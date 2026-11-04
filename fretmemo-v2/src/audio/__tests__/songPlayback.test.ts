@@ -29,20 +29,24 @@ describe('renderSongToBuffer', () => {
         vi.restoreAllMocks();
     });
 
-    it('assembles chunks into one buffer and reports progress', async () => {
+    it('assembles stereo-INTERLEAVED chunks into a 2-channel buffer and reports progress', async () => {
         const ctx = new FakeAudioContext();
+        // 3 frames per chunk, interleaved L,R: L=0.1/0.3/0.5, R=0.2/0.4/0.6
         const { api, render, destroy } = makeExportApi([
-            { samples: new Float32Array(100).fill(0.25), currentTime: 500, endTime: 2000 },
-            { samples: new Float32Array(100).fill(0.5), currentTime: 2000, endTime: 2000 },
+            { samples: Float32Array.from([0.1, 0.2, 0.3, 0.4, 0.5, 0.6]), currentTime: 500, endTime: 2000 },
+            { samples: Float32Array.from([0.7, 0.8]), currentTime: 2000, endTime: 2000 },
         ]);
         const onProgress = vi.fn();
 
         const buffer = await renderSongToBuffer(ctx as unknown as AudioContext, api, onProgress);
 
-        expect(buffer.length).toBe(200);
+        expect(buffer.numberOfChannels).toBe(2);
+        expect(buffer.length).toBe(4); // (3 + 1) frames
         expect(buffer.sampleRate).toBe(SONG_SAMPLE_RATE);
-        expect(buffer.getChannelData(0)[0]).toBeCloseTo(0.25);
-        expect(buffer.getChannelData(0)[100]).toBeCloseTo(0.5);
+        const left = Array.from(buffer.getChannelData(0));
+        const right = Array.from(buffer.getChannelData(1));
+        expect(left.map((x) => +x.toFixed(6))).toEqual([0.1, 0.3, 0.5, 0.7]);
+        expect(right.map((x) => +x.toFixed(6))).toEqual([0.2, 0.4, 0.6, 0.8]);
         expect(onProgress).toHaveBeenCalledTimes(2);
         expect(render).toHaveBeenCalledWith(500);
         expect(destroy).toHaveBeenCalled();

@@ -253,11 +253,19 @@ export default function ScoreViewer() {
 
     const startGuitarRender = async () => {
         const api = apiRef.current;
-        if (!api || guitarRendering) return;
+        const score = scoreRef.current;
+        if (!api || !score || guitarRendering) return;
         setGuitarError(false);
         setGuitarRendering(true);
         setGuitarRenderProgress(0);
         try {
+            // Guitar mode plays the whole arrangement: regenerate the player
+            // midi with every non-percussion track (the track Select renders
+            // only the chosen one for soundfont playback).
+            const allTrackIndexes = score.tracks
+                .map((track, index) => (track.isPercussion ? -1 : index))
+                .filter((index) => index >= 0);
+            api.renderScore(score, allTrackIndexes.length > 0 ? allTrackIndexes : [trackIndex]);
             const ctx = getSongEngineContext();
             const buffer = await renderSongToBuffer(ctx, api, (progress) => {
                 setGuitarRenderProgress(
@@ -301,6 +309,10 @@ export default function ScoreViewer() {
         } else {
             songPlaybackRef.current?.pause();
             setPlaying(false);
+            // back to the soundfont transport: restore the single-track view
+            if (apiRef.current && scoreRef.current) {
+                apiRef.current.renderScore(scoreRef.current, [trackIndex]);
+            }
         }
         setGuitarMode(next);
     };
