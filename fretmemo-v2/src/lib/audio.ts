@@ -1,24 +1,21 @@
 /**
  * Guitar-like Web Audio synthesis.
  *
- * Uses additive synthesis with harmonic overtones, a
- * body-resonance bandpass filter, and a pluck-style
+ * Uses additive synthesis with harmonic overtones and a pluck-style
  * envelope to approximate a nylon-string classical guitar.
  *
  * No external samples — 100% Web Audio API.
+ *
+ * Since the sound-engine migration, every guitar voice terminates in the
+ * sound engine's voice bus (`src/audio/engine.ts`) instead of
+ * `ctx.destination`: the bus feeds the preset chain (input gain → amp stage
+ * → EQ → comp → delay → reverb → master gain). The historical per-voice
+ * body/brightness filter pair now lives in the engine's classic amp stage
+ * (`buildClassicAmpStage`); count-in clicks stay on `ctx.destination`
+ * directly (they are not guitar sound).
  */
 
-let audioCtx: AudioContext | null = null;
-
-function getAudioContext(): AudioContext {
-    if (!audioCtx) {
-        audioCtx = new AudioContext();
-    }
-    if (audioCtx.state === "suspended") {
-        audioCtx.resume();
-    }
-    return audioCtx;
-}
+import { getSoundEngineContext, getSoundEngineVoiceBus, initSoundEngine } from '@/audio/engine';
 
 /** Convert MIDI note number to frequency (A4 = 440 Hz). */
 export function midiToFrequency(midi: number): number {
@@ -46,37 +43,21 @@ function createNoiseBurst(ctx: AudioContext, duration: number): AudioBufferSourc
  * Play a single guitar-like note at the given MIDI number.
  *
  * Uses 5 detuned harmonics with decreasing amplitude,
- * shaped by a pluck envelope (fast attack, natural decay),
- * and filtered through a resonant lowpass + body bandpass to
- * approximate nylon-string warmth.
+ * shaped by a pluck envelope (fast attack, natural decay).
+ * The voice is routed into the sound engine's voice bus, where the preset
+ * chain (amp stage, EQ, effects, master volume) shapes it further.
  */
 export function playTone(midi: number, durationSec = 1.2): Promise<void> {
-    const ctx = getAudioContext();
+    const ctx = getSoundEngineContext();
     const freq = midiToFrequency(midi);
     const now = ctx.currentTime;
 
-    // — Master output chain —
-    const masterGain = ctx.createGain();
-    masterGain.gain.setValueAtTime(0.40, now);
-
-    // Body resonance: bandpass centred around 200-400 Hz (classical guitar body)
-    const bodyFilter = ctx.createBiquadFilter();
-    bodyFilter.type = "peaking";
-    bodyFilter.frequency.setValueAtTime(280, now);
-    bodyFilter.Q.setValueAtTime(1.2, now);
-    bodyFilter.gain.setValueAtTime(6, now);
-
-    // Brightness: lowpass to cut harsh upper harmonics
-    const brightnessFilter = ctx.createBiquadFilter();
-    brightnessFilter.type = "lowpass";
-    // Lower notes → darker; higher notes → brighter
-    const cutoff = Math.min(freq * 6, 6000);
-    brightnessFilter.frequency.setValueAtTime(cutoff, now);
-    brightnessFilter.Q.setValueAtTime(0.7, now);
-
-    masterGain.connect(bodyFilter);
-    bodyFilter.connect(brightnessFilter);
-    brightnessFilter.connect(ctx.destination);
+    // Voice hub: sums this voice's partials into the engine voice bus.
+    // (The historical 0.40 per-voice master gain now lives once in the
+    // engine, scaled by the volume setting — see VOICE_BUS_TRIM.)
+    const voiceHub = ctx.createGain();
+    voiceHub.gain.setValueAtTime(1, now);
+    voiceHub.connect(getSoundEngineVoiceBus());
 
     // — Harmonics —
     const harmonics = [
@@ -107,7 +88,7 @@ export function playTone(midi: number, durationSec = 1.2): Promise<void> {
         gain.gain.exponentialRampToValueAtTime(0.001, now + decayTime);      // sustain tail
 
         osc.connect(gain);
-        gain.connect(masterGain);
+        gain.connect(voiceHub);
         osc.start(now);
         osc.stop(now + durationSec);
     }
@@ -125,7 +106,7 @@ export function playTone(midi: number, durationSec = 1.2): Promise<void> {
 
     noise.connect(noiseFilter);
     noiseFilter.connect(noiseGain);
-    noiseGain.connect(masterGain);
+    noiseGain.connect(voiceHub);
     noise.start(now);
     noise.stop(now + 0.05);
 
@@ -143,9 +124,10 @@ export interface PlayChordOptions {
 }
 
 export function playChord(midis: number[], durationSec = 1.5, options: PlayChordOptions = {}): Promise<void> {
-    const ctx = getAudioContext();
+    const ctx = getSoundEngineContext();
     const now = ctx.currentTime;
-    const strumDelay = Math.max(0, options.strumDelaySec ?? 0.025); // natural strum by default
+    const strumDelay = Math.max(0, options.strumDelaySec ?? 0.025);
+    const voiceBus = getSoundEngineVoiceBus();
 
     const promises = midis.map((midi, i) => {
         const freq = midiToFrequency(midi);
@@ -155,22 +137,7 @@ export function playChord(midis: number[], durationSec = 1.5, options: PlayChord
         // Master per-voice
         const voiceGain = ctx.createGain();
         const vol = 0.28 / Math.sqrt(midis.length);
-
-        // Body filter
-        const bodyFilter = ctx.createBiquadFilter();
-        bodyFilter.type = "peaking";
-        bodyFilter.frequency.setValueAtTime(280, startAt);
-        bodyFilter.Q.setValueAtTime(1.0, startAt);
-        bodyFilter.gain.setValueAtTime(4, startAt);
-
-        const lpf = ctx.createBiquadFilter();
-        lpf.type = "lowpass";
-        lpf.frequency.setValueAtTime(Math.min(freq * 5, 5000), startAt);
-        lpf.Q.setValueAtTime(0.6, startAt);
-
-        voiceGain.connect(bodyFilter);
-        bodyFilter.connect(lpf);
-        lpf.connect(ctx.destination);
+        voiceGain.connect(voiceBus);
 
         // Harmonics
         const harmonics = [
@@ -297,9 +264,10 @@ export async function playFunctionalPrompt(options: FunctionalPromptOptions): Pr
 
 /**
  * Ensure audio context is ready (call on first user interaction).
+ * Delegates to the sound engine's idempotent warm-up.
  */
 export function initAudio(): void {
-    getAudioContext();
+    initSoundEngine();
 }
 
 /**
@@ -307,12 +275,14 @@ export function initAudio(): void {
  *
  * Uses the same click voice as the practice metronome in `useGameStore`
  * (triangle, 1040 Hz accent / 760 Hz beat) so the count-in flows into the
- * session seamlessly. Safe when no AudioContext exists (tests, blocked
- * autoplay): the call degrades to a no-op and visual count-in still runs.
+ * session seamlessly. Clicks stay on `ctx.destination` — they are not
+ * guitar sound and must not run through the preset chain. Safe when no
+ * AudioContext exists (tests, blocked autoplay): the call degrades to a
+ * no-op and visual count-in still runs.
  */
 export function playCountInClicks(bpm: number, beats = 4): void {
     try {
-        const audioContext = getAudioContext();
+        const audioContext = getSoundEngineContext();
         const beatSec = 60 / Math.max(1, bpm);
         // Small margin so the first click never lands on `currentTime`.
         const startAt = audioContext.currentTime + 0.08;

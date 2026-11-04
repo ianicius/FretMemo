@@ -1,5 +1,10 @@
-import { type ChangeEvent, useMemo, useRef, useState } from "react";
+import { type ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { AudioWaveform } from "lucide-react";
+import { BUILT_IN_PRESETS } from "@/audio/presets";
+import { getPresetName } from "@/components/sound/presetUtils";
 import { useSettingsStore } from "@/stores/useSettingsStore";
+import { useSoundStore } from "@/stores/useSoundStore";
 import { useFeedbackStore, type AppFeedbackTone } from "@/stores/useFeedbackStore";
 import { useProgressStore } from "@/stores/useProgressStore";
 import { useRhythmDojoStore } from "@/stores/useRhythmDojoStore";
@@ -64,6 +69,7 @@ function clampInputLatency(value: number): number {
 
 export default function Settings() {
     const { t } = useTranslation();
+    const navigate = useNavigate();
     const quick = useSettingsStore((state) => state.quick);
     const full = useSettingsStore((state) => state.full);
     const modules = useSettingsStore((state) => state.modules);
@@ -78,6 +84,8 @@ export default function Settings() {
     const rhythmInputLatencyMs = useRhythmDojoStore((state) => state.inputLatencyMs);
     const setRhythmInputLatencyMs = useRhythmDojoStore((state) => state.setInputLatencyMs);
     const enqueueFeedback = useFeedbackStore((state) => state.enqueue);
+    const customPresets = useSoundStore((state) => state.customPresets);
+    const loadCustomPresets = useSoundStore((state) => state.loadCustomPresets);
     const importFileInputRef = useRef<HTMLInputElement | null>(null);
     const importModeRef = useRef<"merge" | "replace">("merge");
     const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null);
@@ -87,6 +95,21 @@ export default function Settings() {
     const showFeedback = (message: string, tone: AppFeedbackTone = "info") => {
         enqueueFeedback(message, tone);
     };
+
+    useEffect(() => {
+        void loadCustomPresets();
+    }, [loadCustomPresets]);
+
+    const activeSoundPreset = useMemo(
+        () =>
+            [...BUILT_IN_PRESETS, ...customPresets].find(
+                (preset) => preset.id === full.audio.soundPreset,
+            ) ?? null,
+        [customPresets, full.audio.soundPreset],
+    );
+    const activeSoundName = activeSoundPreset
+        ? getPresetName(activeSoundPreset, t)
+        : t("sound.activeFallback");
 
     const triggerImportPicker = (mode: "merge" | "replace") => {
         importModeRef.current = mode;
@@ -220,7 +243,27 @@ export default function Settings() {
 
     const showGlobalInstrument = matchesQuery(["profile", "profil", "instrument", "tuning", "strojenie", "notation", "notacja", "left-handed", "leworęczny", "fret", "gryf"]);
     const showGlobalLearning = matchesQuery(["learning", "nauka", "session", "sesja", "auto-advance", "auto", "hints", "podpowiedzi", "difficulty", "trudność", "repetition", "powtórki"]);
-    const showGlobalAudio = matchesQuery(["audio", "dźwięk", "volume", "głośność", "sound", "pitch", "strój", "input", "wejście"]);
+    // Keywords include the "Brzmienie gitary" row (sound preset): search is a
+    // literal lowercase `includes` match, so diacritics stay as typed (PL
+    // entries keep them, same convention as every other list here).
+    const showGlobalAudio = matchesQuery([
+        "audio",
+        "dźwięk",
+        "brzmienie",
+        "volume",
+        "głośność",
+        "sound",
+        "tone",
+        "pitch",
+        "strój",
+        "input",
+        "wejście",
+        "guitar",
+        "gitara",
+        "amp",
+        "wzmacniacz",
+        "preset",
+    ]);
     const showGlobalAppearance = matchesQuery(["appearance", "wygląd", "theme", "motyw", "display", "widok", "layer", "warstwa"]);
     const showGlobalGame = matchesQuery(["game", "gra", "gamification", "xp", "streak", "seria", "achievement", "osiągnięcia"]);
     const showModulePractice = matchesQuery(["practice defaults", "domyślne treningu", "tempo", "metronome", "metronom", "root", "tonika", "scale", "skala", "sequence", "kolejność", "fret range", "zakres progów"]);
@@ -571,25 +614,16 @@ export default function Settings() {
                                 onValueChange={(vals) => updateFullSettings({ audio: { ...full.audio, volume: vals[0] / 100 } })}
                             />
                         </div>
-                        <FormField
-                            id="instrument-sound"
-                            label={t("settingsPage.audio.instrumentSound")}
-                            hint={t("settingsPage.audio.instrumentSoundHint")}
-                        >
-                            <Select
-                                value={full.audio.instrumentSound}
-                                onChange={(event) => updateFullSettings({
-                                    audio: {
-                                        ...full.audio,
-                                        instrumentSound: event.target.value as typeof full.audio.instrumentSound,
-                                    },
-                                })}
-                            >
-                                <option value="acoustic">{t("settingsPage.audio.sounds.acoustic")}</option>
-                                <option value="electric">{t("settingsPage.audio.sounds.electric")}</option>
-                                <option value="clean">{t("settingsPage.audio.sounds.clean")}</option>
-                            </Select>
-                        </FormField>
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                            <div className="space-y-0.5">
+                                <Label>{t("settingsPage.audio.soundPreset")}</Label>
+                                <p className="text-sm text-muted-foreground">{t("settingsPage.audio.soundPresetHint")}</p>
+                            </div>
+                            <Button variant="outline" className="shrink-0" onClick={() => navigate("/sound")}>
+                                <AudioWaveform className="mr-2 h-4 w-4" />
+                                {activeSoundName}
+                            </Button>
+                        </div>
                         <div className="space-y-4">
                             <div className="flex justify-between">
                                 <Label>{t("settingsPage.audio.pitchTolerance")}</Label>

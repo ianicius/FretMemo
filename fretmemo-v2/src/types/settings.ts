@@ -50,7 +50,13 @@ export interface FullSettings {
     };
     audio: {
         volume: number; // 0-1
+        /**
+         * @deprecated Superseded by `soundPreset`; kept only because the
+         * Settings screen still renders the legacy selector.
+         */
         instrumentSound: 'acoustic' | 'electric' | 'clean';
+        /** Id of the active sound preset (see src/audio/presets.ts). */
+        soundPreset: string;
         pitchTolerance: number; // cents
     };
     display: {

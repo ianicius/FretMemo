@@ -1,0 +1,12 @@
+# Binary assets — never line-ending normalize (a converted sf2/sf3 or font
+# would be silently corrupted on checkout).
+*.sf2 binary
+*.sf3 binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+*.eot binary
+*.ttf binary
+*.png binary
+*.jpg binary
+*.ico binary

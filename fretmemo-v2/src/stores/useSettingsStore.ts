@@ -11,6 +11,7 @@ import type {
 } from '../types/settings';
 import { STANDARD_TUNING } from '@/lib/constants';
 import { getDefaultTuningForInstrument, inferInstrumentTypeFromTuning, normalizeInstrumentType, normalizeTuning } from '@/lib/tuning';
+import { DEFAULT_PRESET_ID } from '@/audio/presets';
 
 const EAR_INTERVAL_OPTION_TOKENS = ["P1", "m2", "M2", "m3", "M3", "P4", "TT", "P5", "m6", "M6", "m7", "M7", "P8"] as const;
 const LEGACY_DEFAULT_EAR_INTERVAL_TOKENS = ["P1", "P5", "P8"] as const;
@@ -90,6 +91,26 @@ function normalizeEarTrainingIntervals(value: unknown): string[] {
     return normalized.length > 0 ? normalized : [...EAR_INTERVAL_OPTION_TOKENS];
 }
 
+/**
+ * Resolve the active sound preset from persisted state:
+ * 1. a non-empty persisted `soundPreset` string wins;
+ * 2. otherwise map the legacy `instrumentSound` selector
+ *    ('acoustic' → classic-acoustic, everything else → the default preset);
+ * 3. otherwise fall back to the default preset.
+ */
+function normalizeSoundPreset(
+    persistedSoundPreset: unknown,
+    legacyInstrumentSound: unknown,
+): string {
+    if (typeof persistedSoundPreset === 'string' && persistedSoundPreset.trim().length > 0) {
+        return persistedSoundPreset;
+    }
+    if (legacyInstrumentSound === 'acoustic') {
+        return 'classic-acoustic';
+    }
+    return DEFAULT_PRESET_ID;
+}
+
 function isLegacyDefaultEarIntervals(intervals: string[]): boolean {
     const normalized = new Set(intervals.map((token) => token.trim().toUpperCase()));
     return (
@@ -133,6 +154,7 @@ function createDefaultSettings(): AppSettings {
         audio: {
             volume: 0.8,
             instrumentSound: 'acoustic',
+            soundPreset: DEFAULT_PRESET_ID,
             pitchTolerance: 10,
         },
         display: {
@@ -222,6 +244,11 @@ export const useSettingsStore = create<SettingsState>()(
                 const mergedEarDirection = normalizeEarTrainingDirection(
                     persistedEarTraining.direction ?? currentState.modules.earTraining.direction,
                 );
+                const persistedAudio = (persistedFull.audio ?? {}) as Partial<FullSettings['audio']>;
+                const mergedSoundPreset = normalizeSoundPreset(
+                    persistedAudio.soundPreset,
+                    persistedAudio.instrumentSound,
+                );
 
                 return {
                     ...currentState,
@@ -257,6 +284,7 @@ export const useSettingsStore = create<SettingsState>()(
                         audio: {
                             ...currentState.full.audio,
                             ...(persistedFull.audio ?? {}),
+                            soundPreset: mergedSoundPreset,
                         },
                         display: {
                             ...currentState.full.display,
