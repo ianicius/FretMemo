@@ -15,3 +15,16 @@ export {
     type NamLoadResult,
     type NamLoadErrorCode,
 } from './nam';
+export {
+    ensureSamplerLoaded,
+    isSamplerReady,
+    loadSampler,
+    pickSampleMidi,
+    computeSampleRate,
+    playSampleVoice,
+    SAMPLE_LOW_MIDI,
+    SAMPLE_HIGH_MIDI,
+    SAMPLE_TRIM,
+    SAMPLED_MIDIS,
+    type SampleVoiceHandle,
+} from './sampler';

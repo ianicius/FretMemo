@@ -1,21 +1,20 @@
 /**
  * Guitar-like Web Audio synthesis.
  *
- * Uses additive synthesis with harmonic overtones and a pluck-style
- * envelope to approximate a nylon-string classical guitar.
- *
- * No external samples — 100% Web Audio API.
- *
- * Since the sound-engine migration, every guitar voice terminates in the
- * sound engine's voice bus (`src/audio/engine.ts`) instead of
- * `ctx.destination`: the bus feeds the preset chain (input gain → amp stage
- * → EQ → comp → delay → reverb → master gain). The historical per-voice
- * body/brightness filter pair now lives in the engine's classic amp stage
- * (`buildClassicAmpStage`); count-in clicks stay on `ctx.destination`
+ * The primary voice source is a sampled guitar (chromatic MP3 notes from the
+ * CC0-licensed Karoryfer "Black and Green Guitars" library, see
+ * `src/audio/sampler.ts`); the additive synth below is the fallback that
+ * answers until the sample buffers are decoded (and permanently if loading
+ * fails). Both terminate in the sound engine's voice bus (`src/audio/engine.ts`)
+ * instead of `ctx.destination`: the bus feeds the preset chain (input gain →
+ * amp stage → EQ → comp → delay → reverb → master gain). The historical
+ * per-voice body/brightness filter pair lives in the engine's classic amp
+ * stage (`buildClassicAmpStage`); count-in clicks stay on `ctx.destination`
  * directly (they are not guitar sound).
  */
 
 import { getSoundEngineContext, getSoundEngineVoiceBus, initSoundEngine } from '@/audio/engine';
+import { ensureSamplerLoaded, isSamplerReady, playSampleVoice } from '@/audio/sampler';
 
 /** Convert MIDI note number to frequency (A4 = 440 Hz). */
 export function midiToFrequency(midi: number): number {
@@ -42,10 +41,11 @@ function createNoiseBurst(ctx: AudioContext, duration: number): AudioBufferSourc
 /**
  * Play a single guitar-like note at the given MIDI number.
  *
- * Uses 5 detuned harmonics with decreasing amplitude,
- * shaped by a pluck envelope (fast attack, natural decay).
- * The voice is routed into the sound engine's voice bus, where the preset
- * chain (amp stage, EQ, effects, master volume) shapes it further.
+ * Primary source: a sampled guitar note (see `src/audio/sampler.ts`). Until
+ * the sample buffers are decoded — and permanently if loading fails — the
+ * 5-harmonic additive synth below answers. The voice is routed into the sound
+ * engine's voice bus, where the preset chain (amp stage, EQ, effects, master
+ * volume) shapes it further.
  */
 export function playTone(midi: number, durationSec = 1.2): Promise<void> {
     const ctx = getSoundEngineContext();
@@ -58,6 +58,15 @@ export function playTone(midi: number, durationSec = 1.2): Promise<void> {
     const voiceHub = ctx.createGain();
     voiceHub.gain.setValueAtTime(1, now);
     voiceHub.connect(getSoundEngineVoiceBus());
+
+    // Sampling is lazy: the first playback call (always a user gesture)
+    // starts the fetch; the synth answers until the buffers are ready.
+    ensureSamplerLoaded(ctx);
+
+    if (isSamplerReady()) {
+        playSampleVoice(ctx, voiceHub, midi, now);
+        return new Promise((resolve) => setTimeout(resolve, durationSec * 1000));
+    }
 
     // — Harmonics —
     const harmonics = [
@@ -138,6 +147,17 @@ export function playChord(midis: number[], durationSec = 1.5, options: PlayChord
         const voiceGain = ctx.createGain();
         const vol = 0.28 / Math.sqrt(midis.length);
         voiceGain.connect(voiceBus);
+
+        ensureSamplerLoaded(ctx);
+
+        if (isSamplerReady()) {
+            // Sampled voice with the chord's per-note balance on top of the
+            // sampler's loudness trim (see SAMPLE_TRIM).
+            playSampleVoice(ctx, voiceGain, midi, startAt, 1 / Math.sqrt(midis.length));
+            return new Promise<void>((resolve) => {
+                setTimeout(resolve, (offset + durationSec) * 1000);
+            });
+        }
 
         // Harmonics
         const harmonics = [

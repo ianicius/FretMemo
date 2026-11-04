@@ -541,8 +541,8 @@
     },
     "presets": {
       "classicAcoustic": {
-        "name": "Klasyczna akustyka",
-        "description": "Ciepłe, neutralne brzmienie akustycznej gitary (synteza Web Audio)."
+        "name": "Klasyczna gitara",
+        "description": "Ciepłe, czyste brzmienie gitary z próbek (Karoryfer Black & Green, CC0)."
       },
       "namCleanJc": {
         "name": "Czysty JC-120",

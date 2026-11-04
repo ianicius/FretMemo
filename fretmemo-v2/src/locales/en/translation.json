@@ -586,8 +586,8 @@
     },
     "presets": {
       "classicAcoustic": {
-        "name": "Classic acoustic",
-        "description": "Warm, neutral acoustic guitar voice (Web Audio synthesis)."
+        "name": "Classic guitar",
+        "description": "Warm, clean sampled guitar (Karoryfer Black & Green, CC0)."
       },
       "namCleanJc": {
         "name": "Clean JC-120",

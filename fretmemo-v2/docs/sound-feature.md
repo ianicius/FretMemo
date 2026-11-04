@@ -32,12 +32,32 @@ tlumaczone kluczami `sound.presets.<id>.name` / `.description` (en + pl).
 
 | Preset (`id`) | Wzmacniacz | Charakter |
 | --- | --- | --- |
-| `classic-acoustic` — Klasyczna akustyka | classic (synteza Web Audio) | ciepłe, neutralne brzmienie akustyczne |
+| `classic-acoustic` — Klasyczna gitara | classic (próbki Karoryfer, CC0) | ciepłe, czyste brzmienie gitary z próbek |
 | `nam-clean-jc` — Czysty JC-120 | NAM `nam-clean-jc` (Roland JC-120) | krystaliczny, uniwersalny clean |
 | `nam-clean-deluxe` — Clean Deluxe | NAM `nam-deluxe-a2` (Fender Deluxe Reverb) | kremowy clean, połysk góry |
 | `nam-crunch-ac10` — Crunch AC10 | NAM `nam-crunch-ac10` (Vox AC10) | brytyjski crunch, wyraźna środnica |
 | `nam-lead-jcm` — Lead JCM800 | NAM `nam-lead-jcm` (Marshall JCM800) | klasyczny lead, śpiewny środek |
 | `nam-high-gain-5153` — High Gain 5153 | NAM `nam-high-gain-5153` (Boosted EVH 5153) | nowoczesny, ciasny high-gain |
+
+### Źródło dźwięku: próbki (sampler)
+
+Suchym sygnałem zasilającym łańcuch (i NAM) nie jest już syntezator, tylko
+**próbki prawdziwej gitary** — 28 nut z biblioteki Karoryfer „Black and Green Guitars"
+(Gretsch Anniversary, CC0; szczegóły licencji w `public/sound/LICENSES.md`).
+
+- **Pliki**: `public/sound/samples/<midi>.mp3` (mono 44.1 kHz, łącznie ~1.2 MB),
+  kod MIDI w nazwie; zakres E3–D7, tylko dźwięki naturalne (tak nagrano upstream).
+- **Mapowanie**: requested note → najbliższa próbka naturalna + pitch-shift przez
+  `playbackRate` (±1 półton w obrębie zakresu; poniżej E3 próg E3 jest zsuwany
+  w dół, maks. do −12 półtonów dla E2) — konwencja jak w soundfontach.
+- **Ładowanie**: leniwe i idempotentne (`ensureSamplerLoaded` przy pierwszym
+  odtworzeniu — zawsze w geście użytkownika). Dopóki bufory się dekodują,
+  gra syntezator addytywny jako fallback; jeśli pobieranie się nie powiedzie,
+  następnym razem jest ponawiane.
+- **Poziom**: trim ×2.2 dopasowuje peak próbki (−16.8 dBFS) do charakteru
+  syntezatora, dla którego była strojona gain-staging łańcucha.
+- Klasyczny stage (lowpass) został podniesiony z 4 do 8 kHz, żeby prawdziwe
+  nagrania zachowały powietrze (patrz `docs/sound-engine.md`).
 
 Karta presetu pokazuje: badge kategorii (Akustyczna / NAM / Własny), nazwę, opis charakteru,
 status silnika dla swojego modelu („Ładowanie modelu…” / błąd z przyciskiem „Ponów”),

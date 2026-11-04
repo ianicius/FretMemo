@@ -115,6 +115,7 @@ export class FakeOscillatorNode extends FakeAudioNode {
 
 export class FakeAudioBufferSourceNode extends FakeAudioNode {
     buffer: AudioBuffer | null = null;
+    playbackRate = new FakeAudioParam(1);
 
     start = vi.fn();
     stop = vi.fn();
@@ -131,6 +132,11 @@ export class FakeAudioBuffer {
         this.length = length;
         this.sampleRate = sampleRate;
         this.channels = Array.from({ length: numberOfChannels }, () => new Float32Array(length));
+    }
+
+    /** Mirrors the real AudioBuffer duration (seconds). */
+    get duration(): number {
+        return this.length / this.sampleRate;
     }
 
     getChannelData(channel: number): Float32Array {
