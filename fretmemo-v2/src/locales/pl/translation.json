@@ -421,7 +421,8 @@
       "retry": "Ponów",
       "playbackPosition": "Pozycja odtwarzania",
       "guitarMode": "Dźwięk gitary",
-      "renderingGuitar": "Renderuję dźwięk gitary…"
+      "renderingGuitar": "Renderuję dźwięk gitary…",
+      "guitarError": "Nie udało się wyrenderować dźwięku gitary — spróbuj ponownie."
     }
   },
   "sound": {

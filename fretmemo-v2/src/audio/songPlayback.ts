@@ -29,8 +29,17 @@ export interface SongAudioExporter {
     destroy(): void;
 }
 
+export interface SongExportOptions {
+    sampleRate: number;
+    masterVolume?: number;
+    metronomeVolume?: number;
+    useSyncPoints?: boolean;
+    trackVolume?: Map<number, number>;
+    trackTranspositionPitches?: Map<number, number>;
+}
+
 export interface SongExportApi {
-    exportAudio(options: { sampleRate: number; masterVolume?: number }): Promise<SongAudioExporter>;
+    exportAudio(options: SongExportOptions): Promise<SongAudioExporter>;
 }
 
 export interface SongRenderProgress {
@@ -38,22 +47,55 @@ export interface SongRenderProgress {
     totalMs: number;
 }
 
+/** Guards against a wedged worker exporter (initialize/render never settling). */
+export const SONG_EXPORT_TIMEOUT_MS = 15000;
+
+function withTimeout<T>(promise: Promise<T>, what: string, timeoutMs: number): Promise<T> {
+    return new Promise<T>((resolve, reject) => {
+        const timer = window.setTimeout(
+            () => reject(new Error(`songPlayback: ${what} timed out after ${timeoutMs} ms`)),
+            timeoutMs,
+        );
+        promise.then(
+            (value) => {
+                window.clearTimeout(timer);
+                resolve(value);
+            },
+            (error) => {
+                window.clearTimeout(timer);
+                reject(error);
+            },
+        );
+    });
+}
+
 /**
  * Render the currently loaded score to a mono AudioBuffer (offline, through
  * alphaTab's soundfont synth). The soundfont must already be loaded on the
- * API's player for the output to contain audio.
+ * API's player for the output to contain audio. The full export options are
+ * provided here because alphaTab reads `trackVolume`/`trackTranspositionPitches`
+ * unconditionally — a bare `{ sampleRate }` object throws a TypeError.
  */
 export async function renderSongToBuffer(
     ctx: BaseAudioContext,
     api: SongExportApi,
     onProgress?: (progress: SongRenderProgress) => void,
+    timeoutMs = SONG_EXPORT_TIMEOUT_MS,
 ): Promise<AudioBuffer> {
-    const exporter = await api.exportAudio({ sampleRate: SONG_SAMPLE_RATE, masterVolume: 1 });
+    const options: SongExportOptions = {
+        sampleRate: SONG_SAMPLE_RATE,
+        masterVolume: 1,
+        metronomeVolume: 0,
+        useSyncPoints: false, // exact sheet timing, not backing-track alignment
+        trackVolume: new Map(),
+        trackTranspositionPitches: new Map(),
+    };
+    const exporter = await withTimeout(api.exportAudio(options), 'export start', timeoutMs);
     try {
         const chunks: SongExportChunk[] = [];
         let totalMs = 0;
         for (let i = 0; i < MAX_RENDER_ITERATIONS; i += 1) {
-            const chunk = await exporter.render(500);
+            const chunk = await withTimeout(exporter.render(500), 'render chunk', timeoutMs);
             if (!chunk) break;
             chunks.push(chunk);
             totalMs = Math.max(totalMs, chunk.endTime);

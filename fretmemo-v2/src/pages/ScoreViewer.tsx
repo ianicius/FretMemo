@@ -79,6 +79,7 @@ export default function ScoreViewer() {
     const [guitarMode, setGuitarMode] = useState(false);
     const [guitarRendering, setGuitarRendering] = useState(false);
     const [guitarRenderProgress, setGuitarRenderProgress] = useState<number | null>(null);
+    const [guitarError, setGuitarError] = useState(false);
 
     const entrySource =
         (location.state as { source?: string } | null)?.source ?? null;
@@ -253,6 +254,7 @@ export default function ScoreViewer() {
     const startGuitarRender = async () => {
         const api = apiRef.current;
         if (!api || guitarRendering) return;
+        setGuitarError(false);
         setGuitarRendering(true);
         setGuitarRenderProgress(0);
         try {
@@ -276,9 +278,10 @@ export default function ScoreViewer() {
             songPlaybackRef.current.play(0);
             setPlaying(true);
         } catch {
-            // Render failed (e.g. soundfont not loaded) — fall back to the
-            // soundfont transport instead of leaving a dead toggle on.
+            // Render failed (bad options, wedged worker, soundfont missing) —
+            // surface it instead of silently reverting the toggle.
             setGuitarMode(false);
+            setGuitarError(true);
         } finally {
             setGuitarRendering(false);
             setGuitarRenderProgress(null);
@@ -394,19 +397,26 @@ export default function ScoreViewer() {
 
             {status === "ready" && (
                 <>
-                    <div className="flex items-center justify-end gap-2">
-                        <Switch
-                            id="guitar-mode"
-                            checked={guitarMode}
-                            onCheckedChange={handleGuitarModeToggle}
-                            disabled={guitarRendering}
-                        />
-                        <Label
-                            htmlFor="guitar-mode"
-                            className="cursor-pointer text-xs text-muted-foreground"
-                        >
-                            {t("scores.playback.guitarMode")}
-                        </Label>
+                    <div className="flex flex-col items-end gap-1">
+                        <div className="flex items-center gap-2">
+                            <Switch
+                                id="guitar-mode"
+                                checked={guitarMode}
+                                onCheckedChange={handleGuitarModeToggle}
+                                disabled={guitarRendering}
+                            />
+                            <Label
+                                htmlFor="guitar-mode"
+                                className="cursor-pointer text-xs text-muted-foreground"
+                            >
+                                {t("scores.playback.guitarMode")}
+                            </Label>
+                        </div>
+                        {guitarError && (
+                            <p className="text-xs text-destructive" role="alert">
+                                {t("scores.playback.guitarError")}
+                            </p>
+                        )}
                     </div>
                     <PlaybackControls
                         playing={playing}

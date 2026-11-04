@@ -7,6 +7,7 @@ import {
     stubAudioContextGlobal,
 } from './fixtures/audioStubs';
 import { renderSongToBuffer, SongPlayback, SONG_SAMPLE_RATE } from '../songPlayback';
+import type { SongExportOptions } from '../songPlayback';
 
 function makeExportApi(chunks: Array<{ samples: Float32Array; currentTime: number; endTime: number } | undefined>) {
     const render = vi.fn();
@@ -14,7 +15,7 @@ function makeExportApi(chunks: Array<{ samples: Float32Array; currentTime: numbe
         render.mockResolvedValueOnce(chunk);
     }
     const destroy = vi.fn();
-    const exportAudio = vi.fn(async () => ({ render, destroy }));
+    const exportAudio = vi.fn(async (_options: SongExportOptions) => ({ render, destroy }));
     return { api: { exportAudio } as never, render, destroy, exportAudio };
 }
 
@@ -55,6 +56,33 @@ describe('renderSongToBuffer', () => {
             /no audio rendered/,
         );
         expect(destroy).toHaveBeenCalled();
+    });
+
+    it('passes complete export options (alphaTab reads trackVolume unconditionally)', async () => {
+        const ctx = new FakeAudioContext();
+        const { api, exportAudio } = makeExportApi([
+            { samples: new Float32Array(10), currentTime: 10, endTime: 10 },
+        ]);
+
+        await renderSongToBuffer(ctx as unknown as AudioContext, api);
+
+        expect(exportAudio).toHaveBeenCalledTimes(1);
+        const options = exportAudio.mock.calls[0][0] as SongExportOptions;
+        expect(options.sampleRate).toBe(44100);
+        expect(options.trackVolume).toBeInstanceOf(Map);
+        expect(options.trackTranspositionPitches).toBeInstanceOf(Map);
+        expect(options.metronomeVolume).toBe(0);
+        expect(options.useSyncPoints).toBe(false);
+    });
+
+    it('rejects with a timeout error when the exporter never settles', async () => {
+        const ctx = new FakeAudioContext();
+        const exportAudio = vi.fn(() => new Promise(() => { /* never settles */ }));
+        const api = { exportAudio } as never;
+
+        await expect(
+            renderSongToBuffer(ctx as unknown as AudioContext, api, undefined, 30),
+        ).rejects.toThrow(/timed out/);
     });
 });
 
