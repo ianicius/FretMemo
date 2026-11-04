@@ -70,7 +70,7 @@ export function deriveChordFromBar(notes: PrompterNote[]): string | null {
 export function buildChordTimeline(
     track: PrompterTrack,
     masterBarCount: number,
-): ChordTimelineEntry[] | null {
+): Array<ChordTimelineEntry | null> | null {
     const staff = track.staves[0];
     if (!staff || masterBarCount <= 0) {
         return null;

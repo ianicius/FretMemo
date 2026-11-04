@@ -41,6 +41,34 @@ const { FakeAlphaTabApi, apiInstanceHolder } = vi.hoisted(() => {
         playbackSpeed = 1;
         masterVolume = 1;
         metronomeVolume = 0;
+        // Minimal rendered-track fixture for the chord prompter:
+        // track.staves[0].bars[0].voices[0].beats[0] with an annotated chord.
+        tracks: Array<Record<string, unknown>> = [
+            {
+                name: 'Guitar',
+                isPercussion: false,
+                staves: [
+                    {
+                        bars: [
+                            {
+                                voices: [
+                                    {
+                                        beats: [
+                                            {
+                                                chordId: 'c1',
+                                                chord: { name: 'Em' },
+                                                notes: [{ realValue: 40 }, { realValue: 47 }, { realValue: 52 }],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+                chords: { c1: { name: 'Em' } },
+            },
+        ];
         settings: { core: Record<string, unknown>; display: Record<string, unknown>; player: Record<string, unknown> };
         renderScoreCalls: Array<{ tracks: number[] }> = [];
         destroyed = false;
@@ -89,6 +117,7 @@ vi.mock("@coderline/alphatab", () => {
                     title: "Playback Test Song",
                     tempo: 96,
                     tracks: [{ name: "Guitar", isPercussion: false }],
+                    masterBars: [{ id: 1 }, { id: 2 }, { id: 3 }],
                 }),
             },
         },

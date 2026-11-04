@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 import { trackFeatureOpened } from "@/lib/analytics";
 import { formatScoreMetaLine } from "@/lib/scoreDisplay";
 import { getScoreBytes, listScoreMeta } from "@/lib/scoreStore";
-import { buildChordTimeline, type ChordTimelineEntry } from "@/lib/chords";
+import { buildChordTimeline, type ChordTimelineEntry, type PrompterTrack } from "@/lib/chords";
 import { ChordPrompter } from "@/components/score/ChordPrompter";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import {
@@ -72,7 +72,7 @@ export default function ScoreViewer() {
     const [metronomeOn, setMetronomeOn] = useState(false);
     const [reloadKey, setReloadKey] = useState(0);
     const displayTheme = useSettingsStore((state) => state.full.display.theme);
-    const [chordTimeline, setChordTimeline] = useState<ChordTimelineEntry[] | null>(null);
+    const [chordTimeline, setChordTimeline] = useState<Array<ChordTimelineEntry | null> | null>(null);
     const [currentBar, setCurrentBar] = useState<number | null>(null);
     const playerStateRef = useRef(1); // alphatab.synth.PlayerState.Playing, refreshed on import
 
@@ -216,7 +216,8 @@ export default function ScoreViewer() {
                 setTrackIndex(initialIndex);
                 api.renderScore(score, [initialIndex]);
                 setChordTimeline(
-                    buildChordTimeline(api.tracks[0], score.masterBars.length),
+                    // alphaTab's Track satisfies the PrompterTrack duck type
+                    buildChordTimeline(api.tracks[0] as unknown as PrompterTrack, score.masterBars.length),
                 );
                 api.playbackSpeed = speed;
                 api.masterVolume = volume;
@@ -253,7 +254,7 @@ export default function ScoreViewer() {
         if (apiRef.current && scoreRef.current) {
             apiRef.current.renderScore(scoreRef.current, [index]);
             setChordTimeline(
-                buildChordTimeline(apiRef.current.tracks[0], scoreRef.current.masterBars.length),
+                buildChordTimeline(apiRef.current.tracks[0] as unknown as PrompterTrack, scoreRef.current.masterBars.length),
             );
         }
         if (guitarMode) {

@@ -1,6 +1,6 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
-import i18n from "@/lib/i18n";
+import "@/lib/i18n"; // side-effect: initializes i18next for t()
 import { ChordPrompter } from "../ChordPrompter";
 
 const TIMELINE = [

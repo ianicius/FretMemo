@@ -6,7 +6,7 @@ const UPCOMING_COUNT = 3;
 
 interface ChordPrompterProps {
     /** Per-master-bar chord timeline from `buildChordTimeline`. */
-    timeline: ChordTimelineEntry[] | null;
+    timeline: Array<ChordTimelineEntry | null> | null;
     /** Master-bar index under the playback cursor, or null before playback. */
     currentBar: number | null;
 }
