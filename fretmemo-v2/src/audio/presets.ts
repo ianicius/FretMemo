@@ -143,6 +143,16 @@ export const NAM_MODELS: Record<string, NamModelDescriptor> = {
         label: 'Boosted EVH 5153 (A2 capture)',
         nameKey: 'sound.presets.namHighGain5153.name',
     },
+    'nam-lead-dumble': {
+        file: 'models/dumble.nam',
+        label: 'Dumble Overdrive Special (A2 capture)',
+        nameKey: 'sound.presets.namLeadDumble.name',
+    },
+    'nam-vintage-ampeg': {
+        file: 'models/ampeg.nam',
+        label: 'Ampeg V-2 (A2 capture)',
+        nameKey: 'sound.presets.namVintageAmpeg.name',
+    },
 };
 
 /** Id of the preset used out of the box (matches the store default). */
@@ -189,7 +199,7 @@ export const BUILT_IN_PRESETS: SoundPreset[] = [
         id: 'nam-crunch-ac10',
         kind: 'nam',
         amp: 'nam-crunch-ac10',
-        params: { ...neutralChainParams(), mid: 1.5, delayMix: 0.08, reverbMix: 0.12 },
+        params: { ...neutralChainParams(), inputGain: 1.4, mid: 1.5, delayMix: 0.08, reverbMix: 0.12 },
         nameKey: `${BASE_NAME_KEY}.namCrunchAc10.name`,
         descriptionKey: `${BASE_NAME_KEY}.namCrunchAc10.description`,
         builtIn: true,
@@ -198,7 +208,7 @@ export const BUILT_IN_PRESETS: SoundPreset[] = [
         id: 'nam-lead-jcm',
         kind: 'nam',
         amp: 'nam-lead-jcm',
-        params: { ...neutralChainParams(), bass: 1, mid: 2, comp: 0.2, reverbMix: 0.1 },
+        params: { ...neutralChainParams(), inputGain: 1.7, bass: 1, mid: 2, comp: 0.2, reverbMix: 0.1 },
         nameKey: `${BASE_NAME_KEY}.namLeadJcm.name`,
         descriptionKey: `${BASE_NAME_KEY}.namLeadJcm.description`,
         builtIn: true,
@@ -207,9 +217,27 @@ export const BUILT_IN_PRESETS: SoundPreset[] = [
         id: 'nam-high-gain-5153',
         kind: 'nam',
         amp: 'nam-high-gain-5153',
-        params: { ...neutralChainParams(), treble: 1.5, comp: 0.15, reverbMix: 0.08 },
+        params: { ...neutralChainParams(), inputGain: 2, treble: 1.5, comp: 0.15, reverbMix: 0.08 },
         nameKey: `${BASE_NAME_KEY}.namHighGain5153.name`,
         descriptionKey: `${BASE_NAME_KEY}.namHighGain5153.description`,
+        builtIn: true,
+    },
+    {
+        id: 'nam-lead-dumble',
+        kind: 'nam',
+        amp: 'nam-lead-dumble',
+        params: { ...neutralChainParams(), inputGain: 1.8, comp: 0.15, reverbMix: 0.12 },
+        nameKey: `${BASE_NAME_KEY}.namLeadDumble.name`,
+        descriptionKey: `${BASE_NAME_KEY}.namLeadDumble.description`,
+        builtIn: true,
+    },
+    {
+        id: 'nam-vintage-ampeg',
+        kind: 'nam',
+        amp: 'nam-vintage-ampeg',
+        params: { ...neutralChainParams(), inputGain: 1.2, reverbMix: 0.15 },
+        nameKey: `${BASE_NAME_KEY}.namVintageAmpeg.name`,
+        descriptionKey: `${BASE_NAME_KEY}.namVintageAmpeg.description`,
         builtIn: true,
     },
 ];

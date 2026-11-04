@@ -25,7 +25,16 @@ const DIFFICULTY_SETS: Record<Difficulty, string[]> = {
 };
 
 function getRandomRoot(): number {
-    return Math.floor(Math.random() * 12) + 48; // C3 to B3
+    // G3–F#4: chord-quality identification needs a mid register — roots at
+    // C3–B3 put dom7 voicings into the bass mud (and below the E3 sample
+    // floor), while this range keeps every chord tone inside the sampled
+    // E3–D7 window with at most a ±1-semitone pitch shift.
+    return Math.floor(Math.random() * 12) + 55;
+}
+
+/** Chord playback: slightly rolled for clarity, short ring so qualities stay separable. */
+function playChordForQuality(midis: number[]): Promise<void> {
+    return playChord(midis, 1.6, { strumDelaySec: 0.04 });
 }
 
 export default function ChordQualityTrainer() {
@@ -47,7 +56,7 @@ export default function ChordQualityTrainer() {
         const midis = quality.intervals.map(i => root + i);
 
         setCurrentChord(midis, quality.name);
-        playChord(midis);
+        void playChordForQuality(midis);
     }, [difficulty, setCurrentChord]);
 
     const handleStart = useCallback(() => {
@@ -60,7 +69,7 @@ export default function ChordQualityTrainer() {
 
     const handleReplay = useCallback(() => {
         if (currentChordMidis) {
-            playChord(currentChordMidis);
+            void playChordForQuality(currentChordMidis);
         }
     }, [currentChordMidis]);
 

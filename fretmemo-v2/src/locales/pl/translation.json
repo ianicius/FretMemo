@@ -474,7 +474,9 @@
         "nam-clean-jc": "Roland JC-120 (NAM)",
         "nam-crunch-ac10": "Vox AC10 (NAM)",
         "nam-lead-jcm": "Marshall JCM800 (NAM)",
-        "nam-high-gain-5153": "EVH 5153 (NAM)"
+        "nam-high-gain-5153": "EVH 5153 (NAM)",
+        "nam-lead-dumble": "Dumble ODS (NAM)",
+        "nam-vintage-ampeg": "Ampeg V-2 (NAM)"
       },
       "params": {
         "inputGain": "Wzmocnienie wejścia",
@@ -563,6 +565,14 @@
       "namHighGain5153": {
         "name": "High Gain 5153",
         "description": "Nowoczesny high-gain — ciasny, mocny, gotowy na riffy."
+      },
+      "namLeadDumble": {
+        "name": "Dumble ODS",
+        "description": "Legendarny śpiewny lead w stylu Dumble — gładki i responsywny."
+      },
+      "namVintageAmpeg": {
+        "name": "Ampeg V-2",
+        "description": "Ciepły, vintage'owy charakter lampowego wzmacniacza z lekkim crunchem."
       }
     }
   },

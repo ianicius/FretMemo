@@ -61,8 +61,10 @@ model authors are credited below.
 | `ac10.nam` | Vox AC10 | tone3000 (TONE3000) | https://raw.githubusercontent.com/tone-3000/neural-amp-modeler-wasm/main/ui/public/models/ac10.nam | MIT (repo LICENSE, no model carve-outs) | `76cc07f56dbc1cc8` | 2026-11-03 |
 | `jcm.nam` | Marshall JCM800 | tone3000 (TONE3000) | https://raw.githubusercontent.com/tone-3000/neural-amp-modeler-wasm/main/ui/public/models/jcm.nam | MIT (repo LICENSE, no model carve-outs) | `3b2f7abf8963f73b` | 2026-11-03 |
 | `5153.nam` | Boosted EVH 5153 | pippress (contributed; trainer TONE3000) | https://raw.githubusercontent.com/tone-3000/neural-amp-modeler-wasm/main/ui/public/models/5153.nam | MIT (repo LICENSE, no model carve-outs) | `d8f4fcde724e33a6` | 2026-11-03 |
+| `dumble.nam` | Dumble Overdrive Special | tone3000 (TONE3000) | https://raw.githubusercontent.com/tone-3000/neural-amp-modeler-wasm/main/ui/public/models/dumble.nam | MIT (repo LICENSE, no model carve-outs) | `365c41bca03fb3f4` | 2026-11-04 |
+| `ampeg.nam` | Ampeg V-2 | tone3000 (TONE3000) | https://raw.githubusercontent.com/tone-3000/neural-amp-modeler-wasm/main/ui/public/models/ampeg.nam | MIT (repo LICENSE, no model carve-outs) | `e3a450c68f2e29b1` | 2026-11-04 |
 
-Full SHA-256 checksums (SHA256, computed 2026-11-03):
+Full SHA-256 checksums (SHA256, computed 2026-11-03 / 2026-11-04):
 
 ```
 d8f4fcde724e33a6eef2a54d69d81ba6af2996ff7395a4dc26e8425cb0f73e98  models/5153.nam
@@ -70,6 +72,8 @@ d8f4fcde724e33a6eef2a54d69d81ba6af2996ff7395a4dc26e8425cb0f73e98  models/5153.na
 0ed18bf86d79a132c3d8682d96261dd7f78b7d8613412d3d623e9949c98bd8da  models/deluxe-a2.nam
 7df7cf05849dd4bb7652813b9d39de67de45e0e1a22f540069e109af8dafbb2b  models/jc.nam
 3b2f7abf8963f73bf9518b942707fffc5fdea8b54f1091b1c92e12419a7a10bf  models/jcm.nam
+365c41bca03fb3f480dba2503d540d95a29bb31a2c153ffc4fc317e3645e1dcb  models/dumble.nam
+e3a450c68f2e29b18864f0b4856382fec34cd246167d0a79119a1c9f4abb473d  models/ampeg.nam
 a477f51681c26eb27a791b18447010481bd4ceb5cee65fce0376772f2d5f4c81  engine/nam-engine.wasm
 999c8d50e0216d44b7fa6afba8e8394e236992f88f8d4228880cf67f0687ef32  engine/nam-worklet.js
 ```

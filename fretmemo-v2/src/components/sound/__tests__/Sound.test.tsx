@@ -111,8 +111,8 @@ describe("Sound page", () => {
             ).toBeInTheDocument();
             expect(within(card as HTMLElement).getByRole("button", { name: "Audition" })).toBeInTheDocument();
         }
-        expect(screen.getAllByRole("button", { name: /Select(ed)?/ })).toHaveLength(6);
-        expect(screen.getAllByRole("button", { name: "Audition" })).toHaveLength(6);
+        expect(screen.getAllByRole("button", { name: /Select(ed)?/ })).toHaveLength(8);
+        expect(screen.getAllByRole("button", { name: "Audition" })).toHaveLength(8);
     });
 
     it("highlights the active preset and marks its button as selected", async () => {
@@ -122,7 +122,7 @@ describe("Sound page", () => {
         const card = activeHeading.closest(".bg-card") as HTMLElement;
         expect(within(card).getByRole("button", { name: "Selected" })).toBeDisabled();
         expect(within(card).getByText("Active")).toBeInTheDocument();
-        expect(screen.getAllByRole("button", { name: "Select" })).toHaveLength(5);
+        expect(screen.getAllByRole("button", { name: "Select" })).toHaveLength(7);
     });
 
     it("shows the active sound summary from the settings store", async () => {
@@ -228,7 +228,7 @@ describe("Sound page", () => {
         for (const name of ["Klasyczna gitara", "Czysty JC-120", "Lead JCM800"]) {
             expect(await screen.findByRole("heading", { name })).toBeInTheDocument();
         }
-        expect(screen.getAllByRole("button", { name: "Wybierz" })).toHaveLength(5);
-        expect(screen.getAllByRole("button", { name: "Posłuchaj" })).toHaveLength(6);
+        expect(screen.getAllByRole("button", { name: "Wybierz" })).toHaveLength(7);
+        expect(screen.getAllByRole("button", { name: "Posłuchaj" })).toHaveLength(8);
     });
 });
