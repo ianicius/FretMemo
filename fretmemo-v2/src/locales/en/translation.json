@@ -1232,7 +1232,7 @@
       "modeNotFoundDesc": "The mode '{{mode}}' is not available.",
       "backToLibrary": "Back to Train",
       "modes": {
-        "soundToFretboard": "Sound -> Fretboard",
+        "soundToFretboard": "Find the Note",
         "intervalRecognition": "Interval Recognition",
         "chordQuality": "Chord Quality",
         "functionalEar": "Functional Ear"
@@ -1249,7 +1249,7 @@
       "correct": "Correct!"
     },
     "soundToFretboard": {
-      "title": "Sound -> Fretboard",
+      "title": "Find the Note",
       "description": "Hear the note and pick matching positions on the fretboard.",
       "enableAudioHint": "Tap start once to unlock audio.",
       "noteIs": "Note: {{note}}",
