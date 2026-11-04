@@ -468,6 +468,11 @@
       "guitarMode": "Guitar sound",
       "renderingGuitar": "Rendering guitar audio…",
       "guitarError": "Could not render the guitar audio — try again."
+    },
+    "prompter": {
+      "current": "Current",
+      "next": "Next",
+      "currentChordAria": "Current chord"
     }
   },
   "sound": {

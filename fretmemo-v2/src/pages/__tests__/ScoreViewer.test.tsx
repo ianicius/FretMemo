@@ -28,6 +28,7 @@ const { FakeAlphaTabApi, apiInstanceHolder } = vi.hoisted(() => {
         playerPositionChanged = new FakeEmitter<{ currentTime: number; endTime: number }>();
         soundFontLoad = new FakeEmitter<{ loaded: number; total: number }>();
         playerFinished = new FakeEmitter();
+        playedBeatChanged = new FakeEmitter<{ voice: { bar: { index: number } } }>();
         error = new FakeEmitter();
         player = {
             soundFontLoadFailed: new FakeEmitter(),

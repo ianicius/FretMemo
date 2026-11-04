@@ -16,6 +16,8 @@ import { cn } from "@/lib/utils";
 import { trackFeatureOpened } from "@/lib/analytics";
 import { formatScoreMetaLine } from "@/lib/scoreDisplay";
 import { getScoreBytes, listScoreMeta } from "@/lib/scoreStore";
+import { buildChordTimeline, type ChordTimelineEntry } from "@/lib/chords";
+import { ChordPrompter } from "@/components/score/ChordPrompter";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import {
     getSongDestination,
@@ -70,6 +72,8 @@ export default function ScoreViewer() {
     const [metronomeOn, setMetronomeOn] = useState(false);
     const [reloadKey, setReloadKey] = useState(0);
     const displayTheme = useSettingsStore((state) => state.full.display.theme);
+    const [chordTimeline, setChordTimeline] = useState<ChordTimelineEntry[] | null>(null);
+    const [currentBar, setCurrentBar] = useState<number | null>(null);
     const playerStateRef = useRef(1); // alphatab.synth.PlayerState.Playing, refreshed on import
 
     // Guitar-sound playback: the score is rendered offline (exportAudio) and
@@ -179,7 +183,13 @@ export default function ScoreViewer() {
                     }
                 });
                 api.playerFinished.on(() => {
-                    if (!cancelled) setPlaying(false);
+                    if (!cancelled) {
+                        setPlaying(false);
+                        setCurrentBar(null);
+                    }
+                });
+                api.playedBeatChanged.on((beat) => {
+                    if (!cancelled) setCurrentBar(beat.voice.bar.index);
                 });
 
                 const names = score.tracks.map((track, index) =>
@@ -205,6 +215,9 @@ export default function ScoreViewer() {
                 setTrackNames(names);
                 setTrackIndex(initialIndex);
                 api.renderScore(score, [initialIndex]);
+                setChordTimeline(
+                    buildChordTimeline(api.tracks[0], score.masterBars.length),
+                );
                 api.playbackSpeed = speed;
                 api.masterVolume = volume;
                 api.metronomeVolume = metronomeOn ? 0.5 : 0;
@@ -239,6 +252,9 @@ export default function ScoreViewer() {
         setTrackIndex(index);
         if (apiRef.current && scoreRef.current) {
             apiRef.current.renderScore(scoreRef.current, [index]);
+            setChordTimeline(
+                buildChordTimeline(apiRef.current.tracks[0], scoreRef.current.masterBars.length),
+            );
         }
         if (guitarMode) {
             // The rendered mix reflects the previous track selection — drop it;
@@ -353,6 +369,7 @@ export default function ScoreViewer() {
         apiRef.current?.stop();
         setPlaying(false);
         setPositionMs(0);
+        setCurrentBar(null);
     };
 
     const handleSpeedChange = (next: number) => {
@@ -450,6 +467,10 @@ export default function ScoreViewer() {
                         onRetry={() => setReloadKey((key) => key + 1)}
                     />
                 </>
+            )}
+
+            {status === "ready" && (
+                <ChordPrompter timeline={chordTimeline} currentBar={currentBar} />
             )}
 
             {status === "ready" && trackNames.length > 0 && (

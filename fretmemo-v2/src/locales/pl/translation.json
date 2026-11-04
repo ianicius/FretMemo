@@ -423,6 +423,11 @@
       "guitarMode": "Dźwięk gitary",
       "renderingGuitar": "Renderuję dźwięk gitary…",
       "guitarError": "Nie udało się wyrenderować dźwięku gitary — spróbuj ponownie."
+    },
+    "prompter": {
+      "current": "Teraz",
+      "next": "Potem",
+      "currentChordAria": "Bieżący akord"
     }
   },
   "sound": {
