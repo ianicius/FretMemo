@@ -101,35 +101,56 @@ describe('sampler loading and playback', () => {
         expect(fake).not.toBeNull();
     });
 
-    it('plays a sampled voice wired into the destination with trim and tail fade', async () => {
+    it('plays a sampled voice wired into the destination and releases after durationSec', async () => {
         stubFetchSucceeding();
         const { ctx } = makeContext(new FakeAudioBuffer(1, 44100 * 5, 44100)); // 5 s sample
         await loadSampler(ctx);
 
         const destination = ctx.createGain();
-        const handle = playSampleVoice(ctx, destination as unknown as AudioNode, 60, 10);
+        const handle = playSampleVoice(ctx, destination as unknown as AudioNode, 60, 10, 1, 1.2);
         expect(handle).not.toBeNull();
 
         const source = handle!.source as unknown as FakeAudioBufferSourceNode;
         expect(source.buffer).not.toBeNull();
         expect(source.playbackRate.value).toBeCloseTo(1);
         expect(source.start).toHaveBeenCalledWith(10);
-        expect(source.stop).toHaveBeenCalledWith(10 + 5); // natural end at rate 1
+        // Released after durationSec + mute fade — NOT at the 5 s natural end.
+        expect(source.stop).toHaveBeenCalledWith(10 + 1.2 + 0.18);
 
-        // gain: trim applied at start, held through the fade start, ramped to 0
+        // gain: trim at start, held until the release point, ramped to 0
         const automations = (handle!.gain as unknown as { gain: { automationCalls: Array<{ method: string; args: unknown[] }> } }).gain.automationCalls;
         expect(automations[0]).toEqual({ method: 'setValueAtTime', args: [2.2, 10] });
-        expect(automations.at(-1)).toEqual({ method: 'linearRampToValueAtTime', args: [0, 15] });
+        expect(automations[1]).toEqual({ method: 'setValueAtTime', args: [2.2, 11.2] });
+        const lastRamp = automations.at(-1)!;
+        expect(lastRamp.method).toBe('linearRampToValueAtTime');
+        expect(lastRamp.args[0]).toBe(0);
+        expect(lastRamp.args[1]).toBeCloseTo(11.38);
 
         // wired source -> gain -> destination
         expect(source.connections).toContainEqual({ destination: handle!.gain, output: undefined, input: undefined });
         expect((handle!.gain as unknown as { connections: Array<{ destination: unknown }> }).connections).toContainEqual({ destination, output: undefined, input: undefined });
     });
 
+    it('caps a long-duration request at the natural sample end', async () => {
+        stubFetchSucceeding();
+        const { ctx } = makeContext(new FakeAudioBuffer(1, 44100 * 5, 44100));
+        await loadSampler(ctx);
+
+        const destination = ctx.createGain();
+        const handle = playSampleVoice(ctx, destination as unknown as AudioNode, 60, 0, 1, 20);
+        expect(handle).not.toBeNull();
+        const source = handle!.source as unknown as FakeAudioBufferSourceNode;
+        // 5 s natural end: release starts at 5 − 0.18, stops at 5.
+        expect(source.stop).toHaveBeenCalledWith(5);
+        const automations = (handle!.gain as unknown as { gain: { automationCalls: Array<{ method: string; args: unknown[] }> } }).gain.automationCalls;
+        expect(automations[1]).toEqual({ method: 'setValueAtTime', args: [2.2, 4.82] });
+        expect(automations.at(-1)).toEqual({ method: 'linearRampToValueAtTime', args: [0, 5] });
+    });
+
     it('returns null when the sampler is not ready (caller falls back to synth)', () => {
         const fake = new FakeAudioContext();
         const destination = fake.createGain();
-        expect(playSampleVoice(fake as unknown as AudioContext, destination as unknown as AudioNode, 60, 0)).toBeNull();
+        expect(playSampleVoice(fake as unknown as AudioContext, destination as unknown as AudioNode, 60, 0, 1, 1)).toBeNull();
     });
 
     it('pitch-shifts chords with per-note balance applied on top of the trim', async () => {
@@ -138,7 +159,7 @@ describe('sampler loading and playback', () => {
         await loadSampler(ctx);
 
         const destination = ctx.createGain();
-        const handle = playSampleVoice(ctx, destination as unknown as AudioNode, 40, 0, 0.5);
+        const handle = playSampleVoice(ctx, destination as unknown as AudioNode, 40, 0, 0.5, 1.2);
         expect(handle).not.toBeNull();
         const source = handle!.source as unknown as FakeAudioBufferSourceNode;
         expect(source.playbackRate.value).toBeCloseTo(2 ** (-12 / 12));

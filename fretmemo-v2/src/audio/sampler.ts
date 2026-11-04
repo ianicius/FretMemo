@@ -31,6 +31,16 @@ export const SAMPLE_TRIM = 2.2;
 /** Fade length applied at the very end of a sample to avoid a click. */
 export const SAMPLE_TAIL_FADE_SEC = 0.12;
 
+/**
+ * Musical release: the additive synth decayed BY durationSec, so a requested
+ * note ends at its duration + this short mute fade (not at the 5.7 s natural
+ * end of the recording, which smeared notes together in fast sequences).
+ */
+export const SAMPLE_RELEASE_SEC = 0.18;
+
+/** Shortest ring before the release fade may start. */
+export const SAMPLE_MIN_RING_SEC = 0.25;
+
 /** MIDI numbers that actually have a sample file (upstream sampled naturals only). */
 export const SAMPLED_MIDIS: readonly number[] = (() => {
     const midis: number[] = [];
@@ -127,14 +137,17 @@ export interface SampleVoiceHandle {
 /**
  * Play one sampled note into `destination`. Returns null when the sampler is
  * not ready (caller falls back to the synth). `gainScale` lets chords keep
- * their per-note balance (1/sqrt(n)) on top of the loudness trim.
+ * their per-note balance (1/sqrt(n)) on top of the loudness trim. The note
+ * rings its natural decay until `when + durationSec`, then a short mute fade
+ * releases it — the same duration contract the additive synth had.
  */
 export function playSampleVoice(
     ctx: BaseAudioContext,
     destination: AudioNode,
     midi: number,
     when: number,
-    gainScale = 1,
+    gainScale: number,
+    durationSec: number,
 ): SampleVoiceHandle | null {
     if (!buffers) return null;
     const sampleMidi = pickSampleMidi(midi);
@@ -149,15 +162,19 @@ export function playSampleVoice(
     const gain = ctx.createGain();
     const peak = SAMPLE_TRIM * gainScale;
     const naturalEnd = when + buffer.duration / rate;
-    const fadeStart = Math.max(when, naturalEnd - SAMPLE_TAIL_FADE_SEC);
+    const releaseStart = Math.min(
+        when + Math.max(durationSec, SAMPLE_MIN_RING_SEC),
+        Math.max(when, naturalEnd - SAMPLE_RELEASE_SEC),
+    );
+    const stopAt = Math.min(releaseStart + SAMPLE_RELEASE_SEC, naturalEnd);
     gain.gain.setValueAtTime(peak, when);
-    gain.gain.setValueAtTime(peak, fadeStart);
-    gain.gain.linearRampToValueAtTime(0, naturalEnd);
+    gain.gain.setValueAtTime(peak, releaseStart);
+    gain.gain.linearRampToValueAtTime(0, stopAt);
 
     source.connect(gain);
     gain.connect(destination);
     source.start(when);
-    source.stop(naturalEnd);
+    source.stop(stopAt);
 
     return { source, gain };
 }

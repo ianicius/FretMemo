@@ -64,7 +64,7 @@ export function playTone(midi: number, durationSec = 1.2): Promise<void> {
     ensureSamplerLoaded(ctx);
 
     if (isSamplerReady()) {
-        playSampleVoice(ctx, voiceHub, midi, now);
+        playSampleVoice(ctx, voiceHub, midi, now, 1, durationSec);
         return new Promise((resolve) => setTimeout(resolve, durationSec * 1000));
     }
 
@@ -153,7 +153,7 @@ export function playChord(midis: number[], durationSec = 1.5, options: PlayChord
         if (isSamplerReady()) {
             // Sampled voice with the chord's per-note balance on top of the
             // sampler's loudness trim (see SAMPLE_TRIM).
-            playSampleVoice(ctx, voiceGain, midi, startAt, 1 / Math.sqrt(midis.length));
+            playSampleVoice(ctx, voiceGain, midi, startAt, 1 / Math.sqrt(midis.length), durationSec);
             return new Promise<void>((resolve) => {
                 setTimeout(resolve, (offset + durationSec) * 1000);
             });
