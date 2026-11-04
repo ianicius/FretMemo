@@ -67,6 +67,17 @@ export default defineConfig({
               cacheableResponse: { statuses: [0, 200] },
             },
           },
+          // Sound engine assets (NAM models, worklet script, wasm binary):
+          // runtime-cached on first use like the soundfont — never precached.
+          {
+            urlPattern: /\/sound\/.+/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "sound-assets",
+              expiration: { maxEntries: 12, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
         ],
         cleanupOutdatedCaches: true,
         skipWaiting: true,

@@ -91,6 +91,13 @@ Nastepny etap:
   - `Progress`,
   - `Settings`.
 
+> **ADDENDUM (2026-11-04, zatwierdzona funkcja Guitar Sound)** — nawigacja najwyzszego
+> poziomu doczekała sie piątej zakładki. Finalna struktura: **Home, Train, Sound (Dźwięk),
+> Challenges, Me**. Zakładka `/sound` gromadzi wszystko związane z brzmieniem gitary:
+> wybór presetów brzmienia, projektant brzmienia (tone designer) oraz wejście na żywo
+> (live input, mikrofon przez łańcuch silnika). Powyzszy plan historyczny (cztery zakładki)
+> pozostaje niezmieniony — niniejszy dodatek odzwierciedla zaimplementowana nawigację.
+
 ## 3.2 Architektura ustawien (krytyczne)
 
 ### A. Global Defaults (`/me?section=settings`)

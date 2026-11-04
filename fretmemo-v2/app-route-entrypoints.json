@@ -1,6 +1,7 @@
 {
   "routes": [
     "/train",
+    "/sound",
     "/practice",
     "/library",
     "/scores",

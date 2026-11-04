@@ -1,4 +1,5 @@
 import {
+    AudioWaveform,
     ChartBar,
     CircleHelp,
     Coffee,
@@ -134,6 +135,17 @@ export function Header() {
                                         >
                                             <Target className="mr-2 h-4 w-4" />
                                             {t('nav.practice')}
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            className="justify-start"
+                                            onClick={() => {
+                                                trackNavigationClicked("header_quick_actions", "/sound", "sound");
+                                                navigate("/sound");
+                                            }}
+                                        >
+                                            <AudioWaveform className="mr-2 h-4 w-4" />
+                                            {t('nav.sound')}
                                         </Button>
                                         <Button
                                             variant="outline"

@@ -392,6 +392,7 @@
     "practice": "Trening",
     "challenges": "Wyzwania",
     "progress": "Postępy",
+    "sound": "Dźwięk",
     "help": "Pomoc",
     "settings": "Ustawienia"
   },
@@ -419,6 +420,150 @@
       "playerError": "Nie udało się uruchomić odtwarzania. Sprawdź połączenie — brzmienia (38 MB) ładują się raz i są potem cache’owane.",
       "retry": "Ponów",
       "playbackPosition": "Pozycja odtwarzania"
+    }
+  },
+  "sound": {
+    "title": "Dźwięk",
+    "subtitle": "Wybierz brzmienie gitary używane we wszystkich ćwiczeniach.",
+    "activeSummary": "Aktywne brzmienie: {{name}}",
+    "activeFallback": "Nieznane brzmienie",
+    "moreSettings": "Więcej ustawień audio",
+    "kind": {
+      "acoustic": "Akustyczna",
+      "nam": "NAM",
+      "custom": "Własny"
+    },
+    "status": {
+      "active": "Aktywny",
+      "loading": "Ładowanie modelu…",
+      "ready": "Gotowy",
+      "error": "Nie udało się wczytać modelu.",
+      "retry": "Ponów"
+    },
+    "actions": {
+      "select": "Wybierz",
+      "selected": "Wybrane",
+      "audition": "Posłuchaj",
+      "auditioning": "Gram…",
+      "delete": "Usuń",
+      "deleteTone": "Usuń brzmienie"
+    },
+    "volume": {
+      "label": "Głośność",
+      "hint": "Główna głośność odtwarzania — dotyczy wszystkich ćwiczeń."
+    },
+    "custom": {
+      "emptyTitle": "Brak własnych brzmień",
+      "emptyDescription": "Otwórz projektant brzmienia, ustaw parametry i zapisz swój pierwszy preset.",
+      "deleteConfirmTitle": "Usunąć brzmienie?",
+      "deleteConfirmDescription": "„{{name}}” zostanie trwale usunięte.",
+      "deleteConfirmConfirm": "Usuń",
+      "deleteConfirmCancel": "Anuluj",
+      "feedback": {
+        "deleted": "Usunięto brzmienie „{{name}}”."
+      }
+    },
+    "designer": {
+      "title": "Projektant brzmienia",
+      "summary": "Wzmacniacz, EQ, efekty",
+      "description": "Zbuduj własne brzmienie: wybierz wzmacniacz, ustaw parametry łańcucha i posłuchaj frazy testowej. Zapisane presety pojawią się na liście obok wbudowanych.",
+      "amp": "Wzmacniacz",
+      "amps": {
+        "classic": "Klasyczny (synteza)",
+        "nam-deluxe-a2": "Fender Deluxe Reverb (NAM)",
+        "nam-clean-jc": "Roland JC-120 (NAM)",
+        "nam-crunch-ac10": "Vox AC10 (NAM)",
+        "nam-lead-jcm": "Marshall JCM800 (NAM)",
+        "nam-high-gain-5153": "EVH 5153 (NAM)"
+      },
+      "params": {
+        "inputGain": "Wzmocnienie wejścia",
+        "drive": "Drive",
+        "bass": "Bas",
+        "mid": "Środek",
+        "treble": "Góra",
+        "comp": "Kompresor",
+        "delayMix": "Delay",
+        "reverbMix": "Pogłos",
+        "outputGain": "Wzmocnienie wyjścia"
+      },
+      "units": {
+        "db": "dB",
+        "percent": "%",
+        "x": "x"
+      },
+      "audition": "Posłuchaj frazy",
+      "auditioning": "Gram…",
+      "nameLabel": "Nazwa presetu",
+      "namePlaceholder": "np. Ciepły jazz",
+      "nameRequired": "Podaj nazwę presetu.",
+      "save": "Zapisz preset",
+      "saving": "Zapisywanie…",
+      "feedback": {
+        "saved": "Zapisano brzmienie „{{name}}”.",
+        "saveFailed": "Nie udało się zapisać brzmienia."
+      }
+    },
+    "live": {
+      "title": "Wejście na żywo",
+      "summary": "Graj przez aktywne brzmienie",
+      "description": "Przepuszcza sygnał z mikrofonu przez aktualnie wybrany preset — słyszysz gitarę z aktywnym brzmieniem. Pomyślane pod słuchawki.",
+      "hint": "Zanim włączysz: załóż słuchawki. Odsłuch na żywo przez głośniki może skończyć się głośnym sprzężeniem.",
+      "enable": "Włącz wejście na żywo",
+      "disable": "Wyłącz wejście na żywo",
+      "starting": "Uruchamianie…",
+      "status": {
+        "off": "Wejście na żywo jest wyłączone",
+        "starting": "Uruchamianie mikrofonu…",
+        "on": "Wejście na żywo jest włączone",
+        "error": "Nie udało się uruchomić wejścia"
+      },
+      "level": "Poziom sygnału",
+      "muted": "Wyciszone",
+      "warning": "Słuchawki na! Słyszysz się na żywo przez wybrane brzmienie — głośniki mogą wywołać sprzężenie.",
+      "mute": "Awaryjne wyciszenie",
+      "unmute": "Wznów odsłuch",
+      "errors": {
+        "denied": {
+          "title": "Brak dostępu do mikrofonu",
+          "description": "Przeglądarka zablokowała dostęp do mikrofonu. Zezwól na niego dla tej witryny (kłódka w pasku adresu) i spróbuj ponownie."
+        },
+        "notfound": {
+          "title": "Nie znaleziono mikrofonu",
+          "description": "Nie wykryto urządzenia wejściowego. Podłącz mikrofon lub interfejs audio i spróbuj ponownie."
+        },
+        "unknown": {
+          "title": "Nie udało się uruchomić wejścia na żywo",
+          "description": "Wystąpił błąd podczas otwierania mikrofonu. Spróbuj ponownie."
+        }
+      },
+      "retry": "Spróbuj ponownie"
+    },
+    "presets": {
+      "classicAcoustic": {
+        "name": "Klasyczna akustyka",
+        "description": "Ciepłe, neutralne brzmienie akustycznej gitary (synteza Web Audio)."
+      },
+      "namCleanJc": {
+        "name": "Czysty JC-120",
+        "description": "Krystaliczny, uniwersalny clean Rolanda JC-120 — idealny do ćwiczeń."
+      },
+      "namCleanDeluxe": {
+        "name": "Clean Deluxe",
+        "description": "Kremowy clean amerykańskiego kombo z lekkim połyskiem góry."
+      },
+      "namCrunchAc10": {
+        "name": "Crunch AC10",
+        "description": "Brytyjski crunch z wyraźną środnicą — od czystych po przekrzywione akordy."
+      },
+      "namLeadJcm": {
+        "name": "Lead JCM800",
+        "description": "Klasyczny brytyjski lead — śpiewny środek do solówek."
+      },
+      "namHighGain5153": {
+        "name": "High Gain 5153",
+        "description": "Nowoczesny high-gain — ciasny, mocny, gotowy na riffy."
+      }
     }
   },
   "library": {
@@ -972,13 +1117,6 @@
       "cardTitle": "Audio i wejście",
       "cardDescription": "Zarządzaj wyjściem dźwięku i wejściem mikrofonu.",
       "masterVolume": "Główna głośność",
-      "instrumentSound": "Brzmienie instrumentu",
-      "instrumentSoundHint": "Używane do generowanych dźwięków i tonów referencyjnych.",
-      "sounds": {
-        "acoustic": "Akustyczne",
-        "electric": "Elektryczne",
-        "clean": "Clean"
-      },
       "pitchTolerance": "Tolerancja stroju (centy)",
       "pitchToleranceHint": "Wyższe wartości dają większą tolerancję detekcji.",
       "latency": {
@@ -994,7 +1132,9 @@
         "retry": "Ponów",
         "noMic": "Nie znaleziono mikrofonu albo odmówiono dostępu.",
         "tooFewHits": "Za mało wyraźnych onsetów. Graj głośniej, dokładnie na klik."
-      }
+      },
+      "soundPreset": "Brzmienie gitary",
+      "soundPresetHint": "Aktywny preset — zmienisz go w panelu Dźwięk."
     },
     "appearance": {
       "sectionTitle": "Wygląd",

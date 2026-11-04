@@ -392,6 +392,7 @@
     "practice": "Train",
     "challenges": "Challenges",
     "progress": "Me",
+    "sound": "Sound",
     "help": "Help",
     "settings": "Settings"
   },
@@ -464,6 +465,150 @@
       "playerError": "Playback could not start. Check your connection — the instrument sounds (38 MB) load once and are then cached.",
       "retry": "Retry",
       "playbackPosition": "Playback position"
+    }
+  },
+  "sound": {
+    "title": "Sound",
+    "subtitle": "Pick the guitar sound used across all exercises.",
+    "activeSummary": "Active sound: {{name}}",
+    "activeFallback": "Unknown sound",
+    "moreSettings": "More audio settings",
+    "kind": {
+      "acoustic": "Acoustic",
+      "nam": "NAM",
+      "custom": "Custom"
+    },
+    "status": {
+      "active": "Active",
+      "loading": "Loading model…",
+      "ready": "Ready",
+      "error": "Model failed to load.",
+      "retry": "Retry"
+    },
+    "actions": {
+      "select": "Select",
+      "selected": "Selected",
+      "audition": "Audition",
+      "auditioning": "Playing…",
+      "delete": "Delete",
+      "deleteTone": "Delete tone"
+    },
+    "volume": {
+      "label": "Volume",
+      "hint": "Master playback volume — applies to every exercise."
+    },
+    "custom": {
+      "emptyTitle": "No custom tones yet",
+      "emptyDescription": "Open the tone designer, dial in the parameters and save your first preset.",
+      "deleteConfirmTitle": "Delete this tone?",
+      "deleteConfirmDescription": "\"{{name}}\" will be permanently deleted.",
+      "deleteConfirmConfirm": "Delete",
+      "deleteConfirmCancel": "Cancel",
+      "feedback": {
+        "deleted": "Deleted tone \"{{name}}\"."
+      }
+    },
+    "designer": {
+      "title": "Tone designer",
+      "summary": "Amp, EQ, effects",
+      "description": "Build your own tone: pick an amp, dial in the chain parameters and check them with the test phrase. Saved presets appear in the list next to the built-ins.",
+      "amp": "Amp",
+      "amps": {
+        "classic": "Classic (synthesis)",
+        "nam-deluxe-a2": "Fender Deluxe Reverb (NAM)",
+        "nam-clean-jc": "Roland JC-120 (NAM)",
+        "nam-crunch-ac10": "Vox AC10 (NAM)",
+        "nam-lead-jcm": "Marshall JCM800 (NAM)",
+        "nam-high-gain-5153": "EVH 5153 (NAM)"
+      },
+      "params": {
+        "inputGain": "Input gain",
+        "drive": "Drive",
+        "bass": "Bass",
+        "mid": "Mids",
+        "treble": "Treble",
+        "comp": "Compressor",
+        "delayMix": "Delay",
+        "reverbMix": "Reverb",
+        "outputGain": "Output gain"
+      },
+      "units": {
+        "db": "dB",
+        "percent": "%",
+        "x": "x"
+      },
+      "audition": "Play phrase",
+      "auditioning": "Playing…",
+      "nameLabel": "Preset name",
+      "namePlaceholder": "e.g. Warm jazz",
+      "nameRequired": "Enter a preset name.",
+      "save": "Save preset",
+      "saving": "Saving…",
+      "feedback": {
+        "saved": "Saved tone \"{{name}}\".",
+        "saveFailed": "Could not save the tone."
+      }
+    },
+    "live": {
+      "title": "Live input",
+      "summary": "Play through the active sound",
+      "description": "Routes your microphone through the currently selected preset — you hear your guitar with the active sound. Designed for headphones.",
+      "hint": "Before enabling: put on headphones. Live monitoring through speakers can cause loud feedback.",
+      "enable": "Enable live input",
+      "disable": "Disable live input",
+      "starting": "Starting…",
+      "status": {
+        "off": "Live input is off",
+        "starting": "Starting microphone…",
+        "on": "Live input is on",
+        "error": "Live input failed"
+      },
+      "level": "Input level",
+      "muted": "Muted",
+      "warning": "Headphones on! You are hearing yourself live through the selected sound — speakers or loud monitors can cause feedback.",
+      "mute": "Emergency mute",
+      "unmute": "Resume monitoring",
+      "errors": {
+        "denied": {
+          "title": "Microphone access denied",
+          "description": "Your browser blocked microphone access. Allow it for this site (padlock icon in the address bar) and try again."
+        },
+        "notfound": {
+          "title": "No microphone found",
+          "description": "No input device was detected. Connect a microphone or audio interface, then try again."
+        },
+        "unknown": {
+          "title": "Could not start live input",
+          "description": "Something went wrong while opening the microphone. Try again."
+        }
+      },
+      "retry": "Try again"
+    },
+    "presets": {
+      "classicAcoustic": {
+        "name": "Classic acoustic",
+        "description": "Warm, neutral acoustic guitar voice (Web Audio synthesis)."
+      },
+      "namCleanJc": {
+        "name": "Clean JC-120",
+        "description": "Crystal-clear Roland JC-120 clean — a universal practice voice."
+      },
+      "namCleanDeluxe": {
+        "name": "Clean Deluxe",
+        "description": "Creamy American-combo clean with a touch of top-end sparkle."
+      },
+      "namCrunchAc10": {
+        "name": "Crunch AC10",
+        "description": "British crunch with a pronounced midrange — from clean to biting chords."
+      },
+      "namLeadJcm": {
+        "name": "Lead JCM800",
+        "description": "Classic British lead — a singing midrange for solos."
+      },
+      "namHighGain5153": {
+        "name": "High Gain 5153",
+        "description": "Modern high gain — tight, heavy and riff-ready."
+      }
     }
   },
   "challenges": {
@@ -958,13 +1103,6 @@
       "cardTitle": "Audio & Input",
       "cardDescription": "Manage sound output and microphone input.",
       "masterVolume": "Master Volume",
-      "instrumentSound": "Playback Instrument Sound",
-      "instrumentSoundHint": "Used for generated tones and reference notes.",
-      "sounds": {
-        "acoustic": "Acoustic",
-        "electric": "Electric",
-        "clean": "Clean"
-      },
       "pitchTolerance": "Pitch Tolerance (cents)",
       "pitchToleranceHint": "Higher values make detection more forgiving.",
       "latency": {
@@ -980,7 +1118,9 @@
         "retry": "Retry",
         "noMic": "No microphone was found or access was denied.",
         "tooFewHits": "Not enough clean onsets. Play louder, right on the clicks."
-      }
+      },
+      "soundPreset": "Guitar sound",
+      "soundPresetHint": "The active preset — change it in the Sound panel."
     },
     "appearance": {
       "sectionTitle": "Appearance",

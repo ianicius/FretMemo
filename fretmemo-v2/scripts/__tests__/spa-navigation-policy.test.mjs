@@ -30,7 +30,7 @@ describe("SPA navigation fallback policy", () => {
   });
 
   it("allows only the root and manifest routes with optional trailing slashes", () => {
-    expect(routeManifest.routes).toHaveLength(28);
+    expect(routeManifest.routes).toHaveLength(29);
     expect(isAllowedNavigation("/")).toBe(true);
 
     for (const route of routeManifest.routes) {

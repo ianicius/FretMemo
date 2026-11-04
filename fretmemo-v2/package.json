@@ -33,7 +33,6 @@
     "tailwind-merge": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
     "tonal": "^6.4.3",
-    "tone": "^15.1.22",
     "vite-plugin-pwa": "^1.2.0",
     "zustand": "^5.0.11"
   },

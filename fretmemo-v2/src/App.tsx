@@ -7,6 +7,7 @@ import { ErrorBoundary } from "./components/ui/error-boundary";
 
 const Home = lazy(() => import("./pages/Home"));
 const Practice = lazy(() => import("./pages/Practice"));
+const Sound = lazy(() => import("./pages/Sound"));
 const Library = lazy(() => import("./pages/Library"));
 const ScoreViewer = lazy(() => import("./pages/ScoreViewer"));
 const Technique = lazy(() => import("./pages/Technique"));
@@ -27,6 +28,7 @@ function AppRoutes() {
           <Route path="/" element={<Home />} />
           <Route path="/train" element={<Library />} />
           <Route path="/practice" element={<Practice />} />
+          <Route path="/sound" element={<Sound />} />
           <Route path="/library" element={<Navigate to="/train" replace />} />
           <Route path="/scores" element={<ScoreViewer />} />
           <Route path="/technique/:id" element={<Technique />} />
