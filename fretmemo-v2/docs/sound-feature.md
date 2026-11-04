@@ -38,6 +38,8 @@ tlumaczone kluczami `sound.presets.<id>.name` / `.description` (en + pl).
 | `nam-crunch-ac10` — Crunch AC10 | NAM `nam-crunch-ac10` (Vox AC10) | brytyjski crunch, wyraźna środnica |
 | `nam-lead-jcm` — Lead JCM800 | NAM `nam-lead-jcm` (Marshall JCM800) | klasyczny lead, śpiewny środek |
 | `nam-high-gain-5153` — High Gain 5153 | NAM `nam-high-gain-5153` (Boosted EVH 5153) | nowoczesny, ciasny high-gain |
+| `nam-lead-dumble` — Dumble ODS | NAM `nam-lead-dumble` (Dumble Overdrive Special) | śpiewny, responsywny lead |
+| `nam-vintage-ampeg` — Ampeg V-2 | NAM `nam-vintage-ampeg` (Ampeg V-2) | ciepły, vintage'owy charakter |
 
 ### Źródło dźwięku: próbki (sampler)
 
