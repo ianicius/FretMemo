@@ -419,6 +419,11 @@
       "playerError": "Nie udało się uruchomić odtwarzania. Sprawdź połączenie — brzmienia (38 MB) ładują się raz i są potem cache’owane.",
       "retry": "Ponów",
       "playbackPosition": "Pozycja odtwarzania"
+    },
+    "prompter": {
+      "current": "Teraz",
+      "next": "Potem",
+      "currentChordAria": "Bieżący akord"
     }
   },
   "library": {
