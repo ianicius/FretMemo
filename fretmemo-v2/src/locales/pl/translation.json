@@ -419,7 +419,9 @@
       "loadingSoundfont": "Wczytywanie brzmień…",
       "playerError": "Nie udało się uruchomić odtwarzania. Sprawdź połączenie — brzmienia (38 MB) ładują się raz i są potem cache’owane.",
       "retry": "Ponów",
-      "playbackPosition": "Pozycja odtwarzania"
+      "playbackPosition": "Pozycja odtwarzania",
+      "guitarMode": "Dźwięk gitary",
+      "renderingGuitar": "Renderuję dźwięk gitary…"
     }
   },
   "sound": {

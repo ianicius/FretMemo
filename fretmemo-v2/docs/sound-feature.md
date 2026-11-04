@@ -41,6 +41,17 @@ tlumaczone kluczami `sound.presets.<id>.name` / `.description` (en + pl).
 | `nam-lead-dumble` — Dumble ODS | NAM `nam-lead-dumble` (Dumble Overdrive Special) | śpiewny, responsywny lead |
 | `nam-vintage-ampeg` — Ampeg V-2 | NAM `nam-vintage-ampeg` (Ampeg V-2) | ciepły, vintage'owy charakter |
 
+### Twoje utwory — tryb „Dźwięk gitary"
+
+W ScoreViewer przełącznik **Dźwięk gitary** renderuje wczytany utwór offline
+(`AlphaTabApi.exportAudio`, własny soundfont) do bufora i odtwarza go przez
+ten sam łańcuch silnika — aktywny preset (classic lub NAM) barwi całe
+aranżacje. alphaTab pozostaje wstrzymany; kursory nut prowadzi nasz zegar
+(`api.timePosition`). Suwak głośności w tym trybie steruje głośnością
+silnika (ustawienie `audio.volume`); tempo i metronom są wyłączone (wspierane
+tylko przez transport soundfontu). Zmiana ścieżki unieważnia wyrenderowany
+bufor — kolejny play renderuje ponownie. Moduł: `src/audio/songPlayback.ts`.
+
 ### Źródło dźwięku: próbki (sampler)
 
 Suchym sygnałem zasilającym łańcuch (i NAM) nie jest już syntezator, tylko

@@ -8,13 +8,21 @@ import {
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, FileWarning, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { PlaybackControls } from "@/components/score/PlaybackControls";
 import { cn } from "@/lib/utils";
 import { trackFeatureOpened } from "@/lib/analytics";
 import { formatScoreMetaLine } from "@/lib/scoreDisplay";
 import { getScoreBytes, listScoreMeta } from "@/lib/scoreStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
+import {
+    getSongDestination,
+    getSongEngineContext,
+    renderSongToBuffer,
+    SongPlayback,
+} from "@/audio/songPlayback";
 import type { ScoreSummary } from "@/types/scores";
 // Type-only import: erased at build time, keeps alphaTab out of the entry chunk.
 import type { AlphaTabApi, model } from "@coderline/alphatab";
@@ -64,6 +72,14 @@ export default function ScoreViewer() {
     const displayTheme = useSettingsStore((state) => state.full.display.theme);
     const playerStateRef = useRef(1); // alphatab.synth.PlayerState.Playing, refreshed on import
 
+    // Guitar-sound playback: the score is rendered offline (exportAudio) and
+    // played through the engine chain, so the active preset colors the song.
+    const songPlaybackRef = useRef<SongPlayback | null>(null);
+    const songBufferRef = useRef<AudioBuffer | null>(null);
+    const [guitarMode, setGuitarMode] = useState(false);
+    const [guitarRendering, setGuitarRendering] = useState(false);
+    const [guitarRenderProgress, setGuitarRenderProgress] = useState<number | null>(null);
+
     const entrySource =
         (location.state as { source?: string } | null)?.source ?? null;
 
@@ -82,6 +98,12 @@ export default function ScoreViewer() {
         setPositionMs(0);
         setSoundfontProgress(null);
         scoreRef.current = null;
+        songPlaybackRef.current?.dispose();
+        songPlaybackRef.current = null;
+        songBufferRef.current = null;
+        setGuitarMode(false);
+        setGuitarRendering(false);
+        setGuitarRenderProgress(null);
 
         (async () => {
             try {
@@ -206,6 +228,9 @@ export default function ScoreViewer() {
             api?.destroy();
             apiRef.current = null;
             scoreRef.current = null;
+            songPlaybackRef.current?.dispose();
+            songPlaybackRef.current = null;
+            songBufferRef.current = null;
         };
     }, [id, entrySource, reloadKey, displayTheme]);
 
@@ -214,11 +239,87 @@ export default function ScoreViewer() {
         if (apiRef.current && scoreRef.current) {
             apiRef.current.renderScore(scoreRef.current, [index]);
         }
+        if (guitarMode) {
+            // The rendered mix reflects the previous track selection — drop it;
+            // the next play press re-renders with the new selection.
+            songPlaybackRef.current?.dispose();
+            songPlaybackRef.current = null;
+            songBufferRef.current = null;
+            setPlaying(false);
+            setGuitarRenderProgress(null);
+        }
+    };
+
+    const startGuitarRender = async () => {
+        const api = apiRef.current;
+        if (!api || guitarRendering) return;
+        setGuitarRendering(true);
+        setGuitarRenderProgress(0);
+        try {
+            const ctx = getSongEngineContext();
+            const buffer = await renderSongToBuffer(ctx, api, (progress) => {
+                setGuitarRenderProgress(
+                    progress.totalMs > 0 ? progress.renderedMs / progress.totalMs : 0,
+                );
+            });
+            songBufferRef.current = buffer;
+            songPlaybackRef.current?.dispose();
+            songPlaybackRef.current = new SongPlayback(ctx, getSongDestination(), buffer, {
+                onPosition: (ms) => {
+                    setPositionMs(ms);
+                    // alphaTab stays paused; its cursors follow our clock.
+                    if (apiRef.current) apiRef.current.timePosition = ms;
+                },
+                onEnded: () => setPlaying(false),
+            });
+            setDurationMs(buffer.duration * 1000);
+            songPlaybackRef.current.play(0);
+            setPlaying(true);
+        } catch {
+            // Render failed (e.g. soundfont not loaded) — fall back to the
+            // soundfont transport instead of leaving a dead toggle on.
+            setGuitarMode(false);
+        } finally {
+            setGuitarRendering(false);
+            setGuitarRenderProgress(null);
+        }
+    };
+
+    const handleGuitarModeToggle = () => {
+        const next = !guitarMode;
+        if (next) {
+            apiRef.current?.pause(); // keep alphaTab's synth silent under our transport
+            if (songBufferRef.current && songPlaybackRef.current) {
+                songPlaybackRef.current.play();
+                setPlaying(true);
+            } else {
+                void startGuitarRender();
+            }
+        } else {
+            songPlaybackRef.current?.pause();
+            setPlaying(false);
+        }
+        setGuitarMode(next);
     };
 
     const handlePlayToggle = () => {
         const api = apiRef.current;
         if (!api) return;
+        if (guitarMode) {
+            const playback = songPlaybackRef.current;
+            if (!playback) {
+                void startGuitarRender();
+                return;
+            }
+            if (playback.playing) {
+                playback.pause();
+                setPlaying(false);
+            } else {
+                playback.play();
+                setPlaying(true);
+            }
+            return;
+        }
         if (api.playerState === playerStateRef.current) {
             api.pause();
         } else {
@@ -227,6 +328,13 @@ export default function ScoreViewer() {
     };
 
     const handleStop = () => {
+        if (guitarMode) {
+            songPlaybackRef.current?.stop();
+            setPlaying(false);
+            setPositionMs(0);
+            if (apiRef.current) apiRef.current.timePosition = 0;
+            return;
+        }
         apiRef.current?.stop();
         setPlaying(false);
         setPositionMs(0);
@@ -239,6 +347,13 @@ export default function ScoreViewer() {
 
     const handleVolumeChange = (next: number) => {
         setVolume(next);
+        if (guitarMode) {
+            // Guitar mode plays through the engine — its master volume is the
+            // app-wide audio setting.
+            const settings = useSettingsStore.getState();
+            settings.updateFullSettings({ audio: { ...settings.full.audio, volume: next } });
+            return;
+        }
         if (apiRef.current) apiRef.current.masterVolume = next;
     };
 
@@ -278,23 +393,41 @@ export default function ScoreViewer() {
             </div>
 
             {status === "ready" && (
-                <PlaybackControls
-                    playing={playing}
-                    ready={playerReady}
-                    playerError={playerError}
-                    soundfontProgress={soundfontProgress}
-                    positionMs={positionMs}
-                    durationMs={durationMs}
-                    speed={speed}
-                    volume={volume}
-                    metronomeOn={metronomeOn}
-                    onPlayToggle={handlePlayToggle}
-                    onStop={handleStop}
-                    onSpeedChange={handleSpeedChange}
-                    onVolumeChange={handleVolumeChange}
-                    onMetronomeToggle={handleMetronomeToggle}
-                    onRetry={() => setReloadKey((key) => key + 1)}
-                />
+                <>
+                    <div className="flex items-center justify-end gap-2">
+                        <Switch
+                            id="guitar-mode"
+                            checked={guitarMode}
+                            onCheckedChange={handleGuitarModeToggle}
+                            disabled={guitarRendering}
+                        />
+                        <Label
+                            htmlFor="guitar-mode"
+                            className="cursor-pointer text-xs text-muted-foreground"
+                        >
+                            {t("scores.playback.guitarMode")}
+                        </Label>
+                    </div>
+                    <PlaybackControls
+                        playing={playing}
+                        ready={playerReady}
+                        playerError={playerError}
+                        soundfontProgress={soundfontProgress}
+                        positionMs={positionMs}
+                        durationMs={durationMs}
+                        speed={speed}
+                        volume={volume}
+                        metronomeOn={metronomeOn}
+                        guitarMode={guitarMode}
+                        guitarRenderProgress={guitarRendering ? guitarRenderProgress : null}
+                        onPlayToggle={handlePlayToggle}
+                        onStop={handleStop}
+                        onSpeedChange={handleSpeedChange}
+                        onVolumeChange={handleVolumeChange}
+                        onMetronomeToggle={handleMetronomeToggle}
+                        onRetry={() => setReloadKey((key) => key + 1)}
+                    />
+                </>
             )}
 
             {status === "ready" && trackNames.length > 0 && (

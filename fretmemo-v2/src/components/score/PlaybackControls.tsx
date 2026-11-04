@@ -25,6 +25,10 @@ interface PlaybackControlsProps {
     speed: number;
     volume: number;
     metronomeOn: boolean;
+    /** Guitar mode: transport runs through the engine (no speed/metronome). */
+    guitarMode?: boolean;
+    /** 0..1 while the guitar-mode render is running; null when idle. */
+    guitarRenderProgress?: number | null;
     onPlayToggle: () => void;
     onStop: () => void;
     onSpeedChange: (speed: number) => void;
@@ -44,6 +48,8 @@ export function PlaybackControls({
     speed,
     volume,
     metronomeOn,
+    guitarMode = false,
+    guitarRenderProgress = null,
     onPlayToggle,
     onStop,
     onSpeedChange,
@@ -93,6 +99,7 @@ export function PlaybackControls({
                     type="button"
                     size="sm"
                     onClick={onPlayToggle}
+                    disabled={guitarRenderProgress !== null}
                     aria-label={playing ? t("scores.playback.pause") : t("scores.playback.play")}
                 >
                     {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
@@ -103,6 +110,7 @@ export function PlaybackControls({
                     size="sm"
                     variant="outline"
                     onClick={onStop}
+                    disabled={guitarRenderProgress !== null}
                     aria-label={t("scores.playback.stop")}
                 >
                     <Square className="h-4 w-4" />
@@ -125,18 +133,30 @@ export function PlaybackControls({
                         onChange={(event) => onVolumeChange(Number(event.target.value))}
                         className="h-1.5 w-24 accent-primary"
                     />
-                    <div className="flex items-center gap-1.5">
-                        <Switch
-                            checked={metronomeOn}
-                            aria-label={t("scores.playback.metronome")}
-                            onCheckedChange={onMetronomeToggle}
-                        />
-                        <Label className="text-xs text-muted-foreground">
-                            {t("scores.playback.metronome")}
-                        </Label>
-                    </div>
+                    {!guitarMode && (
+                        <div className="flex items-center gap-1.5">
+                            <Switch
+                                checked={metronomeOn}
+                                aria-label={t("scores.playback.metronome")}
+                                onCheckedChange={onMetronomeToggle}
+                            />
+                            <Label className="text-xs text-muted-foreground">
+                                {t("scores.playback.metronome")}
+                            </Label>
+                        </div>
+                    )}
                 </div>
             </div>
+
+            {guitarRenderProgress !== null && (
+                <div className="flex items-center gap-2 rounded-md border border-border/50 px-2.5 py-1.5">
+                    <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                    <span className="text-xs text-muted-foreground">
+                        {t("scores.playback.renderingGuitar")}{" "}
+                        {Math.round(guitarRenderProgress * 100)}%
+                    </span>
+                </div>
+            )}
 
             <div
                 className="h-1.5 w-full overflow-hidden rounded-full bg-muted"
@@ -152,23 +172,25 @@ export function PlaybackControls({
                 />
             </div>
 
-            <div className="flex items-center gap-2">
-                <Label className="text-xs text-muted-foreground" htmlFor="playback-speed">
-                    {t("scores.playback.speed")}
-                </Label>
-                <Select
-                    id="playback-speed"
-                    className="h-8 w-auto"
-                    value={speed}
-                    onChange={(event) => onSpeedChange(Number(event.target.value))}
-                >
-                    {SPEED_OPTIONS.map((option) => (
-                        <option key={option} value={option}>
-                            {option}×
-                        </option>
-                    ))}
-                </Select>
-            </div>
+            {!guitarMode && (
+                <div className="flex items-center gap-2">
+                    <Label className="text-xs text-muted-foreground" htmlFor="playback-speed">
+                        {t("scores.playback.speed")}
+                    </Label>
+                    <Select
+                        id="playback-speed"
+                        className="h-8 w-auto"
+                        value={speed}
+                        onChange={(event) => onSpeedChange(Number(event.target.value))}
+                    >
+                        {SPEED_OPTIONS.map((option) => (
+                            <option key={option} value={option}>
+                                {option}×
+                            </option>
+                        ))}
+                    </Select>
+                </div>
+            )}
         </div>
     );
 }

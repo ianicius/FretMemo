@@ -464,7 +464,9 @@
       "loadingSoundfont": "Loading instrument sounds…",
       "playerError": "Playback could not start. Check your connection — the instrument sounds (38 MB) load once and are then cached.",
       "retry": "Retry",
-      "playbackPosition": "Playback position"
+      "playbackPosition": "Playback position",
+      "guitarMode": "Guitar sound",
+      "renderingGuitar": "Rendering guitar audio…"
     }
   },
   "sound": {
