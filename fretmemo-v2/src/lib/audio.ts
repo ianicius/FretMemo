@@ -13,8 +13,19 @@
  * directly (they are not guitar sound).
  */
 
-import { getSoundEngineContext, getSoundEngineVoiceBus, initSoundEngine } from '@/audio/engine';
-import { ensureSamplerLoaded, isSamplerReady, playSampleVoice } from '@/audio/sampler';
+import {
+    getSoundEngineContext,
+    getSoundEngineVoiceBus,
+    initSoundEngine,
+    soundEngine,
+} from '@/audio/engine';
+import { getPresetById } from '@/audio/presets';
+import {
+    ensureSamplerLoaded,
+    isSamplerReady,
+    playSampleVoice,
+    type SampleSetId,
+} from '@/audio/sampler';
 
 /** Convert MIDI note number to frequency (A4 = 440 Hz). */
 export function midiToFrequency(midi: number): number {
@@ -34,6 +45,21 @@ function createNoiseBurst(ctx: AudioContext, duration: number): AudioBufferSourc
     const src = ctx.createBufferSource();
     src.buffer = buffer;
     return src;
+}
+
+/**
+ * Which sample set answers for the active preset: the classic guitar preset
+ * plays the nylon samples, every NAM amp preset plays the electric (Gretsch)
+ * ones. Defaults to nylon (the default preset's voice).
+ */
+function resolveSampleSetId(): SampleSetId {
+    try {
+        const { presetId } = soundEngine.getState();
+        const preset = presetId ? getPresetById(presetId) : null;
+        return preset && preset.amp !== 'classic' ? 'electric' : 'nylon';
+    } catch {
+        return 'nylon';
+    }
 }
 
 /* ─────────── Guitar voice ─────────── */
@@ -61,10 +87,11 @@ export function playTone(midi: number, durationSec = 1.2): Promise<void> {
 
     // Sampling is lazy: the first playback call (always a user gesture)
     // starts the fetch; the synth answers until the buffers are ready.
-    ensureSamplerLoaded(ctx);
+    const sampleSet = resolveSampleSetId();
+    ensureSamplerLoaded(ctx, sampleSet);
 
-    if (isSamplerReady()) {
-        playSampleVoice(ctx, voiceHub, midi, now, 1, durationSec);
+    if (isSamplerReady(sampleSet)) {
+        playSampleVoice(ctx, voiceHub, midi, now, 1, durationSec, sampleSet);
         return new Promise((resolve) => setTimeout(resolve, durationSec * 1000));
     }
 
@@ -148,12 +175,13 @@ export function playChord(midis: number[], durationSec = 1.5, options: PlayChord
         const vol = 0.28 / Math.sqrt(midis.length);
         voiceGain.connect(voiceBus);
 
-        ensureSamplerLoaded(ctx);
+        const sampleSet = resolveSampleSetId();
+        ensureSamplerLoaded(ctx, sampleSet);
 
-        if (isSamplerReady()) {
+        if (isSamplerReady(sampleSet)) {
             // Sampled voice with the chord's per-note balance on top of the
-            // sampler's loudness trim (see SAMPLE_TRIM).
-            playSampleVoice(ctx, voiceGain, midi, startAt, 1 / Math.sqrt(midis.length), durationSec);
+            // sampler's per-note loudness normalization (SET_TARGET_PEAK).
+            playSampleVoice(ctx, voiceGain, midi, startAt, 1 / Math.sqrt(midis.length), durationSec, sampleSet);
             return new Promise<void>((resolve) => {
                 setTimeout(resolve, (offset + durationSec) * 1000);
             });

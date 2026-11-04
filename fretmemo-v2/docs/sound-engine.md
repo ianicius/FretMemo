@@ -71,7 +71,7 @@ modelem dublowałby przester. `kind: 'custom'` jest zarezerwowany na przyszły e
 ## 4. Kolejność stage'ów łańcucha
 
 ```
-voices (lib/audio.ts; źródło: próbki Karoryfer z `src/audio/sampler.ts`,
+voices (lib/audio.ts; źródło: próbki nylon/electric z `src/audio/sampler.ts`,
          fallback: syntezator addytywny)
   → voiceBus
     → inputGain

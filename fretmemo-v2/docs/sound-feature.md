@@ -32,7 +32,7 @@ tlumaczone kluczami `sound.presets.<id>.name` / `.description` (en + pl).
 
 | Preset (`id`) | Wzmacniacz | Charakter |
 | --- | --- | --- |
-| `classic-acoustic` — Klasyczna gitara | classic (próbki Karoryfer, CC0) | ciepłe, czyste brzmienie gitary z próbek |
+| `classic-acoustic` — Klasyczna gitara | classic (nylon, próbki UIowa) | ciepły, klasyczny nylon |
 | `nam-clean-jc` — Czysty JC-120 | NAM `nam-clean-jc` (Roland JC-120) | krystaliczny, uniwersalny clean |
 | `nam-clean-deluxe` — Clean Deluxe | NAM `nam-deluxe-a2` (Fender Deluxe Reverb) | kremowy clean, połysk góry |
 | `nam-crunch-ac10` — Crunch AC10 | NAM `nam-crunch-ac10` (Vox AC10) | brytyjski crunch, wyraźna środnica |
@@ -52,25 +52,29 @@ silnika (ustawienie `audio.volume`); tempo i metronom są wyłączone (wspierane
 tylko przez transport soundfontu). Zmiana ścieżki unieważnia wyrenderowany
 bufor — kolejny play renderuje ponownie. Moduł: `src/audio/songPlayback.ts`.
 
-### Źródło dźwięku: próbki (sampler)
+### Źródło dźwięku: dwa zestawy próbek (sampler)
 
 Suchym sygnałem zasilającym łańcuch (i NAM) nie jest już syntezator, tylko
-**próbki prawdziwej gitary** — 28 nut z biblioteki Karoryfer „Black and Green Guitars"
-(Gretsch Anniversary, CC0; szczegóły licencji w `public/sound/LICENSES.md`).
+**próbki prawdziwej gitary** z dwóch zestawów (`src/audio/sampler.ts`):
 
-- **Pliki**: `public/sound/samples/<midi>.mp3` (mono 44.1 kHz, łącznie ~1.2 MB),
-  kod MIDI w nazwie; zakres E3–D7, tylko dźwięki naturalne (tak nagrano upstream).
-- **Mapowanie**: requested note → najbliższa próbka naturalna + pitch-shift przez
-  `playbackRate` (±1 półton w obrębie zakresu; poniżej E3 próg E3 jest zsuwany
-  w dół, maks. do −12 półtonów dla E2) — konwencja jak w soundfontach.
-- **Ładowanie**: leniwe i idempotentne (`ensureSamplerLoaded` przy pierwszym
-  odtworzeniu — zawsze w geście użytkownika). Dopóki bufory się dekodują,
-  gra syntezator addytywny jako fallback; jeśli pobieranie się nie powiedzie,
-  następnym razem jest ponawiane.
-- **Poziom**: trim ×2.2 dopasowuje peak próbki (−16.8 dBFS) do charakteru
-  syntezatora, dla którego była strojona gain-staging łańcucha.
-- Klasyczny stage (lowpass) został podniesiony z 4 do 8 kHz, żeby prawdziwe
-  nagrania zachowały powietrze (patrz `docs/sound-engine.md`).
+| Zestaw | Preset | Instrument | Zakres | Pliki |
+| --- | --- | --- | --- | --- |
+| `nylon` | classic („Klasyczna gitara") | Raimundo 118 (nylon, UIowa) | **chromatycznie E2–B5** (42 nuty) | `samples/nylon/<midi>.mp3` |
+| `electric` | wszystkie NAM | Gretsch Anniversary (Karoryfer, CC0) | naturals E3–D7 (28 nut) | `samples/electric/<midi>.mp3` |
+
+- **Wybór zestawu**: preset z `amp: 'classic'` → nylon; każdy preset NAM →
+  electric (patrz `resolveSampleSetId` w `lib/audio.ts`).
+- **Strojenie**: nuty nylonowe są skorygowane do concert pitch przez
+  `playbackRate = midiToFreq(midi) / NYLON_DETECTED_F0[sampleMidi]`
+  (nagrania z 1961 były do ~45 cents płaskie; mapa: `src/audio/nylonTuning.ts`,
+  generowana przez `gauntlet/sound/tools/verify-nylon-pitch.py`). Electric:
+  przesunięcia ±1 półton do najbliższej naturalnej ( upstream bez krzyżyków).
+- **Normalizacja**: każda nuta jest normalizowana do peaka 0.30 przy dekodowaniu
+  (`SET_TARGET_PEAK`) — oba zestawy grają z jedną głośnością.
+- **Ładowanie**: leniwe per zestaw, idempotentne, z ponawianiem; syntezator
+  addytywny zostaje fallbackiem aż do skutecznego dekodowania.
+- Poniżej E2 powyżej B5: skoki o ±półton od skrajnych próbek (C6+ schodzi w dół
+  z B5 — rzadkie w praktyce).
 
 Karta presetu pokazuje: badge kategorii (Akustyczna / NAM / Własny), nazwę, opis charakteru,
 status silnika dla swojego modelu („Ładowanie modelu…” / błąd z przyciskiem „Ponów”),

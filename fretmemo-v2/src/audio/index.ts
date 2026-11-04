@@ -24,7 +24,8 @@ export {
     playSampleVoice,
     SAMPLE_LOW_MIDI,
     SAMPLE_HIGH_MIDI,
-    SAMPLE_TRIM,
+    SET_TARGET_PEAK,
     SAMPLED_MIDIS,
+    type SampleSetId,
     type SampleVoiceHandle,
 } from './sampler';

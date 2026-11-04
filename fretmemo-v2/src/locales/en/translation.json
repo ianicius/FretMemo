@@ -592,7 +592,7 @@
     "presets": {
       "classicAcoustic": {
         "name": "Classic guitar",
-        "description": "Warm, clean sampled guitar (Karoryfer Black & Green, CC0)."
+        "description": "Warm classical nylon voice (University of Iowa samples)."
       },
       "namCleanJc": {
         "name": "Clean JC-120",
