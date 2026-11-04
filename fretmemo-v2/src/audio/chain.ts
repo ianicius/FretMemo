@@ -85,10 +85,11 @@ export const CLASSIC_AMP_STAGE = {
     bodyGainDb: 6,
     /**
      * Fixed brightness cutoff. The historical per-voice filter used
-     * `min(freq * 6, 6000)`; the engine-wide stage uses one sensible
-     * fixed cutoff so every note keeps its pluck warmth.
+     * `min(freq * 6, 6000)`; since the sampled guitar source landed
+     * (real recordings keep meaningful air up to ~8 kHz) the stage uses
+     * one fixed cutoff that keeps the warmth without dulling the pluck.
      */
-    brightnessCutoffHz: 4000,
+    brightnessCutoffHz: 8000,
     brightnessQ: 0.7,
 } as const;
 

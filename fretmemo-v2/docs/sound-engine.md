@@ -71,11 +71,12 @@ modelem dublowałby przester. `kind: 'custom'` jest zarezerwowany na przyszły e
 ## 4. Kolejność stage'ów łańcucha
 
 ```
-voices (lib/audio.ts)
+voices (lib/audio.ts; źródło: próbki Karoryfer z `src/audio/sampler.ts`,
+         fallback: syntezator addytywny)
   → voiceBus
     → inputGain
     → drive (waveshaper; neutralny przy 0)
-    → amp stage:  classic: peaking 280 Hz Q1.2 +6 dB → lowpass 4 kHz Q0.7
+    → amp stage:  classic: peaking 280 Hz Q1.2 +6 dB → lowpass 8 kHz Q0.7
                   nam:     AudioWorkletNode z modelem NAM (mono)
     → EQ: lowshelf 200 → peaking 1k → highshelf 3.2k
     → compressor (DynamicsCompressorNode)
@@ -90,9 +91,9 @@ voices (lib/audio.ts)
 Uwagi:
 
 - **Klasyczny stage** odtwarza parę filtrów body/brightness z per-woice'owego kodu
-  historycznego (`peaking 280 Hz Q1.2 +6 dB`), z jednym utwornionym cutoffem lowpass 4 kHz
-  (wcześniej per-głos `min(freq*6, 6000)` — niskie dźwięki są teraz nieco jaśniejsze; to
-  świadome uprosczenie, character plucka zostaje).
+  historycznego (`peaking 280 Hz Q1.2 +6 dB`), z jednym utwornionym cutoffem lowpass 8 kHz (pierwotnie 4 kHz dla głosu
+  addytywnego; od wprowadzenia próbek Karoryfer podniesiony do 8 kHz, żeby prawdziwe
+  nagrania zachowały powietrze w transjencie).
 - **Reverb** używa syntetycznej odpowiedzi impulsowej (stereo, 1.6 s, zanikający szum
   `pow(1-t, 2.5)`) generowanej w runtime — brak licencjonowanych plików IR.
 - **VOICE_BUS_TRIM = 0.40**: historyczny per-wykrowany master gain 0.40 z `lib/audio.ts`
@@ -203,9 +204,9 @@ Stan: 29 plików / 374 testów na zielono (bazowy stan: 24 / 316); `npm run buil
 
 1. **`npm install` wymaga `--legacy-peer-deps`** (peer react@^18 w pakiecie NAM; podścieżka
    `/engine` Reacta nie używa). Wpływa to tylko na świeże instalacje zależności.
-2. Klasyczny stage używa jednego stałego cutoffu lowpass (4 kHz) zamiast historycznego
+2. Klasyczny stage używa jednego stałego cutoffu lowpass (8 kHz, pierwotnie 4 kHz) zamiast historycznego
    per-głosowego `min(freq*6, 6000)` — niskie dźwięki są odrobinę jaśniejsze niż kiedyś.
-   Chordy używają parametrów stage'u (280 Hz Q1.2 +6 dB, 4 kHz) zamiast dawnej pary
+   Chordy używają parametrów stage'u (280 Hz Q1.2 +6 dB, 8 kHz) zamiast dawnej pary
    (280 Hz Q1.0 +4 dB, `min(freq*5, 5000)`) — jeden kanoniczny stage dla wszystkich głosów.
 3. Modele NAM są trenowane przy 48 kHz; silnik raportuje `expectedSampleRate`, a kontekst
    audio działa z rate przeglądarki/urządzenia (zwykle 44.1/48 kHz). Worklet NAM obsługuje

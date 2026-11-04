@@ -63,7 +63,7 @@ vi.mock("@/lib/audio", () => ({
 }));
 
 const BUILT_IN_NAMES = [
-    "Classic acoustic",
+    "Classic guitar",
     "Clean JC-120",
     "Clean Deluxe",
     "Crunch AC10",
@@ -118,7 +118,7 @@ describe("Sound page", () => {
     it("highlights the active preset and marks its button as selected", async () => {
         renderPage();
 
-        const activeHeading = await screen.findByRole("heading", { name: "Classic acoustic" });
+        const activeHeading = await screen.findByRole("heading", { name: "Classic guitar" });
         const card = activeHeading.closest(".bg-card") as HTMLElement;
         expect(within(card).getByRole("button", { name: "Selected" })).toBeDisabled();
         expect(within(card).getByText("Active")).toBeInTheDocument();
@@ -128,7 +128,7 @@ describe("Sound page", () => {
     it("shows the active sound summary from the settings store", async () => {
         renderPage();
 
-        expect(screen.getByText("Active sound: Classic acoustic")).toBeInTheDocument();
+        expect(screen.getByText("Active sound: Classic guitar")).toBeInTheDocument();
         expect(screen.getByRole("heading", { level: 1, name: "Sound" })).toBeInTheDocument();
     });
 
@@ -211,7 +211,7 @@ describe("Sound page", () => {
         renderPage();
 
         const activeCard = screen
-            .getByRole("heading", { name: "Classic acoustic" })
+            .getByRole("heading", { name: "Classic guitar" })
             .closest(".bg-card") as HTMLElement;
         expect(within(activeCard).getByText("Ready")).toBeInTheDocument();
         const otherCard = screen
@@ -225,7 +225,7 @@ describe("Sound page", () => {
         renderPage();
 
         expect(screen.getByRole("heading", { level: 1, name: "Dźwięk" })).toBeInTheDocument();
-        for (const name of ["Klasyczna akustyka", "Czysty JC-120", "Lead JCM800"]) {
+        for (const name of ["Klasyczna gitara", "Czysty JC-120", "Lead JCM800"]) {
             expect(await screen.findByRole("heading", { name })).toBeInTheDocument();
         }
         expect(screen.getAllByRole("button", { name: "Wybierz" })).toHaveLength(5);
