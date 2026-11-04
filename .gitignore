@@ -20,3 +20,5 @@ plans/
 
 # Isolated agent worktrees
 .worktrees/
+.claude/
+audits/
