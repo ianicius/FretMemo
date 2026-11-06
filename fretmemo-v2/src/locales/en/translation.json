@@ -473,6 +473,14 @@
       "current": "Current",
       "next": "Next",
       "currentChordAria": "Current chord"
+    },
+    "tracks": {
+      "title": "Track voices",
+      "presetLabel": "Voice",
+      "directOption": "Direct (soundfont)",
+      "drums": "Drums (direct)",
+      "namLimit": "More than 3 NAM amps — extra tracks fall back to the classic chain.",
+      "muteAria": "Mute {{name}}"
     }
   },
   "sound": {

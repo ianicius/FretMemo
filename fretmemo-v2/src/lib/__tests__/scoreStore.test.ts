@@ -77,7 +77,8 @@ describe("scoreStore", () => {
         await putScoreFile(makeRecord({ id: "good" }));
         // Corrupt the store directly with a record missing required fields.
         const db = await new Promise<IDBDatabase>((resolve, reject) => {
-            const open = indexedDB.open("fretmemo-scores-v1", 1);
+            // No version argument: open whatever version the store currently has.
+            const open = indexedDB.open("fretmemo-scores-v1");
             open.onsuccess = () => resolve(open.result);
             open.onerror = () => reject(open.error);
         });
