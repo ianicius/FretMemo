@@ -22,3 +22,6 @@ plans/
 .worktrees/
 .claude/
 audits/
+
+# E2E smoke artifact (regenerate: node scripts/generate-e2e-score.mjs)
+e2e-smoke.gp

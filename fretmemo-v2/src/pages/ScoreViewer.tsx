@@ -15,7 +15,7 @@ import { PlaybackControls } from "@/components/score/PlaybackControls";
 import { cn } from "@/lib/utils";
 import { trackFeatureOpened } from "@/lib/analytics";
 import { formatScoreMetaLine } from "@/lib/scoreDisplay";
-import { getScoreBytes, listScoreMeta } from "@/lib/scoreStore";
+import { getScoreBytes, listScoreMeta, updateScoreBytes } from "@/lib/scoreStore";
 import { buildChordTimeline, type ChordTimelineEntry, type PrompterTrack } from "@/lib/chords";
 import { ChordPrompter } from "@/components/score/ChordPrompter";
 import { useSettingsStore } from "@/stores/useSettingsStore";
@@ -27,6 +27,16 @@ import { MultiTrackPlayback } from "@/audio/multiTrackPlayback";
 import { assemblePerTrackGraph, type AssembledTrackGraph } from "@/audio/perTrackGraph";
 import { masterGainValue } from "@/audio/engine";
 import { loadNamNode } from "@/audio/nam";
+import { TabEditorPanel } from "@/components/score/TabEditorPanel";
+import {
+    addNoteToString,
+    beatSummary,
+    clearBeat,
+    removeNoteFromString,
+    setBeatDuration,
+    setNoteFret,
+} from "@/lib/tabEditor";
+import { restoreScoreSnapshot, snapshotScoreAsync } from "@/lib/tabEditorUndo";
 import { getBuiltinPresets, getPresetById, type SoundPreset } from "@/audio/presets";
 import { toEnginePreset, useSoundStore } from "@/stores/useSoundStore";
 import {
@@ -37,7 +47,7 @@ import {
 } from "@/lib/trackConfigs";
 import type { ScoreSummary } from "@/types/scores";
 // Type-only import: erased at build time, keeps alphaTab out of the entry chunk.
-import type { AlphaTabApi, model } from "@coderline/alphatab";
+import type { AlphaTabApi, Settings, model } from "@coderline/alphatab";
 
 type AlphaTabScore = model.Score;
 
@@ -90,6 +100,20 @@ export default function ScoreViewer() {
     // played through the engine chain, so the active preset colors the song.
     const multiPlaybackRef = useRef<MultiTrackPlayback | null>(null);
     const playbackGraphRef = useRef<AssembledTrackGraph | null>(null);
+    const settingsRef = useRef<Settings | null>(null);
+    /** Creates real alphaTab model.Note instances (captured after dynamic import). */
+    const noteFactoryRef = useRef<(() => model.Note) | null>(null);
+    const [editMode, setEditMode] = useState(false);
+    const [editorDirty, setEditorDirty] = useState(false);
+    const [editorSaving, setEditorSaving] = useState(false);
+    const [editorSaveError, setEditorSaveError] = useState(false);
+    const [beatVersion, setBeatVersion] = useState(0);
+    const editBeatRef = useRef<model.Beat | null>(null);
+    const editBeatLocationRef = useRef<{ barIndex: number; voiceIndex: number; beatIndex: number } | null>(null);
+    const editorStringCount = useSettingsStore((state) => state.quick.tuning.length);
+    const undoStackRef = useRef<string[]>([]);
+    const redoStackRef = useRef<string[]>([]);
+    const editModeRef = useRef(false);
     const [trackConfigs, setTrackConfigsState] = useState<ValidTrackConfig[]>([]);
     const [namPoolWarning, setNamPoolWarning] = useState(false);
     const [guitarMode, setGuitarMode] = useState(false);
@@ -121,10 +145,21 @@ export default function ScoreViewer() {
         setGuitarMode(false);
         setGuitarRendering(false);
         setGuitarRenderProgress(null);
+        setGuitarError(false);
+        // Reset editor state — snapshots belong to the previous score.
+        editModeRef.current = false;
+        setEditMode(false);
+        editBeatRef.current = null;
+        editBeatLocationRef.current = null;
+        undoStackRef.current = [];
+        redoStackRef.current = [];
+        setEditorDirty(false);
+        setEditorSaveError(false);
+        setGuitarRendering(false);
+        setGuitarRenderProgress(null);
 
         (async () => {
             try {
-                console.log("DBG bytes");
                 const bytes = await getScoreBytes(id);
                 if (cancelled) return;
                 if (!bytes) {
@@ -137,11 +172,16 @@ export default function ScoreViewer() {
                     listScoreMeta(),
                 ]);
                 if (cancelled || !containerRef.current) return;
+                // Editor note factory — the model requires real class
+                // instances (score.finish calls note.chain(); see
+                // addNoteToString in lib/tabEditor.ts).
+                noteFactoryRef.current = () => new alphatab.model.Note();
 
                 const score = alphatab.importer.ScoreLoader.loadScoreFromBytes(
                     new Uint8Array(bytes),
                 );
                 const settings = new alphatab.Settings();
+                if (!cancelled) settingsRef.current = settings;
                 settings.core.engine = "svg";
                 settings.core.fontDirectory = `${import.meta.env.BASE_URL}font/bravura/`;
                 settings.core.useWorkers = false;
@@ -206,7 +246,18 @@ export default function ScoreViewer() {
                     }
                 });
                 api.playedBeatChanged.on((beat) => {
-                    if (!cancelled) setCurrentBar(beat.voice.bar.index);
+                    if (!cancelled) {
+                        setCurrentBar(beat.voice.bar.index);
+                        if (editModeRef.current) {
+                            editBeatRef.current = beat;
+                            editBeatLocationRef.current = {
+                                barIndex: beat.voice.bar.index,
+                                voiceIndex: beat.voice.index,
+                                beatIndex: beat.index,
+                            };
+                            setBeatVersion((v) => v + 1);
+                        }
+                    }
                 });
 
                 const names = score.tracks.map((track, index) =>
@@ -526,6 +577,174 @@ export default function ScoreViewer() {
         if (apiRef.current) apiRef.current.playbackSpeed = next;
     };
 
+    // ─── Tab editor (R-07) ───────────────────────────────────────────────
+
+    const editorBusyRef = useRef(false);
+
+    /** Re-resolves the editable beat by position after a score replacement. */
+    const reresolveEditBeat = (restored: model.Score) => {
+        const loc = editBeatLocationRef.current;
+        if (!loc) {
+            editBeatRef.current = null;
+            return;
+        }
+        const staff = restored.tracks[0]?.staves[0];
+        const voice = staff?.bars[loc.barIndex]?.voices[loc.voiceIndex];
+        editBeatRef.current = voice?.beats[loc.beatIndex] ?? null;
+    };
+
+    /** Applies an edit: snapshot for undo, mutate, finish, re-render, refresh MIDI. */
+    const applyEdit = (mutate: (beat: model.Beat) => void) => {
+        const api = apiRef.current;
+        const score = scoreRef.current;
+        const settings = settingsRef.current;
+        const beat = editBeatRef.current;
+        if (!api || !score || !settings || !beat || editorBusyRef.current) return;
+        editorBusyRef.current = true;
+        void snapshotScoreAsync(score)
+            .then((snapshot) => {
+                undoStackRef.current = [...undoStackRef.current.slice(-49), snapshot];
+                redoStackRef.current = [];
+                setEditorDirty(true);
+                mutate(beat);
+                score.finish(settings);
+                api.renderScore(score, [trackIndex]);
+                api.loadMidiForScore();
+                setBeatVersion((v) => v + 1);
+            })
+            .catch((error) => console.error("Tab edit failed:", error))
+            .finally(() => {
+                editorBusyRef.current = false;
+            });
+    };
+
+    const handleEditFretChange = (stringIndex: number, fret: number | null) => {
+        const beat = editBeatRef.current;
+        if (!beat) return;
+        applyEdit(() => {
+            if (fret === null) {
+                removeNoteFromString(beat, stringIndex + 1);
+            } else {
+                const existing = beat.getNoteOnString(stringIndex + 1);
+                if (existing) {
+                    setNoteFret(beat, stringIndex + 1, fret);
+                } else {
+                    addNoteToString(beat, stringIndex + 1, fret, () => {
+                        const factory = noteFactoryRef.current;
+                        if (!factory) throw new Error("alphaTab not loaded");
+                        return factory();
+                    });
+                }
+            }
+        });
+    };
+
+    const handleEditDurationChange = (duration: number) => {
+        const beat = editBeatRef.current;
+        if (!beat) return;
+        applyEdit(() => setBeatDuration(beat, duration, beat.dots));
+    };
+
+    const handleEditRest = () => {
+        const beat = editBeatRef.current;
+        if (!beat) return;
+        applyEdit(() => clearBeat(beat));
+    };
+
+    const restoreEditorScore = async (snapshot: string) => {
+        const api = apiRef.current;
+        const settings = settingsRef.current;
+        if (!api || !settings) return null;
+        const restored = (await restoreScoreSnapshot(snapshot)) as model.Score;
+        scoreRef.current = restored;
+        restored.finish(settings);
+        api.renderScore(restored, [trackIndex]);
+        api.loadMidiForScore();
+        // Re-resolve the editable beat by position in the restored model.
+        reresolveEditBeat(restored);
+        setEditorDirty(true);
+        setBeatVersion((v) => v + 1);
+        return restored;
+    };
+
+    const handleEditorUndo = async () => {
+        const api = apiRef.current;
+        const score = scoreRef.current;
+        const stack = undoStackRef.current;
+        const snapshot = stack[stack.length - 1];
+        if (!api || !score || !snapshot || editorBusyRef.current) return;
+        editorBusyRef.current = true;
+        try {
+            undoStackRef.current = stack.slice(0, -1);
+            redoStackRef.current = [...redoStackRef.current, await snapshotScoreAsync(score)];
+            await restoreEditorScore(snapshot);
+        } catch (error) {
+            console.error("Editor undo failed:", error);
+        } finally {
+            editorBusyRef.current = false;
+        }
+    };
+
+    const handleEditorRedo = async () => {
+        const api = apiRef.current;
+        const score = scoreRef.current;
+        const stack = redoStackRef.current;
+        const snapshot = stack[stack.length - 1];
+        if (!api || !score || !snapshot || editorBusyRef.current) return;
+        editorBusyRef.current = true;
+        try {
+            redoStackRef.current = stack.slice(0, -1);
+            undoStackRef.current = [...undoStackRef.current, await snapshotScoreAsync(score)];
+            await restoreEditorScore(snapshot);
+        } catch (error) {
+            console.error("Editor redo failed:", error);
+        } finally {
+            editorBusyRef.current = false;
+        }
+    };
+
+    const handleEditorSave = async () => {
+        const score = scoreRef.current;
+        if (!score || !id || editorSaving) return;
+        setEditorSaving(true);
+        setEditorSaveError(false);
+        try {
+            const alphatab = await import("@coderline/alphatab");
+            const bytes = new alphatab.exporter.Gp7Exporter().export(score);
+            await updateScoreBytes(id, bytes.buffer as ArrayBuffer);
+            setEditorDirty(false);
+            // The guitar-mode mix reflects the pre-edit score — drop it.
+            disposePlayback();
+            setGuitarMode(false);
+        } catch {
+            setEditorSaveError(true);
+        } finally {
+            setEditorSaving(false);
+        }
+    };
+
+    const handleEditModeToggle = () => {
+        const next = !editMode;
+        editModeRef.current = next;
+        setEditMode(next);
+        if (next) {
+            apiRef.current?.pause();
+            setPlaying(false);
+            // Default the editable beat to the first beat of the rendered
+            // track until the cursor moves during playback.
+            if (!editBeatRef.current) {
+                const firstBeat =
+                    apiRef.current?.tracks[trackIndex]?.staves[0]?.bars[0]?.voices[0]?.beats[0];
+                if (firstBeat) {
+                    editBeatRef.current = firstBeat;
+                    editBeatLocationRef.current = { barIndex: 0, voiceIndex: 0, beatIndex: 0 };
+                    setBeatVersion((v) => v + 1);
+                }
+            }
+            trackFeatureOpened("score_editor", id, null);
+        }
+    };
+
     const handleVolumeChange = (next: number) => {
         setVolume(next);
         if (guitarMode) {
@@ -698,6 +917,53 @@ export default function ScoreViewer() {
                         onMetronomeToggle={handleMetronomeToggle}
                         onRetry={() => setReloadKey((key) => key + 1)}
                     />
+                </>
+            )}
+
+            {status === "ready" && (
+                <>
+                    <div className="flex flex-col items-end gap-1">
+                        <div className="flex items-center gap-2">
+                            <Switch
+                                id="edit-mode"
+                                checked={editMode}
+                                onCheckedChange={handleEditModeToggle}
+                                disabled={guitarMode || guitarRendering}
+                            />
+                            <Label
+                                htmlFor="edit-mode"
+                                className="cursor-pointer text-xs text-muted-foreground"
+                            >
+                                {t("scores.editor.editMode")}
+                            </Label>
+                        </div>
+                    </div>
+                    {editMode && editorSaveError && (
+                        <p className="text-xs text-destructive" role="alert">
+                            {t("scores.editor.saveError")}
+                        </p>
+                    )}
+                    {editMode && (
+                        <TabEditorPanel
+                            beatVersion={beatVersion}
+                            summary={
+                                editBeatRef.current
+                                    ? beatSummary(editBeatRef.current, editorStringCount)
+                                    : null
+                            }
+                            stringCount={editorStringCount}
+                            duration={editBeatRef.current?.duration ?? 4}
+                            dirty={editorDirty}
+                            canUndo={undoStackRef.current.length > 0}
+                            canRedo={redoStackRef.current.length > 0}
+                            onFretChange={handleEditFretChange}
+                            onDurationChange={handleEditDurationChange}
+                            onRest={handleEditRest}
+                            onUndo={() => void handleEditorUndo()}
+                            onRedo={() => void handleEditorRedo()}
+                            onSave={() => void handleEditorSave()}
+                        />
+                    )}
                 </>
             )}
 
