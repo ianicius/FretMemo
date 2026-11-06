@@ -481,6 +481,27 @@
       "drums": "Drums (direct)",
       "namLimit": "More than 3 NAM amps — extra tracks fall back to the classic chain.",
       "muteAria": "Mute {{name}}"
+    },
+    "editor": {
+      "title": "Edit tab",
+      "unsaved": "Unsaved changes",
+      "stringLabel": "String {{n}}",
+      "fretAria": "Fret — string {{n}}",
+      "duration": "Duration",
+      "rest": "Rest",
+      "undo": "Undo",
+      "redo": "Redo",
+      "save": "Save",
+      "editMode": "Edit mode",
+      "saved": "Saved.",
+      "saveError": "Saving failed.",
+      "durations": {
+        "whole": "Whole",
+        "half": "Half",
+        "quarter": "Quarter",
+        "eighth": "Eighth",
+        "sixteenth": "Sixteenth"
+      }
     }
   },
   "sound": {

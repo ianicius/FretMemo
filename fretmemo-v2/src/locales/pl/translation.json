@@ -436,6 +436,27 @@
       "drums": "Perkusja (direct)",
       "namLimit": "Ponad 3 wzmacniacze NAM — dodatkowe ścieżki użyją klasycznego łańcucha.",
       "muteAria": "Wycisz {{name}}"
+    },
+    "editor": {
+      "title": "Edycja tabulatury",
+      "unsaved": "Niezapisane zmiany",
+      "stringLabel": "Struna {{n}}",
+      "fretAria": "Prog — struna {{n}}",
+      "duration": "Wartość rytmiczna",
+      "rest": "Pauza",
+      "undo": "Cofnij",
+      "redo": "Ponów",
+      "save": "Zapisz",
+      "editMode": "Tryb edycji",
+      "saved": "Zapisano.",
+      "saveError": "Zapis nie powiódł się.",
+      "durations": {
+        "whole": "Cała",
+        "half": "Półnuta",
+        "quarter": "Ćwierćnuta",
+        "eighth": "Ósemka",
+        "sixteenth": "Szesnastka"
+      }
     }
   },
   "sound": {

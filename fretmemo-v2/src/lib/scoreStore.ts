@@ -171,3 +171,21 @@ export async function clearAllScores(): Promise<void> {
     tx.objectStore(STORE).clear();
     await transactionDone(tx);
 }
+
+/**
+ * Replaces a stored score's binary payload (tab editor save) while keeping
+ * the summary fields. Also refreshes the byte size to match the new payload.
+ * No-op when the score id is unknown.
+ */
+export async function updateScoreBytes(id: string, bytes: ArrayBuffer): Promise<void> {
+    const db = await openDb();
+    const tx = db.transaction(STORE, "readwrite");
+    const store = tx.objectStore(STORE);
+    const record = await requestToPromise(store.get(id) as IDBRequest<unknown>);
+    if (typeof record !== "object" || record === null) {
+        return;
+    }
+    const updated = { ...(record as Record<string, unknown>), bytes, sizeBytes: bytes.byteLength };
+    store.put(updated);
+    await transactionDone(tx);
+}
