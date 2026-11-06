@@ -191,3 +191,43 @@ describe("playTab highway queue", () => {
         vi.unstubAllGlobals();
     });
 });
+
+describe("playTab fingering (R-03)", () => {
+    it("attaches finger and hand position to chained queue entries", () => {
+        useGameStore.setState({
+            targetPosition: { fret: 5, stringIndex: 0, note: "A", finger: 1, handPositionFret: 5 },
+        });
+
+        useGameStore.getState().generateNewTarget();
+
+        const { upcomingPositions } = useGameStore.getState();
+        expect(upcomingPositions).toHaveLength(3);
+        for (const position of upcomingPositions) {
+            expect(position.handPositionFret).not.toBeNull();
+            expect(position.handPositionFret as number).toBeGreaterThanOrEqual(1);
+            // Open strings carry no finger; fretted notes are within 1-4.
+            if (position.fret === 0) {
+                expect(position.finger).toBeNull();
+            } else {
+                expect(position.finger).toBeGreaterThanOrEqual(1);
+                expect(position.finger).toBeLessThanOrEqual(4);
+            }
+        }
+    });
+
+    it("keeps the finger consistent with the hand window", () => {
+        useGameStore.setState({
+            targetPosition: { fret: 5, stringIndex: 0, note: "A", finger: 1, handPositionFret: 5 },
+        });
+
+        useGameStore.getState().generateNewTarget();
+
+        const { upcomingPositions } = useGameStore.getState();
+        for (const position of upcomingPositions) {
+            if (position.fret > 0 && position.handPositionFret != null) {
+                const expected = position.fret - position.handPositionFret + 1;
+                expect(position.finger).toBe(expected);
+            }
+        }
+    });
+});

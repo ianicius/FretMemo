@@ -650,6 +650,32 @@
   background: hsl(0 72% 51%);
   animation: fret-highway-miss 0.45s ease-out;
 }
+/* R-03: left-hand finger badge on the falling dot. */
+.fret-highway__dot-finger {
+  position: absolute;
+  top: -0.3rem;
+  right: -0.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.95rem;
+  height: 0.95rem;
+  border-radius: 9999px;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-size: 0.6rem;
+  font-weight: 700;
+  border: 1px solid hsl(var(--primary) / 0.6);
+}
+/* R-03 Practice position line: fret column under the index finger. */
+.fret-highway__position-band {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: hsl(var(--primary) / 0.12);
+  border-left: 1px solid hsl(var(--primary) / 0.35);
+  border-right: 1px solid hsl(var(--primary) / 0.35);
+}
 @keyframes fret-highway-hit {
   0% { box-shadow: 0 0 0 0 hsl(142 71% 45% / 0.7); }
   100% { box-shadow: 0 0 0 16px hsl(142 71% 45% / 0); }

@@ -129,6 +129,18 @@ export function FretHighway({
                         style={{ top: `${((lane + 1) / (LANE_COUNT + 1)) * 100}%` }}
                     />
                 ))}
+                {/* R-03 Practice position line: the fret column under the index finger. */}
+                {target?.handPositionFret != null ? (
+                    <div
+                        className="fret-highway__position-band"
+                        data-testid="fret-highway-position-band"
+                        data-fret={target.handPositionFret}
+                        style={{
+                            left: `${(target.handPositionFret / (MAX_FRET + 1)) * 100}%`,
+                            width: `${(1 / (MAX_FRET + 1)) * 100}%`,
+                        }}
+                    />
+                ) : null}
                 {dots.map((position, index) => {
                     const isTarget = index === 0;
                     return (
@@ -138,6 +150,7 @@ export function FretHighway({
                             data-testid="fret-highway-dot"
                             data-fret={position.fret}
                             data-string={position.stringIndex}
+                            data-finger={position.finger ?? undefined}
                             className={cn(
                                 "fret-highway__dot",
                                 isTarget && targetFeedback === "hit" && "fret-highway__dot--hit",
@@ -151,6 +164,9 @@ export function FretHighway({
                         >
                             <span className="fret-highway__dot-fret">{position.fret}</span>
                             <span className="fret-highway__dot-string">s{position.stringIndex + 1}</span>
+                            {position.finger != null ? (
+                                <span className="fret-highway__dot-finger">{position.finger}</span>
+                            ) : null}
                         </div>
                     );
                 })}

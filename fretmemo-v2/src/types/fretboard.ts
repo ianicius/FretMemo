@@ -4,6 +4,10 @@ export interface Position {
     stringIndex: number; // 0 (High E) to 5 (Low E) or configurable
     fret: number;
     note: NoteName;
+    /** Left-hand finger 1-4 (index..pinky); null = open string. Set by the fingering pass (R-03). */
+    finger?: import("@/lib/fingering").Finger | null;
+    /** Fret under the index finger when this position was fingered; null on open strings. */
+    handPositionFret?: number | null;
 }
 
 export type FretboardLayer = "standard" | "heatmap" | "scale" | "intervals";
