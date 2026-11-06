@@ -13,7 +13,7 @@
  *   (settings + engine) and closes without restoring.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Loader2, Play, Save } from "lucide-react";
+import { Loader2, Play, Save, Trash2, Upload } from "lucide-react";
 import { DEFAULT_PRESET_ID, getPresetById, neutralChainParams, CHAIN_PARAM_RANGES, type ChainParams, type SoundPreset } from "@/audio/presets";
 import type { SoundEngineStatus } from "@/audio/engine";
 import { soundEngine } from "@/audio/engine";
@@ -24,6 +24,14 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { useFeedbackStore } from "@/stores/useFeedbackStore";
 import { toEnginePreset, useSoundStore } from "@/stores/useSoundStore";
+import {
+    deleteUserModel,
+    listUserModels,
+    saveUserModel,
+    UserModelError,
+    type UserModelMeta,
+} from "@/audio/userModels";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useTranslation } from "react-i18next";
 import { selectSoundPreset } from "./useAudition";
 import { SoundSlider } from "./SoundSlider";
@@ -67,6 +75,17 @@ export function ToneDesigner({
     const [nameError, setNameError] = useState(false);
     const [saving, setSaving] = useState(false);
     const [dirty, setDirty] = useState(false);
+    const [userAmps, setUserAmps] = useState<UserModelMeta[]>([]);
+    const [importing, setImporting] = useState(false);
+    const [importErrorKey, setImportErrorKey] = useState<string | null>(null);
+    const [ampPendingDelete, setAmpPendingDelete] = useState<UserModelMeta | null>(null);
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+    // Refresh the user-imported amp list whenever the designer opens.
+    useEffect(() => {
+        if (!open) return;
+        void listUserModels().then(setUserAmps);
+    }, [open]);
 
     // Refs mirror state/props for the open/close transition effect, which
     // deliberately runs on `open` transitions only.
@@ -187,6 +206,36 @@ export function ToneDesigner({
         setAmp(value);
     };
 
+    /** Import a user .nam file: validate, store locally, list and select it. */
+    const handleImportFile = async (file: File) => {
+        setImporting(true);
+        setImportErrorKey(null);
+        try {
+            const bytes = await file.arrayBuffer();
+            const meta = await saveUserModel(file.name.replace(/\.nam$/i, ""), bytes);
+            setUserAmps((previous) => [meta, ...previous]);
+            handleAmpChange(meta.id);
+            enqueueFeedback(t("sound.designer.import.success", { name: meta.name }), "success");
+        } catch (error) {
+            const code = error instanceof UserModelError ? error.code : "storage-error";
+            setImportErrorKey(`sound.designer.import.errors.${code}`);
+        } finally {
+            setImporting(false);
+        }
+    };
+
+    const confirmDeleteUserAmp = async () => {
+        const model = ampPendingDelete;
+        if (!model) return;
+        setAmpPendingDelete(null);
+        await deleteUserModel(model.id);
+        setUserAmps((previous) => previous.filter((amp) => amp.id !== model.id));
+        if (amp === model.id) {
+            handleAmpChange("classic");
+        }
+        enqueueFeedback(t("sound.designer.import.deleted", { name: model.name }), "success");
+    };
+
     /** Flush the pending draft change, then play the shared phrase. */
     const handleAudition = async () => {
         markDirty();
@@ -230,14 +279,83 @@ export function ToneDesigner({
             <p className="text-sm text-muted-foreground">{t("sound.designer.description")}</p>
 
             <FormField id="designer-amp" label={t("sound.designer.amp")}>
-                <Select value={amp} onChange={(event) => handleAmpChange(event.target.value)}>
-                    {getAmpOptions().map((option) => (
-                        <option key={option.id} value={option.id}>
-                            {t(ampLabelKey(option.id))}
-                        </option>
-                    ))}
-                </Select>
+                <div className="flex items-center gap-2">
+                    <Select
+                        value={amp}
+                        onChange={(event) => handleAmpChange(event.target.value)}
+                        className="flex-1"
+                    >
+                        {getAmpOptions().map((option) => (
+                            <option key={option.id} value={option.id}>
+                                {t(ampLabelKey(option.id))}
+                            </option>
+                        ))}
+                        {userAmps.map((model) => (
+                            <option key={model.id} value={model.id}>
+                                {model.name} (user)
+                            </option>
+                        ))}
+                    </Select>
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".nam,application/json"
+                        className="hidden"
+                        onChange={(event) => {
+                            const file = event.target.files?.[0];
+                            event.target.value = "";
+                            if (file) void handleImportFile(file);
+                        }}
+                    />
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={importing}
+                        onClick={() => fileInputRef.current?.click()}
+                    >
+                        {importing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                        {t("sound.designer.import.label")}
+                    </Button>
+                </div>
+                {importErrorKey && (
+                    <p className="text-xs text-destructive" role="alert">
+                        {t(importErrorKey)}
+                    </p>
+                )}
+                {amp.startsWith("user-") && (
+                    <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+                        <span>{t("sound.designer.import.userNote")}</span>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                                const model = userAmps.find((ampMeta) => ampMeta.id === amp);
+                                if (model) setAmpPendingDelete(model);
+                            }}
+                        >
+                            <Trash2 className="h-4 w-4" />
+                            {t("sound.designer.import.deleteAmp")}
+                        </Button>
+                    </div>
+                )}
+                <p className="text-xs text-muted-foreground">{t("sound.designer.import.licenseNote")}</p>
             </FormField>
+
+            <ConfirmDialog
+                open={ampPendingDelete !== null}
+                onOpenChange={(open) => {
+                    if (!open) setAmpPendingDelete(null);
+                }}
+                title={t("sound.designer.import.deleteConfirmTitle")}
+                description={t("sound.designer.import.deleteConfirmDesc", {
+                    name: ampPendingDelete?.name ?? "",
+                })}
+                confirmLabel={t("sound.designer.import.deleteAmp")}
+                confirmVariant="destructive"
+                onConfirm={() => void confirmDeleteUserAmp()}
+            />
 
             <div className="grid gap-x-8 gap-y-5 md:grid-cols-2">
                 {CHAIN_PARAM_ORDER.map((key) => {

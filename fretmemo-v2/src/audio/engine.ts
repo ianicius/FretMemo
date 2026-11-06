@@ -19,6 +19,7 @@
 import { useSettingsStore } from '@/stores/useSettingsStore';
 import { assembleChain, connectNodes, disconnectNodes, type AssembledChain, type ChainAudioNode } from './chain';
 import { loadNamNode } from './nam';
+import { getUserModelBlobUrl } from './userModels';
 import { DEFAULT_PRESET_ID, getPresetById, type SoundPreset } from './presets';
 
 export type SoundEngineStatus = 'idle' | 'loading' | 'ready' | 'error';
@@ -161,7 +162,15 @@ class SoundEngineController {
         try {
             let ampNode: ChainAudioNode | undefined;
             if (preset.kind === 'nam') {
-                const result = await loadNamNode(ctx, preset.amp);
+                // User-imported models resolve to a session blob URL over
+                // IndexedDB bytes; bundled ids skip the lookup entirely.
+                const userModelUrl = preset.amp.startsWith('user-')
+                    ? await getUserModelBlobUrl(preset.amp)
+                    : null;
+                if (preset.amp.startsWith('user-') && !userModelUrl) {
+                    throw new Error(`NAM load failed (unknown-model): user model ${preset.amp} not found`);
+                }
+                const result = await loadNamNode(ctx, preset.amp, userModelUrl ?? undefined);
                 if (!result.ok) {
                     throw new Error(`NAM load failed (${result.code}): ${result.message}`);
                 }

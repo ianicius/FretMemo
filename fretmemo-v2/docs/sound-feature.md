@@ -76,6 +76,24 @@ Suchym sygnałem zasilającym łańcuch (i NAM) nie jest już syntezator, tylko
 - Poniżej E2 powyżej B5: skoki o ±półton od skrajnych próbek (C6+ schodzi w dół
   z B5 — rzadkie w praktyce).
 
+### Import własnych modeli `.nam`
+
+W kreatorze (sekcja wzmacniacza) przycisk **Importuj .nam** przyjmuje plik
+modelu (np. z tone3000.com). Walidacja: wyłącznie format **A2
+SlimmableContainer** (starsze pliki A1/WaveNet/LSTM są odrzucane z czytelnym
+komunikatem), limit 15 MB. Zaimportowane modele:
+
+- zapisywane lokalnie w IndexedDB (`fretmemo-user-models-v1`) — **zostają na
+  urządzeniu użytkownika** i nie są objęte licencjami dołączonych plików
+  (`public/sound/LICENSES.md` dotyczy wyłącznie modeli dołączonych przez nas),
+- widoczne w selektorze wzmacniacza z dopiskiem „(user)", usuwalne
+  (przy większej liczbie własnych modeli zapas place rośnie — hard limit 15 MB
+  na plik),
+- używane przez presety własne jak każdy model NAM; silnik czyta je z blob URL
+  (`loadNamNode(ctx, id, modelUrl)`), a po usunięciu modelu presety, które go
+  używały, wracają do brzmienia classic.
+Moduł: `src/audio/userModels.ts`; testy: `src/audio/__tests__/userModels.test.ts`.
+
 Karta presetu pokazuje: badge kategorii (Akustyczna / NAM / Własny), nazwę, opis charakteru,
 status silnika dla swojego modelu („Ładowanie modelu…” / błąd z przyciskiem „Ponów”),
 podświetlenie aktywnego presetu oraz dwie akcje: **Wybierz** i **Posłuchaj**.

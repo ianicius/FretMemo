@@ -557,6 +557,22 @@
       "feedback": {
         "saved": "Saved tone \"{{name}}\".",
         "saveFailed": "Could not save the tone."
+      },
+      "import": {
+        "label": "Import .nam",
+        "success": "Imported \"{{name}}\".",
+        "deleted": "Deleted \"{{name}}\".",
+        "deleteAmp": "Delete amp",
+        "deleteConfirmTitle": "Delete this amp?",
+        "deleteConfirmDesc": "\"{{name}}\" will be removed from this device. Custom presets using it fall back to the classic voice.",
+        "userNote": "Imported model — stays on this device.",
+        "licenseNote": "Imported models are yours: they stay local and are not covered by the bundled-model licenses.",
+        "errors": {
+          "invalid-model": "Not a valid .nam file.",
+          "legacy-format": "Legacy NAM format — only A2 (SlimmableContainer) files are supported.",
+          "too-large": "File exceeds the 15 MB limit.",
+          "storage-error": "Could not store the model locally."
+        }
       }
     },
     "live": {

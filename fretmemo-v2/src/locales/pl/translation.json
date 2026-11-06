@@ -512,6 +512,22 @@
       "feedback": {
         "saved": "Zapisano brzmienie „{{name}}”.",
         "saveFailed": "Nie udało się zapisać brzmienia."
+      },
+      "import": {
+        "label": "Importuj .nam",
+        "success": "Zaimportowano „{{name}}”.",
+        "deleted": "Usunięto „{{name}}”.",
+        "deleteAmp": "Usuń wzmacniacz",
+        "deleteConfirmTitle": "Usunąć ten wzmacniacz?",
+        "deleteConfirmDesc": "„{{name}}” zostanie usunięty z tego urządzenia. Presety własne, które go używały, wrócą do brzmienia classic.",
+        "userNote": "Model zaimportowany — pozostaje na tym urządzeniu.",
+        "licenseNote": "Importowane modele są Twoje: zostają lokalnie i nie są objęte licencjami dołączonych plików.",
+        "errors": {
+          "invalid-model": "To nie jest poprawny plik .nam.",
+          "legacy-format": "Stary format NAM — wspierane są tylko pliki A2 (SlimmableContainer).",
+          "too-large": "Plik przekracza limit 15 MB.",
+          "storage-error": "Nie udało się zapisać modelu lokalnie."
+        }
       }
     },
     "live": {
