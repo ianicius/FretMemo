@@ -428,6 +428,14 @@
       "current": "Teraz",
       "next": "Potem",
       "currentChordAria": "Bieżący akord"
+    },
+    "tracks": {
+      "title": "Głosy ścieżek",
+      "presetLabel": "Brzmienie",
+      "directOption": "Direct (soundfont)",
+      "drums": "Perkusja (direct)",
+      "namLimit": "Ponad 3 wzmacniacze NAM — dodatkowe ścieżki użyją klasycznego łańcucha.",
+      "muteAria": "Wycisz {{name}}"
     }
   },
   "sound": {

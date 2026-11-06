@@ -20,11 +20,21 @@ import { buildChordTimeline, type ChordTimelineEntry, type PrompterTrack } from 
 import { ChordPrompter } from "@/components/score/ChordPrompter";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import {
-    getSongDestination,
     getSongEngineContext,
     renderSongToBuffer,
-    SongPlayback,
 } from "@/audio/songPlayback";
+import { MultiTrackPlayback } from "@/audio/multiTrackPlayback";
+import { assemblePerTrackGraph, type AssembledTrackGraph } from "@/audio/perTrackGraph";
+import { masterGainValue } from "@/audio/engine";
+import { loadNamNode } from "@/audio/nam";
+import { getBuiltinPresets, getPresetById, type SoundPreset } from "@/audio/presets";
+import { toEnginePreset, useSoundStore } from "@/stores/useSoundStore";
+import {
+    getTrackConfigs,
+    setTrackConfigs,
+    sanitizeTrackConfigs,
+    type ValidTrackConfig,
+} from "@/lib/trackConfigs";
 import type { ScoreSummary } from "@/types/scores";
 // Type-only import: erased at build time, keeps alphaTab out of the entry chunk.
 import type { AlphaTabApi, model } from "@coderline/alphatab";
@@ -68,7 +78,7 @@ export default function ScoreViewer() {
     const [durationMs, setDurationMs] = useState(0);
     const [soundfontProgress, setSoundfontProgress] = useState<number | null>(null);
     const [speed, setSpeed] = useState(1);
-    const [volume, setVolume] = useState(0.8);
+    const [volume, setVolume] = useState(() => useSettingsStore.getState().full.audio.volume);
     const [metronomeOn, setMetronomeOn] = useState(false);
     const [reloadKey, setReloadKey] = useState(0);
     const displayTheme = useSettingsStore((state) => state.full.display.theme);
@@ -78,8 +88,10 @@ export default function ScoreViewer() {
 
     // Guitar-sound playback: the score is rendered offline (exportAudio) and
     // played through the engine chain, so the active preset colors the song.
-    const songPlaybackRef = useRef<SongPlayback | null>(null);
-    const songBufferRef = useRef<AudioBuffer | null>(null);
+    const multiPlaybackRef = useRef<MultiTrackPlayback | null>(null);
+    const playbackGraphRef = useRef<AssembledTrackGraph | null>(null);
+    const [trackConfigs, setTrackConfigsState] = useState<ValidTrackConfig[]>([]);
+    const [namPoolWarning, setNamPoolWarning] = useState(false);
     const [guitarMode, setGuitarMode] = useState(false);
     const [guitarRendering, setGuitarRendering] = useState(false);
     const [guitarRenderProgress, setGuitarRenderProgress] = useState<number | null>(null);
@@ -103,15 +115,16 @@ export default function ScoreViewer() {
         setPositionMs(0);
         setSoundfontProgress(null);
         scoreRef.current = null;
-        songPlaybackRef.current?.dispose();
-        songPlaybackRef.current = null;
-        songBufferRef.current = null;
+        disposePlayback();
+        setTrackConfigsState([]);
+        setNamPoolWarning(false);
         setGuitarMode(false);
         setGuitarRendering(false);
         setGuitarRenderProgress(null);
 
         (async () => {
             try {
+                console.log("DBG bytes");
                 const bytes = await getScoreBytes(id);
                 if (cancelled) return;
                 if (!bytes) {
@@ -152,7 +165,11 @@ export default function ScoreViewer() {
                 settings.player.playerMode = alphatab.PlayerMode.EnabledSynthesizer;
                 settings.player.soundFont = SOUNDFONT_URL;
 
+                console.log("DBG pre-configs");
                 const storedMeta = metas.find((item) => item.id === id) ?? null;
+                setTrackConfigsState(
+                    sanitizeTrackConfigs(await getTrackConfigs(id), score.tracks.length),
+                );
 
                 api = new alphatab.AlphaTabApi(containerRef.current, settings);
                 apiRef.current = api;
@@ -231,7 +248,8 @@ export default function ScoreViewer() {
                     trackedRef.current = true;
                     trackFeatureOpened("scores", id, entrySource);
                 }
-            } catch {
+            } catch (e) {
+                console.log("DBG CAUGHT:", String(e));
                 if (!cancelled) {
                     setStatus("error");
                 }
@@ -243,9 +261,7 @@ export default function ScoreViewer() {
             api?.destroy();
             apiRef.current = null;
             scoreRef.current = null;
-            songPlaybackRef.current?.dispose();
-            songPlaybackRef.current = null;
-            songBufferRef.current = null;
+            disposePlayback();
         };
     }, [id, entrySource, reloadKey, displayTheme]);
 
@@ -260,12 +276,34 @@ export default function ScoreViewer() {
         if (guitarMode) {
             // The rendered mix reflects the previous track selection — drop it;
             // the next play press re-renders with the new selection.
-            songPlaybackRef.current?.dispose();
-            songPlaybackRef.current = null;
-            songBufferRef.current = null;
+            disposePlayback();
             setPlaying(false);
             setGuitarRenderProgress(null);
         }
+    };
+
+    /** Disposes the playback transport, per-track chains and master gain. */
+    const disposePlayback = () => {
+        multiPlaybackRef.current?.dispose();
+        multiPlaybackRef.current = null;
+        playbackGraphRef.current?.dispose();
+        playbackGraphRef.current = null;
+    };
+
+    /** Cleans up transport + chains but keeps the master gain alive. */
+    const disposeTransportOnly = () => {
+        multiPlaybackRef.current?.dispose();
+        multiPlaybackRef.current = null;
+    };
+
+    const resolvePresetById = (id: string): SoundPreset | null => {
+        const custom = useSoundStore
+            .getState()
+            .customPresets.find((preset) => preset.id === id);
+        if (custom) {
+            return toEnginePreset(custom);
+        }
+        return getPresetById(id) ?? null;
     };
 
     const startGuitarRender = async () => {
@@ -273,38 +311,107 @@ export default function ScoreViewer() {
         const score = scoreRef.current;
         if (!api || !score || guitarRendering) return;
         setGuitarError(false);
+        setNamPoolWarning(false);
         setGuitarRendering(true);
         setGuitarRenderProgress(0);
+        const ctx = getSongEngineContext();
         try {
-            // Guitar mode plays the whole arrangement: regenerate the player
-            // midi with every non-percussion track (the track Select renders
-            // only the chosen one for soundfont playback).
-            const allTrackIndexes = score.tracks
-                .map((track, index) => (track.isPercussion ? -1 : index))
-                .filter((index) => index >= 0);
-            api.renderScore(score, allTrackIndexes.length > 0 ? allTrackIndexes : [trackIndex]);
-            const ctx = getSongEngineContext();
-            const buffer = await renderSongToBuffer(ctx, api, (progress) => {
-                setGuitarRenderProgress(
-                    progress.totalMs > 0 ? progress.renderedMs / progress.totalMs : 0,
-                );
-            });
-            songBufferRef.current = buffer;
-            songPlaybackRef.current?.dispose();
-            songPlaybackRef.current = new SongPlayback(ctx, getSongDestination(), buffer, {
+            // Per-track rendering: every track (drums included) renders to its
+            // own buffer through the soundfont synth, then plays back through
+            // its assigned voice — a preset chain or the direct soundfont.
+            const tracks = score.tracks.map((track, index) => ({ track, index }));
+            const total = tracks.length;
+
+            // NAM pool caps concurrent resident models — more than 3 distinct
+            // NAM presets per song would thrash the LRU and kill chains.
+            const namPresetIds = new Set(
+                trackConfigs
+                    .filter((config) => config.kind === "preset" && config.presetId)
+                    .map((config) => resolvePresetById(config.presetId!))
+                    .filter((preset): preset is SoundPreset => preset?.kind === "nam")
+                    .map((preset) => preset.amp),
+            );
+            const allowedNamAmps = new Set<string>();
+            let namOverflow = false;
+            for (const amp of namPresetIds) {
+                if (allowedNamAmps.size < 3) {
+                    allowedNamAmps.add(amp);
+                } else {
+                    namOverflow = true;
+                }
+            }
+            setNamPoolWarning(namOverflow);
+
+            const outputs: Array<{
+                trackIndex: number;
+                buffer: AudioBuffer;
+                plan: { kind: "preset"; preset: SoundPreset; ampNode?: AudioNode } | { kind: "direct" };
+                muted: boolean;
+            }> = [];
+            for (const { index } of tracks) {
+                const config = trackConfigs.find((entry) => entry.trackIndex === index);
+                const muted = config?.muted === true;
+                if (muted) {
+                    // Muted = silence: skip the render entirely.
+                    outputs.push({ trackIndex: index, buffer: ctx.createBuffer(2, 1, ctx.sampleRate), plan: { kind: "direct" }, muted: true });
+                    continue;
+                }
+                api.renderScore(score, [index]);
+                const buffer = await renderSongToBuffer(ctx, api, (progress) => {
+                    const trackFraction =
+                        progress.totalMs > 0 ? progress.renderedMs / progress.totalMs : 1;
+                    setGuitarRenderProgress((index + trackFraction) / total);
+                });
+                let plan: { kind: "preset"; preset: SoundPreset; ampNode?: AudioNode } | { kind: "direct" } =
+                    { kind: "direct" };
+                if (config?.kind === "preset" && config.presetId) {
+                    const preset = resolvePresetById(config.presetId);
+                    if (preset) {
+                        let ampNode: AudioNode | undefined;
+                        let effective = preset;
+                        if (preset.kind === "nam") {
+                            if (allowedNamAmps.has(preset.amp)) {
+                                const load = await loadNamNode(ctx, preset.amp);
+                                if (load.ok) {
+                                    ampNode = load.node;
+                                } else {
+                                    namOverflow = true;
+                                }
+                            } else {
+                                namOverflow = true;
+                            }
+                        }
+                        if (!ampNode && effective.kind === "nam") {
+                            // NAM unavailable (pool cap or load failure) — fall
+                            // back to the built-in classic chain, never silent.
+                            effective = getPresetById("classic-acoustic") ?? effective;
+                        }
+                        plan = { kind: "preset", preset: effective, ampNode };
+                    }
+                }
+                outputs.push({ trackIndex: index, buffer, plan, muted: false });
+            }
+
+            // Assemble the playback graph and restore the view render.
+            const graph = assemblePerTrackGraph(ctx, outputs, volume);
+            playbackGraphRef.current = graph;
+            api.renderScore(score, [trackIndex]);
+
+            disposeTransportOnly();
+            multiPlaybackRef.current = new MultiTrackPlayback(ctx, graph.sources, {
                 onPosition: (ms) => {
                     setPositionMs(ms);
-                    // alphaTab stays paused; its cursors follow our clock.
                     if (apiRef.current) apiRef.current.timePosition = ms;
                 },
                 onEnded: () => setPlaying(false),
             });
-            setDurationMs(buffer.duration * 1000);
-            songPlaybackRef.current.play(0);
+            setDurationMs(multiPlaybackRef.current.durationMs);
+            multiPlaybackRef.current.play();
             setPlaying(true);
         } catch {
             // Render failed (bad options, wedged worker, soundfont missing) —
             // surface it instead of silently reverting the toggle.
+            disposePlayback();
             setGuitarMode(false);
             setGuitarError(true);
         } finally {
@@ -317,14 +424,14 @@ export default function ScoreViewer() {
         const next = !guitarMode;
         if (next) {
             apiRef.current?.pause(); // keep alphaTab's synth silent under our transport
-            if (songBufferRef.current && songPlaybackRef.current) {
-                songPlaybackRef.current.play();
+            if (multiPlaybackRef.current) {
+                multiPlaybackRef.current.play();
                 setPlaying(true);
             } else {
                 void startGuitarRender();
             }
         } else {
-            songPlaybackRef.current?.pause();
+            multiPlaybackRef.current?.pause();
             setPlaying(false);
             // back to the soundfont transport: restore the single-track view
             if (apiRef.current && scoreRef.current) {
@@ -338,7 +445,7 @@ export default function ScoreViewer() {
         const api = apiRef.current;
         if (!api) return;
         if (guitarMode) {
-            const playback = songPlaybackRef.current;
+            const playback = multiPlaybackRef.current;
             if (!playback) {
                 void startGuitarRender();
                 return;
@@ -361,7 +468,7 @@ export default function ScoreViewer() {
 
     const handleStop = () => {
         if (guitarMode) {
-            songPlaybackRef.current?.stop();
+            multiPlaybackRef.current?.stop();
             setPlaying(false);
             setPositionMs(0);
             if (apiRef.current) apiRef.current.timePosition = 0;
@@ -373,6 +480,47 @@ export default function ScoreViewer() {
         setCurrentBar(null);
     };
 
+    const customPresetOptions = useSoundStore((state) => state.customPresets);
+
+    /** Updates one track's voice config, persists it and drops the stale mix. */
+    const updateTrackConfig = (index: number, next: ValidTrackConfig) => {
+        const others = trackConfigs.filter((entry) => entry.trackIndex !== index);
+        const updated = [...others, next].sort((a, b) => a.trackIndex - b.trackIndex);
+        setTrackConfigsState(updated);
+        if (id) {
+            void setTrackConfigs(id, updated);
+        }
+        if (guitarMode) {
+            // The rendered mix reflects the old assignment — drop it; the next
+            // play press re-renders per the new assignment.
+            disposeTransportOnly();
+            setPlaying(false);
+        }
+    };
+
+    const handleTrackVoiceChange = (
+        index: number,
+        voice: { kind: "direct" } | { kind: "preset"; presetId: string },
+    ) => {
+        const previous = trackConfigs.find((entry) => entry.trackIndex === index);
+        updateTrackConfig(index, {
+            trackIndex: index,
+            kind: voice.kind,
+            presetId: voice.kind === "preset" ? voice.presetId : undefined,
+            muted: previous?.muted ?? false,
+        });
+    };
+
+    const handleTrackMuteChange = (index: number, muted: boolean) => {
+        const previous = trackConfigs.find((entry) => entry.trackIndex === index);
+        updateTrackConfig(index, {
+            trackIndex: index,
+            kind: previous?.kind ?? "direct",
+            presetId: previous?.presetId,
+            muted,
+        });
+    };
+
     const handleSpeedChange = (next: number) => {
         setSpeed(next);
         if (apiRef.current) apiRef.current.playbackSpeed = next;
@@ -381,10 +529,13 @@ export default function ScoreViewer() {
     const handleVolumeChange = (next: number) => {
         setVolume(next);
         if (guitarMode) {
-            // Guitar mode plays through the engine — its master volume is the
-            // app-wide audio setting.
+            // Guitar mode plays through per-track chains into our own master
+            // gain — mirror the app-wide audio setting there.
             const settings = useSettingsStore.getState();
             settings.updateFullSettings({ audio: { ...settings.full.audio, volume: next } });
+            if (playbackGraphRef.current) {
+                playbackGraphRef.current.master.gain.value = masterGainValue(next);
+            }
             return;
         }
         if (apiRef.current) apiRef.current.masterVolume = next;
@@ -448,6 +599,86 @@ export default function ScoreViewer() {
                             </p>
                         )}
                     </div>
+                    {guitarMode && (
+                        <div className="space-y-2 rounded-lg border border-border/50 p-3">
+                            <p className="text-xs font-bold tracking-[0.2em] text-muted-foreground uppercase">
+                                {t("scores.tracks.title")}
+                            </p>
+                            {namPoolWarning && (
+                                <p className="text-xs text-amber-600 dark:text-amber-400">
+                                    {t("scores.tracks.namLimit")}
+                                </p>
+                            )}
+                            {scoreRef.current?.tracks.map((track, index) => {
+                                const config = trackConfigs.find(
+                                    (entry) => entry.trackIndex === index,
+                                );
+                                const muted = config?.muted === true;
+                                const isDrums = track.isPercussion;
+                                return (
+                                    <div
+                                        key={`${index}-${track.name}`}
+                                        className="flex flex-wrap items-center justify-between gap-2"
+                                    >
+                                        <div className="flex min-w-40 flex-col">
+                                            <span className="truncate text-sm font-medium">
+                                                {track.name.length > 0
+                                                    ? track.name
+                                                    : `Track ${index + 1}`}
+                                            </span>
+                                            <span className="text-[10px] text-muted-foreground">
+                                                {isDrums
+                                                    ? t("scores.tracks.drums")
+                                                    : null}
+                                            </span>
+                                        </div>
+                                        {isDrums ? (
+                                            <span className="text-xs text-muted-foreground">
+                                                {t("scores.tracks.directOption")}
+                                            </span>
+                                        ) : (
+                                            <Select
+                                                aria-label={t("scores.tracks.presetLabel")}
+                                                className="h-8 w-auto"
+                                                value={config?.kind === "preset" ? config.presetId : "direct"}
+                                                onChange={(event) =>
+                                                    handleTrackVoiceChange(
+                                                        index,
+                                                        event.target.value === "direct"
+                                                            ? { kind: "direct" }
+                                                            : { kind: "preset", presetId: event.target.value },
+                                                    )
+                                                }
+                                            >
+                                                <option value="direct">
+                                                    {t("scores.tracks.directOption")}
+                                                </option>
+                                                {getBuiltinPresets().map((preset) => (
+                                                    <option key={preset.id} value={preset.id}>
+                                                        {t(preset.nameKey)}
+                                                    </option>
+                                                ))}
+                                                {customPresetOptions.map((preset) => (
+                                                    <option key={preset.id} value={preset.id}>
+                                                        {t(preset.nameKey)}
+                                                    </option>
+                                                ))}
+                                            </Select>
+                                        )}
+                                        <Switch
+                                            checked={!muted}
+                                            aria-label={t("scores.tracks.muteAria", {
+                                                name: track.name || `Track ${index + 1}`,
+                                            })}
+                                            onCheckedChange={(checked) =>
+                                                handleTrackMuteChange(index, !checked)
+                                            }
+                                        />
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
                     <PlaybackControls
                         playing={playing}
                         ready={playerReady}

@@ -8,6 +8,11 @@ verified redistributable license entry below.
 **banned**. NonCommercial / NoDerivs assets are avoided; if a needed asset is only
 available under such terms, that is a human-checkpoint decision, not a builder decision.
 
+**Scope note:** this file covers the assets WE bundle. User-imported NAM
+models (tone designer, `fretmemo-user-models-v1`) live only on the user's
+device and are the user's own licensing responsibility — they are never
+redistributed by us.
+
 ## Guitar note samples (`public/sound/samples/`)
 
 Two sets, one subdirectory each (the sampler picks per active preset):

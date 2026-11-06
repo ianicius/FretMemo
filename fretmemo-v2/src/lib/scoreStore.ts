@@ -9,8 +9,9 @@
 import type { GuitarProFormat, ScoreRecord, ScoreSummary } from "@/types/scores";
 
 const DB_NAME = "fretmemo-scores-v1";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE = "files";
+const TRACK_CONFIGS_STORE = "trackConfigs";
 
 let dbPromise: Promise<IDBDatabase> | null = null;
 
@@ -22,6 +23,9 @@ function openDb(): Promise<IDBDatabase> {
                 const db = request.result;
                 if (!db.objectStoreNames.contains(STORE)) {
                     db.createObjectStore(STORE, { keyPath: "id" });
+                }
+                if (!db.objectStoreNames.contains(TRACK_CONFIGS_STORE)) {
+                    db.createObjectStore(TRACK_CONFIGS_STORE, { keyPath: "scoreId" });
                 }
             };
             request.onsuccess = () => {
@@ -73,6 +77,26 @@ function toSummary(record: unknown): ScoreSummary | null {
         trackCount: typeof r.trackCount === "number" ? r.trackCount : 0,
         tempoBpm: typeof r.tempoBpm === "number" ? r.tempoBpm : null,
     };
+}
+
+/**
+ * Runs an operation against the track-configs store and settles when the
+ * surrounding transaction commits (so writes are durable on resolve).
+ */
+export async function withTrackConfigsStore<T>(
+    mode: IDBTransactionMode,
+    run: (store: IDBObjectStore) => Promise<T>,
+): Promise<T> {
+    const db = await openDb();
+    const tx = db.transaction(TRACK_CONFIGS_STORE, mode);
+    const store = tx.objectStore(TRACK_CONFIGS_STORE);
+    const result = await run(store);
+    await new Promise<void>((resolve, reject) => {
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error ?? new Error("IndexedDB transaction failed"));
+        tx.onabort = () => reject(tx.error ?? new Error("IndexedDB transaction aborted"));
+    });
+    return result;
 }
 
 function requestToPromise<T>(request: IDBRequest<T>): Promise<T> {
