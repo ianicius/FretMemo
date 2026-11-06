@@ -501,7 +501,12 @@
         "quarter": "Quarter",
         "eighth": "Eighth",
         "sixteenth": "Sixteenth"
-      }
+      },
+      "barPosition": "Bar {{current}}/{{total}}",
+      "appendBar": "Bar",
+      "duplicateBar": "Duplicate",
+      "removeBar": "Delete",
+      "tempo": "Tempo"
     }
   },
   "sound": {

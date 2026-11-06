@@ -9,12 +9,19 @@ const baseProps = {
     summary: SUMMARY,
     stringCount: 6,
     duration: 4,
+    barCount: 2,
+    barIndex: 0,
+    tempo: 120,
     dirty: false,
     canUndo: true,
     canRedo: false,
     onFretChange: vi.fn(),
     onDurationChange: vi.fn(),
     onRest: vi.fn(),
+    onAppendBar: vi.fn(),
+    onDuplicateBar: vi.fn(),
+    onRemoveBar: vi.fn(),
+    onTempoChange: vi.fn(),
     onUndo: vi.fn(),
     onRedo: vi.fn(),
     onSave: vi.fn(),
@@ -86,5 +93,37 @@ describe("TabEditorPanel", () => {
         render(<TabEditorPanel {...baseProps} canUndo={false} canRedo />);
         expect(screen.getByRole("button", { name: "Undo" })).toBeDisabled();
         expect(screen.getByRole("button", { name: "Redo" })).toBeEnabled();
+    });
+});
+
+describe("TabEditorPanel — bar ops and tempo", () => {
+    it("shows the bar position and fires append/duplicate/remove callbacks", () => {
+        render(<TabEditorPanel {...baseProps} />);
+        expect(screen.getByText("Bar 1/2")).toBeTruthy();
+        fireEvent.click(screen.getByRole("button", { name: "Bar" }));
+        expect(baseProps.onAppendBar).toHaveBeenCalledTimes(1);
+        fireEvent.click(screen.getByRole("button", { name: "Duplicate" }));
+        expect(baseProps.onDuplicateBar).toHaveBeenCalledTimes(1);
+        fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+        expect(baseProps.onRemoveBar).toHaveBeenCalledTimes(1);
+    });
+
+    it("disables duplicate/remove without a current bar and remove on the last bar", () => {
+        render(<TabEditorPanel {...baseProps} barIndex={null} />);
+        expect(screen.getByRole("button", { name: "Duplicate" })).toBeDisabled();
+        cleanup();
+        render(<TabEditorPanel {...baseProps} barCount={1} barIndex={0} />);
+        expect(screen.getByRole("button", { name: "Delete" })).toBeDisabled();
+    });
+
+    it("routes tempo changes clamped to 10-400", () => {
+        render(<TabEditorPanel {...baseProps} />);
+        const tempo = screen.getByLabelText("Tempo");
+        fireEvent.change(tempo, { target: { value: "145" } });
+        expect(baseProps.onTempoChange).toHaveBeenCalledWith(145);
+        fireEvent.change(tempo, { target: { value: "999" } });
+        expect(baseProps.onTempoChange).toHaveBeenLastCalledWith(400);
+        fireEvent.change(tempo, { target: { value: "" } });
+        expect(baseProps.onTempoChange).toHaveBeenCalledTimes(2);
     });
 });
