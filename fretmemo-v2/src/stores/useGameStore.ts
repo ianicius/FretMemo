@@ -10,6 +10,7 @@ import { trackEvent } from '@/lib/analytics';
 import { playCountInClicks } from '@/lib/audio';
 import { calculateDynamicXP } from '../lib/progression';
 import { getPromptFeedback, type PracticeFeedback } from '@/lib/practiceFeedback';
+import { assignFingerings, HAND_SPAN } from '@/lib/fingering';
 
 export type PracticeMode = 'fretboardToNote' | 'tabToNote' | 'noteToTab' | 'playNotes' | 'playTab';
 export type PracticeModeId = PracticeMode;
@@ -393,7 +394,8 @@ function pickClosestPosition(
     targetNote: NoteName,
     frets: number = 12,
     options: OccurrenceOptions = {},
-    tuning: NoteName[] = getActiveTuning()
+    tuning: NoteName[] = getActiveTuning(),
+    handPositionFret?: number | null
 ): Position | null {
     const occurrences = getAllOccurrences(targetNote, frets, options, tuning);
     if (occurrences.length === 0) return null;
@@ -405,14 +407,29 @@ function pickClosestPosition(
     let best = candidates[0];
     let bestDistance = Number.POSITIVE_INFINITY;
     for (const candidate of candidates) {
-        const dist = Math.abs(candidate.stringIndex - currentPos.stringIndex) + Math.abs(candidate.fret - currentPos.fret);
+        let dist = Math.abs(candidate.stringIndex - currentPos.stringIndex) + Math.abs(candidate.fret - currentPos.fret);
+        // Fingering tiebreak (R-03): a candidate outside the current hand
+        // window forces a position shift — make in-window candidates win
+        // near ties without overriding note proximity.
+        if (handPositionFret != null && candidate.fret > 0) {
+            const inWindow =
+                candidate.fret >= handPositionFret &&
+                candidate.fret <= handPositionFret + HAND_SPAN - 1;
+            if (!inWindow) dist += 0.5;
+        }
         if (dist < bestDistance) {
             best = candidate;
             bestDistance = dist;
         }
     }
 
-    return best;
+    return attachFingering(best, handPositionFret);
+}
+
+/** Adds left-hand finger + hand position to a picked position (R-03). */
+function attachFingering(position: Position, handPositionFret?: number | null): Position {
+    const [step] = assignFingerings([position], handPositionFret ?? undefined);
+    return { ...position, finger: step.finger, handPositionFret: step.handPositionFret };
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -1040,10 +1057,11 @@ export const useGameStore = create<GameState>((set, get) => ({
         // this drill always used.
         while (queue.length < 3) {
             const chainPrev = queue[queue.length - 1] ?? newCurrent;
+            const prevHand = chainPrev.handPositionFret ?? null;
             const desiredNextNote = pickNextPlayNote(chainPrev.note);
             const chainedNext =
-                pickClosestPosition(chainPrev, desiredNextNote, 12, occurrenceOptions, tuning) ??
-                pickClosestPosition(chainPrev, desiredNextNote, 12, {}, tuning) ??
+                pickClosestPosition(chainPrev, desiredNextNote, 12, occurrenceOptions, tuning, prevHand) ??
+                pickClosestPosition(chainPrev, desiredNextNote, 12, {}, tuning, prevHand) ??
                 initPos();
             queue.push(chainedNext);
         }

@@ -141,3 +141,78 @@ describe("FretHighway", () => {
         expect(dot.style.transform).toBe("translateY(0px)");
     });
 });
+
+describe("FretHighway — fingering (R-03)", () => {
+    it("shows a finger badge on dots that carry a finger", () => {
+        render(
+            <FretHighway
+                target={{ ...TARGET, finger: 1, handPositionFret: 3 }}
+                upcoming={[{ ...UP1, finger: 2, handPositionFret: 3 }]}
+                beatMs={500}
+                lastBeatAt={null}
+                answered={false}
+                missed={false}
+                tuning={["E", "B", "G", "D", "A", "E"]}
+            />,
+        );
+
+        const dots = screen.getAllByTestId("fret-highway-dot");
+        expect(dots[0].getAttribute("data-finger")).toBe("1");
+        expect(dots[1].getAttribute("data-finger")).toBe("2");
+        expect(screen.getByText("1")).toBeTruthy();
+        expect(screen.getByText("2")).toBeTruthy();
+    });
+
+    it("omits the badge for unfingered positions (legacy queue entries)", () => {
+        render(
+            <FretHighway
+                target={TARGET}
+                upcoming={[UP1]}
+                beatMs={500}
+                lastBeatAt={null}
+                answered={false}
+                missed={false}
+                tuning={["E", "B", "G", "D", "A", "E"]}
+            />,
+        );
+
+        for (const dot of screen.getAllByTestId("fret-highway-dot")) {
+            expect(dot.getAttribute("data-finger")).toBeNull();
+        }
+    });
+
+    it("renders the Practice position band at the target's hand position", () => {
+        render(
+            <FretHighway
+                target={{ ...TARGET, finger: 1, handPositionFret: 5 }}
+                upcoming={[]}
+                beatMs={500}
+                lastBeatAt={null}
+                answered={false}
+                missed={false}
+                tuning={["E", "B", "G", "D", "A", "E"]}
+            />,
+        );
+
+        const band = screen.getByTestId("fret-highway-position-band");
+        expect(band.getAttribute("data-fret")).toBe("5");
+        // Column math: band left edge = fret / (MAX_FRET + 1) of the width.
+        expect(band.style.left).toBe(`${(5 / 13) * 100}%`);
+    });
+
+    it("omits the position band when the target has no hand position", () => {
+        render(
+            <FretHighway
+                target={TARGET}
+                upcoming={[]}
+                beatMs={500}
+                lastBeatAt={null}
+                answered={false}
+                missed={false}
+                tuning={["E", "B", "G", "D", "A", "E"]}
+            />,
+        );
+
+        expect(screen.queryByTestId("fret-highway-position-band")).toBeNull();
+    });
+});
