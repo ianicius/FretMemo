@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Copy, Plus, RotateCcw, Redo2, Save, Trash2 } from "lucide-react";
+import { Copy, Download, Plus, RotateCcw, Redo2, Save, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
@@ -14,6 +14,9 @@ const DURATION_OPTIONS = [
     { value: 16, labelKey: "scores.editor.durations.sixteenth" },
 ];
 
+const TIME_SIGNATURE_NUMERATORS = [1, 2, 3, 4, 5, 6, 7, 9, 12];
+const TIME_SIGNATURE_DENOMINATORS = [2, 4, 8, 16, 32];
+
 interface TabEditorPanelProps {
     /** Bumped on every model mutation — forces parent-driven panel refresh. */
     beatVersion?: number;
@@ -26,6 +29,8 @@ interface TabEditorPanelProps {
     barIndex: number | null;
     /** Score tempo in BPM (null when unavailable). */
     tempo: number | null;
+    /** Time signature of the bar under the cursor (null when unavailable). */
+    timeSignature: { numerator: number; denominator: number } | null;
     dirty: boolean;
     canUndo: boolean;
     canRedo: boolean;
@@ -36,9 +41,12 @@ interface TabEditorPanelProps {
     onDuplicateBar: () => void;
     onRemoveBar: () => void;
     onTempoChange: (bpm: number) => void;
+    onTimeSignatureChange: (numerator: number, denominator: number) => void;
     onUndo: () => void;
     onRedo: () => void;
     onSave: () => void;
+    /** Downloads the current editor state as a .gp file. */
+    onDownload: () => void;
 }
 
 /**
@@ -54,6 +62,7 @@ export function TabEditorPanel({
     barCount,
     barIndex,
     tempo,
+    timeSignature,
     dirty,
     canUndo,
     canRedo,
@@ -64,9 +73,11 @@ export function TabEditorPanel({
     onDuplicateBar,
     onRemoveBar,
     onTempoChange,
+    onTimeSignatureChange,
     onUndo,
     onRedo,
     onSave,
+    onDownload,
 }: TabEditorPanelProps) {
     const { t } = useTranslation();
     const strings = summary ?? Array.from({ length: stringCount }, () => null);
@@ -154,7 +165,47 @@ export function TabEditorPanel({
                     {t("scores.editor.removeBar")}
                 </Button>
                 <div className="ml-auto flex items-center gap-1.5">
-                    <Label className="text-xs text-muted-foreground" htmlFor="editor-tempo">
+                    <Label className="text-xs text-muted-foreground" htmlFor="editor-time-signature">
+                        {t("scores.editor.timeSignature")}
+                    </Label>
+                    <Select
+                        id="editor-time-signature"
+                        className="h-8 w-auto"
+                        value={timeSignature?.numerator ?? 4}
+                        disabled={timeSignature === null}
+                        onChange={(event) =>
+                            onTimeSignatureChange(
+                                Number(event.target.value),
+                                timeSignature?.denominator ?? 4,
+                            )
+                        }
+                    >
+                        {TIME_SIGNATURE_NUMERATORS.map((value) => (
+                            <option key={value} value={value}>
+                                {value}
+                            </option>
+                        ))}
+                    </Select>
+                    <span className="text-xs text-muted-foreground">/</span>
+                    <Select
+                        aria-label={t("scores.editor.timeSignatureDenominator")}
+                        className="h-8 w-auto"
+                        value={timeSignature?.denominator ?? 4}
+                        disabled={timeSignature === null}
+                        onChange={(event) =>
+                            onTimeSignatureChange(
+                                timeSignature?.numerator ?? 4,
+                                Number(event.target.value),
+                            )
+                        }
+                    >
+                        {TIME_SIGNATURE_DENOMINATORS.map((value) => (
+                            <option key={value} value={value}>
+                                {value}
+                            </option>
+                        ))}
+                    </Select>
+                    <Label className="ml-3 text-xs text-muted-foreground" htmlFor="editor-tempo">
                         {t("scores.editor.tempo")}
                     </Label>
                     <input
@@ -222,6 +273,16 @@ export function TabEditorPanel({
                     <Button type="button" size="sm" disabled={!dirty} onClick={onSave}>
                         <Save className="h-4 w-4" />
                         {t("scores.editor.save")}
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={onDownload}
+                        aria-label={t("scores.editor.download")}
+                        title={t("scores.editor.download")}
+                    >
+                        <Download className="h-4 w-4" />
                     </Button>
                 </div>
             </div>

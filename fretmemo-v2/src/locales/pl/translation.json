@@ -461,7 +461,10 @@
       "appendBar": "Takt",
       "duplicateBar": "Duplikuj",
       "removeBar": "Usuń",
-      "tempo": "Tempo"
+      "tempo": "Tempo",
+      "timeSignature": "Metrum",
+      "timeSignatureDenominator": "Metrum — mianownik",
+      "download": "Pobierz .gp"
     }
   },
   "sound": {

@@ -155,3 +155,26 @@ describe("tabEditorBars — setScoreTempo", () => {
         expect(automations[0].value).toBe(160);
     });
 });
+
+describe("tabEditorBars — setTimeSignatureAt", () => {
+    it("sets the meter on the target master bar only", async () => {
+        const score = makeScore();
+        await import("../tabEditorBars").then(({ setTimeSignatureAt }) =>
+            setTimeSignatureAt(score, 1, 6, 8),
+        );
+        expect(score.masterBars[0].timeSignatureNumerator).toBe(4);
+        expect(score.masterBars[1].timeSignatureNumerator).toBe(6);
+        expect(score.masterBars[1].timeSignatureDenominator).toBe(8);
+        expect(() => score.finish(new Settings())).not.toThrow();
+    });
+
+    it("rejects invalid numerators and non-power-of-two denominators", async () => {
+        const score = makeScore();
+        const { setTimeSignatureAt } = await import("../tabEditorBars");
+        expect(() => setTimeSignatureAt(score, 0, 0, 4)).toThrow();
+        expect(() => setTimeSignatureAt(score, 0, 13, 4)).toThrow();
+        expect(() => setTimeSignatureAt(score, 0, 4, 3)).toThrow();
+        expect(() => setTimeSignatureAt(score, 0, 4, 7)).toThrow();
+        expect(() => setTimeSignatureAt(score, 9, 4, 4)).toThrow();
+    });
+});

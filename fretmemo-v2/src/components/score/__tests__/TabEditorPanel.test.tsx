@@ -12,6 +12,7 @@ const baseProps = {
     barCount: 2,
     barIndex: 0,
     tempo: 120,
+    timeSignature: { numerator: 4, denominator: 4 },
     dirty: false,
     canUndo: true,
     canRedo: false,
@@ -22,9 +23,11 @@ const baseProps = {
     onDuplicateBar: vi.fn(),
     onRemoveBar: vi.fn(),
     onTempoChange: vi.fn(),
+    onTimeSignatureChange: vi.fn(),
     onUndo: vi.fn(),
     onRedo: vi.fn(),
     onSave: vi.fn(),
+    onDownload: vi.fn(),
 };
 
 beforeEach(async () => {
@@ -125,5 +128,28 @@ describe("TabEditorPanel — bar ops and tempo", () => {
         expect(baseProps.onTempoChange).toHaveBeenLastCalledWith(400);
         fireEvent.change(tempo, { target: { value: "" } });
         expect(baseProps.onTempoChange).toHaveBeenCalledTimes(2);
+    });
+});
+
+describe("TabEditorPanel — meter and download", () => {
+    it("shows the current meter and fires time signature changes", () => {
+        render(<TabEditorPanel {...baseProps} />);
+        const numerator = screen.getByLabelText("Meter");
+        expect((numerator as HTMLSelectElement).value).toBe("4");
+        fireEvent.change(numerator, { target: { value: "6" } });
+        expect(baseProps.onTimeSignatureChange).toHaveBeenCalledWith(6, 4);
+        fireEvent.change(screen.getByLabelText("Meter denominator"), {
+            target: { value: "8" },
+        });
+        expect(baseProps.onTimeSignatureChange).toHaveBeenLastCalledWith(4, 8);
+    });
+
+    it("disables meter selects without a current bar and fires download", () => {
+        render(<TabEditorPanel {...baseProps} timeSignature={null} />);
+        expect(screen.getByLabelText("Meter")).toBeDisabled();
+        cleanup();
+        render(<TabEditorPanel {...baseProps} />);
+        fireEvent.click(screen.getByRole("button", { name: "Download .gp" }));
+        expect(baseProps.onDownload).toHaveBeenCalledTimes(1);
     });
 });

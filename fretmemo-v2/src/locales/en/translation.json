@@ -506,7 +506,10 @@
       "appendBar": "Bar",
       "duplicateBar": "Duplicate",
       "removeBar": "Delete",
-      "tempo": "Tempo"
+      "tempo": "Tempo",
+      "timeSignature": "Meter",
+      "timeSignatureDenominator": "Meter denominator",
+      "download": "Download .gp"
     }
   },
   "sound": {

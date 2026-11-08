@@ -219,6 +219,27 @@ export function removeBarAt(score: BarsScoreLike, barIndex: number): void {
 
 const TEMPO_AUTOMATION_TYPE = 0; // alphaTab AutomationType.Tempo
 
+const TIME_SIGNATURE_DENOMINATORS = new Set([2, 4, 8, 16, 32]);
+
+/** Sets the time signature (meter) of a single bar. */
+export function setTimeSignatureAt(
+    score: BarsScoreLike,
+    barIndex: number,
+    numerator: number,
+    denominator: number,
+): void {
+    assertBarIndex(score, barIndex);
+    if (!Number.isInteger(numerator) || numerator < 1 || numerator > 12) {
+        throw new Error(`Invalid time signature numerator: ${numerator}`);
+    }
+    if (!TIME_SIGNATURE_DENOMINATORS.has(denominator)) {
+        throw new Error(`Invalid time signature denominator: ${denominator}`);
+    }
+    const masterBar = score.masterBars[barIndex];
+    masterBar.timeSignatureNumerator = numerator;
+    masterBar.timeSignatureDenominator = denominator;
+}
+
 export function setScoreTempo(score: BarsScoreLike, bpm: number): void {
     if (!Number.isFinite(bpm) || bpm < 10 || bpm > 400) {
         throw new Error(`Invalid tempo: ${bpm}`);
