@@ -6,7 +6,7 @@ import {
     useSearchParams,
 } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, FileWarning, Loader2 } from "lucide-react";
+import { ArrowLeft, Download, FileWarning, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
@@ -37,6 +37,7 @@ import {
     setNoteFret,
 } from "@/lib/tabEditor";
 import { restoreScoreSnapshot, snapshotScoreAsync } from "@/lib/tabEditorUndo";
+import { audioBufferToWavBlob } from "@/lib/audioExport";
 import {
     appendEmptyBar,
     duplicateBarAt,
@@ -125,6 +126,8 @@ export default function ScoreViewer() {
     const [namPoolWarning, setNamPoolWarning] = useState(false);
     const [guitarMode, setGuitarMode] = useState(false);
     const [guitarRendering, setGuitarRendering] = useState(false);
+    const [exportingAudio, setExportingAudio] = useState(false);
+    const [exportAudioError, setExportAudioError] = useState(false);
     const [guitarRenderProgress, setGuitarRenderProgress] = useState<number | null>(null);
     const [guitarError, setGuitarError] = useState(false);
 
@@ -773,6 +776,40 @@ export default function ScoreViewer() {
         }
     };
 
+    /** Renders the FULL song mix and downloads it as a 16-bit PCM WAV. */
+    const handleExportAudio = async () => {
+        const api = apiRef.current;
+        const score = scoreRef.current;
+        if (!api || !score || exportingAudio || guitarMode || guitarRendering) return;
+        setExportAudioError(false);
+        setExportingAudio(true);
+        try {
+            api.pause();
+            setPlaying(false);
+            const ctx = getSongEngineContext();
+            // Full mix: every track, drums included — the arrangement the
+            // soundfont player plays by default. No chains involved, so the
+            // guitar-mode NAM pool rules do not apply here.
+            api.renderScore(score, score.tracks.map((_, index) => index));
+            const buffer = await renderSongToBuffer(ctx, api);
+            // Restore the single-track view render.
+            api.renderScore(score, [trackIndex]);
+            const blob = audioBufferToWavBlob(buffer);
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `${meta?.title || "song"}.wav`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+        } catch {
+            setExportAudioError(true);
+        } finally {
+            setExportingAudio(false);
+        }
+    };
+
     const restoreEditorScore = async (snapshot: string) => {
         const api = apiRef.current;
         const settings = settingsRef.current;
@@ -1039,6 +1076,29 @@ export default function ScoreViewer() {
                         onMetronomeToggle={handleMetronomeToggle}
                         onRetry={() => setReloadKey((key) => key + 1)}
                     />
+                    <div className="flex items-center gap-2">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => void handleExportAudio()}
+                            disabled={exportingAudio || guitarMode || guitarRendering}
+                        >
+                            {exportingAudio ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                                <Download className="h-4 w-4" />
+                            )}
+                            {exportingAudio
+                                ? t("scores.playback.exporting")
+                                : t("scores.playback.exportAudio")}
+                        </Button>
+                        {exportAudioError && (
+                            <p className="text-xs text-destructive" role="alert">
+                                {t("scores.playback.exportAudioError")}
+                            </p>
+                        )}
+                    </div>
                 </>
             )}
 
