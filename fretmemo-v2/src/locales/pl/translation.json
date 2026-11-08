@@ -456,7 +456,15 @@
         "quarter": "Ćwierćnuta",
         "eighth": "Ósemka",
         "sixteenth": "Szesnastka"
-      }
+      },
+      "barPosition": "Takt {{current}}/{{total}}",
+      "appendBar": "Takt",
+      "duplicateBar": "Duplikuj",
+      "removeBar": "Usuń",
+      "tempo": "Tempo",
+      "timeSignature": "Metrum",
+      "timeSignatureDenominator": "Metrum — mianownik",
+      "download": "Pobierz .gp"
     }
   },
   "sound": {

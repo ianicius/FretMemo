@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { RotateCcw, Redo2, Save, Trash2 } from "lucide-react";
+import { Copy, Download, Plus, RotateCcw, Redo2, Save, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
@@ -14,6 +14,9 @@ const DURATION_OPTIONS = [
     { value: 16, labelKey: "scores.editor.durations.sixteenth" },
 ];
 
+const TIME_SIGNATURE_NUMERATORS = [1, 2, 3, 4, 5, 6, 7, 9, 12];
+const TIME_SIGNATURE_DENOMINATORS = [2, 4, 8, 16, 32];
+
 interface TabEditorPanelProps {
     /** Bumped on every model mutation — forces parent-driven panel refresh. */
     beatVersion?: number;
@@ -21,35 +24,60 @@ interface TabEditorPanelProps {
     summary: BeatStringSummary | null;
     stringCount: number;
     duration: number;
+    /** Total bars in the score and the bar index under the cursor (0-based). */
+    barCount: number;
+    barIndex: number | null;
+    /** Score tempo in BPM (null when unavailable). */
+    tempo: number | null;
+    /** Time signature of the bar under the cursor (null when unavailable). */
+    timeSignature: { numerator: number; denominator: number } | null;
     dirty: boolean;
     canUndo: boolean;
     canRedo: boolean;
     onFretChange: (stringIndex: number, fret: number | null) => void;
     onDurationChange: (duration: number) => void;
     onRest: () => void;
+    onAppendBar: () => void;
+    onDuplicateBar: () => void;
+    onRemoveBar: () => void;
+    onTempoChange: (bpm: number) => void;
+    onTimeSignatureChange: (numerator: number, denominator: number) => void;
     onUndo: () => void;
     onRedo: () => void;
     onSave: () => void;
+    /** Downloads the current editor state as a .gp file. */
+    onDownload: () => void;
 }
 
 /**
  * Edit panel for the beat under the playback cursor: per-string fret inputs,
- * duration, rest toggle and undo/redo/save. Pure presentation.
+ * duration, rest toggle, bar operations, tempo and undo/redo/save. Pure
+ * presentation.
  */
 export function TabEditorPanel({
     beatVersion,
     summary,
     stringCount,
     duration,
+    barCount,
+    barIndex,
+    tempo,
+    timeSignature,
     dirty,
     canUndo,
     canRedo,
     onFretChange,
     onDurationChange,
     onRest,
+    onAppendBar,
+    onDuplicateBar,
+    onRemoveBar,
+    onTempoChange,
+    onTimeSignatureChange,
     onUndo,
     onRedo,
     onSave,
+    onDownload,
 }: TabEditorPanelProps) {
     const { t } = useTranslation();
     const strings = summary ?? Array.from({ length: stringCount }, () => null);
@@ -95,6 +123,105 @@ export function TabEditorPanel({
                             />
                         </div>
                     ))}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+                <Label className="text-xs text-muted-foreground">
+                    {t("scores.editor.barPosition", {
+                        current: barIndex !== null ? barIndex + 1 : "—",
+                        total: barCount,
+                    })}
+                </Label>
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={onAppendBar}
+                    title={t("scores.editor.appendBar")}
+                >
+                    <Plus className="h-4 w-4" />
+                    {t("scores.editor.appendBar")}
+                </Button>
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={barIndex === null}
+                    onClick={onDuplicateBar}
+                    title={t("scores.editor.duplicateBar")}
+                >
+                    <Copy className="h-4 w-4" />
+                    {t("scores.editor.duplicateBar")}
+                </Button>
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={barIndex === null || barCount <= 1}
+                    onClick={onRemoveBar}
+                    title={t("scores.editor.removeBar")}
+                >
+                    <Trash2 className="h-4 w-4" />
+                    {t("scores.editor.removeBar")}
+                </Button>
+                <div className="ml-auto flex items-center gap-1.5">
+                    <Label className="text-xs text-muted-foreground" htmlFor="editor-time-signature">
+                        {t("scores.editor.timeSignature")}
+                    </Label>
+                    <Select
+                        id="editor-time-signature"
+                        className="h-8 w-auto"
+                        value={timeSignature?.numerator ?? 4}
+                        disabled={timeSignature === null}
+                        onChange={(event) =>
+                            onTimeSignatureChange(
+                                Number(event.target.value),
+                                timeSignature?.denominator ?? 4,
+                            )
+                        }
+                    >
+                        {TIME_SIGNATURE_NUMERATORS.map((value) => (
+                            <option key={value} value={value}>
+                                {value}
+                            </option>
+                        ))}
+                    </Select>
+                    <span className="text-xs text-muted-foreground">/</span>
+                    <Select
+                        aria-label={t("scores.editor.timeSignatureDenominator")}
+                        className="h-8 w-auto"
+                        value={timeSignature?.denominator ?? 4}
+                        disabled={timeSignature === null}
+                        onChange={(event) =>
+                            onTimeSignatureChange(
+                                timeSignature?.numerator ?? 4,
+                                Number(event.target.value),
+                            )
+                        }
+                    >
+                        {TIME_SIGNATURE_DENOMINATORS.map((value) => (
+                            <option key={value} value={value}>
+                                {value}
+                            </option>
+                        ))}
+                    </Select>
+                    <Label className="ml-3 text-xs text-muted-foreground" htmlFor="editor-tempo">
+                        {t("scores.editor.tempo")}
+                    </Label>
+                    <input
+                        id="editor-tempo"
+                        type="number"
+                        min={10}
+                        max={400}
+                        inputMode="numeric"
+                        className="h-8 w-16 rounded-md border border-input bg-background px-2 text-sm"
+                        value={tempo ?? ""}
+                        onChange={(event) => {
+                            const raw = event.target.value;
+                            if (raw !== "") onTempoChange(Math.max(10, Math.min(400, Number(raw))));
+                        }}
+                    />
+                </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
@@ -146,6 +273,16 @@ export function TabEditorPanel({
                     <Button type="button" size="sm" disabled={!dirty} onClick={onSave}>
                         <Save className="h-4 w-4" />
                         {t("scores.editor.save")}
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={onDownload}
+                        aria-label={t("scores.editor.download")}
+                        title={t("scores.editor.download")}
+                    >
+                        <Download className="h-4 w-4" />
                     </Button>
                 </div>
             </div>

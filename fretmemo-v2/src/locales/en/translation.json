@@ -501,7 +501,15 @@
         "quarter": "Quarter",
         "eighth": "Eighth",
         "sixteenth": "Sixteenth"
-      }
+      },
+      "barPosition": "Bar {{current}}/{{total}}",
+      "appendBar": "Bar",
+      "duplicateBar": "Duplicate",
+      "removeBar": "Delete",
+      "tempo": "Tempo",
+      "timeSignature": "Meter",
+      "timeSignatureDenominator": "Meter denominator",
+      "download": "Download .gp"
     }
   },
   "sound": {

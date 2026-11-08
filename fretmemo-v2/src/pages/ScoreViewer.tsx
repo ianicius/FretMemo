@@ -37,6 +37,13 @@ import {
     setNoteFret,
 } from "@/lib/tabEditor";
 import { restoreScoreSnapshot, snapshotScoreAsync } from "@/lib/tabEditorUndo";
+import {
+    appendEmptyBar,
+    duplicateBarAt,
+    removeBarAt,
+    setScoreTempo,
+    setTimeSignatureAt,
+} from "@/lib/tabEditorBars";
 import { getBuiltinPresets, getPresetById, type SoundPreset } from "@/audio/presets";
 import { toEnginePreset, useSoundStore } from "@/stores/useSoundStore";
 import {
@@ -651,6 +658,121 @@ export default function ScoreViewer() {
         applyEdit(() => clearBeat(beat));
     };
 
+    /** Score-level edit (bar ops, tempo): snapshot → mutate → finish → refresh. */
+    const applyScoreEdit = (
+        mutate: (score: model.Score) => number | void | Promise<number | void>,
+        nextBarIndex?: (
+            result: number | undefined,
+            currentBarIndex: number,
+            barCount: number,
+        ) => number,
+    ) => {
+        const api = apiRef.current;
+        const score = scoreRef.current;
+        const settings = settingsRef.current;
+        if (!api || !score || !settings || editorBusyRef.current) return;
+        editorBusyRef.current = true;
+        void snapshotScoreAsync(score)
+            .then(async (snapshot) => {
+                undoStackRef.current = [...undoStackRef.current.slice(-49), snapshot];
+                redoStackRef.current = [];
+                setEditorDirty(true);
+                const result = (await mutate(score)) as number | undefined;
+                score.finish(settings);
+                api.renderScore(score, [trackIndex]);
+                api.loadMidiForScore();
+                const barIndex = editBeatLocationRef.current?.barIndex;
+                if (barIndex !== undefined) {
+                    const next = nextBarIndex
+                        ? nextBarIndex(result, barIndex, score.masterBars.length)
+                        : barIndex;
+                    editBeatLocationRef.current = {
+                        ...editBeatLocationRef.current!,
+                        barIndex: Math.max(0, Math.min(next, score.masterBars.length - 1)),
+                    };
+                }
+                reresolveEditBeat(score);
+                setBeatVersion((v) => v + 1);
+            })
+            .catch((error) => console.error("Tab bar edit failed:", error))
+            .finally(() => {
+                editorBusyRef.current = false;
+            });
+    };
+
+    const handleAppendBar = () => {
+        const score = scoreRef.current;
+        if (!score) return;
+        applyScoreEdit(
+            (target) => appendEmptyBar(target),
+            (result, _current, barCount) => (typeof result === "number" ? result : barCount - 1),
+        );
+    };
+
+    const handleDuplicateBar = () => {
+        const score = scoreRef.current;
+        const barIndex = editBeatLocationRef.current?.barIndex;
+        if (!score || barIndex === undefined) return;
+        applyScoreEdit(
+            (target) => duplicateBarAt(target, barIndex),
+            (result, current) => (typeof result === "number" ? result : current + 1),
+        );
+    };
+
+    const handleRemoveBar = () => {
+        const score = scoreRef.current;
+        const barIndex = editBeatLocationRef.current?.barIndex;
+        if (!score || barIndex === undefined) return;
+        applyScoreEdit(
+            (target) => {
+                removeBarAt(target, barIndex);
+            },
+            (_result, currentBarIndex) => currentBarIndex,
+        );
+    };
+
+    const handleTempoChange = (bpm: number) => {
+        const score = scoreRef.current;
+        if (!score) return;
+        applyScoreEdit((target) => {
+            setScoreTempo(target, bpm);
+        });
+    };
+
+    const handleTimeSignatureChange = (numerator: number, denominator: number) => {
+        const score = scoreRef.current;
+        const barIndex = editBeatLocationRef.current?.barIndex;
+        if (!score || barIndex === undefined) return;
+        applyScoreEdit((target) => {
+            setTimeSignatureAt(target, barIndex, numerator, denominator);
+        });
+    };
+
+    /** Downloads the CURRENT editor state (unsaved changes included) as .gp. */
+    const handleEditorDownload = async () => {
+        const score = scoreRef.current;
+        if (!score) return;
+        try {
+            const alphatab = await import("@coderline/alphatab");
+            const bytes = new alphatab.exporter.Gp7Exporter().export(score);
+            // The exporter allocates an exact-size buffer (same assumption as
+            // the save path) — the cast satisfies TS 5.9 ArrayBuffer generics.
+            const blob = new Blob([bytes.buffer as ArrayBuffer], {
+                type: "application/octet-stream",
+            });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `${meta?.title || "score"}.gp`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+        } catch {
+            setEditorSaveError(true);
+        }
+    };
+
     const restoreEditorScore = async (snapshot: string) => {
         const api = apiRef.current;
         const settings = settingsRef.current;
@@ -953,15 +1075,35 @@ export default function ScoreViewer() {
                             }
                             stringCount={editorStringCount}
                             duration={editBeatRef.current?.duration ?? 4}
+                            barCount={scoreRef.current?.masterBars.length ?? 0}
+                            barIndex={editBeatLocationRef.current?.barIndex ?? null}
+                            tempo={scoreRef.current ? scoreRef.current.tempo : null}
+                            timeSignature={(() => {
+                                const score = scoreRef.current;
+                                const barIndex = editBeatLocationRef.current?.barIndex;
+                                if (!score || barIndex === undefined) return null;
+                                const masterBar = score.masterBars[barIndex];
+                                if (!masterBar) return null;
+                                return {
+                                    numerator: masterBar.timeSignatureNumerator,
+                                    denominator: masterBar.timeSignatureDenominator,
+                                };
+                            })()}
                             dirty={editorDirty}
                             canUndo={undoStackRef.current.length > 0}
                             canRedo={redoStackRef.current.length > 0}
                             onFretChange={handleEditFretChange}
                             onDurationChange={handleEditDurationChange}
                             onRest={handleEditRest}
+                            onAppendBar={handleAppendBar}
+                            onDuplicateBar={handleDuplicateBar}
+                            onRemoveBar={handleRemoveBar}
+                            onTempoChange={handleTempoChange}
+                            onTimeSignatureChange={handleTimeSignatureChange}
                             onUndo={() => void handleEditorUndo()}
                             onRedo={() => void handleEditorRedo()}
                             onSave={() => void handleEditorSave()}
+                            onDownload={() => void handleEditorDownload()}
                         />
                     )}
                 </>
