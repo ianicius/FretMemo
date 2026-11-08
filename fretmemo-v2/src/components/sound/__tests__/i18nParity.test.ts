@@ -79,7 +79,6 @@ describe("sound i18n parity (en + pl)", () => {
             "sound.actions.selected",
             "sound.actions.audition",
             "sound.actions.auditioning",
-            "sound.actions.delete",
             "sound.actions.deleteTone",
             "sound.volume.label",
             "sound.volume.hint",
