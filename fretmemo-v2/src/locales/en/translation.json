@@ -473,7 +473,8 @@
       "exportAudioError": "Audio export failed — try again.",
       "loop": "Loop",
       "loopFrom": "From bar",
-      "loopTo": "To bar"
+      "loopTo": "To bar",
+      "resumeFrom": "Resume from {{time}}"
     },
     "prompter": {
       "current": "Current",

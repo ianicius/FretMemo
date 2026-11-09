@@ -81,3 +81,32 @@ describe("barLoop — barRangeToMsWindow", () => {
         expect(() => barRangeToMsWindow(score as never, 1, 0)).toThrow();
     });
 });
+
+describe("barLoop — msToTicks", () => {
+    it("inverts barRangeToMsWindow at constant tempo", async () => {
+        const { msToTicks } = await import("../barLoop");
+        const score = makeScore([
+            makeMasterBar(0, 4),
+            makeMasterBar(3840, 4),
+            makeMasterBar(7680, 4),
+        ]);
+        // 2000 ms = start of bar 1 = tick 3840 (at 120 BPM, 960 ticks/quarter).
+        expect(msToTicks(score as never, 2000)).toBe(3840);
+        expect(msToTicks(score as never, 0)).toBe(0);
+        // Past the end: clamps to the final tick.
+        expect(msToTicks(score as never, 99999)).toBe(11520);
+    });
+
+    it("follows tempo automations (slow bar covers fewer ticks per ms)", async () => {
+        const { msToTicks } = await import("../barLoop");
+        const score = makeScore([
+            makeMasterBar(0, 4),
+            makeMasterBar(3840, 4, 60),
+            makeMasterBar(7680, 4),
+        ]);
+        // At 2000 ms the walk is exactly at the bar 1 boundary (tick 3840).
+        expect(msToTicks(score as never, 2000)).toBe(3840);
+        // Halfway into the 60-BPM bar (2000 ms more) = 1920 ticks further.
+        expect(msToTicks(score as never, 4000)).toBe(3840 + 1920);
+    });
+});

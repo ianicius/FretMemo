@@ -428,7 +428,8 @@
       "exportAudioError": "Eksport audio nie powiódł się — spróbuj ponownie.",
       "loop": "Pętla",
       "loopFrom": "Od taktu",
-      "loopTo": "Do taktu"
+      "loopTo": "Do taktu",
+      "resumeFrom": "Wznów od {{time}}"
     },
     "prompter": {
       "current": "Teraz",

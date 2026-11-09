@@ -38,7 +38,13 @@ import {
 } from "@/lib/tabEditor";
 import { restoreScoreSnapshot, snapshotScoreAsync } from "@/lib/tabEditorUndo";
 import { audioBufferToWavBlob } from "@/lib/audioExport";
-import { barRangeTicks, barRangeToMsWindow } from "@/lib/barLoop";
+import { barRangeTicks, barRangeToMsWindow, msToTicks } from "@/lib/barLoop";
+import { sha256Hex, type SongProgress } from "@/lib/songProgress";
+import {
+    getSongProgress,
+    setSongProgress,
+    copySongProgress,
+} from "@/lib/scoreStore";
 import {
     appendEmptyBar,
     duplicateBarAt,
@@ -137,6 +143,14 @@ export default function ScoreViewer() {
     const loopEnabledRef = useRef(false);
     const loopStartBarRef = useRef(0);
     const loopEndBarRef = useRef(3);
+    // R-08: practice progress keyed by the score-bytes hash — restores the
+    // loop, practice tempo and (as an explicit chip) the last position.
+    const scoreHashRef = useRef<string | null>(null);
+    const positionMsRef = useRef(0);
+    const [resumeAtMs, setResumeAtMs] = useState<number | null>(null);
+    // The load-effect closure captures the pre-restore speed — the restored
+    // practice tempo must reach api.playbackSpeed through a ref.
+    const restoredSpeedRef = useRef<number | null>(null);
     const [guitarRenderProgress, setGuitarRenderProgress] = useState<number | null>(null);
     const [guitarError, setGuitarError] = useState(false);
 
@@ -184,6 +198,34 @@ export default function ScoreViewer() {
                 if (!bytes) {
                     setStatus("not-found");
                     return;
+                }
+
+                // R-08: progress travels with the file CONTENT — hash the
+                // bytes and restore this song's practice state if it exists.
+                const contentHash = await sha256Hex(new Uint8Array(bytes));
+                if (cancelled) return;
+                scoreHashRef.current = contentHash;
+                const progress = (await getSongProgress(contentHash)) as SongProgress | null;
+                if (!cancelled && progress) {
+                    if (typeof progress.speed === "number" && progress.speed >= 0.5 && progress.speed <= 1.5) {
+                        restoredSpeedRef.current = progress.speed;
+                        setSpeed(progress.speed);
+                    }
+                    if (typeof progress.loopEnabled === "boolean") {
+                        loopEnabledRef.current = progress.loopEnabled;
+                        setLoopEnabled(progress.loopEnabled);
+                    }
+                    if (Number.isInteger(progress.loopStartBar)) {
+                        loopStartBarRef.current = progress.loopStartBar!;
+                        setLoopStartBar(progress.loopStartBar!);
+                    }
+                    if (Number.isInteger(progress.loopEndBar)) {
+                        loopEndBarRef.current = progress.loopEndBar!;
+                        setLoopEndBar(progress.loopEndBar!);
+                    }
+                    if (typeof progress.lastPositionMs === "number" && progress.lastPositionMs > 3000) {
+                        setResumeAtMs(progress.lastPositionMs);
+                    }
                 }
 
                 const [alphatab, metas] = await Promise.all([
@@ -254,6 +296,7 @@ export default function ScoreViewer() {
                 });
                 api.playerPositionChanged.on((args) => {
                     if (cancelled) return;
+                    positionMsRef.current = args.currentTime;
                     setPositionMs(args.currentTime);
                     setDurationMs(args.endTime);
                 });
@@ -310,7 +353,7 @@ export default function ScoreViewer() {
                     // alphaTab's Track satisfies the PrompterTrack duck type
                     buildChordTimeline(api.tracks[0] as unknown as PrompterTrack, score.masterBars.length),
                 );
-                api.playbackSpeed = speed;
+                api.playbackSpeed = restoredSpeedRef.current ?? speed;
                 api.masterVolume = volume;
                 api.metronomeVolume = metronomeOn ? 0.5 : 0;
                 playerStateRef.current =
@@ -474,6 +517,7 @@ export default function ScoreViewer() {
             disposeTransportOnly();
             multiPlaybackRef.current = new MultiTrackPlayback(ctx, graph.sources, {
                 onPosition: (ms) => {
+                    positionMsRef.current = ms;
                     setPositionMs(ms);
                     if (apiRef.current) apiRef.current.timePosition = ms;
                 },
@@ -528,6 +572,7 @@ export default function ScoreViewer() {
             if (playback.playing) {
                 playback.pause();
                 setPlaying(false);
+                flushSongProgress();
             } else {
                 playback.play();
                 setPlaying(true);
@@ -536,6 +581,7 @@ export default function ScoreViewer() {
         }
         if (api.playerState === playerStateRef.current) {
             api.pause();
+            flushSongProgress();
         } else {
             void api.play();
         }
@@ -599,6 +645,7 @@ export default function ScoreViewer() {
     const handleSpeedChange = (next: number) => {
         setSpeed(next);
         if (apiRef.current) apiRef.current.playbackSpeed = next;
+        flushSongProgress(next);
     };
 
     // ─── Tab editor (R-07) ───────────────────────────────────────────────
@@ -862,6 +909,7 @@ export default function ScoreViewer() {
         }
         applySoundfontLoop();
         applyGuitarLoop();
+        flushSongProgress();
     };
 
     const handleLoopRangeChange = (which: "start" | "end", barIndex: number) => {
@@ -881,6 +929,47 @@ export default function ScoreViewer() {
         setLoopEndBar(end);
         applySoundfontLoop();
         applyGuitarLoop();
+        flushSongProgress();
+    };
+
+    /** Persists the practice state under the score-content hash (R-08). */
+    const flushSongProgress = (speedOverride?: number) => {
+        const hash = scoreHashRef.current;
+        if (!hash) return;
+        void setSongProgress({
+            hash,
+            lastPositionMs: Math.round(positionMsRef.current),
+            speed: speedOverride ?? speed,
+            loopEnabled: loopEnabledRef.current,
+            loopStartBar: loopStartBarRef.current,
+            loopEndBar: loopEndBarRef.current,
+            updatedAt: Date.now(),
+        });
+    };
+
+    // Flush on leaving the page — the position lives in a ref, so the
+    // closure stays valid without re-subscribing.
+    useEffect(() => {
+        const onPageHide = () => flushSongProgress();
+        window.addEventListener("pagehide", onPageHide);
+        return () => window.removeEventListener("pagehide", onPageHide);
+    }, []);
+
+    /** Resume chip: seeks both transports to the saved position. */
+    const handleResumeClick = () => {
+        const target = resumeAtMs;
+        if (target == null) return;
+        setResumeAtMs(null);
+        const api = apiRef.current;
+        const score = scoreRef.current;
+        if (multiPlaybackRef.current) {
+            multiPlaybackRef.current.seek(target);
+        } else if (api && score) {
+            api.tickPosition = msToTicks(score, target);
+            positionMsRef.current = target;
+            setPositionMs(target);
+        }
+        flushSongProgress();
     };
 
     const restoreEditorScore = async (snapshot: string) => {
@@ -944,6 +1033,17 @@ export default function ScoreViewer() {
             const alphatab = await import("@coderline/alphatab");
             const bytes = new alphatab.exporter.Gp7Exporter().export(score);
             await updateScoreBytes(id, bytes.buffer as ArrayBuffer);
+            // The bytes changed — the content hash moves and the practice
+            // progress must follow the song, not the old snapshot.
+            try {
+                const newHash = await sha256Hex(new Uint8Array(bytes));
+                if (scoreHashRef.current) {
+                    await copySongProgress(scoreHashRef.current, newHash);
+                }
+                scoreHashRef.current = newHash;
+            } catch {
+                // Hashing is best-effort; the save itself already succeeded.
+            }
             setEditorDirty(false);
             // The guitar-mode mix reflects the pre-edit score — drop it.
             disposePlayback();
@@ -1158,6 +1258,20 @@ export default function ScoreViewer() {
                         onRetry={() => setReloadKey((key) => key + 1)}
                     />
                     <div className="flex flex-wrap items-center gap-2">
+                        {resumeAtMs !== null && (
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={handleResumeClick}
+                            >
+                                {t("scores.playback.resumeFrom", {
+                                    time: `${Math.floor(resumeAtMs / 60000)}:${String(
+                                        Math.floor(resumeAtMs / 1000) % 60,
+                                    ).padStart(2, "0")}`,
+                                })}
+                            </Button>
+                        )}
                         <Switch
                             id="loop-toggle"
                             checked={loopEnabled}
