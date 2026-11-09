@@ -24,6 +24,12 @@ export interface MultiTrackSource {
     destination: AudioNode | ChainAudioNode;
 }
 
+/** Loop window in milliseconds; playback wraps endMs -> startMs. */
+export interface MultiTrackLoopWindow {
+    startMs: number;
+    endMs: number;
+}
+
 const POSITION_TICKER_MS = 120;
 
 export class MultiTrackPlayback {
@@ -34,6 +40,7 @@ export class MultiTrackPlayback {
     private startedAtCtxTime = 0;
     private offsetSec = 0;
     private ticker: number | null = null;
+    private loop: MultiTrackLoopWindow | null = null;
     playing = false;
     private endedFired = false;
 
@@ -48,6 +55,25 @@ export class MultiTrackPlayback {
 
     get durationMs(): number {
         return Math.max(...this.sources.map((source) => source.buffer.duration)) * 1000;
+    }
+
+    /**
+     * Sets (or clears) the loop window. While playing, a position already
+     * past the new end wraps to the start immediately.
+     */
+    setLoop(loop: MultiTrackLoopWindow | null): void {
+        if (loop !== null) {
+            if (
+                !Number.isFinite(loop.startMs) || !Number.isFinite(loop.endMs) ||
+                loop.startMs < 0 || loop.endMs <= loop.startMs
+            ) {
+                throw new Error(`Invalid loop window: ${loop.startMs}-${loop.endMs}`);
+            }
+        }
+        this.loop = loop;
+        if (this.playing && loop && this.currentTimeMs >= loop.endMs) {
+            this.seek(loop.startMs);
+        }
     }
 
     get state(): MultiTrackPlaybackState {
@@ -145,6 +171,13 @@ export class MultiTrackPlayback {
 
     private onTick(): void {
         const timeMs = this.currentTimeMs;
+        // Loop wrap (R-04): restart inside the window instead of ending.
+        // Granularity follows the ticker (~120 ms overshoot past endMs).
+        if (this.loop && this.playing && timeMs >= this.loop.endMs) {
+            this.seek(this.loop.startMs);
+            this.hooks.onPosition?.(this.loop.startMs);
+            return;
+        }
         this.hooks.onPosition?.(timeMs);
         if (timeMs >= this.durationMs && !this.endedFired) {
             this.endedFired = true;

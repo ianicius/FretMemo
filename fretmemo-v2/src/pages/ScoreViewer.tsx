@@ -38,6 +38,7 @@ import {
 } from "@/lib/tabEditor";
 import { restoreScoreSnapshot, snapshotScoreAsync } from "@/lib/tabEditorUndo";
 import { audioBufferToWavBlob } from "@/lib/audioExport";
+import { barRangeTicks, barRangeToMsWindow } from "@/lib/barLoop";
 import {
     appendEmptyBar,
     duplicateBarAt,
@@ -128,6 +129,14 @@ export default function ScoreViewer() {
     const [guitarRendering, setGuitarRendering] = useState(false);
     const [exportingAudio, setExportingAudio] = useState(false);
     const [exportAudioError, setExportAudioError] = useState(false);
+    // R-04 loop: repeat a bar-range fragment (soundfont via alphaTab's
+    // native playbackRange, guitar mode via the MultiTrackPlayback window).
+    const [loopEnabled, setLoopEnabled] = useState(false);
+    const [loopStartBar, setLoopStartBar] = useState(0);
+    const [loopEndBar, setLoopEndBar] = useState(3);
+    const loopEnabledRef = useRef(false);
+    const loopStartBarRef = useRef(0);
+    const loopEndBarRef = useRef(3);
     const [guitarRenderProgress, setGuitarRenderProgress] = useState<number | null>(null);
     const [guitarError, setGuitarError] = useState(false);
 
@@ -226,7 +235,11 @@ export default function ScoreViewer() {
                 scoreRef.current = score;
 
                 api.playerReady.on(() => {
-                    if (!cancelled) setPlayerReady(true);
+                    if (!cancelled) {
+                        setPlayerReady(true);
+                        // Re-apply a persisted loop window on the fresh player.
+                        applySoundfontLoop();
+                    }
                 });
                 api.playerStateChanged.on((args) => {
                     if (!cancelled) setPlaying(args.state === PLAYER_STATE_PLAYING);
@@ -467,6 +480,7 @@ export default function ScoreViewer() {
                 onEnded: () => setPlaying(false),
             });
             setDurationMs(multiPlaybackRef.current.durationMs);
+            applyGuitarLoop();
             multiPlaybackRef.current.play();
             setPlaying(true);
         } catch {
@@ -810,6 +824,65 @@ export default function ScoreViewer() {
         }
     };
 
+    /** Soundfont transport loop: alphaTab's native range + loop flag. */
+    const applySoundfontLoop = () => {
+        const api = apiRef.current;
+        const score = scoreRef.current;
+        if (!api || !score || guitarMode) return;
+        if (!loopEnabledRef.current) {
+            api.playbackRange = null;
+            api.isLooping = false;
+            return;
+        }
+        api.isLooping = true;
+        api.playbackRange = barRangeTicks(score, loopStartBarRef.current, loopEndBarRef.current);
+    };
+
+    /** Guitar transport loop: the MultiTrackPlayback ms window. */
+    const applyGuitarLoop = () => {
+        const playback = multiPlaybackRef.current;
+        const score = scoreRef.current;
+        if (!playback || !score) return;
+        playback.setLoop(
+            loopEnabledRef.current
+                ? barRangeToMsWindow(score, loopStartBarRef.current, loopEndBarRef.current)
+                : null,
+        );
+    };
+
+    const handleLoopToggle = (next: boolean) => {
+        loopEnabledRef.current = next;
+        setLoopEnabled(next);
+        if (next && loopEndBarRef.current < loopStartBarRef.current) {
+            // First enable: default a 4-bar window (or up to the last bar).
+            const last = Math.max(0, (scoreRef.current?.masterBars.length ?? 1) - 1);
+            const end = Math.min(loopStartBarRef.current + 3, last);
+            loopEndBarRef.current = end;
+            setLoopEndBar(end);
+        }
+        applySoundfontLoop();
+        applyGuitarLoop();
+    };
+
+    const handleLoopRangeChange = (which: "start" | "end", barIndex: number) => {
+        const barCount = scoreRef.current?.masterBars.length ?? 0;
+        const clamped = Math.max(0, Math.min(barIndex, barCount - 1));
+        let start = loopStartBarRef.current;
+        let end = loopEndBarRef.current;
+        if (which === "start") {
+            start = clamped;
+            if (end < start) end = start;
+        } else {
+            end = Math.max(clamped, start);
+        }
+        loopStartBarRef.current = start;
+        loopEndBarRef.current = end;
+        setLoopStartBar(start);
+        setLoopEndBar(end);
+        applySoundfontLoop();
+        applyGuitarLoop();
+    };
+
     const restoreEditorScore = async (snapshot: string) => {
         const api = apiRef.current;
         const settings = settingsRef.current;
@@ -928,6 +1001,14 @@ export default function ScoreViewer() {
     if (!id) {
         return <Navigate to="/train" replace />;
     }
+
+    // Loop range options (1-based bar numbers for the user, 0-based values).
+    const barCount = scoreRef.current?.masterBars.length ?? 0;
+    const barOptions = Array.from({ length: barCount }, (_, index) => (
+        <option key={index} value={index}>
+            {index + 1}
+        </option>
+    ));
 
     return (
         <div className="space-y-4 pb-8">
@@ -1076,6 +1157,50 @@ export default function ScoreViewer() {
                         onMetronomeToggle={handleMetronomeToggle}
                         onRetry={() => setReloadKey((key) => key + 1)}
                     />
+                    <div className="flex flex-wrap items-center gap-2">
+                        <Switch
+                            id="loop-toggle"
+                            checked={loopEnabled}
+                            onCheckedChange={handleLoopToggle}
+                            disabled={guitarRendering || exportingAudio}
+                        />
+                        <Label
+                            htmlFor="loop-toggle"
+                            className="cursor-pointer text-xs text-muted-foreground"
+                        >
+                            {t("scores.playback.loop")}
+                        </Label>
+                        {loopEnabled && (
+                            <>
+                                <Label className="ml-2 text-xs text-muted-foreground">
+                                    {t("scores.playback.loopFrom")}
+                                </Label>
+                                <Select
+                                    aria-label={t("scores.playback.loopFrom")}
+                                    className="h-8 w-auto"
+                                    value={loopStartBar}
+                                    onChange={(event) =>
+                                        handleLoopRangeChange("start", Number(event.target.value))
+                                    }
+                                >
+                                    {barOptions}
+                                </Select>
+                                <Label className="text-xs text-muted-foreground">
+                                    {t("scores.playback.loopTo")}
+                                </Label>
+                                <Select
+                                    aria-label={t("scores.playback.loopTo")}
+                                    className="h-8 w-auto"
+                                    value={loopEndBar}
+                                    onChange={(event) =>
+                                        handleLoopRangeChange("end", Number(event.target.value))
+                                    }
+                                >
+                                    {barOptions}
+                                </Select>
+                            </>
+                        )}
+                    </div>
                     <div className="flex items-center gap-2">
                         <Button
                             type="button"

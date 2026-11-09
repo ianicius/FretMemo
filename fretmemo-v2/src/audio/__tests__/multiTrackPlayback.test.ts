@@ -149,3 +149,53 @@ describe("MultiTrackPlayback", () => {
         expect(playback.currentTimeMs).toBeGreaterThanOrEqual(2200);
     });
 });
+
+describe("MultiTrackPlayback — loop window (R-04)", () => {
+    it("wraps playback back to the loop start past endMs and keeps playing", () => {
+        const { ctx, destination } = makeStubs();
+        const positions: number[] = [];
+        playback = new MultiTrackPlayback(
+            ctx as unknown as AudioContext,
+            [{ buffer: makeBuffer(30), destination: destination as unknown as AudioNode }],
+            { onPosition: (ms) => positions.push(ms) },
+        );
+        playback.setLoop({ startMs: 2000, endMs: 5000 });
+        playback.play();
+        // Advance 5.4 s past start: position passes endMs (5000) -> wrap to 2000.
+        vi.advanceTimersByTime(5400);
+        ctx.currentTime += 5.4;
+        vi.advanceTimersByTime(200); // let the ticker observe the wrap
+        expect(playback.state).toBe("playing");
+        const after = playback.currentTimeMs;
+        // Inside the window again (50 ms source lead-in tolerated — the
+        // position dips ~50 ms below startMs right after the wrap restart).
+        expect(after).toBeGreaterThanOrEqual(1800);
+        expect(after).toBeLessThan(5000);
+        expect(playback.currentTimeMs).toBeLessThan(20000); // never near song end
+    });
+
+    it("setLoop while playing past the new end wraps immediately", () => {
+        const { ctx, destination } = makeStubs();
+        playback = new MultiTrackPlayback(
+            ctx as unknown as AudioContext,
+            [{ buffer: makeBuffer(30), destination: destination as unknown as AudioNode }],
+        );
+        playback.play();
+        vi.advanceTimersByTime(8000);
+        ctx.currentTime += 8;
+        expect(playback.currentTimeMs).toBeGreaterThanOrEqual(7500);
+        playback.setLoop({ startMs: 1000, endMs: 4000 });
+        expect(playback.currentTimeMs).toBeLessThan(4000);
+        expect(playback.state).toBe("playing");
+    });
+
+    it("rejects an invalid loop window", () => {
+        const { ctx, destination } = makeStubs();
+        const player = new MultiTrackPlayback(
+            ctx as unknown as AudioContext,
+            [{ buffer: makeBuffer(5), destination: destination as unknown as AudioNode }],
+        );
+        expect(() => player.setLoop({ startMs: 3000, endMs: 1000 })).toThrow();
+        expect(() => player.setLoop({ startMs: -1, endMs: 1000 })).toThrow();
+    });
+});
