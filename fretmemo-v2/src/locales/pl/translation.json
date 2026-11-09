@@ -422,7 +422,10 @@
       "playbackPosition": "Pozycja odtwarzania",
       "guitarMode": "Dźwięk gitary",
       "renderingGuitar": "Renderuję dźwięk gitary…",
-      "guitarError": "Nie udało się wyrenderować dźwięku gitary — spróbuj ponownie."
+      "guitarError": "Nie udało się wyrenderować dźwięku gitary — spróbuj ponownie.",
+      "exportAudio": "Eksportuj WAV",
+      "exporting": "Renderowanie…",
+      "exportAudioError": "Eksport audio nie powiódł się — spróbuj ponownie."
     },
     "prompter": {
       "current": "Teraz",
@@ -490,7 +493,6 @@
       "selected": "Wybrane",
       "audition": "Posłuchaj",
       "auditioning": "Gram…",
-      "delete": "Usuń",
       "deleteTone": "Usuń brzmienie"
     },
     "volume": {

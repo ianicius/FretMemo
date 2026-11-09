@@ -198,7 +198,7 @@ przy pierwszym użyciu, więc po jednej sesji online działają offline.
   błędnym modelu NAM,
 - `fixtures/audioStubs.ts` — lekkie fake'i AudioContext/parametrów z rejestracją połączeń.
 
-Stan: 29 plików / 374 testów na zielono (bazowy stan: 24 / 316); `npm run build` przechodzi.
+Stan: 47 plików / 550 testów na zielono (bazowy stan: 24 / 316); `npm run build` przechodzi.
 
 ## 11. Known limitations
 

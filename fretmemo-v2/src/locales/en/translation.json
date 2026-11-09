@@ -467,7 +467,10 @@
       "playbackPosition": "Playback position",
       "guitarMode": "Guitar sound",
       "renderingGuitar": "Rendering guitar audio…",
-      "guitarError": "Could not render the guitar audio — try again."
+      "guitarError": "Could not render the guitar audio — try again.",
+      "exportAudio": "Export WAV",
+      "exporting": "Rendering…",
+      "exportAudioError": "Audio export failed — try again."
     },
     "prompter": {
       "current": "Current",
@@ -535,7 +538,6 @@
       "selected": "Selected",
       "audition": "Audition",
       "auditioning": "Playing…",
-      "delete": "Delete",
       "deleteTone": "Delete tone"
     },
     "volume": {
