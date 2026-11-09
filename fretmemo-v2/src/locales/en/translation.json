@@ -470,7 +470,10 @@
       "guitarError": "Could not render the guitar audio — try again.",
       "exportAudio": "Export WAV",
       "exporting": "Rendering…",
-      "exportAudioError": "Audio export failed — try again."
+      "exportAudioError": "Audio export failed — try again.",
+      "loop": "Loop",
+      "loopFrom": "From bar",
+      "loopTo": "To bar"
     },
     "prompter": {
       "current": "Current",
