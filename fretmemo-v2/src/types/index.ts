@@ -3,7 +3,7 @@ export * from './settings';
 export * from './progress';
 export * from './scores';
 
-export type TabId = 'home' | 'practice' | 'sound' | 'challenges' | 'progress';
+export type TabId = 'home' | 'practice' | 'sound' | 'challenges' | 'improv' | 'progress';
 
 export interface ExerciseType {
     id: string;

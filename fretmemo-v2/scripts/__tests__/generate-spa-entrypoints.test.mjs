@@ -24,7 +24,7 @@ describe("generateSpaEntrypoints", () => {
     const outDir = await createOutputDirectory();
     const generated = await generateSpaEntrypoints({ outDir });
 
-    expect(routeManifest.routes).toHaveLength(29);
+    expect(routeManifest.routes).toHaveLength(52);
     expect(generated).toHaveLength(routeManifest.routes.length);
     for (const route of routeManifest.routes) {
       expect(await readFile(join(outDir, route.slice(1), "index.html"), "utf8"))

@@ -393,6 +393,7 @@
     "challenges": "Challenges",
     "progress": "Me",
     "sound": "Sound",
+    "improv": "Improv",
     "help": "Help",
     "settings": "Settings"
   },
@@ -441,7 +442,9 @@
     "theorySummary_other": "{{count}} tools",
     "earSummary_one": "{{count}} mode",
     "earSummary_other": "{{count}} modes",
-    "soon": "Soon"
+    "soon": "Soon",
+    "improv": "Improv Training",
+    "improvSummary": "Passed: {{done}}/{{total}} modules"
   },
   "scores": {
     "back": "Back to Train",
@@ -1767,5 +1770,484 @@
     "description": "An unexpected error occurred. Try refreshing or click retry.",
     "retry": "Retry",
     "reload": "Reload Page"
+  },
+  "improv": {
+    "title": "Improv Training",
+    "description": "22 improvisation modules in the order of the source video — from the E string notes to Giant Steps. Theory + exercises with pass thresholds.",
+    "libraryCard": {
+      "title": "Improv Training",
+      "description": "22 modules: fretboard, keys, scales, modes, chords, backing loops."
+    },
+    "roadmap": {
+      "progress": "Modules passed: {{done}} of {{total}}",
+      "percent": "{{percent}}% of the map",
+      "unlockAll": "Unlock all modules",
+      "unlockAllHint": "By default passing a module unlocks the next one.",
+      "openModuleAria": "Module {{order}}: {{name}}"
+    },
+    "status": {
+      "done": "Passed",
+      "available": "Available",
+      "passed": "Threshold met"
+    },
+    "module": {
+      "theoryTitle": "Theory — what it is and why it matters",
+      "exercisesTitle": "Exercises",
+      "notFoundTitle": "Module not found",
+      "notFoundDesc": "There is no “{{moduleId}}” module in the roadmap.",
+      "backToRoadmap": "Back to the roadmap",
+      "lockedTitle": "Module locked",
+      "lockedDesc": "Pass the previous module or turn on “Unlock all” on the roadmap."
+    },
+    "engine": {
+      "fretboardQuiz": "Fretboard quiz",
+      "choiceQuiz": "Choice quiz",
+      "diagramDrill": "Diagram + metronome",
+      "backingLoop": "Backing loop"
+    },
+    "quiz": {
+      "threshold": "Threshold: {{required}}/{{total}}",
+      "question": "Question {{current}}/{{total}}",
+      "scoreValue": "{{correct}}/{{total}}",
+      "finalScore": "Score",
+      "correct": "Correct!",
+      "wrong": "Wrong — correct answer: {{answer}}",
+      "restart": "Restart",
+      "passed": "Threshold met — exercise passed!",
+      "failed": "Try again — the threshold is {{required}} correct answers."
+    },
+    "fretQuiz": {
+      "promptPositionToNote": "Which note is highlighted on the fretboard?",
+      "promptNoteToPosition": "Click {{note}} on the fretboard (exercise strings):",
+      "wrongPosition": "That is not {{note}} — the correct position is marked green.",
+      "clickHint": "Click the right fret on the allowed strings."
+    },
+    "drill": {
+      "threshold_one": "Threshold: {{count}} run",
+      "threshold_few": "Threshold: {{count}} runs",
+      "threshold_many": "Threshold: {{count}} runs",
+      "threshold_other": "Threshold: {{count}} runs",
+      "bpm": "BPM: {{bpm}}",
+      "start": "Start",
+      "stop": "Stop",
+      "playRoot": "Play root",
+      "runButton": "Mark run complete (up + down)",
+      "runs": "Runs: {{done}}/{{required}}",
+      "shape": "Shape",
+      "key": "Key"
+    },
+    "loop": {
+      "threshold": "Threshold: {{required}} successful loops",
+      "start": "Start loop",
+      "stop": "Stop",
+      "bpm": "BPM: {{bpm}}",
+      "current": "Now",
+      "next": "Next",
+      "goal": "Goal",
+      "passButton": "Mark loop passed",
+      "passes": "Successful loops: {{done}}/{{required}}",
+      "markAfterLoop": "The button unlocks after a full pass of the progression.",
+      "variant": "Variant"
+    },
+    "shapes": {
+      "min-pent": "Minor pentatonic",
+      "maj-pent": "Major pentatonic",
+      "dorian-pent": "Dorian pentatonic",
+      "phrygian-pent": "Phrygian pentatonic",
+      "mixo-pent": "Mixolydian pentatonic",
+      "major": "Major scale",
+      "melodic-minor": "Melodic minor",
+      "harmonic-minor": "Harmonic minor",
+      "triad": "Triad (3 strings)",
+      "m7-arp": "m7 arpeggio",
+      "dom7-arp": "dom7 arpeggio"
+    },
+    "goals": {
+      "targetThird": "Goal: land on the chord's THIRD at each change — Am→C, C→E, Em→G, D→F#.",
+      "targetFifth": "Goal: land on the chord's FIFTH — Am→E, C→G, Em→B, D→A.",
+      "voiceLeading": "Goal: before the change, play the common tone or a step next to a note of the next chord (Gm→Bbm: shared Bb; Gm→Cm: shared G).",
+      "switchingKeys": "Goal: halfway through the loop the key moves from G to B — shift your lines (scales/arpeggios) to the new key.",
+      "tritoneNormal": "Goal: resolve G7 to C — the third of G7 (B) falls a half step to C, the b7 (F) a whole step to E.",
+      "tritoneSubV": "Goal: over Ab7 emphasize the third (C) and b7 (Gb) and resolve them stepwise to C (3→C, 7→E).",
+      "variantNormal": "Diatonic progression (G7)",
+      "variantSubV": "subV progression (Ab7)",
+      "secondaryDominants": "Goal: after each secondary dominant, aim at the target chord's THIRD.",
+      "borrowedBackdoor": "Goal: over Bb7 play C mixolydian / bVII tones and resolve stepwise to C.",
+      "giantSteps": "Goal: play chord thirds (arpeggios) through the B–G–Eb key changes."
+    },
+    "q": {
+      "keySig": {
+        "keyToCount": "How many accidentals does {{key}} major have?",
+        "countToKey_one": "Which major key has {{count}} accidental?",
+        "countToKey_few": "Which major key has {{count}} accidentals?",
+        "countToKey_many": "Which major key has {{count}} accidentals?",
+        "countToKey_other": "Which major key has {{count}} accidentals?",
+        "accidentalsToKey": "The key signature “{{list}}” ({{type}}) belongs to:",
+        "hintCount_one": "{{key}} has {{count}} accidental.",
+        "hintCount_few": "{{key}} has {{count}} accidentals.",
+        "hintCount_many": "{{key}} has {{count}} accidentals.",
+        "hintCount_other": "{{key}} has {{count}} accidentals.",
+        "hintAccidentals": "{{key}} accidentals: {{list}}"
+      },
+      "modes": {
+        "orderToMode": "Mode number {{order}} (I–VII) is:",
+        "modeToOrder": "The {{mode}} mode is number:",
+        "patternToMode": "Pattern vs major (W = whole step, H = half step): {{pattern}} — this is:",
+        "characteristicToMode": "Which mode has the characteristic note {{characteristic}}?",
+        "hintPattern": "{{mode}}: {{pattern}}",
+        "hintCharacteristic": "{{mode}} — characteristic note: {{characteristic}}"
+      },
+      "triadBuild": {
+        "degreeToType": "In {{key}} major, build the triad on degree {{degree}} ({{notes}}). What type is it?",
+        "degreeToTriad": "In {{key}} major, degree {{degree}} spells {{notes}}. Which symbol is correct?",
+        "hintType": "Type: {{type}}",
+        "hintSpelling": "Spelling: {{notes}}"
+      },
+      "chordScale": {
+        "chordToMode": "Which mode fits {{chord}} (in C major)?",
+        "modeToChord": "Which chord does the {{mode}} mode serve?",
+        "hintPair": "{{chord}} → {{mode}}"
+      },
+      "triadType": {
+        "nameToIntervals": "Intervals of the {{label}} chord:",
+        "intervalsToName": "The intervals {{intervals}} define a:",
+        "hintIntervals": "Intervals: {{intervals}}"
+      },
+      "tritone": {
+        "vToSubv": "The tritone substitution (subV) for {{v}} is:",
+        "subvToV": "{{sub}} is the tritone substitution (subV) for:",
+        "subvResolution": "{{sub}} resolves (subV → I) to:",
+        "hintSubV": "{{sub}} shares its tritone with {{v}} — it resolves to {{v}}.",
+        "hintResolution": "{{sub}} resolves to {{target}}."
+      },
+      "secondaryDom": {
+        "chordToSecondary": "Which secondary dominant (V7/x) resolves to {{target}} in C?",
+        "secondaryToChord": "{{dominant}} in C resolves to:",
+        "hintPair": "{{dominant}} → {{target}}"
+      },
+      "borrowed": {
+        "identifyDegree": "In C major, {{chord}} is borrowed. Which degree is it?",
+        "backdoor": "The progression {{chord}} in C is:",
+        "hintSource": "{{chord}} comes from the parallel minor ({{source}}).",
+        "hintBackdoor": "Fm7–Bb7→C: the bVII7 from C minor instead of G7.",
+        "answerBackdoor": "backdoor ii–V (borrowed from parallel minor)",
+        "answerDiatonic251": "diatonic ii–V (Dm7–G7)",
+        "answerMinor251": "ii–V–i of C minor",
+        "answerTurnaround": "V–I turnaround"
+      },
+      "pivot": {
+        "commonChord": "A diatonic chord shared by {{first}} and {{second}} major:",
+        "pivotTarget": "Which ii–V leads to the key of {{key}}?",
+        "hintCommon": "{{chord}} is diatonic in both keys.",
+        "hintTarget": "{{ii}}–{{v}} are degrees ii and V of {{key}} major."
+      },
+      "coltrane": {
+        "cycleOrder": "The key order of Coltrane's cycle (“Giant Steps”) is:",
+        "resolution": "In “Giant Steps”, {{dominant}} resolves to:",
+        "hintCycle": "Cycle: {{cycle}} (descending major thirds)."
+      }
+    },
+    "modules": {
+      "e-string-notes": {
+        "name": "Notes of the E string",
+        "term": "Notes of the E string",
+        "theory": "Improvisation starts with knowing the fretboard. We begin with the low E string: the notes run chromatically E F F# G G# A A# B C C# D D# E in frets 0–12. Once you know it by heart, half of the fretboard map is done — the A string repeats the same layout shifted up 5 semitones. Practice both directions: see a position and name the note (position → note), then see a name and find the position (note → position)."
+      },
+      "key-signatures": {
+        "name": "Key Signatures",
+        "term": "Key Signatures",
+        "theory": "A key tells you which notes “live at home”. The circle of fifths orders the keys: moving clockwise adds sharps (C→G→D→A→E→B), counter-clockwise adds flats (C→F→Bb→Eb→Ab). The number of accidentals in the key signature is the fastest way to recognize a key on paper. It is the language you share with other musicians and with charts — without it, “play in D” is an empty sentence."
+      },
+      "pentatonic-scale": {
+        "name": "Pentatonic Scale",
+        "term": "Pentatonic Scale",
+        "theory": "The minor pentatonic (1 b3 4 5 b7) is most players' first improvising vocabulary — it works over blues, rock and funk. The standard box (e.g. A in frets 5–8) sits comfortably under the fingers and teaches phrasing inside one position instead of running all over the neck. Switching keys C/A/D/E/G teaches transposing the shape rather than memorizing random frets. Play full runs up and down with a metronome — even timing is part of the language."
+      },
+      "major-scale": {
+        "name": "Major Scale",
+        "term": "Major Scale",
+        "theory": "The major scale (1 2 3 4 5 6 7) is the reference point for everything that follows — modes, chord construction and harmony analysis are all counted against it. A one-position box (groups of 6 notes per string) shows the scale as a system, not random dots. Practice up and down with a metronome, then in thirds and fourths — that is how a scale turns into melodic material."
+      },
+      "fretboard-notes": {
+        "name": "Notes of the Rest of the Fretboard",
+        "term": "Notes of the Rest of the Fretboard",
+        "theory": "Now we extend the map to all strings. The key: neighbouring strings E–A–D–G are a perfect fourth apart (5 semitones), and G–B a major third (4 semitones). If you know the E and A strings, you can derive the rest upwards. Goal: see every note anywhere in frets 0–12 — without it, “following the changes” higher up the neck is a lottery."
+      },
+      "pentatonic-positions": {
+        "name": "Pentatonic Scale Positions",
+        "term": "Pentatonic Scale Positions",
+        "theory": "The pentatonic scale has five modes: minor (1 b3 4 5 b7), major (1 2 3 5 6), dorian (1 2 b3 5 6), phrygian (1 b2 3 5 b6) and mixolydian (1 3 4 5 b7). Each brings a different colour over the same chord — dorian adds the “cool” 6, phrygian the b2, mixolydian the b7. Each mode in its position is a separate shape to own: G min pent (3fr), Bb maj pent (5fr), C dorian pent (7fr), D phrygian pent (10fr), F mixo pent (12fr)."
+      },
+      "modes": {
+        "name": "Modes",
+        "term": "Modes",
+        "theory": "Modes are the seven rotations of the major scale: I Ionian, II Dorian, III Phrygian, IV Lydian, V Mixolydian, VI Aeolian, VII Locrian. Relative to major: Dorian = b3 b7, Phrygian = b2, Lydian = #4, Mixolydian = b7, Aeolian = b3 b6 b7, Locrian = b2 b3 b5 b6 b7. Learn the W/H pattern and train your ear on the characteristic note: Lydian is all about #4, Mixolydian about b7, Phrygian about b2."
+      },
+      "chord-construction": {
+        "name": "How Chords Are Built",
+        "term": "How Chords Are Built",
+        "theory": "Chords are built from the scale: stack every other note — 1-3-5 — starting from a degree. In F major: F-A-C is degree I (major), G-Bb-D is ii (minor), E-G-Bb is vii (diminished). You recognize a triad type by its distances: major third + perfect fifth = major, minor third + perfect fifth = minor, both narrowed = dim, both widened = aug. The same stacking extends to seventh chords and every extension used in improvisation."
+      },
+      "chord-scale-major": {
+        "name": "Chord/Scale Relationships (Major)",
+        "term": "Chord/Scale Relationships (Major)",
+        "theory": "Every diatonic chord has “its” scale: Dm7 → Dorian (Dm13 is the same world with extensions), Em7 → Phrygian, Fmaj7 → Lydian (hence the characteristic #11), G7 → Mixolydian, Am7 → Aeolian, Bm7b5 → Locrian. In practice: play the key's scale but aim at the chord's characteristic tones. This is the first step from “playing the key” to “following the changes”."
+      },
+      "triads": {
+        "name": "Triads",
+        "term": "Triads",
+        "theory": "Triads on the top three strings (G-B-E) are the economical way to see harmony: one shape, a subset of the chord, with its inversions (inversions) sitting right next to each other on the neck. Knowing them you can comp and see melodic target notes at the same time. Also drill the names → intervals: major 1 3 5, minor 1 b3 5, diminished 1 b3 b5, augmented 1 3 #5 — without this the harmony quizzes become guessing."
+      },
+      "arpeggios": {
+        "name": "Arpeggios",
+        "term": "Arpeggios",
+        "theory": "An arpeggio is a chord played note by note — the “safest” material over changing chords because it contains only notes that fit. The seventh-chord shape (1 3 5 b7 for dom7, 1 b3 5 b7 for m7) spread one note per string (E-A-D-G) shows the whole chord structure inside one position. In improvisation the arpeggio steers the line: scales, chromatics and approach notes hang off this skeleton."
+      },
+      "target-chord-tones": {
+        "name": "How to Target Chord Tones",
+        "term": "How to Target Chord Tones",
+        "theory": "“Following the changes” starts with landing on chord tones exactly when the chord changes. Over Am–C–Em–D aim at the third (C, E, G, F#) or the fifth (E, G, B, A) of each chord — the third defines the major/minor colour, the fifth is stable and safe. Take the approach from the previous chord; the landing is new. That contrast is the essence of improvising, not a rehearsed routine."
+      },
+      "voice-leading": {
+        "name": "Voice Leading",
+        "term": "Voice Leading",
+        "theory": "Voice leading means minimal movement between chords: find the common tone or a half/whole step away from a note of the next chord. Gm→Bbm shares Bb, Gm→Cm shares G — play that note right before the change and your line glides through the harmony instead of jumping. The same rule drives comping: move by 1–2 frets instead of teleporting across the neck."
+      },
+      "switching-keys": {
+        "name": "How to Switch Keys While Improvising",
+        "term": "How to Switch Keys While Improvising",
+        "theory": "Modulating while improvising: find a chord shared by both keys (pivot chord) or use a ii–V to “announce” the new key. In the drill the key changes halfway through the loop (G → B): your material — pentatonics, scales, arpeggios — must move with it. Train it deliberately: hear the change first, then pick your shape in the new key, finally connect both worlds with one line."
+      },
+      "tritone-subs": {
+        "name": "Tritone Substitutions",
+        "term": "Tritone Substitutions",
+        "theory": "Tritone substitution: replace a dominant with the dominant a tritone above — G7 → Db7. Both chords share the same tritone (third and seventh swap places), so they serve the same function, but the bass now moves chromatically: Dm7–Db7–C instead of Dm7–G7–C. Emphasize the subV's third and b7 and resolve them stepwise — the classic jazz descending-bass tension and release."
+      },
+      "secondary-dominants": {
+        "name": "Secondary Dominants",
+        "term": "Secondary Dominants",
+        "theory": "A secondary dominant is the V7 of a chord's “temporary” key: A7 leads to Dm7 (V7/ii), B7 to Em7, C7 to Fmaj7, D7 to G7, E7 to Am7. They inject tension and motion inside one key without changing it for good. The progression C–A7–Dm7–G7–C shows the mechanism: each dominant aims at the target chord's tones — the third works best."
+      },
+      "borrowed-chords": {
+        "name": "Borrowed Chords",
+        "term": "Borrowed Chords",
+        "theory": "Borrowed chords come from the parallel minor key: bVII7 (Bb7 in C), iv m (Fm), bVI (Ab), bIII (Eb). The most famous case is the backdoor ii–V: Fm7–Bb7→C, where Bb7 works as a “back door” dominant whose b7 in the bass resolves down by a whole step. Over Bb7 play C mixolydian / bVII tones and resolve stepwise into the C chord."
+      },
+      "melodic-minor": {
+        "name": "Melodic Minor Scale and Modes",
+        "term": "Melodic Minor Scale and Modes",
+        "theory": "Melodic minor (1 2 b3 4 5 6 7) is “the jazz scale”: minor on the bottom, major on top — a smooth sound without the harmonic-minor gap. It is more useful for improvisation than harmonic minor because its modes cover m(Maj7), 7alt, Lydian Dominant and a whole family of modern sounds. Own the A box around fret 4, then move the shape to other keys with the switcher."
+      },
+      "chord-scale-melodic": {
+        "name": "Melodic Minor Chord/Scale Relationships",
+        "term": "Melodic Minor Chord/Scale Relationships",
+        "theory": "The melodic minor modes pair with chords: I Melodic Minor → m(Maj7), II Dorian b2 → m7, III Lydian Augmented → Maj7#5, IV Lydian Dominant → 7(#11), V Mixolydian b6 → 7(b13), VI Aeolian b5 → m7b5, VII Altered → 7alt. (The video also pairs Altered with m7b5 — conventionally Altered serves a 7alt chord.) Recognize the chord symbol and you know which scale supplies its “jazz” colour."
+      },
+      "harmonic-minor": {
+        "name": "Harmonic Minor Scale and Modes",
+        "term": "Harmonic Minor Scale and Modes",
+        "theory": "Harmonic minor (1 2 b3 4 5 b6 7) has the distinctive b6→7 leap — instantly recognizable. It sits near the end of the learning order not because it is hard, but because it matters less for improvisation than everything before it. Still, its fifth mode (Phrygian Dominant) and its intervals come up often — own the C box around fret 6, then move it to other keys."
+      },
+      "chord-scale-harmonic": {
+        "name": "Harmonic Minor Chord/Scale Relationships",
+        "term": "Harmonic Minor Chord/Scale Relationships",
+        "theory": "The harmonic minor modes pair with chords: I Harmonic Minor → m(Maj7), II Locrian #6 → m7b5, III Ionian #5 → Maj7#5, IV Dorian #4 → m7. Next: V Phrygian Dominant → 7, VI Lydian #2 → Maj7, VII Superlocrian bb7 → dim7. In practice you will use Phrygian Dominant over a dominant heading to a minor chord (V7/x in minor) and the scale itself over m(Maj7) most often."
+      },
+      "giant-steps": {
+        "name": "Giant Steps",
+        "term": "Giant Steps",
+        "theory": "Coltrane's “Giant Steps” is the final boss: keys in major-third triangles (B–G–Eb), the progression |Bmaj7 D7|Gmaj7 Bb7|Ebmaj7 F#7|Bmaj7|. The dominants (D7, Bb7, F#7) resolve down a fifth into the “next” key every two chords, and the key changes faster than in any standard. Play chord thirds (arpeggios) through the changes and slow down to 60 BPM — once this is yours, the whole earlier list clicks into one system."
+      }
+    },
+    "ex": {
+      "e-string-notes.e1": {
+        "name": "Quiz: position → note (E string)",
+        "desc": "See the highlighted fret on the E string (0–12) and pick the note name. Threshold 10/10."
+      },
+      "e-string-notes.e2": {
+        "name": "Quiz: note → position (E string)",
+        "desc": "Click the named note on the E string on the fretboard. Threshold 10/10."
+      },
+      "key-signatures.e1": {
+        "name": "Key → accidental count",
+        "desc": "How many accidentals does the major key have? Threshold 8/10."
+      },
+      "key-signatures.e2": {
+        "name": "Accidentals → key",
+        "desc": "Recognize the major key from its accidentals (circle of fifths). Threshold 8/10."
+      },
+      "pentatonic-scale.e1": {
+        "name": "Diagram: minor pentatonic (5fr)",
+        "desc": "The pentatonic box in frets 5–8 with a C/A/D/E/G key switch. 2 full runs (up and down) pass the drill."
+      },
+      "pentatonic-scale.e2": {
+        "name": "Diagram: minor pentatonic (12fr)",
+        "desc": "The same shape one octave up (12–15). 2 full runs."
+      },
+      "major-scale.e1": {
+        "name": "Diagram: A major (2–6)",
+        "desc": "The major scale in one box, note groups per string. 2 full runs."
+      },
+      "major-scale.e2": {
+        "name": "Diagram: C major (7–11)",
+        "desc": "The major scale higher up with a key switch. 2 full runs."
+      },
+      "fretboard-notes.e1": {
+        "name": "Quiz: position → note (whole neck)",
+        "desc": "All strings, frets 0–12. Threshold 15/15."
+      },
+      "fretboard-notes.e2": {
+        "name": "Quiz: note → position (whole neck)",
+        "desc": "Click the named note anywhere on the neck (0–12). Threshold 15/15."
+      },
+      "pentatonic-positions.e1": {
+        "name": "G minor pentatonic (3fr)",
+        "desc": "First pentatonic mode in position 3–6. 1 full run (up and down)."
+      },
+      "pentatonic-positions.e2": {
+        "name": "Bb major pentatonic (5fr)",
+        "desc": "Second mode (major pent) in position 5–8. 1 full run."
+      },
+      "pentatonic-positions.e3": {
+        "name": "C dorian pentatonic (7fr)",
+        "desc": "Third mode (1 2 b3 5 6) in position 7–10. 1 full run."
+      },
+      "pentatonic-positions.e4": {
+        "name": "D phrygian pentatonic (10fr)",
+        "desc": "Fourth mode (1 b2 3 5 b6) in position 10–13. 1 full run."
+      },
+      "pentatonic-positions.e5": {
+        "name": "F mixolydian pentatonic (12fr)",
+        "desc": "Fifth mode (1 3 4 5 b7) in position 12–15. 1 full run."
+      },
+      "modes.e1": {
+        "name": "Mode order and names",
+        "desc": "I → VII: name from the number and the pattern vs major. Threshold 8/10."
+      },
+      "modes.e2": {
+        "name": "Characteristic notes",
+        "desc": "Lydian has #4, Mixolydian b7, Phrygian b2 — name the mode from its characteristic note. Threshold 8/10."
+      },
+      "chord-construction.e1": {
+        "name": "Triad from a scale degree",
+        "desc": "Stack 1-3-5 from the major scale and name the triad type. Threshold 8/10."
+      },
+      "chord-construction.e2": {
+        "name": "Degree's chord symbol",
+        "desc": "Pick the correct chord symbol for a scale degree (e.g. ii in D). Threshold 8/10."
+      },
+      "chord-scale-major.e1": {
+        "name": "Chord → mode (major)",
+        "desc": "Dm7 → Dorian, Fmaj7 → Lydian, G7 → Mixolydian… Threshold 8/10."
+      },
+      "chord-scale-major.e2": {
+        "name": "Mode → chord (major)",
+        "desc": "The reverse pairing plus characteristic tensions (Dm13, Fmaj7#11). Threshold 8/10."
+      },
+      "triads.e1": {
+        "name": "Diagram: triads on 3 strings",
+        "desc": "Am and C on the G-B-E strings — subsets/inversions side by side. 2 full runs."
+      },
+      "triads.e2": {
+        "name": "Name → intervals",
+        "desc": "Major 1 3 5, minor 1 b3 5, dim, aug + seventh chords. Threshold 8/10."
+      },
+      "arpeggios.e1": {
+        "name": "Diagram: m7 arpeggio (EADG)",
+        "desc": "1 b3 5 b7, one note per string. 1 full run."
+      },
+      "arpeggios.e2": {
+        "name": "Diagram: dom7 arpeggio (EADG)",
+        "desc": "1 3 5 b7, one note per string. 1 full run."
+      },
+      "target-chord-tones.e1": {
+        "name": "Loop: land on the third",
+        "desc": "Am–C–Em–D; land on the third (C, E, G, F#) at each change. 3 successful loops."
+      },
+      "target-chord-tones.e2": {
+        "name": "Loop: land on the fifth",
+        "desc": "Same progression, goal: the chord's fifth (E, G, B, A). 3 successful loops."
+      },
+      "voice-leading.e1": {
+        "name": "Loop: Gm → Bbm",
+        "desc": "Before the change play the common tone (Bb) or a neighbouring step. 3 successful changes."
+      },
+      "voice-leading.e2": {
+        "name": "Loop: Gm → Cm",
+        "desc": "Common tone: G. Minimize finger movement. 3 successful changes."
+      },
+      "switching-keys.e1": {
+        "name": "Quiz: common chords and ii–V",
+        "desc": "Pivot chords between keys and the ii–V that announces a key. Threshold 8/10."
+      },
+      "switching-keys.e2": {
+        "name": "Loop: modulation G → B",
+        "desc": "Gmaj7–Em7–Am7–D7 → Bmaj7–G#m7–C#m7–F#7; adapt your lines to the new key. 2 loops."
+      },
+      "tritone-subs.e1": {
+        "name": "Quiz: tritone substitutions",
+        "desc": "subV for G7? V for a subV? subV→I resolution. Threshold 8/10."
+      },
+      "tritone-subs.e2": {
+        "name": "Loop: G7 vs Ab7 (subV)",
+        "desc": "Toggle normal/subV; play the subV's third and b7 with stepwise resolution. 2 loops."
+      },
+      "secondary-dominants.e1": {
+        "name": "Quiz: secondary dominants",
+        "desc": "Which V7/x resolves to Dm7, Em7, Fmaj7, G7, Am7 in C? Threshold 8/10."
+      },
+      "secondary-dominants.e2": {
+        "name": "Loop: C–A7–Dm7–G7–C",
+        "desc": "After each secondary dominant aim at the target chord's third. 2 loops."
+      },
+      "borrowed-chords.e1": {
+        "name": "Quiz: borrowed chords",
+        "desc": "bVII7, iv m, bVI, backdoor ii–V — recognize the degree and the source. Threshold 8/10."
+      },
+      "borrowed-chords.e2": {
+        "name": "Loop: backdoor Fm7–Bb7–C",
+        "desc": "Over Bb7 play C mixolydian / bVII tones and resolve stepwise to C. 2 loops."
+      },
+      "melodic-minor.e1": {
+        "name": "Diagram: A melodic minor (~4fr)",
+        "desc": "1 2 b3 4 5 6 7 in position 3–7. 2 full runs."
+      },
+      "melodic-minor.e2": {
+        "name": "Diagram: C melodic minor (~8fr)",
+        "desc": "The same shape higher up + key switch. 2 full runs."
+      },
+      "chord-scale-melodic.e1": {
+        "name": "Chord → mode (melodic minor)",
+        "desc": "m(Maj7), 7alt, 7#11, 7b13… name the scale. Threshold 8/10."
+      },
+      "chord-scale-melodic.e2": {
+        "name": "Mode → chord (melodic minor)",
+        "desc": "The reverse: mode → the chord it serves. Threshold 8/10."
+      },
+      "harmonic-minor.e1": {
+        "name": "Diagram: C harmonic minor (~6fr)",
+        "desc": "1 2 b3 4 5 b6 7 in position 5–9. 2 full runs."
+      },
+      "harmonic-minor.e2": {
+        "name": "Diagram: A harmonic minor (~2fr)",
+        "desc": "Lower position + key switch. 2 full runs."
+      },
+      "chord-scale-harmonic.e1": {
+        "name": "Chord → mode (harmonic minor)",
+        "desc": "Harmonic Minor, Locrian #6, Phrygian Dominant… Threshold 8/10."
+      },
+      "chord-scale-harmonic.e2": {
+        "name": "Mode → chord (harmonic minor)",
+        "desc": "The reverse pairing. Threshold 8/10."
+      },
+      "giant-steps.e1": {
+        "name": "Quiz: Coltrane cycle",
+        "desc": "Key order B–G–Eb; resolutions D7→G, Bb7→Eb, F#7→B. Threshold 8/10."
+      },
+      "giant-steps.e2": {
+        "name": "Loop: Giant Steps (60–120 BPM)",
+        "desc": "|Bmaj7 D7|Gmaj7 Bb7|Ebmaj7 F#7|Bmaj7| — play chord thirds through the changes. 2 successful loops."
+      }
+    }
   }
 }
