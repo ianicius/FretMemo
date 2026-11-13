@@ -39,7 +39,16 @@ import {
 import { restoreScoreSnapshot, snapshotScoreAsync } from "@/lib/tabEditorUndo";
 import { audioBufferToWavBlob } from "@/lib/audioExport";
 import { barRangeTicks, barRangeToMsWindow, msToTicks } from "@/lib/barLoop";
+import {
+    barHitRatios,
+    buildBeatMarkers,
+    recordBeatResult,
+    weakestBarWindow,
+    type BarStatsMap,
+} from "@/lib/barScore";
 import { sha256Hex, type SongProgress } from "@/lib/songProgress";
+import { usePitchDetector } from "@/services/pitch";
+import { BarMap } from "@/components/score/BarMap";
 import {
     getSongProgress,
     setSongProgress,
@@ -151,6 +160,14 @@ export default function ScoreViewer() {
     // The load-effect closure captures the pre-restore speed — the restored
     // practice tempo must reach api.playbackSpeed through a ref.
     const restoredSpeedRef = useRef<number | null>(null);
+    // R-08 extension: per-bar mic scoring while the song plays.
+    const [micScoring, setMicScoring] = useState(false);
+    const micScoringRef = useRef(false);
+    const [barStats, setBarStats] = useState<BarStatsMap>({});
+    const barStatsRef = useRef<BarStatsMap>({});
+    const scoredBeatIndexRef = useRef(-1);
+    const { note: detectedNote, isRunning: micRunning } = usePitchDetector(micScoring);
+    const detectedNoteRef = useRef<string | null>(null);
     const [guitarRenderProgress, setGuitarRenderProgress] = useState<number | null>(null);
     const [guitarError, setGuitarError] = useState(false);
 
@@ -226,6 +243,21 @@ export default function ScoreViewer() {
                     if (typeof progress.lastPositionMs === "number" && progress.lastPositionMs > 3000) {
                         setResumeAtMs(progress.lastPositionMs);
                     }
+                    if (progress.barStats && typeof progress.barStats === "object") {
+                        const cleaned: BarStatsMap = {};
+                        for (const [key, value] of Object.entries(progress.barStats)) {
+                            const index = Number(key);
+                            const entry = value as { hits?: unknown; attempts?: unknown };
+                            if (
+                                Number.isInteger(index) && index >= 0 &&
+                                Number.isFinite(entry?.hits) && Number.isFinite(entry?.attempts)
+                            ) {
+                                cleaned[index] = { hits: Number(entry.hits), attempts: Number(entry.attempts) };
+                            }
+                        }
+                        barStatsRef.current = cleaned;
+                        setBarStats(cleaned);
+                    }
                 }
 
                 const [alphatab, metas] = await Promise.all([
@@ -299,6 +331,7 @@ export default function ScoreViewer() {
                     positionMsRef.current = args.currentTime;
                     setPositionMs(args.currentTime);
                     setDurationMs(args.endTime);
+                    scoreAtPositionRef.current(args.currentTime);
                 });
                 api.soundFontLoad.on((progress) => {
                     if (!cancelled && progress.total > 0) {
@@ -520,6 +553,7 @@ export default function ScoreViewer() {
                     positionMsRef.current = ms;
                     setPositionMs(ms);
                     if (apiRef.current) apiRef.current.timePosition = ms;
+                    scoreAtPositionRef.current(ms);
                 },
                 onEnded: () => setPlaying(false),
             });
@@ -932,6 +966,39 @@ export default function ScoreViewer() {
         flushSongProgress();
     };
 
+    const handleMicScoringToggle = (next: boolean) => {
+        micScoringRef.current = next;
+        setMicScoring(next);
+        // A fresh scoring session — re-score the beat under the cursor.
+        scoredBeatIndexRef.current = -1;
+    };
+
+    /** One click: loop the weakest contiguous window (up to 4 bars). */
+    const handleLoopWeakBars = () => {
+        const score = scoreRef.current;
+        if (!score) return;
+        const barCount = score.masterBars.length;
+        const ratios = barHitRatios(barStatsRef.current, barCount);
+        const weak = weakestBarWindow(ratios, barCount, 4);
+        if (!weak) return;
+        loopEnabledRef.current = true;
+        loopStartBarRef.current = weak.start;
+        loopEndBarRef.current = weak.end;
+        setLoopEnabled(true);
+        setLoopStartBar(weak.start);
+        setLoopEndBar(weak.end);
+        applySoundfontLoop();
+        applyGuitarLoop();
+        flushSongProgress();
+    };
+
+    const handleResetBars = () => {
+        barStatsRef.current = {};
+        setBarStats({});
+        scoredBeatIndexRef.current = -1;
+        flushSongProgress();
+    };
+
     /** Persists the practice state under the score-content hash (R-08). */
     const flushSongProgress = (speedOverride?: number) => {
         const hash = scoreHashRef.current;
@@ -943,6 +1010,7 @@ export default function ScoreViewer() {
             loopEnabled: loopEnabledRef.current,
             loopStartBar: loopStartBarRef.current,
             loopEndBar: loopEndBarRef.current,
+            barStats: barStatsRef.current,
             updatedAt: Date.now(),
         });
     };
@@ -954,6 +1022,55 @@ export default function ScoreViewer() {
         window.addEventListener("pagehide", onPageHide);
         return () => window.removeEventListener("pagehide", onPageHide);
     }, []);
+
+    // ─── Per-bar mic scoring (R-08 extension) ────────────────────────────
+
+    const playingRef = useRef(false);
+    useEffect(() => {
+        playingRef.current = playing;
+    }, [playing]);
+    useEffect(() => {
+        detectedNoteRef.current = detectedNote;
+    }, [detectedNote]);
+
+    /**
+     * Samples the mic note on every NEW scored beat and folds the result
+     * into the per-bar stats. A silent mic counts no attempt (missing data
+     * is not a miss); loop wraps and seeks re-score naturally because the
+     * guard is the marker index, not a one-shot flag.
+     */
+    const scoreAtPosition = (timeMs: number) => {
+        if (!micScoringRef.current || !playingRef.current) return;
+        const score = scoreRef.current;
+        if (!score) return;
+        const markers = buildBeatMarkers(score, trackIndex);
+        if (markers.length === 0) return;
+        const tick = msToTicks(score, timeMs);
+        let low = 0;
+        let high = markers.length - 1;
+        let found = -1;
+        while (low <= high) {
+            const mid = (low + high) >> 1;
+            if (markers[mid].startTick <= tick) {
+                found = mid;
+                low = mid + 1;
+            } else {
+                high = mid - 1;
+            }
+        }
+        if (found < 0 || found === scoredBeatIndexRef.current) return;
+        scoredBeatIndexRef.current = found;
+        const detected = detectedNoteRef.current;
+        if (!detected) return;
+        const hit = markers[found].pitchClasses.includes(detected);
+        const next = recordBeatResult(barStatsRef.current, markers[found].barIndex, hit);
+        barStatsRef.current = next;
+        setBarStats(next);
+    };
+    // Position handlers are captured inside the load effect — route them
+    // through a ref so they always hit the freshest closure.
+    const scoreAtPositionRef = useRef<(timeMs: number) => void>(() => {});
+    scoreAtPositionRef.current = scoreAtPosition;
 
     /** Resume chip: seeks both transports to the saved position. */
     const handleResumeClick = () => {
@@ -1314,7 +1431,35 @@ export default function ScoreViewer() {
                                 </Select>
                             </>
                         )}
+                        <div className="ml-4 flex items-center gap-1.5">
+                            <Switch
+                                id="mic-score-toggle"
+                                checked={micScoring}
+                                onCheckedChange={handleMicScoringToggle}
+                                disabled={guitarRendering || exportingAudio}
+                            />
+                            <Label
+                                htmlFor="mic-score-toggle"
+                                className="cursor-pointer text-xs text-muted-foreground"
+                            >
+                                {t("scores.playback.micScore")}
+                            </Label>
+                            {micRunning && (
+                                <span
+                                    className="h-2 w-2 rounded-full bg-emerald-500"
+                                    aria-hidden="true"
+                                    data-testid="mic-live-dot"
+                                />
+                            )}
+                        </div>
                     </div>
+                    {micScoring && (
+                        <BarMap
+                            ratios={barHitRatios(barStats, barCount)}
+                            onLoopWeak={handleLoopWeakBars}
+                            onReset={handleResetBars}
+                        />
+                    )}
                     <div className="flex items-center gap-2">
                         <Button
                             type="button"

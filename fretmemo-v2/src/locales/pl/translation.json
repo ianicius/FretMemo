@@ -429,7 +429,13 @@
       "loop": "Pętla",
       "loopFrom": "Od taktu",
       "loopTo": "Do taktu",
-      "resumeFrom": "Wznów od {{time}}"
+      "resumeFrom": "Wznów od {{time}}",
+      "barAccuracy": "Trafność taktów",
+      "loopWeak": "Pętla na słabe",
+      "resetBars": "Reset",
+      "barRatio": "Takt {{n}}: {{percent}}% trafień",
+      "barNoData": "Takt {{n}}: brak danych",
+      "micScore": "Oceniaj z mikrofonu"
     },
     "prompter": {
       "current": "Teraz",

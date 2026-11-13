@@ -474,7 +474,13 @@
       "loop": "Loop",
       "loopFrom": "From bar",
       "loopTo": "To bar",
-      "resumeFrom": "Resume from {{time}}"
+      "resumeFrom": "Resume from {{time}}",
+      "barAccuracy": "Bar accuracy",
+      "loopWeak": "Loop weak bars",
+      "resetBars": "Reset",
+      "barRatio": "Bar {{n}}: {{percent}}% hits",
+      "barNoData": "Bar {{n}}: no data",
+      "micScore": "Score with mic"
     },
     "prompter": {
       "current": "Current",

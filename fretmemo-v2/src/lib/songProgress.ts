@@ -18,6 +18,8 @@ export interface SongProgress {
     loopEnabled?: boolean;
     loopStartBar?: number;
     loopEndBar?: number;
+    /** Per-bar mic-scored hit/attempt counts (R-08 extension). */
+    barStats?: import("@/lib/barScore").BarStatsMap;
     updatedAt: number;
 }
 
