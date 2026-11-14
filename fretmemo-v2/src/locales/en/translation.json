@@ -1791,7 +1791,9 @@
         "status": {
             "done": "Passed",
             "available": "Available",
-            "passed": "Passed"
+            "passed": "Passed",
+            "unverified": "Unverified",
+            "unverifiedHint": "Passed with the button, not checked by the microphone."
         },
         "module": {
             "theoryTitle": "Theory",
@@ -1837,7 +1839,8 @@
             "runs": "Runs: {{done}}/{{required}}",
             "shape": "Shape",
             "key": "Key",
-            "runNeedsMetronome": "Play the full run (up and down) with the metronome first — {{beats}} clicks."
+            "runNeedsMetronome": "Play the full run (up and down) with the metronome first — {{beats}} clicks.",
+            "tuningNotice": "Box shapes and fret windows assume standard tuning. The notes shown match your tuning, but the layout may differ from the box."
         },
         "loop": {
             "threshold": "Successful loops needed: {{required}}",
@@ -1858,7 +1861,17 @@
             "micError": "Microphone unavailable — use the self-mark button.",
             "micDetected": "Hearing: {{note}}",
             "bass": "Bass",
-            "allVariants": "To pass the exercise, every variant needs its own successful loops."
+            "allVariants": "To pass the exercise, every variant needs its own successful loops.",
+            "key": "Key",
+            "keyOriginal": "{{key}} (original)",
+            "transposedNotice": "The goal and chord hints refer to the original key ({{key}}). Chords, fretboard and mic targets are transposed.",
+            "fretboardToggle": "Chord tones on the fretboard",
+            "fretboardLegend": "Numbers are chord degrees; the root (1) is highlighted.",
+            "fretboardLegendTargets": "Green: mic target notes.",
+            "rampToggle": "+5 BPM every 2 successful loops",
+            "reportTitle": "Last loop: {{done}}/{{total}} chords hit",
+            "reportHit": "hit",
+            "reportMiss": "missed"
         },
         "shapes": {
             "min-pent": "Minor pentatonic",
@@ -1890,7 +1903,7 @@
             "modeDorian": "Dorian (Dm7–G7)",
             "modePhrygian": "Phrygian (Em7–Fmaj7)",
             "modeLydian": "Lydian (Fmaj7–G6)",
-            "modeMixolydian": "Mixolydian (G7–Cmaj7)",
+            "modeMixolydian": "Mixolydian (G7–F)",
             "chordScaleCharacteristic": "On every chord, play its characteristic tone from the hinted scale.",
             "arpeggiosOnly": "Play chord arpeggios only — outline the harmony.",
             "targetRoot": "Land on the chord's root at each change — Am→A, C→C, Em→E, D→D.",
@@ -1922,7 +1935,11 @@
             "giantStepsPatternLabel": "Level 2: 1-2-3-5 pattern",
             "giantStepsArpsLabel": "Level 3: arpeggios",
             "bluesBox1": "12-bar blues in A — improvise in pentatonic box 1.",
-            "bluesChordTones": "12-bar blues in A — land on a chord tone at every change."
+            "bluesChordTones": "12-bar blues in A — land on a chord tone at every change.",
+            "playRest": "Play only in bars marked “play”. In “rest” bars play nothing: listen to the backing and plan the next phrase.",
+            "callResponse": "Two bars of question, two bars of answer. Start the answer with a motif from the question and end it on a chord tone.",
+            "playRestLabel": "Play a bar, rest a bar",
+            "callResponseLabel": "Call and response (2+2 bars)"
         },
         "q": {
             "keySig": {
@@ -1949,7 +1966,9 @@
                 "countToKey_flats_many": "Which major key has {{count}} flats?",
                 "countToKey_flats_other": "Which major key has {{count}} flats?",
                 "sharps": "sharps",
-                "flats": "flats"
+                "flats": "flats",
+                "relativeMinor": "The relative minor of {{key}} major is:",
+                "hintRelative": "The relative minor sits on the 6th degree: {{key}} major → {{target}} minor. Both share the key signature."
             },
             "modes": {
                 "orderToMode": "Mode number {{order}} (I–VII) is:",
@@ -2079,7 +2098,7 @@
             "arpeggios": {
                 "name": "Arpeggios",
                 "term": "Arpeggios",
-                "theory": "An arpeggio is a chord played one note at a time. It contains only chord tones, so it always fits over that chord — the safest material when chords keep changing. The diagrams show each arpeggio across all six strings in one position: 1 b3 5 b7 for m7 and 1 3 5 b7 for the dominant 7. The arpeggio is the skeleton of a line; scale notes, chromatics and passing notes go around it."
+                "theory": "An arpeggio is a chord played one note at a time. It contains only chord tones, so it always fits over that chord — the safest material when chords keep changing. The diagrams show each arpeggio across all six strings in one position: 1 b3 5 b7 for m7, 1 3 5 b7 for the dominant 7, 1 3 5 7 for maj7 and 1 b3 b5 b7 for m7b5. The arpeggio is the skeleton of a line; scale notes, chromatics and passing notes go around it."
             },
             "target-chord-tones": {
                 "name": "How to Target Chord Tones",
@@ -2397,6 +2416,22 @@
             "target-chord-tones.e3": {
                 "name": "Loop: 12-bar blues",
                 "desc": "12-bar blues in A — land on a chord tone at every change. 2 successful loops."
+            },
+            "arpeggios.e4": {
+                "name": "Diagram: maj7 arpeggio",
+                "desc": "Cmaj7 arpeggio (1 3 5 7) across all strings, frets 7–11 — the I chord of the ii–V–I loop."
+            },
+            "arpeggios.e5": {
+                "name": "Diagram: m7b5 arpeggio",
+                "desc": "Bm7b5 arpeggio (1 b3 b5 b7) across all strings, frets 7–11 — the vii chord of C major and the ii of a minor ii–V."
+            },
+            "pentatonic-scale.e6": {
+                "name": "Loop: phrase and rest",
+                "desc": "Extra practice. Am7–Am7–Dm7–Em7 in box 1: play a bar and rest a bar, or a two-bar question and a two-bar answer."
+            },
+            "target-chord-tones.e4": {
+                "name": "Loop: phrase and rest",
+                "desc": "Extra practice. Am–C–Em–D: play a bar and rest a bar, or a two-bar question and a two-bar answer; end each phrase on a chord tone."
             }
         },
         "practiceLink": {
@@ -2432,7 +2467,14 @@
             "hmA": "A harmonic minor",
             "hmE7": "E7 — aim for G#",
             "hmLocrian": "B Locrian #6 (from A harmonic minor)",
-            "hmPhrygianDom": "E Phrygian dominant (from A harmonic minor)"
+            "hmPhrygianDom": "E Phrygian dominant (from A harmonic minor)",
+            "mixolydianF": "F is the bVII chord — stay in G mixolydian",
+            "barPlay": "Play",
+            "barRest": "Rest — listen",
+            "barQuestion1": "Question, bar 1 of 2",
+            "barQuestion2": "Question, bar 2 of 2",
+            "barAnswer1": "Answer, bar 1 of 2",
+            "barAnswer2": "Answer, bar 2 of 2"
         },
         "stage": {
             "podstawy": "Foundations (1–6)",

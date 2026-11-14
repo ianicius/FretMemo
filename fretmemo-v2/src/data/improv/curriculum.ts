@@ -100,6 +100,8 @@ export interface BackingLoopVariant {
     progression: Array<string | ProgressionEntry>;
     goalKey: string;
     targets?: ChordMicTargets[];
+    /** Key of the variant for the transposition selector (B2); see `BackingLoopParams.key`. */
+    key?: string;
 }
 
 export interface BackingLoopParams {
@@ -115,6 +117,13 @@ export interface BackingLoopParams {
     variants?: BackingLoopVariant[];
     /** Optional mic-verification targets (plan phase 4). */
     targets?: ChordMicTargets[];
+    /**
+     * Key the loop is written in ("C", "Am") — the origin of the transposition
+     * selector (plan B2). Omitted = root of the first chord (+ "m" for a minor chord).
+     */
+    key?: string;
+    /** Extra practice that never gates module completion (plan rule 3; B4 variants). */
+    nonGating?: boolean;
 }
 
 /** Theory tool embedded in the module's theory card (plan phase 2). */
@@ -238,6 +247,36 @@ function loopExercise(
     };
 }
 
+/** Per-bar hints of the phrasing variants (plan B4), one bar per chord. */
+const PLAY_REST_HINTS = ["improv.hints.barPlay", "improv.hints.barRest", "improv.hints.barPlay", "improv.hints.barRest"];
+const CALL_RESPONSE_HINTS = ["improv.hints.barQuestion1", "improv.hints.barQuestion2", "improv.hints.barAnswer1", "improv.hints.barAnswer2"];
+
+/**
+ * Phrasing loop (plan B4): the same four bars as "play a bar / rest a bar"
+ * and as a 2+2-bar question–answer, cued by per-chord hints. Non-gating
+ * extra practice (plan rule 3) so the modules do not get harder to pass.
+ */
+function phraseLoop(chords: [string, string, string, string]): BackingLoopParams {
+    const withHints = (hints: string[]): ProgressionEntry[] =>
+        chords.map((chord, index) => ({ chord, hintKey: hints[index] }));
+    return {
+        progression: withHints(PLAY_REST_HINTS),
+        goalKey: "improv.goals.playRest",
+        beatsPerChord: 4,
+        defaultBpm: 80,
+        minBpm: 50,
+        maxBpm: 160,
+        requiredPasses: 2,
+        nonGating: true,
+        variants: [
+            { id: "play-rest", labelKey: "improv.goals.playRestLabel",
+              progression: withHints(PLAY_REST_HINTS), goalKey: "improv.goals.playRest" },
+            { id: "call-response", labelKey: "improv.goals.callResponseLabel",
+              progression: withHints(CALL_RESPONSE_HINTS), goalKey: "improv.goals.callResponse" },
+        ],
+    };
+}
+
 /** "Giant Steps" changes, 16 bars of 4/4 (two beats for split bars). */
 const GIANT_STEPS_FORM: ProgressionEntry[] = (
     [
@@ -331,6 +370,7 @@ export const CURRICULUM: ImprovModule[] = [
                 maxBpm: 160,
                 requiredPasses: 2,
             }),
+            loopExercise("pentatonic-scale", "e6", phraseLoop(["Am7", "Am7", "Dm7", "Em7"])),
         ],
     },
     {
@@ -439,7 +479,7 @@ export const CURRICULUM: ImprovModule[] = [
                       progression: [{ chord: "Fmaj7", hintKey: "improv.hints.lydianF" }, "G6"],
                       goalKey: "improv.goals.modeCharacteristic" },
                     { id: "mixolydian", labelKey: "improv.goals.modeMixolydian",
-                      progression: [{ chord: "G7", hintKey: "improv.hints.mixolydianG" }, "Cmaj7"],
+                      progression: [{ chord: "G7", hintKey: "improv.hints.mixolydianG" }, { chord: "F", hintKey: "improv.hints.mixolydianF" }],
                       goalKey: "improv.goals.modeCharacteristic" },
                 ],
             }),
@@ -469,6 +509,7 @@ export const CURRICULUM: ImprovModule[] = [
                     { chord: "Cmaj7", hintKey: "improv.hints.csIonian" },
                 ],
                 goalKey: "improv.goals.chordScaleCharacteristic",
+                key: "C",
                 beatsPerChord: 4,
                 defaultBpm: 80,
                 minBpm: 50,
@@ -520,9 +561,30 @@ export const CURRICULUM: ImprovModule[] = [
                 70,
                 1,
             ),
+            // Plan A5: the ii–V–I loop below needs the maj7 arpeggio; m7b5 is the
+            // vii chord of C (and the ii of the minor ii–V).
+            drillExercise(
+                "arpeggios",
+                "e4",
+                [{ shapeId: "maj7-arp", defaultKey: "C" }],
+                -1,
+                3,
+                70,
+                1,
+            ),
+            drillExercise(
+                "arpeggios",
+                "e5",
+                [{ shapeId: "m7b5-arp", defaultKey: "B" }],
+                0,
+                4,
+                70,
+                1,
+            ),
             loopExercise("arpeggios", "e3", {
                 progression: ["Dm7", "G7", "Cmaj7"],
                 goalKey: "improv.goals.arpeggiosOnly",
+                key: "C",
                 beatsPerChord: 4,
                 defaultBpm: 80,
                 minBpm: 50,
@@ -602,6 +664,7 @@ export const CURRICULUM: ImprovModule[] = [
                     { chord: "E7", pitchClasses: ["E", "G#", "B", "D"] },
                 ],
             }),
+            loopExercise("target-chord-tones", "e4", phraseLoop(["Am", "C", "Em", "D"])),
         ],
     },
     {
@@ -630,6 +693,7 @@ export const CURRICULUM: ImprovModule[] = [
             loopExercise("voice-leading", "e3", {
                 progression: ["Dm7", "G7", "Cmaj7"],
                 goalKey: "improv.goals.voiceLeadingThirdsSevenths",
+                key: "C",
                 beatsPerChord: 4,
                 defaultBpm: 80,
                 minBpm: 50,
@@ -696,6 +760,7 @@ export const CURRICULUM: ImprovModule[] = [
             loopExercise("tritone-subs", "e2", {
                 progression: ["Dm7", "G7", "Cmaj7"],
                 goalKey: "improv.goals.tritoneNormal",
+                key: "C",
                 beatsPerChord: 4,
                 defaultBpm: 90,
                 minBpm: 50,
@@ -719,6 +784,7 @@ export const CURRICULUM: ImprovModule[] = [
                         labelKey: "improv.goals.variantVideo",
                         progression: ["Bm7", "Bb7", "Am7", "Ab7", "Gmaj7"],
                         goalKey: "improv.goals.tritoneVideo",
+                        key: "G",
                     },
                 ],
             }),
@@ -773,6 +839,7 @@ export const CURRICULUM: ImprovModule[] = [
             loopExercise("borrowed-chords", "e2", {
                 progression: ["Cmaj7", "Fm7", "Bb7", "Cmaj7"],
                 goalKey: "improv.goals.borrowedBackdoor",
+                key: "C",
                 beatsPerChord: 4,
                 defaultBpm: 90,
                 minBpm: 50,
@@ -844,6 +911,7 @@ export const CURRICULUM: ImprovModule[] = [
                     { chord: "Cm(maj7)", hintKey: "improv.hints.mmC" },
                 ],
                 goalKey: "improv.goals.melodicMinorHints",
+                key: "Cm",
                 beatsPerChord: 4,
                 defaultBpm: 80,
                 minBpm: 50,
@@ -859,7 +927,7 @@ export const CURRICULUM: ImprovModule[] = [
                       goalKey: "improv.goals.melodicMinorHints" },
                     { id: "d7-11-vamp", labelKey: "improv.goals.mmD711",
                       progression: [{ chord: "D7#11", hintKey: "improv.hints.mmDLydDom" }],
-                      goalKey: "improv.goals.melodicMinorHints" },
+                      goalKey: "improv.goals.melodicMinorHints", key: "D" },
                 ],
             }),
         ],
@@ -922,6 +990,7 @@ export const CURRICULUM: ImprovModule[] = [
                     { chord: "Am", hintKey: "improv.hints.hmA" },
                 ],
                 goalKey: "improv.goals.harmonicMinorPhrygian",
+                key: "Am",
                 beatsPerChord: 4,
                 defaultBpm: 80,
                 minBpm: 50,
@@ -1013,6 +1082,12 @@ export function loopRunKey(exerciseId: string, variantId?: string): string {
 /** Progress shape shared by the store and the pass predicates. */
 export interface ImprovProgressShape {
     exerciseRuns: Record<string, number>;
+    /**
+     * Plan A2: the subset of loop passes (same run keys as `exerciseRuns`)
+     * that the microphone verified. Self-marked passes count only in
+     * `exerciseRuns`. Missing in state persisted before A2 (= none verified).
+     */
+    verifiedRuns?: Record<string, number>;
 }
 
 /** True when the exercise's own pass threshold is met, given module progress. */
@@ -1049,16 +1124,31 @@ export function isExercisePassed(
     }
 }
 
+/**
+ * Plan A2: true when the exercise's threshold is met by mic-verified passes
+ * alone. A passed loop for which this is false was (at least partly) passed
+ * with the self-mark button and shows the "unverified" badge.
+ */
+export function isExerciseVerified(
+    exercise: ImprovExercise,
+    progress: ImprovProgressShape | undefined,
+): boolean {
+    return isExercisePassed(exercise, { exerciseRuns: progress?.verifiedRuns ?? {} });
+}
+
+/** True for extra exercises that never gate module completion. */
+export function isNonGating(exercise: ImprovExercise): boolean {
+    return Boolean((exercise.params as { nonGating?: boolean }).nonGating);
+}
+
 /** A module is completed when every one of its exercises is passed. */
 export function isModuleComplete(
     module: ImprovModule,
     progress: ImprovProgressShape | undefined,
 ): boolean {
-    // Non-gating exercises (plan phase 5 fix: playNotes practice-links) are
-    // extra practice — they never block module completion.
-    return module.exercises.every((exercise) =>
-        (exercise.engine === "practice-link" && (exercise.params as PracticeLinkParams).nonGating)
-        || isExercisePassed(exercise, progress));
+    // Non-gating exercises (plan phase 5 fix: playNotes practice-links; B4
+    // phrasing loops) are extra practice — they never block module completion.
+    return module.exercises.every((exercise) => isNonGating(exercise) || isExercisePassed(exercise, progress));
 }
 
 /**

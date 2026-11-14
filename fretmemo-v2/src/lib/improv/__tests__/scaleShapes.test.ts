@@ -6,6 +6,7 @@ import {
     getScaleShapePositions,
     getShapePitchClasses,
     getShapePositions,
+    isStandardTuning,
     shapeSemitones,
 } from "../scaleShapes";
 
@@ -134,5 +135,29 @@ describe("scaleShapes — registry", () => {
         for (const required of ["min-pent", "maj-pent", "major", "melodic-minor", "harmonic-minor", "m7-arp", "dom7-arp", "maj7-arp", "m7b5-arp"]) {
             expect(required in SCALE_SHAPES).toBe(true);
         }
+    });
+});
+
+describe("scaleShapes — settings tuning (plan A3)", () => {
+    const DROP_D = ["E", "B", "G", "D", "A", "D"] as const;
+
+    it("drop-D positions contain only scale notes for that tuning", () => {
+        const positions = getShapePositions("min-pent", "A", { tuning: [...DROP_D], fretFrom: 5, fretTo: 8 });
+        const scale = new Set(["A", "C", "D", "E", "G"]);
+        for (const position of positions) {
+            const sounding = getNoteAt(DROP_D[position.stringIndex] as never, position.fret);
+            expect(position.note).toBe(sounding);
+            expect(scale.has(sounding), `${position.stringIndex}/${position.fret} ${sounding}`).toBe(true);
+        }
+        // The low string really is D: fret 5 = G (in the scale) and fret 7 = A (root), not B.
+        expect(positions.some((p) => p.stringIndex === 5 && p.fret === 7 && p.isRoot)).toBe(true);
+        expect(positions.some((p) => p.stringIndex === 5 && p.fret === 5)).toBe(true);
+    });
+
+    it("isStandardTuning flags non-standard six-string tunings only", () => {
+        expect(isStandardTuning([...STANDARD_TUNING])).toBe(true);
+        expect(isStandardTuning(["E", "B", "G", "D", "A", "E", "B"])).toBe(true);
+        expect(isStandardTuning([...DROP_D])).toBe(false);
+        expect(isStandardTuning(["G", "D", "A", "E"])).toBe(false);
     });
 });

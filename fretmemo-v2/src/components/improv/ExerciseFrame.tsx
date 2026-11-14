@@ -14,7 +14,7 @@ import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, MicOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ENGINE_LABEL_KEYS } from "@/lib/improv/display";
 import type { ImprovEngineType } from "@/data/improv/curriculum";
@@ -31,10 +31,12 @@ interface ExerciseFrameProps {
     description: string;
     thresholdLabel: string;
     passed: boolean;
+    /** Plan A2: passed, but not by mic-verified loops alone (self-marked). */
+    unverified?: boolean;
     children: ReactNode;
 }
 
-export function ExerciseFrame({ engine, name, description, thresholdLabel, passed, children }: ExerciseFrameProps) {
+export function ExerciseFrame({ engine, name, description, thresholdLabel, passed, unverified = false, children }: ExerciseFrameProps) {
     const { t } = useTranslation();
     const addBonusXP = useProgressStore((state) => state.addBonusXP);
     const { toast, showToast, hideToast } = useXPToast();
@@ -72,6 +74,16 @@ export function ExerciseFrame({ engine, name, description, thresholdLabel, passe
                         <Badge className="border-transparent bg-emerald-500 text-emerald-50">
                             <CheckCircle2 className="mr-1 h-3 w-3" />
                             {t("improv.status.passed")}
+                        </Badge>
+                    )}
+                    {passed && unverified && (
+                        <Badge
+                            variant="outline"
+                            className="border-amber-500/60 bg-amber-500/10 text-amber-700 dark:text-amber-300"
+                            title={t("improv.status.unverifiedHint")}
+                        >
+                            <MicOff className="mr-1 h-3 w-3" aria-hidden="true" />
+                            {t("improv.status.unverified")}
                         </Badge>
                     )}
                 </div>

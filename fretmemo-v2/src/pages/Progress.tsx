@@ -55,8 +55,6 @@ export default function ProgressPage() {
     // Plan phase 6: improv progress card (completed modules).
     const completedImprovModules = CURRICULUM.filter((module) =>
         isModuleComplete(module, improvModuleState[module.id]));
-    const improvTotalXP = 0;
-    void improvTotalXP;
     const [searchParams, setSearchParams] = useSearchParams();
     const [isResetHeatMapConfirmOpen, setIsResetHeatMapConfirmOpen] = useState(false);
 

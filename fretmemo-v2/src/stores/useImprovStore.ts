@@ -11,6 +11,10 @@
  *   correct >= requiredCorrect); the exercise passes after 2 passed attempts
  *   (QUIZ_PASSED_ATTEMPTS) — one lucky run must not lock it in;
  * - drills: completed up+down runs; - backing loops: successful loops.
+ *
+ * Plan A2: loop passes also go to `verifiedRuns` (same run key) when the
+ * microphone verified them; `exerciseRuns` keeps counting every pass, so the
+ * completion rules are unchanged and the UI can flag unverified passes.
  */
 
 import { create } from "zustand";
@@ -27,6 +31,8 @@ import {
 export interface ImprovModuleProgress {
     /** Per-exercise counters (see the engine semantics in the header). */
     exerciseRuns: Record<string, number>;
+    /** Mic-verified loop passes per run key (plan A2); absent = none. */
+    verifiedRuns?: Record<string, number>;
     completed: boolean;
 }
 
@@ -40,8 +46,9 @@ export interface ImprovStoreState {
     reviewSRS: Record<string, SpacedRepetitionEntry>;
     recordQuizResult: (moduleId: string, exerciseId: string, correct: number) => void;
     recordDrillRun: (moduleId: string, exerciseId: string) => void;
-    /** `variantId` counts the pass for that variant (every variant must pass). */
-    recordLoopPass: (moduleId: string, exerciseId: string, variantId?: string) => void;
+    /** `variantId` counts the pass for that variant (every variant must pass);
+     * `verified` = the microphone confirmed the loop (plan A2). */
+    recordLoopPass: (moduleId: string, exerciseId: string, variantId?: string, verified?: boolean) => void;
     /** practice-link: pass criteria live in useProgressStore; the component
      * calls this once they are all met (plan phase 2). */
     recordPracticePass: (moduleId: string, exerciseId: string) => void;
@@ -57,7 +64,7 @@ export interface ImprovStoreState {
 const STORAGE_KEY = "fretmemo-improv-v1";
 
 export function emptyProgress(): ImprovModuleProgress {
-    return { exerciseRuns: {}, completed: false };
+    return { exerciseRuns: {}, verifiedRuns: {}, completed: false };
 }
 
 function createInitialModuleState(): Record<string, ImprovModuleProgress> {
@@ -109,7 +116,8 @@ function migrateLegacyModuleState(
                 }
             }
         }
-        migrated[moduleId] = { exerciseRuns, completed: Boolean(legacy.completed) };
+        // Pre-A2 state has no verifiedRuns: earlier passes count as unverified.
+        migrated[moduleId] = { exerciseRuns, verifiedRuns: { ...(legacy.verifiedRuns ?? {}) }, completed: Boolean(legacy.completed) };
     }
     return migrated;
 }
@@ -149,16 +157,22 @@ export const useImprovStore = create<ImprovStoreState>()(
                     })),
                 }));
             },
-            recordLoopPass: (moduleId, exerciseId, variantId) => {
+            recordLoopPass: (moduleId, exerciseId, variantId, verified = false) => {
                 const runKey = loopRunKey(exerciseId, variantId);
                 set((state) => ({
-                    moduleState: updateModule(state.moduleState, moduleId, (progress) => ({
-                        ...progress,
-                        exerciseRuns: {
-                            ...progress.exerciseRuns,
-                            [runKey]: (progress.exerciseRuns[runKey] ?? 0) + 1,
-                        },
-                    })),
+                    moduleState: updateModule(state.moduleState, moduleId, (progress) => {
+                        const verifiedRuns = progress.verifiedRuns ?? {};
+                        return {
+                            ...progress,
+                            exerciseRuns: {
+                                ...progress.exerciseRuns,
+                                [runKey]: (progress.exerciseRuns[runKey] ?? 0) + 1,
+                            },
+                            verifiedRuns: verified
+                                ? { ...verifiedRuns, [runKey]: (verifiedRuns[runKey] ?? 0) + 1 }
+                                : verifiedRuns,
+                        };
+                    }),
                 }));
             },
             recordPracticePass: (moduleId, exerciseId) => {

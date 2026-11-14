@@ -19,12 +19,14 @@ import { ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Fretboard } from "@/components/fretboard/Fretboard";
-import { STANDARD_TUNING, getNoteAt } from "@/lib/constants";
+import { getNoteAt } from "@/lib/constants";
+import { normalizeTuning } from "@/lib/tuning";
 import type { NoteStatus } from "@/types/fretboard";
 import { trackEvent } from "@/lib/analytics";
 import { isExercisePassed, practiceLinkPositions, type ImprovExercise, type PracticeLinkParams } from "@/data/improv/curriculum";
 import { selectModuleProgress, useImprovStore } from "@/stores/useImprovStore";
 import { useProgressStore } from "@/stores/useProgressStore";
+import { useSettingsStore } from "@/stores/useSettingsStore";
 import { ExerciseFrame, ScoreStrip } from "./ExerciseFrame";
 
 interface PracticeLinkExerciseProps {
@@ -40,6 +42,10 @@ export function PracticeLinkExercise({ moduleId, exercise }: PracticeLinkExercis
     const progress = useImprovStore((state) => selectModuleProgress(state, moduleId));
     const passed = isExercisePassed(exercise, progress);
     const positionStats = useProgressStore((state) => state.positionStats);
+    // Plan A3: follow the user's instrument settings (as ScaleExplorer does).
+    const leftHanded = useSettingsStore((state) => state.full.instrument.leftHanded);
+    const quickTuning = useSettingsStore((state) => state.quick.tuning);
+    const tuning = useMemo(() => normalizeTuning(quickTuning), [quickTuning]);
 
     // Open strings (fret 0) are excluded: practice sessions never ask them
     // and knowing the open string is implied by the string's name (user
@@ -68,13 +74,13 @@ export function PracticeLinkExercise({ moduleId, exercise }: PracticeLinkExercis
             position: {
                 stringIndex: position.stringIndex,
                 fret: position.fret,
-                note: getNoteAt(STANDARD_TUNING[position.stringIndex] ?? "C", position.fret),
+                note: getNoteAt(tuning[position.stringIndex] ?? "C", position.fret),
             },
             status: isPositionQualified(position.stringIndex, position.fret) ? "correct" : "active",
             emphasis: "normal" as const,
         }));
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [positionStats, positions, params.minAccuracy, params.minAnswers]);
+    }, [positionStats, positions, params.minAccuracy, params.minAnswers, tuning]);
 
     const openPractice = () => {
         trackEvent("improv_practice_link_opened", { module_id: moduleId, exercise_id: exercise.id, mode: params.mode });
@@ -113,7 +119,14 @@ export function PracticeLinkExercise({ moduleId, exercise }: PracticeLinkExercis
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
                 <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${coverage}%` }} />
             </div>
-            <Fretboard frets={12} activeNotes={activeNotes} fitContainer className="rounded-lg border border-border bg-card/60" />
+            <Fretboard
+                frets={12}
+                activeNotes={activeNotes}
+                tuning={tuning}
+                leftHanded={leftHanded}
+                fitContainer
+                className="rounded-lg border border-border bg-card/60"
+            />
             <p className="text-xs text-muted-foreground">{t("improv.practiceLink.hint")}</p>
             <Button type="button" size="sm" onClick={openPractice}>
                 <ExternalLink className="mr-2 h-4 w-4" />

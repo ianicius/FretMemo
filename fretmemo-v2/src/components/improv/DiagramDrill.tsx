@@ -15,14 +15,16 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Fretboard } from "@/components/fretboard/Fretboard";
-import { STANDARD_TUNING, getNoteAt } from "@/lib/constants";
+import { getNoteAt } from "@/lib/constants";
+import { normalizeTuning } from "@/lib/tuning";
 import type { NoteStatus } from "@/types/fretboard";
-import { SCALE_SHAPES, getShapePositions, tonicAnchorFret } from "@/lib/improv/scaleShapes";
+import { SCALE_SHAPES, getShapePositions, isStandardTuning, tonicAnchorFret } from "@/lib/improv/scaleShapes";
 import { tonicMidi } from "@/lib/improv/chords";
 import { MetronomeClicker } from "@/lib/improv/click";
 import { playTone } from "@/lib/audio";
 import { isExercisePassed, type DiagramDrillParams, type ImprovExercise } from "@/data/improv/curriculum";
 import { selectModuleProgress, useImprovStore } from "@/stores/useImprovStore";
+import { useSettingsStore } from "@/stores/useSettingsStore";
 import { ExerciseFrame } from "./ExerciseFrame";
 import { localizeToken } from "@/lib/improv/display";
 
@@ -38,6 +40,10 @@ export function DiagramDrill({ moduleId, exercise }: DiagramDrillProps) {
     const progress = useImprovStore((state) => selectModuleProgress(state, moduleId));
     const runs = progress.exerciseRuns[exercise.id] ?? 0;
     const passed = isExercisePassed(exercise, progress);
+    // Plan A3: follow the user's instrument settings (as ScaleExplorer does).
+    const leftHanded = useSettingsStore((state) => state.full.instrument.leftHanded);
+    const quickTuning = useSettingsStore((state) => state.quick.tuning);
+    const tuning = useMemo(() => normalizeTuning(quickTuning), [quickTuning]);
 
     const [shapeIndex, setShapeIndex] = useState(0);
     const shape = params.shapes[Math.min(shapeIndex, params.shapes.length - 1)] as NonNullable<typeof params.shapes[number]>;
@@ -61,11 +67,11 @@ export function DiagramDrill({ moduleId, exercise }: DiagramDrillProps) {
 
     const positions = useMemo(
         () => getShapePositions(shape.shapeId, key, {
-            tuning: STANDARD_TUNING,
+            tuning,
             fretFrom: windowFrom,
             fretTo: windowTo,
         }),
-        [key, windowFrom, windowTo, shape.shapeId],
+        [key, windowFrom, windowTo, shape.shapeId, tuning],
     );
 
     // Plan 1.2: a run counts only after the metronome has clicked through the
@@ -79,13 +85,13 @@ export function DiagramDrill({ moduleId, exercise }: DiagramDrillProps) {
             position: {
                 stringIndex: position.stringIndex,
                 fret: position.fret,
-                note: getNoteAt(STANDARD_TUNING[position.stringIndex] ?? "C", position.fret),
+                note: getNoteAt(tuning[position.stringIndex] ?? "C", position.fret),
             },
             status: "active" as const,
             label: degrees[position.degreeIndex] ?? undefined,
             emphasis: position.isRoot ? ("strong" as const) : ("normal" as const),
         }));
-    }, [positions, shape.shapeId]);
+    }, [positions, shape.shapeId, tuning]);
 
     const handleStart = () => {
         clickerRef.current = new MetronomeClicker(bpm, {
@@ -182,9 +188,14 @@ export function DiagramDrill({ moduleId, exercise }: DiagramDrillProps) {
             <Fretboard
                 frets={Math.max(12, windowTo + 1)}
                 activeNotes={activeNotes}
+                tuning={tuning}
+                leftHanded={leftHanded}
                 fitContainer
                 className="rounded-lg border border-border bg-card/60"
             />
+            {!isStandardTuning(tuning) && (
+                <p className="text-xs text-muted-foreground">{t("improv.drill.tuningNotice")}</p>
+            )}
 
             <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-xs text-muted-foreground">

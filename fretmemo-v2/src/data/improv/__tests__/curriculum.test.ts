@@ -8,6 +8,7 @@ import {
     getImprovExercise,
     getImprovModule,
     isExercisePassed,
+    isExerciseVerified,
     isModuleComplete,
     isModuleUnlocked,
     practiceLinkPositions,
@@ -349,6 +350,71 @@ describe("micLoopPass", () => {
         expect(entries.slice(0, 4).map((entry) => entry.chord)).toEqual(["Bmaj7", "D7", "Gmaj7", "Bb7"]);
         expect(entries.some((entry) => entry.chord === "Bm7")).toBe(false);
         expect(params.variants?.map((variant) => variant.id)).toEqual(["roots", "pattern-1235", "arps"]);
+    });
+
+    it("A2: a loop passed only with self-marked runs is passed but not verified; verified counters alone pass it", () => {
+        const exercise = getImprovExercise("target-chord-tones", "target-chord-tones.e1") as NonNullable<ReturnType<typeof getImprovExercise>>;
+        const params = exercise.params as BackingLoopParams;
+        const allVariants = (count: number) => Object.fromEntries(
+            (params.variants ?? []).map((variant) => [loopRunKey(exercise.id, variant.id), count]),
+        );
+        const selfMarked = { exerciseRuns: allVariants(params.requiredPasses), verifiedRuns: {} };
+        expect(isExercisePassed(exercise, selfMarked)).toBe(true);
+        expect(isExerciseVerified(exercise, selfMarked)).toBe(false);
+        const micVerified = { exerciseRuns: allVariants(params.requiredPasses), verifiedRuns: allVariants(params.requiredPasses) };
+        expect(isExerciseVerified(exercise, micVerified)).toBe(true);
+        // Legacy state without verifiedRuns counts as unverified.
+        expect(isExerciseVerified(exercise, { exerciseRuns: allVariants(params.requiredPasses) })).toBe(false);
+    });
+
+    it("A4: the module 7 mixolydian variant is G7–F (no C major tonic chord)", () => {
+        const exercise = getImprovExercise("modes", "modes.e3") as NonNullable<ReturnType<typeof getImprovExercise>>;
+        const variant = (exercise.params as BackingLoopParams).variants?.find((item) => item.id === "mixolydian");
+        const chords = (variant?.progression ?? []).map((entry) => (typeof entry === "string" ? entry : entry.chord));
+        expect(chords).toEqual(["G7", "F"]);
+        expect(chords.some((chord) => /^C(maj7|6|M7)?$/.test(chord))).toBe(false);
+    });
+
+    it("A5: module 11 has four arpeggio drills (m7, 7, maj7, m7b5) with full six-string windows", () => {
+        const module = getImprovModule("arpeggios") as NonNullable<ReturnType<typeof getImprovModule>>;
+        const drills = module.exercises.filter((exercise) => exercise.engine === "diagram-drill");
+        expect(drills).toHaveLength(4);
+        const shapes = drills.map((exercise) => (exercise.params as DiagramDrillParams).shapes[0]?.shapeId);
+        expect(shapes).toEqual(["m7-arp", "dom7-arp", "maj7-arp", "m7b5-arp"]);
+        for (const exercise of drills) {
+            const params = exercise.params as DiagramDrillParams;
+            const shape = params.shapes[0] as NonNullable<DiagramDrillParams["shapes"][number]>;
+            const anchor = tonicAnchorFret(shape.defaultKey);
+            const options = { fretFrom: anchor + params.offsetsFrom, fretTo: anchor + params.offsetsTo };
+            expect(coversAllDegrees(shape.shapeId, shape.defaultKey, options), exercise.id).toBe(true);
+            const strings = new Set(getShapePositions(shape.shapeId, shape.defaultKey, options).map((p) => p.stringIndex));
+            expect(strings.size, exercise.id).toBe(6);
+        }
+    });
+
+    it("B4: modules 3 and 12 have non-gating play/rest and 2+2 question–answer variants with per-bar hints", () => {
+        for (const [moduleId, exerciseId] of [["pentatonic-scale", "pentatonic-scale.e6"], ["target-chord-tones", "target-chord-tones.e4"]] as const) {
+            const exercise = getImprovExercise(moduleId, exerciseId) as NonNullable<ReturnType<typeof getImprovExercise>>;
+            expect(exercise.engine).toBe("backing-improv");
+            const params = exercise.params as BackingLoopParams;
+            expect(params.nonGating).toBe(true);
+            expect(params.variants?.map((variant) => variant.id)).toEqual(["play-rest", "call-response"]);
+            const hints = (id: string) => (params.variants?.find((variant) => variant.id === id)?.progression ?? [])
+                .map((entry) => (typeof entry === "string" ? undefined : entry.hintKey));
+            expect(hints("play-rest")).toEqual(["improv.hints.barPlay", "improv.hints.barRest", "improv.hints.barPlay", "improv.hints.barRest"]);
+            expect(hints("call-response")).toEqual([
+                "improv.hints.barQuestion1", "improv.hints.barQuestion2", "improv.hints.barAnswer1", "improv.hints.barAnswer2",
+            ]);
+            // Extra practice: the module completes without it.
+            const module = getImprovModule(moduleId) as NonNullable<ReturnType<typeof getImprovModule>>;
+            const runs: Record<string, number> = {};
+            for (const other of module.exercises) {
+                if (other.id === exerciseId) continue;
+                runs[other.id] = 99;
+                for (const variant of (other.params as BackingLoopParams).variants ?? []) runs[loopRunKey(other.id, variant.id)] = 99;
+            }
+            expect(isModuleComplete(module, { exerciseRuns: runs })).toBe(true);
+        }
     });
 
     it("noteToTab links in modules 1/5 are extra practice (same position stats as fretboardToNote)", () => {

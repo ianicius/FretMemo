@@ -3,7 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import en from "@/locales/en/translation.json";
 import pl from "@/locales/pl/translation.json";
-import { CURRICULUM, IMPROV_ORDER } from "@/data/improv/curriculum";
+import { CURRICULUM, IMPROV_ORDER, type BackingLoopParams } from "@/data/improv/curriculum";
 
 /**
  * E-IMPROV-I18N: every improv key must resolve in BOTH locales.
@@ -15,7 +15,7 @@ import { CURRICULUM, IMPROV_ORDER } from "@/data/improv/curriculum";
 
 const IMPROV_SOURCES = [
     path.resolve(process.cwd(), "src/pages/ImprovTraining.tsx"),
-    ...["TheoryCard", "ExerciseFrame", "ChoiceQuiz", "DiagramDrill", "BackingLoopExercise", "PracticeLinkExercise"]
+    ...["TheoryCard", "ExerciseFrame", "ChoiceQuiz", "DiagramDrill", "BackingLoopExercise", "PracticeLinkExercise", "LoopHitReport"]
         .map((name) => path.resolve(process.cwd(), `src/components/improv/${name}.tsx`)),
 ];
 
@@ -121,6 +121,32 @@ describe("improv i18n parity (en + pl)", () => {
                 expect(exMap[id]?.name).toBeTruthy();
                 expect(exMap[id]?.desc).toBeTruthy();
             }
+        }
+    });
+
+    it("every loop goal/label/hint key of the curriculum resolves in both locales (plan B4)", () => {
+        const keys = new Set<string>();
+        for (const module of CURRICULUM) {
+            for (const exercise of module.exercises) {
+                if (exercise.engine !== "backing-improv") continue;
+                const params = exercise.params as BackingLoopParams;
+                const progressions = [params.progression, ...(params.variants ?? []).map((variant) => variant.progression)];
+                keys.add(params.goalKey);
+                for (const variant of params.variants ?? []) {
+                    keys.add(variant.goalKey);
+                    keys.add(variant.labelKey);
+                }
+                for (const entry of progressions.flat()) {
+                    if (typeof entry !== "string" && entry.hintKey) keys.add(entry.hintKey);
+                }
+            }
+        }
+        for (const required of ["improv.hints.barPlay", "improv.hints.barRest", "improv.hints.barQuestion1", "improv.hints.barAnswer2", "improv.goals.playRestLabel", "improv.goals.callResponseLabel"]) {
+            expect(keys.has(required), required).toBe(true);
+        }
+        for (const key of keys) {
+            expect(typeof resolveKey(en, key), `missing in en: ${key}`).toBe("string");
+            expect(typeof resolveKey(pl, key), `missing in pl: ${key}`).toBe("string");
         }
     });
 

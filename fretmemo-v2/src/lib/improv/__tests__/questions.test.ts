@@ -363,3 +363,40 @@ describe("musical correctness (plan phase 0)", () => {
         }
     });
 });
+
+describe("keySig relative minor (plan A6: tonacja paralelna)", () => {
+    it("every relative-minor answer is the tonal minorRelative (VI degree) of the asked major key", () => {
+        const askedKeys = new Set<string>();
+        for (let draw = 0; draw < 40; draw += 1) {
+            const questions = generateChoiceQuiz(
+                { generatorId: "keySig", questionCount: 10, direction: "relative-minor" },
+                `relative-a6:${draw}`,
+            );
+            for (const question of questions) {
+                const key = String(question.promptValues.key);
+                askedKeys.add(key);
+                expect(question.promptKey).toBe("improv.q.keySig.relativeMinor");
+                expect(question.options[question.correctIndex]).toBe(`${Key.majorKey(key).minorRelative}m`);
+                // VI degree of the major scale, cross-checked independently of minorRelative.
+                expect(Note.chroma(question.options[question.correctIndex].replace(/m$/, "")))
+                    .toBe(Note.chroma((Key.majorKey(key).scale as string[])[5] as string));
+                expect(new Set(question.options).size).toBe(question.options.length);
+            }
+        }
+        // All 14 major keys of the signature table are asked.
+        expect(askedKeys.size).toBe(14);
+    });
+
+    it("the mixed module 2 quiz (key-signatures.e1) includes the relative-minor question", async () => {
+        const { getImprovExercise } = await import("@/data/improv/curriculum");
+        const exercise = getImprovExercise("key-signatures", "key-signatures.e1");
+        const params = exercise?.params as { generatorId: "keySig"; questionCount: number; direction?: string };
+        expect(params.direction).toBeUndefined();
+        const promptKeys = new Set<string>();
+        for (let draw = 0; draw < 30; draw += 1) {
+            for (const question of generateChoiceQuiz({ ...params }, `module2-a6:${draw}`)) promptKeys.add(question.promptKey);
+        }
+        expect(promptKeys.has("improv.q.keySig.relativeMinor")).toBe(true);
+        expect(promptKeys.has("improv.q.keySig.parallelMinor")).toBe(true);
+    });
+});

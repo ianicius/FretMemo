@@ -362,6 +362,26 @@ function generateKeySig(rng: Rng, direction: string): ChoiceQuestion {
             hintValues: { key: picked.key, list: picked.list.join(", ") || "—" },
         };
     }
+    if (direction === "relative-minor") {
+        // Tonacja paralelna (PL) = relative minor: the VI degree, same key signature.
+        const picked = rng.pick(MAJOR_KEY_SIGNATURES);
+        const relative = Key.majorKey(picked.key).minorRelative;
+        const distractors = [
+            `${picked.key}m`, // the parallel (jednoimienna) minor — the classic confusion
+            ...rng.shuffle(MAJOR_KEY_SIGNATURES.filter((item) => item.key !== picked.key))
+                .map((item) => `${Key.majorKey(item.key).minorRelative}m`),
+        ];
+        const { options, correctIndex } = chordOptions(`${relative}m`, distractors, rng);
+        return {
+            id: "keySig",
+            promptKey: "improv.q.keySig.relativeMinor",
+            promptValues: { key: picked.key },
+            options,
+            correctIndex,
+            hintKey: "improv.q.keySig.hintRelative",
+            hintValues: { key: picked.key, target: relative },
+        };
+    }
     if (direction === "count-to-key") {
         // Only keys with accidentals: "0 accidentals" would be ambiguous.
         const pool = MAJOR_KEY_SIGNATURES.filter((item) => item.count > 0);
@@ -931,7 +951,7 @@ function generateQuestion(generatorId: ChoiceGeneratorId, rng: Rng, direction: s
     const pickDirection = (): string => {
         if (resolvedDirection !== "mixed") return resolvedDirection;
         switch (generatorId) {
-            case "keySig": return rng.pick(["key-to-count", "count-to-key", "key-to-accidentals", "key-type", "key-accidentals", "parallel-minor"]);
+            case "keySig": return rng.pick(["key-to-count", "count-to-key", "key-to-accidentals", "key-type", "key-accidentals", "parallel-minor", "relative-minor"]);
             case "modes": return rng.pick(["order-to-mode", "mode-to-order", "pattern-to-mode", "characteristic-to-mode", "mode-notes", "mode-parent", "sound-to-mode"]);
             case "triadBuild": return rng.pick(["degree-to-type", "degree-to-triad", "degree-to-seventh", "degree-to-seventh"]);
             case "chordScaleMajor": return rng.pick(["chord-to-mode", "mode-to-chord", "chord-to-mode"]);

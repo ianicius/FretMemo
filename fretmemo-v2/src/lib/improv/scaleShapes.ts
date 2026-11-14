@@ -130,6 +130,16 @@ export function tonicAnchorFret(key: string): number {
 }
 
 /**
+ * True when the six guitar strings are in standard tuning (extra low strings
+ * of a 7/8-string guitar do not matter). The tonic anchor and the box
+ * offsets assume the low E string, so other tunings get a notice (plan A3).
+ */
+export function isStandardTuning(tuning: readonly string[]): boolean {
+    return tuning.length >= STANDARD_TUNING.length
+        && STANDARD_TUNING.every((note, index) => notePitchClass(tuning[index] ?? "") === notePitchClass(note));
+}
+
+/**
  * Alias kept for call-site readability: every shape renders through the
  * scale renderer (plan phase 2 — arpeggios are full-window shapes).
  */

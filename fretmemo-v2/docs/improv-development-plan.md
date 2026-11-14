@@ -30,31 +30,36 @@ Dziś moduł uczy, **jakie dźwięki** pasują do akordu. Po wdrożeniu tego pla
 | Tabulatura | `TabView` pokazuje jedną pozycję | Nie nadaje się do zagrywek; zagrywki pokazujemy na gryfie z numerami kolejności |
 | Ćwiczenia techniki | `techniqueExercises.ts` ma legato | Podciągnięć i vibrato nie ma |
 
+## Stan wdrożenia
+
+- Wydanie 1 (etap A): A2–A7 zrobione (run `improv-dev-run1`, gałąź `improv/dev-run1`). A1 otwarty — test na gitarze należy do użytkownika. Przebudowa plików wdrożeniowych z A7 nastąpi przy scalaniu gałęzi.
+- Wydanie 2 (etap B): B1–B5 zrobione w tym samym runie. Opis pól i plików: `improv-training.md`, sekcja 8.
+
 ## Etapy
 
-Rozmiar: S do 1 dnia, M 2–4 dni, L tydzień lub więcej.
+Rozmiar: S do 1 dnia, M 2–4 dni, L tydzień lub więcej. Kolumna „#” oznacza wdrożone pozycje dopiskiem „zrobione”.
 
 ### Etap A — porządki i fundament (przed wszystkim innym)
 
 | # | Co | Gdzie | Rozmiar | Odbiór |
 |---|---|---|---|---|
 | A1 | Test na gitarze: czy mikrofon nie zalicza dźwięków podkładu granego z głośnika | Pętle modułów 12, 13, 16, 22 | S | Protokół z 10 obiegów na głośniku i 10 na słuchawkach; decyzja, czy sprawdzanie wymaga słuchawek |
-| A2 | Oznaczenie zaliczeń bez mikrofonu jako niezweryfikowanych | `useImprovStore`, `ExerciseFrame` | S | Obieg oznaczony przyciskiem ma inną odznakę niż zweryfikowany |
-| A3 | Strój i tryb leworęczny z ustawień w diagramach i treningach | `DiagramDrill`, `PracticeLinkExercise`, `scaleShapes.ts` | S | Diagram w trybie leworęcznym jest lustrzany; przy innym stroju diagram pokazuje poprawne dźwięki albo komunikat, że kształty zakładają strój standardowy |
-| A4 | Wariant miksolidyjski w module 7: G7–F zamiast G7–Cmaj7 (obecny brzmi jak zwykłe C-dur) | `curriculum.ts` | S | Test: progresja wariantu nie zawiera akordu toniki durowej |
-| A5 | Diagramy arpeggiów maj7 i m7b5 (kształty istnieją, nie są użyte), bo pętla ii–V–I ich wymaga | `curriculum.ts`, moduł 11 | S | Moduł 11 ma cztery diagramy |
-| A6 | Tonacja paralelna w quizie modułu 2 (a-moll dla C-dur); dziś jest tylko jednoimienna | `questions.ts` | S | Test z biblioteką `tonal`: dla każdej tonacji durowej odpowiedź to jej VI stopień |
-| A7 | Usunięcie martwego kodu (`improvTotalXP` w `Progress.tsx`), commit zmian, przebudowa plików wdrożeniowych | — | S | Czysty `git status` po buildzie |
+| A2 zrobione | Oznaczenie zaliczeń bez mikrofonu jako niezweryfikowanych | `useImprovStore`, `ExerciseFrame` | S | Obieg oznaczony przyciskiem ma inną odznakę niż zweryfikowany |
+| A3 zrobione | Strój i tryb leworęczny z ustawień w diagramach i treningach | `DiagramDrill`, `PracticeLinkExercise`, `scaleShapes.ts` | S | Diagram w trybie leworęcznym jest lustrzany; przy innym stroju diagram pokazuje poprawne dźwięki albo komunikat, że kształty zakładają strój standardowy |
+| A4 zrobione | Wariant miksolidyjski w module 7: G7–F zamiast G7–Cmaj7 (obecny brzmi jak zwykłe C-dur) | `curriculum.ts` | S | Test: progresja wariantu nie zawiera akordu toniki durowej |
+| A5 zrobione | Diagramy arpeggiów maj7 i m7b5 (kształty istnieją, nie są użyte), bo pętla ii–V–I ich wymaga | `curriculum.ts`, moduł 11 | S | Moduł 11 ma cztery diagramy |
+| A6 zrobione | Tonacja paralelna w quizie modułu 2 (a-moll dla C-dur); dziś jest tylko jednoimienna | `questions.ts` | S | Test z biblioteką `tonal`: dla każdej tonacji durowej odpowiedź to jej VI stopień |
+| A7 zrobione | Usunięcie martwego kodu (`improvTotalXP` w `Progress.tsx`), commit zmian, przebudowa plików wdrożeniowych | — | S | Czysty `git status` po buildzie |
 
 ### Etap B — lepsze pętle (małe zmiany, które poprawiają każde ćwiczenie)
 
 | # | Co | Po co | Gdzie | Rozmiar | Odbiór |
 |---|---|---|---|---|---|
-| B1 | Gryf pod prompterem: dźwięki aktualnego akordu, pryma wyróżniona, przełącza się z akordem, da się wyłączyć | Uczeń widzi cel, zanim zacznie go słyszeć | `BackingLoopExercise`, `getChordPitchClasses` | S | Po zmianie akordu gryf pokazuje nowe dźwięki w tym samym momencie co prompter |
-| B2 | Przełącznik tonacji w pętlach: transpozycja akordów, celów mikrofonu i podpowiedzi | ii–V–I trzeba umieć w dwunastu tonacjach | `BackingLoopExercise`, `curriculum.ts`; transpozycja przez `tonal` | M | Test: transpozycja o n półtonów zachowuje interwały między akordami i między akordem a jego celem |
-| B3 | Wynik po obiegu: które akordy trafione, które nie | Samo „3 z 4" nie mówi, co poprawić | `BackingLoopExercise` | S | Lista akordów z oznaczeniem trafienia po każdym obiegu |
-| B4 | Podpowiedź „graj" / „pauza" przy akordzie | Nauka zostawiania przestrzeni i frazy pytanie–odpowiedź | `ProgressionEntry.hintKey` (już jest), nowe warianty w modułach 3 i 12 | S | Dwa nowe warianty: „takt gry, takt pauzy" i „pytanie 2 takty, odpowiedź 2 takty" |
-| B5 | Stopniowe przyspieszanie tempa co kilka obiegów | Standardowa metoda dochodzenia do tempa | `BackingLoopScheduler.setBpm` (już jest) | S | Opcja „+5 BPM co 2 udane obiegi" |
+| B1 zrobione | Gryf pod prompterem: dźwięki aktualnego akordu, pryma wyróżniona, przełącza się z akordem, da się wyłączyć | Uczeń widzi cel, zanim zacznie go słyszeć | `BackingLoopExercise`, `getChordPitchClasses` | S | Po zmianie akordu gryf pokazuje nowe dźwięki w tym samym momencie co prompter |
+| B2 zrobione | Przełącznik tonacji w pętlach: transpozycja akordów, celów mikrofonu i podpowiedzi | ii–V–I trzeba umieć w dwunastu tonacjach | `BackingLoopExercise`, `curriculum.ts`; transpozycja przez `tonal` | M | Test: transpozycja o n półtonów zachowuje interwały między akordami i między akordem a jego celem |
+| B3 zrobione | Wynik po obiegu: które akordy trafione, które nie | Samo „3 z 4" nie mówi, co poprawić | `BackingLoopExercise` | S | Lista akordów z oznaczeniem trafienia po każdym obiegu |
+| B4 zrobione | Podpowiedź „graj" / „pauza" przy akordzie | Nauka zostawiania przestrzeni i frazy pytanie–odpowiedź | `ProgressionEntry.hintKey` (już jest), nowe warianty w modułach 3 i 12 | S | Dwa nowe warianty: „takt gry, takt pauzy" i „pytanie 2 takty, odpowiedź 2 takty" |
+| B5 zrobione | Stopniowe przyspieszanie tempa co kilka obiegów | Standardowa metoda dochodzenia do tempa | `BackingLoopScheduler.setBpm` (już jest) | S | Opcja „+5 BPM co 2 udane obiegi" |
 
 ### Etap C — układ gryfu: prostokąt i stos, tryby z pentatoniki
 
