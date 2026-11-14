@@ -21,8 +21,8 @@ import { getSoundEngineContext } from "@/audio/engine";
 import { playChord, playTone } from "@/lib/audio";
 import { getChordMidis, tonicMidi } from "@/lib/improv/chords";
 import { BackingLoopScheduler, type BackingLoopEntry } from "@/lib/improv/backingLoop";
-import { micLoopPass, type BackingLoopParams, type ImprovExercise, type ProgressionEntry } from "@/data/improv/curriculum";
-import { useImprovStore } from "@/stores/useImprovStore";
+import { isExercisePassed, loopRunKey, micLoopPass, type BackingLoopParams, type ImprovExercise, type ProgressionEntry } from "@/data/improv/curriculum";
+import { selectModuleProgress, useImprovStore } from "@/stores/useImprovStore";
 import { useRhythmDojoStore } from "@/stores/useRhythmDojoStore";
 import { usePitchDetector } from "@/services/pitch";
 import { Note } from "tonal";
@@ -59,14 +59,17 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
     const { t } = useTranslation();
     const params = exercise.params as BackingLoopParams;
     const recordLoopPass = useImprovStore((state) => state.recordLoopPass);
-    const passes = useImprovStore((state) => state.moduleState[moduleId]?.exerciseRuns[exercise.id] ?? 0);
-    const passed = passes >= params.requiredPasses;
+    const progress = useImprovStore((state) => selectModuleProgress(state, moduleId));
+    const passed = isExercisePassed(exercise, progress);
 
     const [variantId, setVariantId] = useState<string>(params.variants?.[0]?.id ?? "");
     const variant = useMemo(
         () => params.variants?.find((item) => item.id === variantId) ?? null,
         [params.variants, variantId],
     );
+    // Passes are counted per variant; the exercise needs every variant.
+    const runKey = loopRunKey(exercise.id, variant?.id);
+    const passes = progress.exerciseRuns[runKey] ?? 0;
     const rawProgression = variant?.progression ?? params.progression;
     const goalKey = variant?.goalKey ?? params.goalKey;
     const targets = variant?.targets ?? params.targets;
@@ -93,6 +96,12 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
     const detector = usePitchDetector(micOn);
     const inputLatencyMs = useRhythmDojoStore((state) => state.inputLatencyMs);
     const [chordHit, setChordHit] = useState(false);
+    // Scheduler callbacks are created at start: refs let mic/bass toggles
+    // take effect mid-loop instead of after a restart.
+    const micOnRef = useRef(micOn);
+    const bassOnRef = useRef(bassOn);
+    useEffect(() => { micOnRef.current = micOn; }, [micOn]);
+    useEffect(() => { bassOnRef.current = bassOn; }, [bassOn]);
     const [loopHits, setLoopHits] = useState(0);
     const hitsRef = useRef(0);
     const hitThisChordRef = useRef(false);
@@ -142,7 +151,7 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
                             strumDelaySec: CHORD_TONE_STAGGER_SEC,
                         });
                         // Plan phase 6: optional bass root on the chord start.
-                        if (bassOn) void playTone(tonicMidi(info.chord, 36), 1.6);
+                        if (bassOnRef.current) void playTone(tonicMidi(info.chord, 36), 1.6);
                     } catch {
                         // Audio unavailable — the visual prompter still runs.
                     }
@@ -159,7 +168,7 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
                         timersRef.current.push(evalTimer);
                     }
                     // Plan phase 6: bass root on the back half of the chord.
-                    if (bassOn && info.beatInChord === 2) {
+                    if (bassOnRef.current && info.beatInChord === 2) {
                         try {
                             void playTone(tonicMidi(info.chord, 36), 1.2);
                         } catch {
@@ -173,8 +182,8 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
                 const timer = window.setTimeout(() => {
                     setLoopsCompleted((previous) => previous + 1);
                     // Mic-verified pass: ≥3/4 chord changes hit (plan phase 4).
-                    if (micOn && targets && micLoopPass(hitsRef.current, entries.length)) {
-                        recordLoopPass(moduleId, exercise.id);
+                    if (micOnRef.current && targets && micLoopPass(hitsRef.current, entries.length)) {
+                        recordLoopPass(moduleId, exercise.id, variant?.id);
                         setMarkedLoop((previous) => previous + 1);
                     }
                     hitsRef.current = 0;
@@ -213,7 +222,7 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
     /** Mic hit check at the end of the first beat: the detected pitch class
      * must belong to the current chord's target set (plan phase 4). */
     const evaluateMicHit = (chordIndex: number) => {
-        if (!micOn || !targets || hitThisChordRef.current) return;
+        if (!micOnRef.current || !targets || hitThisChordRef.current) return;
         const currentChord = entries[chordIndex]?.chord;
         const targetsForChord = targets.find((entry) => entry.chord === currentChord);
         const detected = detectedNoteRef.current;
@@ -230,7 +239,7 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
     const handleMarkPass = () => {
         if (loopsCompleted <= markedLoop) return;
         setMarkedLoop(loopsCompleted);
-        recordLoopPass(moduleId, exercise.id);
+        recordLoopPass(moduleId, exercise.id, variant?.id);
     };
 
     const currentChord = progression[currentChordIndex] ?? progression[0] ?? "";
@@ -263,6 +272,7 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
                             <option key={item.id} value={item.id}>{t(item.labelKey)}</option>
                         ))}
                     </Select>
+                    <p className="text-xs text-muted-foreground">{t("improv.loop.allVariants")}</p>
                 </div>
             )}
 

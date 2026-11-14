@@ -17,7 +17,7 @@ import {
     type DiagramDrillParams,
 } from "../curriculum";
 import { coversAllDegrees, getShapePositions, shapeSemitones, tonicAnchorFret } from "@/lib/improv/scaleShapes";
-import { micLoopPass } from "../curriculum";
+import { loopRunKey, micLoopPass } from "../curriculum";
 import { tritoneSub } from "@/lib/improv/questions";
 import { Note } from "tonal";
 
@@ -185,9 +185,21 @@ describe("improv curriculum", () => {
         expect(isExercisePassed(e1, partial)).toBe(false);
         expect(isModuleComplete(loopModule, partial)).toBe(false);
 
+        // e1 has four ladder levels: each variant needs its own passes.
+        const variants = (e1.params as BackingLoopParams).variants ?? [];
+        expect(variants.map((variant) => variant.id)).toEqual(["root", "third", "fifth", "seventh"]);
+        const onlyRoots = {
+            exerciseRuns: {
+                [loopRunKey(e1.id, "root")]: requiredPasses,
+                "target-chord-tones.e2": requiredPasses,
+                "target-chord-tones.e3": requiredPasses,
+            } as Record<string, number>,
+            completed: false,
+        };
+        expect(isExercisePassed(e1, onlyRoots)).toBe(false);
         const full = {
             exerciseRuns: {
-                "target-chord-tones.e1": requiredPasses,
+                ...Object.fromEntries(variants.map((variant) => [loopRunKey(e1.id, variant.id), requiredPasses])),
                 "target-chord-tones.e2": requiredPasses,
                 "target-chord-tones.e3": requiredPasses,
             } as Record<string, number>,
@@ -315,4 +327,33 @@ describe("micLoopPass", () => {
         expect(subvVariant).toBeDefined();
         expect(subvVariant?.progression).toEqual(["Dm7", tritoneSub("G7"), "Cmaj7"]);
         expect(tritoneSub("G7")).toBe("Db7");
+    });
+
+    it("drills of one module show different positions (audit: no duplicate diagrams)", () => {
+        for (const module of CURRICULUM) {
+            const windows = module.exercises
+                .filter((exercise) => exercise.engine === "diagram-drill")
+                .map((exercise) => {
+                    const params = exercise.params as DiagramDrillParams;
+                    return `${params.shapes.map((shape) => shape.shapeId).join()}:${params.offsetsFrom}:${params.offsetsTo}`;
+                });
+            expect(new Set(windows).size, module.id).toBe(windows.length);
+        }
+    });
+
+    it("Giant Steps loop is the real 16-bar form (64 beats, Coltrane changes)", () => {
+        const e2 = getImprovExercise("giant-steps", "giant-steps.e2") as NonNullable<ReturnType<typeof getImprovExercise>>;
+        const params = e2.params as BackingLoopParams;
+        const entries = params.progression.map((entry) => (typeof entry === "string" ? { chord: entry, beats: params.beatsPerChord } : entry));
+        expect(entries.reduce((sum, entry) => sum + (entry.beats ?? params.beatsPerChord), 0)).toBe(64);
+        expect(entries.slice(0, 4).map((entry) => entry.chord)).toEqual(["Bmaj7", "D7", "Gmaj7", "Bb7"]);
+        expect(entries.some((entry) => entry.chord === "Bm7")).toBe(false);
+        expect(params.variants?.map((variant) => variant.id)).toEqual(["roots", "pattern-1235", "arps"]);
+    });
+
+    it("noteToTab links in modules 1/5 are extra practice (same position stats as fretboardToNote)", () => {
+        for (const [moduleId, id] of [["e-string-notes", "e-string-notes.e2"], ["fretboard-notes", "fretboard-notes.e2"]] as const) {
+            const exercise = getImprovExercise(moduleId, id) as NonNullable<ReturnType<typeof getImprovExercise>>;
+            expect((exercise.params as PracticeLinkParams).nonGating).toBe(true);
+        }
     });

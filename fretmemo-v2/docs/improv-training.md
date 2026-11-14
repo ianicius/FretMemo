@@ -158,3 +158,24 @@ Moduł jest zaliczony (`completed`), gdy **każde** jego ćwiczenie osiągnie w�
   (fingering pass istniejący w aplikacji nie jest tu podpięty).
 - Sync wizualny promptera E4 odbywa się przez `setTimeout(delayMs)` względem zegara AudioContext —
   wystarczające dla ćwiczenia, bez twardego jitter-budgetu.
+
+## 7. Runda 13 — poprawki po ponownym audycie (2026-11-14)
+
+- **Generatory:** tryby od własnej prymy (`modeNotesFromRoot` obraca skalę — naprawia też odtwarzanie
+  ze słuchu), V7/I = G7, ii–V i cykl Coltrane'a z poprawnej tonacji, akordy mola melodycznego
+  i harmonicznego na właściwych stopniach, pytanie o skalę macierzystą bez tonacji w treści (była
+  odpowiedzią), dim7 bez równoważnych dystraktorów, tonacja w pytaniach o dominanty poboczne
+  i akordy pożyczone. Id pytania zaczyna się od faktycznego generatora (powtórki i test na wejście
+  wcześniej widziały `mixed`); `sequential` = jedno pytanie na moduł w teście na wejście.
+- **Zaliczanie:** pętla z wariantami wymaga udanych obiegów w każdym wariancie (`loopRunKey`
+  → `exerciseRuns["<id>#<wariant>"]`); test na wejście odblokowuje moduły do pierwszego błędu
+  włącznie; powtórki losują generatory należne wg SM-2 (`reviewSRS`); `noteToTab` w modułach 1/5
+  jest dodatkowe (te same `positionStats` co `fretboardToNote`). Mikrofon i bas przełączane
+  w trakcie pętli (refy); cele mikrofonu w modułach 13/16 to tercje (i septymy), nie całe akordy.
+- **Pętle:** prawdziwa 16-taktowa forma Giant Steps z trzema poziomami; `m(maj7)` parsowane
+  (`getChordInfo`); test sprawdza, że każdy akord pętli gra ≥3 dźwięki. Drugi diagram w modułach
+  3/18/20 to inna pozycja (test: brak duplikatów okien w module).
+- **Teksty:** `localizeAnswer` (`display.ts`) tłumaczy odpowiedzi (`improv.term.*`: tryby, rodzaje
+  akordów, „X-moll melodyczna”) i przelicza nuty w sekwencjach na zapis polski. Teksty PL
+  przepisane jednym słownikiem (terminy jak w `ScaleExplorer`, nuty w zapisie H/B zgodnym
+  z prompterem); usunięte nieużywane klucze `fretQuiz`, `loop.loop.*`.

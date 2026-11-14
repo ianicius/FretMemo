@@ -20,13 +20,40 @@ export function localizeToken(value: string): string {
     return formatLocalizedNoteToken(value, i18n.resolvedLanguage ?? i18n.language);
 }
 
+/** Chord/note tokens inside longer answers ("Dm7–G7", "D E F# G", "Bb, Eb"). */
+const EMBEDDED_TOKEN = /(^|[\s,–(-])([A-G][#b]?[0-9mMajdiugslt#b()+]*)(?=$|[\s,–)-])/g;
+const PARENT_MINOR = /^([A-G][#b]?) (melodic|harmonic) minor$/;
+
+/**
+ * Display text of a raw answer/label token. Matching always uses the raw
+ * value; this is display-only:
+ * - "improv.…" keys are translated;
+ * - words with an `improv.term.*` entry (mode names, chord types,
+ *   "major"…) use the localized term;
+ * - "G melodic minor" style parents use a localized template;
+ * - everything else gets the note notation on each embedded chord token.
+ */
+export function localizeAnswer(value: string): string {
+    if (value.startsWith("improv.")) return i18n.t(value);
+    const termKey = `improv.term.${value}`;
+    if (i18n.exists(termKey)) return i18n.t(termKey);
+    const parent = PARENT_MINOR.exec(value);
+    if (parent) {
+        return i18n.t(`improv.term.parentMinor.${parent[2]}`, { key: localizeToken(parent[1] as string) });
+    }
+    return value.replace(EMBEDDED_TOKEN, (_match, lead: string, token: string) => `${lead}${localizeToken(token)}`);
+}
+
+/** Prompt/hint fields holding a mode name, chord-type label or parent scale. */
+const TERM_FIELDS = new Set(["mode", "label", "type", "parent"]);
+
 /**
  * Question/hint value fields that hold a single note or chord token
  * ("Bb", "Db7", "Dm7"…) and follow the B→H display convention.
  * Field names are the generator contract in src/lib/improv/questions.ts;
  * matching always happens on raw tokens — this map is display-only.
  */
-const NOTE_TOKEN_FIELDS = new Set(["key", "chord", "sub", "v", "dominant", "target", "ii", "first", "second", "source"]);
+const NOTE_TOKEN_FIELDS = new Set(["key", "chord", "sub", "v", "dominant", "target", "ii", "first", "second", "source", "root", "offset"]);
 /** Comma-joined note tokens ("F#, C#, G#"). */
 const LIST_NOTE_FIELDS = new Set(["list", "keys"]);
 /** Dash-joined note tokens ("A-C#-E" triad spellings, "B–G–Eb…" cycles). */
@@ -49,13 +76,18 @@ export function localizePromptValues(
     values: Record<string, string | number>,
 ): Record<string, string | number> {
     const language = i18n.resolvedLanguage ?? i18n.language;
-    if (!language.toLowerCase().startsWith("pl")) return values;
+    const isPolish = language.toLowerCase().startsWith("pl");
     const localized: Record<string, string | number> = {};
     for (const [field, value] of Object.entries(values)) {
         if (typeof value === "number") {
             localized[field] = value;
+        } else if (TERM_FIELDS.has(field)) {
+            localized[field] = localizeAnswer(value);
+        } else if (!isPolish) {
+            localized[field] = value;
         } else if (NOTE_TOKEN_FIELDS.has(field)) {
-            localized[field] = formatLocalizedNoteToken(value, language);
+            // Covers single tokens ("Bb7") and sequences ("Em7–A7–B").
+            localized[field] = value.replace(EMBEDDED_TOKEN, (_match, lead: string, token: string) => `${lead}${formatLocalizedNoteToken(token, language)}`);
         } else if (LIST_NOTE_FIELDS.has(field)) {
             localized[field] = localizeJoined(value, /,/, ", ");
         } else if (DASH_NOTE_FIELDS.has(field)) {

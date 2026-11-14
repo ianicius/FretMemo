@@ -58,6 +58,37 @@ function leafExists(root: unknown, key: string): boolean {
     );
 }
 
+describe("generator prompt keys (plan 5 audit)", () => {
+    it("every generated question prompt resolves in both locales", async () => {
+        const { generateChoiceQuiz, listChoiceGeneratorIds } = await import("@/lib/improv/questions");
+        const en = (JSON.parse(readFileSync(process.cwd() + "/src/locales/en/translation.json", "utf8")) as { improv: { q: Record<string, unknown> } }).improv.q;
+        const pl = (JSON.parse(readFileSync(process.cwd() + "/src/locales/pl/translation.json", "utf8")) as { improv: { q: Record<string, unknown> } }).improv.q;
+        const hasLeaf = (node: Record<string, unknown> | undefined, key: string): boolean => {
+            const parts = key.split(".");
+            let cur: unknown = node;
+            for (const part of parts.slice(0, -1)) {
+                if (typeof cur !== "object" || cur === null || !(part in (cur as Record<string, unknown>))) return false;
+                cur = (cur as Record<string, unknown>)[part];
+            }
+            if (typeof cur !== "object" || cur === null) return false;
+            const box = cur as Record<string, unknown>;
+            const last = parts[parts.length - 1];
+            // i18next plural keys: countToKey_one/_other count as countToKey.
+            if (last in box) return box[last] !== null && box[last] !== undefined;
+            return Object.keys(box).some((child) => child.startsWith(last + "_"));
+        };
+        for (const generatorId of listChoiceGeneratorIds()) {
+            const questions = generateChoiceQuiz({ generatorId, questionCount: 40, allowedGenerators: [generatorId] }, `promptkeys:${generatorId}`);
+            for (const question of questions) {
+                // promptKey is "improv.q.…" — walk from the improv.q node.
+                const relative = question.promptKey.replace("improv.q.", "");
+                expect(hasLeaf(en, relative), `EN missing: ${question.promptKey}`).toBe(true);
+                expect(hasLeaf(pl, relative), `PL missing: ${question.promptKey}`).toBe(true);
+            }
+        }
+    });
+});
+
 describe("improv i18n parity (en + pl)", () => {
     it("the improv namespace has identical leaf keys in both locales", () => {
         const enKeys = flattenLeaves(en.improv).sort();

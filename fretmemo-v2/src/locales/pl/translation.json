@@ -1791,691 +1791,711 @@
     },
     "improv": {
         "title": "Trening improwizacji",
-        "description": "Nauka improwizacji w 22 modułach, od dźwięków struny E po Giant Steps. W każdym module krótko o teorii i ćwiczenia z progiem zaliczenia, który otwiera kolejny moduł.",
+        "description": "Nauka improwizacji w 22 modułach: od dźwięków na strunie E po Giant Steps. Każdy moduł to krótka teoria i ćwiczenia; zaliczenie modułu otwiera następny.",
         "roadmap": {
             "progress": "Zaliczone moduły: {{done}} z {{total}}",
-            "percent": "{{percent}}% planu",
+            "percent": "{{percent}}% ścieżki",
             "unlockAll": "Odblokuj wszystkie moduły",
-            "unlockAllHint": "Domyślnie kolejny moduł odblokowuje zaliczenie poprzedniego.",
+            "unlockAllHint": "Domyślnie kolejny moduł otwiera się po zaliczeniu poprzedniego.",
             "openModuleAria": "Moduł {{order}}: {{name}}",
             "entranceTest": "Test na wejście",
             "entranceTestName": "Test na wejście",
-            "entranceTestDesc": "Po jednym pytaniu z każdego modułu. Test odblokowuje moduły do pierwszego błędnego pytania."
+            "entranceTestDesc": "Po jednym pytaniu z każdego modułu z quizem, w kolejności nauki. Otwierają się moduły do pierwszego błędu włącznie — od tego modułu zaczniesz naukę."
         },
         "status": {
             "done": "Zaliczony",
             "available": "Dostępny",
-            "passed": "Próg osiągnięty"
+            "passed": "Zaliczone"
         },
         "module": {
             "theoryTitle": "Teoria",
             "exercisesTitle": "Ćwiczenia",
-            "notFoundTitle": "Nie znaleziono modułu",
-            "notFoundDesc": "Nie ma modułu „{{moduleId}}” w mapie drogowej.",
-            "backToRoadmap": "Wróć do mapy drogowej",
+            "notFoundTitle": "Nie ma takiego modułu",
+            "notFoundDesc": "Moduł „{{moduleId}}” nie istnieje.",
+            "backToRoadmap": "Wróć do ścieżki nauki",
             "lockedTitle": "Moduł zablokowany",
-            "lockedDesc": "Zalicz poprzedni moduł albo włącz „Odblokuj wszystkie” na mapie drogowej.",
+            "lockedDesc": "Zalicz poprzedni moduł albo włącz „Odblokuj wszystkie moduły” na ścieżce nauki.",
             "supplementaryTitle": "Trening uzupełniający",
-            "supplementaryHint": "Dodatkowe narzędzia, które nie wpływają na zaliczenie modułu."
+            "supplementaryHint": "Dodatkowe ćwiczenia — nie wpływają na zaliczenie modułu."
         },
         "engine": {
-            "choiceQuiz": "Quiz zamknięty",
-            "diagramDrill": "Diagram + metronom",
-            "backingLoop": "Loop akordowy",
-            "practiceLink": "Sesja treningowa"
+            "choiceQuiz": "Quiz",
+            "diagramDrill": "Diagram z metronomem",
+            "backingLoop": "Pętla akordowa",
+            "practiceLink": "Trening na gryfie"
         },
         "quiz": {
-            "threshold": "Próg: {{required}}/{{total}}",
+            "threshold": "Do zaliczenia: {{required}}/{{total}}",
             "question": "Pytanie {{current}}/{{total}}",
             "scoreValue": "{{correct}}/{{total}}",
             "finalScore": "Wynik",
             "correct": "Dobrze!",
-            "wrong": "Źle — poprawna odpowiedź: {{answer}}",
-            "restart": "Zacznij od nowa",
-            "passed": "Podejście zaliczone — ćwiczenie wymaga {{required}} zaliczonych podejść.",
+            "wrong": "Źle. Poprawna odpowiedź: {{answer}}.",
+            "restart": "Jeszcze raz",
+            "passed": "Podejście zaliczone. Ćwiczenie wymaga {{required}} zaliczonych podejść.",
             "failed": "Spróbuj jeszcze raz — potrzebujesz {{required}} poprawnych odpowiedzi.",
             "attempts": "Zaliczone podejścia",
             "attemptsValue": "{{done}}/{{required}}",
             "play": "Odtwórz"
         },
-        "fretQuiz": {
-            "promptPositionToNote": "Jaka nuta jest zaznaczona na gryfie?",
-            "promptNoteToPosition": "Kliknij {{note}} na gryfie:",
-            "wrongPosition": "To nie {{note}} — poprawna pozycja jest zaznaczona na zielono.",
-            "clickHint": "Kliknij właściwy prog na strunach z ćwiczenia."
-        },
         "drill": {
-            "threshold_one": "Próg: {{count}} przebieg",
-            "threshold_few": "Próg: {{count}} przebiegi",
-            "threshold_many": "Próg: {{count}} przebiegów",
-            "threshold_other": "Próg: {{count}} przebiegu",
-            "bpm": "BPM: {{bpm}}",
+            "threshold_one": "Do zaliczenia: {{count}} przebieg",
+            "threshold_few": "Do zaliczenia: {{count}} przebiegi",
+            "threshold_many": "Do zaliczenia: {{count}} przebiegów",
+            "threshold_other": "Do zaliczenia: {{count}} przebiegów",
+            "bpm": "Tempo: {{bpm}} BPM",
             "start": "Start",
             "stop": "Stop",
-            "playRoot": "Zagraj roota",
-            "runButton": "Przebieg zaliczony (góra i dół)",
+            "playRoot": "Zagraj tonikę",
+            "runButton": "Przebieg zaliczony (w górę i w dół)",
             "runs": "Przebiegi: {{done}}/{{required}}",
             "shape": "Kształt",
             "key": "Tonacja",
-            "runNeedsMetronome": "Najpierw zagraj pełny przebieg (góra i dół) z metronomem — {{beats}} uderzeń."
+            "runNeedsMetronome": "Najpierw zagraj cały przebieg (w górę i w dół) z metronomem — {{beats}} uderzeń."
         },
         "loop": {
-            "threshold": "Próg: {{required}} udanych obiegów",
-            "start": "Start loopu",
+            "threshold": "Wymagane udane obiegi: {{required}}",
+            "start": "Start",
             "stop": "Stop",
-            "bpm": "BPM: {{bpm}}",
+            "bpm": "Tempo: {{bpm}} BPM",
             "current": "Teraz",
-            "next": "Następny",
+            "next": "Dalej",
             "goal": "Cel ćwiczenia",
-            "passButton": "Obieg zaliczony",
+            "passButton": "Obieg udany",
             "passes": "Udane obiegi: {{done}}/{{required}}",
-            "markAfterLoop": "Przycisk aktywuje się po pełnym obiegu progresji.",
+            "markAfterLoop": "Przycisk działa po każdym pełnym obiegu progresji.",
             "variant": "Wariant",
-            "loop.micEnable": "Sprawdzaj mikrofonem",
-            "loop.micDisable": "Weryfikacja mikrofonem włączona",
-            "loop.micHits": "Trafienia: {{done}}/{{total}}",
-            "loop.micWindowHint": "Zagraj dźwięk z dozwolonego zbioru w momencie zmiany akordu — sprawdzane jest pierwsze uderzenie.",
-            "loop.micError": "Mikrofon niedostępny — użyj przycisku samooceny.",
-            "loop.micDetected": "Wykryto: {{note}}",
             "micEnable": "Sprawdzaj mikrofonem",
-            "micDisable": "Weryfikacja mikrofonem włączona",
+            "micDisable": "Wyłącz sprawdzanie mikrofonem",
             "micHits": "Trafienia: {{done}}/{{total}}",
-            "micWindowHint": "Zagraj dźwięk z dozwolonego zbioru w momencie zmiany akordu — sprawdzane jest pierwsze uderzenie.",
-            "micError": "Mikrofon niedostępny — użyj przycisku samooceny.",
-            "micDetected": "Wykryto: {{note}}",
-            "bass": "Bas"
+            "micWindowHint": "Zagraj dźwięk docelowy na pierwszą miarę nowego akordu — sprawdzane jest pierwsze uderzenie. Najlepiej graj w słuchawkach, żeby mikrofon nie słyszał podkładu.",
+            "micError": "Mikrofon niedostępny — oznaczaj udane obiegi przyciskiem.",
+            "micDetected": "Słyszę: {{note}}",
+            "bass": "Bas",
+            "allVariants": "Do zaliczenia ćwiczenia potrzebne są udane obiegi w każdym wariancie."
         },
         "shapes": {
-            "min-pent": "Minor pentatonic",
-            "maj-pent": "Major pentatonic",
-            "dorian-pent": "Dorian pentatonic",
-            "phrygian-pent": "Phrygian pentatonic",
-            "mixo-pent": "Mixolydian pentatonic",
-            "major": "Skala majorowa",
-            "melodic-minor": "Mol melodyczny",
-            "harmonic-minor": "Mol harmoniczny",
-            "triad": "Triada (3 struny)",
-            "m7-arp": "m7 arpeggio",
-            "dom7-arp": "dom7 arpeggio"
+            "min-pent": "Pentatonika molowa",
+            "maj-pent": "Pentatonika durowa",
+            "major": "Skala durowa",
+            "melodic-minor": "Skala molowa melodyczna",
+            "harmonic-minor": "Skala molowa harmoniczna",
+            "m7-arp": "Arpeggio m7",
+            "dom7-arp": "Arpeggio 7 (dominantowe)",
+            "maj7-arp": "Arpeggio maj7",
+            "m7b5-arp": "Arpeggio m7b5"
         },
         "goals": {
-            "targetThird": "W momencie zmiany akordu ląduj na tercji — Am→C, C→E, Em→G, D→F#.",
-            "targetFifth": "Ląduj na kwincie akordu — Am→E, C→G, Em→B, D→A.",
-            "voiceLeading": "Przed zmianą akordu zagraj dźwięk wspólny lub krok obok dźwięku następnego akordu (Gm→Bbm: wspólne Bb; Gm→Cm: wspólne G).",
-            "switchingKeys": "W połowie pętli tonacja zmienia się z G na B — przestaw swoje linie (skale/arpeggia) na nową tonację.",
-            "tritoneNormal": "Rozwiąż G7 do C — tercja G7 (B) schodzi półtonem do C, b7 (F) o ton do E.",
-            "tritoneSubV": "Nad Ab7 podkreśl tercję (C) i b7 (Gb) i rozwiąż je krokowo do C (3→C, 7→E).",
-            "variantNormal": "Progresja diatoniczna (G7)",
-            "variantSubV": "Progresja z subV (Ab7)",
-            "secondaryDominants": "Po każdej dominantie pobocznej celuj w tercję akordu docelowego.",
-            "borrowedBackdoor": "Nad Bb7 graj dźwięki C mixolydian / bVII i rozwiązuj krokowo do C.",
-            "giantSteps": "Graj tercje (arpeggia) akordów przez zmiany tonacji B–G–Eb.",
-            "triads": "Nad loopem graj wyłącznie triady — przechodź do najbliższej inwersji akordu zamiast przeskakiwać kształty.",
-            "pentatonicBox1": "Improwizuj wyłącznie w boksie 1 (progi 5–8) — twoja pierwsza prawdziwa improwizacja.",
-            "majorC": "Frazuj skalą C-dur i kończ swoje linie na dźwięku C.",
-            "pentatonicBoxes": "Z każdą pętlą przechodź do sąsiedniego boksu pentatoniki.",
-            "modeCharacteristic": "Podkreśl stopień charakterystyczny trybu nad podkładem.",
-            "modeDorian": "Dorian (Dm7–G7)",
-            "modePhrygian": "Phrygian (Em–Fmaj7)",
-            "modeLydian": "Lydian (Fmaj7–G6)",
-            "modeMixolydian": "Mixolydian (G7–Cmaj7)",
-            "chordScaleCharacteristic": "Na każdym akordzie zagraj jego dźwięk charakterystyczny z podpowiedzianej skali.",
-            "arpeggiosOnly": "Graj wyłącznie arpeggia akordów — obrysuj harmonię.",
-            "targetRoot": "W momencie zmiany akordu ląduj na prymie — Am→A, C→C, Em→E, D→D.",
+            "targetThird": "Na zmianie akordu ląduj na tercji: Am→C, C→E, Em→G, D→F#.",
+            "targetFifth": "Na zmianie akordu ląduj na kwincie: Am→E, C→G, Em→H, D→A.",
+            "voiceLeading": "Tuż przed zmianą zagraj dźwięk wspólny obu akordów albo przejdź o pół tonu lub ton do dźwięku następnego akordu (Gm→Bm: wspólne B; Gm→Cm: wspólne G).",
+            "switchingKeys": "W połowie pętli tonacja zmienia się z G-dur na H-dur — przenieś skale i arpeggia do nowej tonacji.",
+            "tritoneNormal": "Rozwiąż G7 do C: tercja G7 (H) idzie o pół tonu w górę do C, septyma (F) o pół tonu w dół do E.",
+            "tritoneSubV": "Nad Db7 podkreślaj tercję (F) i septymę (Cb, czyli H), a potem rozwiąż je o pół tonu: F→E, H→C.",
+            "variantNormal": "Zwykła progresja (G7)",
+            "variantSubV": "Z zamianą trytonową (Db7)",
+            "secondaryDominants": "Po każdej dominancie pobocznej ląduj na tercji następnego akordu.",
+            "borrowedBackdoor": "Nad Fm7 graj skalę F dorycką, nad B7 — B lidyjską dominantową (albo B miksolidyjską), a potem dojdź krokiem do dźwięku akordu C.",
+            "triads": "Graj nad pętlą wyłącznie trójdźwięki — przy każdej zmianie wybierz przewrót najbliżej poprzedniego zamiast przeskakiwać po gryfie.",
+            "pentatonicBox1": "Improwizuj wyłącznie w pierwszym boksie (progi 5–8). To twoja pierwsza prawdziwa improwizacja.",
+            "majorC": "Buduj frazy ze skali C-dur i kończ je na dźwięku C.",
+            "pentatonicBoxes": "Z każdym obiegiem przejdź do sąsiedniego boksu pentatoniki.",
+            "modeCharacteristic": "Podkreślaj nad podkładem dźwięk charakterystyczny trybu.",
+            "modeDorian": "Dorycki (Dm7–G7)",
+            "modePhrygian": "Frygijski (Em7–Fmaj7)",
+            "modeLydian": "Lidyjski (Fmaj7–G6)",
+            "modeMixolydian": "Miksolidyjski (G7–Cmaj7)",
+            "chordScaleCharacteristic": "Na każdym akordzie zagraj jego dźwięk charakterystyczny ze skali z podpowiedzi.",
+            "arpeggiosOnly": "Graj wyłącznie dźwięki akordów (arpeggia) — bez innych dźwięków skali.",
+            "targetRoot": "Na zmianie akordu ląduj na prymie: Am→A, C→C, Em→E, D→D.",
             "targetRootLabel": "Poziom 1: prymy",
             "targetThirdLabel": "Poziom 2: tercje",
             "targetFifthLabel": "Poziom 3: kwinty",
             "targetSeventhLabel": "Poziom 4: septymy",
-            "targetSeventh": "Ląduj na septymie akordu — Am7→G, Cmaj7→B, Em7→D, D7→C.",
-            "targetAny": "Bez stałego celu — ląduj na każdym dźwięku akordu, który usłyszysz. Twoja pierwsza wolna improwizacja.",
-            "voiceLeadingThirdsSevenths": "Prowadź tercje i septymy płynnie: F→F→E albo C→B→B przez Dm7–G7–Cmaj7.",
-            "switchingKeysEasy": "Jedna zmieniona nuta: tonacja przechodzi C → F. Dostosuj linie, gdy prompter zmieni tonację.",
+            "targetSeventh": "Na zmianie akordu ląduj na septymie: Am7→G, Cmaj7→H, Em7→D, D7→C.",
+            "targetAny": "Bez stałego celu: ląduj na dowolnym dźwięku akordu. To twoja pierwsza swobodna improwizacja nad zmianami.",
+            "voiceLeadingThirdsSevenths": "Prowadź tercje i septymy najkrótszą drogą przez Dm7–G7–Cmaj7: F→F→E albo C→H→H.",
+            "switchingKeysEasy": "W połowie pętli tonacja zmienia się z C-dur na F-dur. Różni się jeden dźwięk (H zmienia się w B) — zmień skalę, gdy podpowiedź pokaże nową tonację.",
             "variantVideo": "Progresja z filmu",
-            "tritoneVideo": "Chromatyczne zejście basu: Bm7–Bb7–Am7–Ab7–Gmaj7.",
+            "tritoneVideo": "Chromatycznie opadający bas: Hm7–B7–Am7–Ab7–Gmaj7. Akordy B7 i Ab7 to zamiany trytonowe dominant.",
             "secondaryClassic": "Klasyczna progresja",
             "secondaryFiveLabel": "Pięć dominant pobocznych",
-            "variantDiatonic251": "Diatoniczny ii–V–I",
-            "variantBackdoor251": "Backdoor ii–V",
-            "borrowedDiatonic": "Diatoniczna droga do C: Dm7–G7. Porównaj jej brzmienie z backdoor.",
-            "melodicMinor67": "Podkreśl 6 (F#) i wielką septymę (G#) nad oboma akordami Am.",
-            "mmMinor251": "Molowy ii–V–i",
-            "mmD711": "Vamp D7#11",
-            "melodicMinorHints": "Korzystaj z podpowiedzi molowej melodicznej przy każdym akordzie.",
-            "harmonicMinorGSharp": "Nad E7 podkreśl G# — dźwięk charakterystyczny A-moll harmonicznej.",
-            "harmonicMinorPhrygian": "Nad E7 graj E Phrygian dominant (z A-moll harmonicznej).",
-            "giantStepsRoots": "Graj same prymy akordów przez całą 16-taktową formę.",
-            "giantStepsPattern": "Graj wzór 1-2-3-5 każdego akordu przez całą formę.",
+            "variantDiatonic251": "Diatoniczne ii–V–I",
+            "variantBackdoor251": "Backdoor ii–V–I",
+            "borrowedDiatonic": "Diatoniczna droga do C: Dm7–G7. Porównaj jej brzmienie z wersją backdoor.",
+            "melodicMinor67": "Podkreślaj sekstę wielką (F#) i septymę wielką (G#) nad oboma akordami a-moll.",
+            "mmMinor251": "Molowe ii–V–i",
+            "mmD711": "Jeden akord: D7#11",
+            "melodicMinorHints": "Przy każdym akordzie graj skalę z podpowiedzi — wszystkie pochodzą z molowych melodycznych.",
+            "harmonicMinorGSharp": "Nad E7 podkreślaj G# — dźwięk, który odróżnia a-moll harmoniczną od naturalnej.",
+            "harmonicMinorPhrygian": "Nad E7 graj skalę E frygijską dominantową (piąty tryb a-moll harmonicznej).",
+            "giantStepsRoots": "Graj prymy akordów przez całą 16-taktową formę.",
+            "giantStepsPattern": "Graj wzór 1-2-3-5 na każdym akordzie przez całą formę.",
             "giantStepsArps": "Graj arpeggia akordów przez całą formę.",
             "giantStepsRootsLabel": "Poziom 1: prymy",
-            "giantStepsPatternLabel": "Poziom 2: 1-2-3-5",
+            "giantStepsPatternLabel": "Poziom 2: wzór 1-2-3-5",
             "giantStepsArpsLabel": "Poziom 3: arpeggia",
-            "bluesBox1": "Blues 12-taktowy w A — improwizuj w boksie 1 pentatoniki.",
-            "bluesChordTones": "Blues 12-taktowy w A — ląduj na dźwięku akordu przy każdej zmianie."
+            "bluesBox1": "Blues 12-taktowy w A — improwizuj w pierwszym boksie pentatoniki.",
+            "bluesChordTones": "Blues 12-taktowy w A — na każdej zmianie ląduj na dźwięku akordu."
         },
         "q": {
             "keySig": {
-                "keyToCount": "Ile znaków przykluczowych ma tonacja {{key}} dur?",
-                "countToKey_one": "Która tonacja major ma {{count}} znak przykluczowy?",
-                "countToKey_few": "Która tonacja major ma {{count}} znaki przykluczowe?",
-                "countToKey_many": "Która tonacja major ma {{count}} znaków przykluczowych?",
-                "countToKey_other": "Która tonacja major ma {{count}} znaku przykluczowego?",
-                "accidentalsToKey": "Znaki przykluczowe „{{list}}” ({{type}}) wskazują tonację:",
-                "hintCount_one": "{{key}} ma {{count}} znak przykluczowy.",
-                "hintCount_few": "{{key}} ma {{count}} znaki przykluczowe.",
-                "hintCount_many": "{{key}} ma {{count}} znaków przykluczowych.",
-                "hintCount_other": "{{key}} ma {{count}} znaku przykluczowego.",
-                "hintAccidentals": "Znaki {{key}}: {{list}}"
+                "keyToCount": "Ile znaków przykluczowych ma tonacja {{key}}-dur?",
+                "countToKey_one": "Która tonacja durowa ma {{count}} znak przykluczowy?",
+                "countToKey_few": "Która tonacja durowa ma {{count}} znaki przykluczowe?",
+                "countToKey_many": "Która tonacja durowa ma {{count}} znaków przykluczowych?",
+                "countToKey_other": "Która tonacja durowa ma {{count}} znaków przykluczowych?",
+                "accidentalsToKey": "Znaki przykluczowe {{list}} ma tonacja durowa:",
+                "hintCount_one": "{{key}}-dur ma {{count}} znak przykluczowy.",
+                "hintCount_few": "{{key}}-dur ma {{count}} znaki przykluczowe.",
+                "hintCount_many": "{{key}}-dur ma {{count}} znaków przykluczowych.",
+                "hintCount_other": "{{key}}-dur ma {{count}} znaków przykluczowych.",
+                "hintAccidentals": "Znaki przykluczowe {{key}}-dur: {{list}}",
+                "keyType": "Czy tonacja {{key}}-dur ma w znakach krzyżyki, czy bemole?",
+                "keyAccidentals": "Jakie znaki przykluczowe ma tonacja {{key}}-dur?",
+                "parallelMinor": "Tonacja jednoimienna molowa do {{key}}-dur to:",
+                "countToKey_sharps_one": "Która tonacja durowa ma {{count}} krzyżyk?",
+                "countToKey_sharps_few": "Która tonacja durowa ma {{count}} krzyżyki?",
+                "countToKey_sharps_many": "Która tonacja durowa ma {{count}} krzyżyków?",
+                "countToKey_sharps_other": "Która tonacja durowa ma {{count}} krzyżyków?",
+                "countToKey_flats_one": "Która tonacja durowa ma {{count}} bemol?",
+                "countToKey_flats_few": "Która tonacja durowa ma {{count}} bemole?",
+                "countToKey_flats_many": "Która tonacja durowa ma {{count}} bemoli?",
+                "countToKey_flats_other": "Która tonacja durowa ma {{count}} bemoli?",
+                "sharps": "krzyżyki",
+                "flats": "bemole"
             },
             "modes": {
-                "orderToMode": "Tryb numer {{order}} (I–VII) to:",
-                "modeToOrder": "Tryb {{mode}} jest trybem numer:",
-                "patternToMode": "Wzór względem majora (W = cały ton, H = półton): {{pattern}} — to tryb:",
-                "characteristicToMode": "Który tryb ma stopień charakterystyczny {{characteristic}}?",
+                "orderToMode": "Tryb, który zaczyna się na {{order}}. stopniu skali durowej, to:",
+                "modeToOrder": "Na którym stopniu skali durowej zaczyna się tryb {{mode}}?",
+                "patternToMode": "Układ {{pattern}} (W = cały ton, H = półton) ma tryb:",
+                "characteristicToMode": "Który tryb ma dźwięk charakterystyczny {{characteristic}}?",
                 "hintPattern": "{{mode}}: {{pattern}}",
-                "hintCharacteristic": "{{mode}} — stopień charakterystyczny: {{characteristic}}"
+                "hintCharacteristic": "{{mode}} — dźwięk charakterystyczny: {{characteristic}}",
+                "modeNotesFromRoot": "Jakie dźwięki ma tryb {{mode}} od {{root}}?",
+                "modeParent": "Tryb {{mode}} od {{root}} ma te same dźwięki co skala durowa:",
+                "soundToMode": "Posłuchaj skali zagranej od {{root}}. Jaki to tryb?"
             },
             "triadBuild": {
-                "degreeToType": "W tonacji {{key}} dur zbuduj trójdźwięk na {{degree}}. stopniu ({{notes}}). Jaki to typ?",
-                "degreeToTriad": "W tonacji {{key}} dur {{degree}}. stopień to dźwięki {{notes}}. Który symbol jest poprawny?",
-                "hintType": "Typ: {{type}}",
-                "hintSpelling": "Zapis: {{notes}}"
+                "degreeToType": "W tonacji {{key}}-dur trójdźwięk na {{degree}}. stopniu to {{notes}}. Jaki to rodzaj trójdźwięku?",
+                "degreeToTriad": "W tonacji {{key}}-dur trójdźwięk na {{degree}}. stopniu to {{notes}}. Jak go zapisać?",
+                "hintType": "Rodzaj: {{type}}",
+                "hintSpelling": "Dźwięki: {{notes}}",
+                "degreeToSeventh": "W tonacji {{key}}-dur akord septymowy na {{degree}}. stopniu to {{notes}}. Jak go zapisać?"
             },
             "chordScale": {
-                "chordToMode": "Jaki tryb pasuje do {{chord}} (w tonacji C major)?",
-                "modeToChord": "Który akord obsługuje tryb {{mode}}?",
+                "chordToMode": "Jaki tryb pasuje do {{chord}} w tonacji C-dur?",
+                "modeToChord": "Do którego akordu pasuje tryb {{mode}}?",
                 "hintPair": "{{chord}} → {{mode}}",
-                "chordToModeGeneric": "Jaki tryb pasuje do {{chord}}?"
+                "chordToModeGeneric": "Jaki tryb pasuje do akordu {{chord}}?",
+                "chordToModeKey": "Jaki tryb pasuje do {{chord}} w tonacji {{key}}-dur?",
+                "modeToChordKey": "W tonacji {{key}}-dur tryb {{mode}} pasuje do akordu:",
+                "hintParent": "{{chord}} → {{parent}}"
             },
             "triadType": {
-                "nameToIntervals": "Interwały akordu {{label}}:",
-                "intervalsToName": "Interwały {{intervals}} definiują akord:",
+                "nameToIntervals": "Jakie interwały ma akord: {{label}}?",
+                "intervalsToName": "Interwały {{intervals}} tworzą akord:",
                 "hintIntervals": "Interwały: {{intervals}}"
             },
             "tritone": {
                 "vToSubv": "Zamiana trytonowa (subV) dla {{v}} to:",
-                "subvToV": "{{sub}} to zamiana trytonowa (subV) dla:",
-                "subvResolution": "{{sub}} rozwiązuje się (subV → I) do tonacji:",
-                "hintSubV": "{{sub}} dzieli triton z {{v}} — rozwiązuje się do {{v}}.",
-                "hintResolution": "{{sub}} rozwiązuje się do {{target}}."
+                "subvToV": "{{sub}} jest zamianą trytonową dla:",
+                "subvResolution": "{{sub}} jako zamiana trytonowa prowadzi do akordu:",
+                "hintSubV": "{{sub}} ma ten sam tryton co {{v}}, więc oba prowadzą do {{target}}.",
+                "hintResolution": "{{sub}} prowadzi do {{target}}."
             },
             "secondaryDom": {
-                "chordToSecondary": "Która dominantą poboczna (V7/x) prowadzi do {{target}} w tonacji C?",
-                "secondaryToChord": "{{dominant}} w tonacji C rozwiązuje się do:",
+                "chordToSecondary": "Która dominanta poboczna (V7/x) prowadzi do {{target}} w tonacji {{key}}-dur?",
+                "secondaryToChord": "Do którego akordu prowadzi {{dominant}} w tonacji {{key}}-dur?",
                 "hintPair": "{{dominant}} → {{target}}"
             },
             "borrowed": {
-                "identifyDegree": "W tonacji C dur akord {{chord}} jest pożyczony. Jaki to stopień?",
-                "backdoor": "Sekwencja {{chord}} w tonacji C to:",
-                "hintSource": "{{chord}} pochodzi z mola równoległego ({{source}}).",
-                "hintBackdoor": "Fm7–Bb7→C: bVII7 z C moll zamiast G7.",
-                "answerBackdoor": "backdoor ii–V (pożyczony z mola równoległego)",
-                "answerDiatonic251": "diatoniczny ii–V (Dm7–G7)",
-                "answerMinor251": "ii–V–i z C moll",
-                "answerTurnaround": "turnaround V–I"
+                "identifyDegree": "W tonacji {{key}}-dur akord {{chord}} jest pożyczony z jednoimiennej molowej. Jaki to stopień?",
+                "backdoor": "Czym jest progresja {{chord}} w tonacji {{key}}-dur?",
+                "hintSource": "{{chord}} pochodzi z tonacji jednoimiennej molowej ({{source}}).",
+                "hintBackdoor": "iv m7 – bVII7 – I: akord bVII7 z tonacji molowej zastępuje dominantę V7.",
+                "answerBackdoor": "backdoor ii–V (akordy z jednoimiennej molowej)",
+                "answerDiatonic251": "diatoniczne ii–V–I",
+                "answerMinor251": "molowe ii–V–i",
+                "answerTurnaround": "zwrot V–I (turnaround)"
             },
             "pivot": {
-                "commonChord": "Wspólny diatoniczny akord dla {{first}} i {{second}} dur:",
-                "pivotTarget": "Który ii–V prowadzi do tonacji {{key}}?",
-                "hintCommon": "{{chord}} jest diatoniczny w obu tonacjach.",
-                "hintTarget": "{{ii}}–{{v}} to II i V stopień {{key}} dur."
+                "commonChord": "Wspólny akord tonacji {{first}}-dur i {{second}}-dur to:",
+                "pivotTarget": "Które ii–V prowadzi do tonacji {{key}}-dur?",
+                "hintCommon": "{{chord}} występuje w obu tonacjach.",
+                "hintTarget": "{{ii}}–{{v}} to II i V stopień {{key}}-dur."
             },
             "coltrane": {
-                "cycleOrder": "Kolejność tonacji w cyklu Coltrane'a („Giant Steps”) to:",
-                "resolution": "W „Giant Steps” {{dominant}} rozwiązuje do:",
-                "hintCycle": "Cykl: {{cycle}} (tercje wielkie w dół)."
+                "cycleOrder": "Kolejność tonacji w cyklu Coltrane’a („Giant Steps”) to:",
+                "resolution": "Do której tonacji prowadzi {{dominant}} w „Giant Steps”?",
+                "hintCycle": "Cykl: {{cycle}} (co tercję wielką w dół).",
+                "iiVOf": "Które ii–V prowadzi do tonacji {{target}}?",
+                "cycleTransposed": "Cykl Coltrane’a zaczynający się od {{offset}} to:"
             },
-            "q": {
-                "keySig": {
-                    "keyType": "Czy tonacja {{key}} major ma znaki krzyżykowe, czy bemolowe?",
-                    "keyAccidentals": "Które dźwięki podwyższa tonacja {{key}} major?",
-                    "parallelMinor": "Tonacja paralelna molowa do {{key}} dur to:"
-                },
-                "modes": {
-                    "modeNotesFromRoot": "Tryb {{mode}} od dźwięku {{root}} zawiera nuty:",
-                    "modeParent": "Tryb {{mode}} od {{root}} pochodzi ze skali majorowej:",
-                    "soundToMode": "Posłuchaj skali zagranej od {{root}} — jaki to tryb?"
-                },
-                "triadBuild": {
-                    "degreeToSeventh": "Zbuduj 1-3-5-7 z gamy {{key}} major na stopniu {{degree}} — jaki to akord septymowy?"
-                },
-                "chordScale": {
-                    "chordToModeKey": "Jaki tryb pasuje do {{chord}} w tonacji {{key}} major?",
-                    "modeToChordKey": "W tonacji {{key}} major jaki akord obsługuje tryb {{mode}}?",
-                    "hintParent": "{{chord}} → {{parent}}"
-                },
-                "chordScaleMM": {
-                    "inContext": "Jaka mol melodyczna pasuje do {{chord}} w tonacji {{key}} moll?"
-                },
-                "chordScaleHM": {
-                    "inContext": "Jaka mol harmoniczna pasuje do {{chord}} w tonacji {{key}} moll?"
-                },
-                "coltrane": {
-                    "iiVOf": "ii–V prowadzące do {{target}} to:",
-                    "cycleTransposed": "Cykl Coltrane’a transponowany od {{offset}} to:"
-                }
+            "chordScaleMM": {
+                "inContext": "Z której skali molowej melodycznej pochodzi skala do akordu {{chord}}?"
+            },
+            "chordScaleHM": {
+                "inContext": "Z której skali molowej harmonicznej pochodzi skala do akordu {{chord}}?"
             }
         },
         "modules": {
             "e-string-notes": {
-                "name": "Dźwięki struny E",
+                "name": "Dźwięki na strunie E",
                 "term": "Notes of the E string",
-                "theory": "Fundamentem improwizacji jest znajomość gryfu. Zaczynamy od struny E (low E, 6. struna): dźwięki układają się chromatycznie E F F# G G# A A# B C C# D D# E w progach 0–12. Kiedy znasz ją na pamięć, połowa mapy gryfu jest gotowa — struna A ma identyczny układ przesunięty o 5 półtonów w górę. Ćwicz w obu kierunkach: zobacz pozycję i nazwij nutę, potem przeczytaj nazwę i znajdź ją na gryfie."
+                "theory": "Improwizacja zaczyna się od znajomości gryfu. Pierwszy krok to najgrubsza struna E (6. struna): od progu 0 do 12 dźwięki idą chromatycznie — E F F# G G# A A# H C C# D D# E. Kiedy znasz ją na pamięć, łatwo znajdziesz tonikę skali lub akordu, bo większość kształtów zaczyna się właśnie na tej strunie. Ćwicz w obu kierunkach: widzisz próg i nazywasz dźwięk, a potem widzisz nazwę i szukasz progu."
             },
             "key-signatures": {
                 "name": "Tonacje i znaki przykluczowe",
                 "term": "Key Signatures",
-                "theory": "Tonacja (key) określa, które dźwięki „są w domu”. Koło kwintowe (circle of fifths) porządkuje tonacje: idąc w prawo dodajemy krzyżyki (C→G→D→A→E→B), w lewo bemole (C→F→Bb→Eb→Ab). Liczba znaków przykluczowych (key signature) to najszybszy sposób rozpoznania tonacji w zapisie nutowym. Gdy ktoś w zespole mówi „zagraj w tonacji D”, to właśnie znaki przykluczowe mówią wszystkim, o którą tonację chodzi."
+                "theory": "Tonacja mówi, które dźwięki są „u siebie”. Porządkuje je koło kwintowe: w prawo od C każda kolejna tonacja ma o jeden krzyżyk więcej (C→G→D→A→E→H), w lewo — o jeden bemol więcej (C→F→B→Eb→Ab). Liczba znaków przykluczowych to najszybszy sposób, by rozpoznać tonację. Gdy ktoś w zespole mówi „gramy w D”, wiesz od razu, że w skali są F# i C#."
             },
             "pentatonic-scale": {
                 "name": "Skala pentatoniczna",
                 "term": "Pentatonic Scale",
-                "theory": "Pentatonika molowa (minor pentatonic: 1 b3 4 5 b7) to zwykle pierwsze „zdania” improwizatora — działa nad bluesem, rockiem i folkiem. Standardowy box (np. A w progach 5–8) leży wygodnie pod palcami i uczy frazowania w jednej pozycji zamiast biegania po całym gryfie. Przełączanie tonacji C/A/D/E/G uczy przenoszenia kształtu (transposition), a nie zapamiętywania przypadkowych progów. Zagraj pełny przebieg w górę i w dół z metronomem, żeby czas trzymał równo."
+                "theory": "Pentatonika molowa (1 b3 4 5 b7) to dla większości gitarzystów pierwszy język improwizacji: dobrze brzmi w bluesie, rocku i folku. Pierwszy boks (np. a-moll na progach 5–8) leży wygodnie pod palcami, więc możesz skupić się na frazowaniu, a nie na szukaniu dźwięków. Drugi boks zaczyna się od tercji małej i przedłuża skalę w górę gryfu. Zmieniaj tonację przełącznikiem: kształt zostaje ten sam, przesuwa się tylko po gryfie. Graj z metronomem, w górę i w dół, równo w czasie."
             },
             "major-scale": {
-                "name": "Skala majorowa",
+                "name": "Skala durowa",
                 "term": "Major Scale",
-                "theory": "Skala majorowa (major scale: 1 2 3 4 5 6 7) jest punktem odniesienia dla wszystkiego, co dalej — tryby, budowa akordów i analiza harmonii liczy się względem niej. Box w jednej pozycji (po trzy dźwięki na strunę) pokazuje całą skalę jako powtarzalny wzór. Ćwicz w górę i w dół z metronomem, potem w skokach tercjowych i kwartowych — tak skala staje się materiałem na linie melodyczne."
+                "theory": "Skala durowa (1 2 3 4 5 6 7) to punkt odniesienia dla całej reszty: tryby, budowę akordów i analizę harmonii opisuje się właśnie względem niej. Boks w jednej pozycji, po dwa lub trzy dźwięki na strunę, pokazuje całą skalę jako powtarzalny wzór. Graj ją w górę i w dół z metronomem, a potem tercjami i kwartami — wtedy skala zaczyna brzmieć jak melodia, a nie jak ćwiczenie."
             },
             "fretboard-notes": {
-                "name": "Dźwięki całego gryfu",
+                "name": "Dźwięki na całym gryfie",
                 "term": "Notes of the Rest of the Fretboard",
-                "theory": "Teraz rozszerzamy mapę na wszystkie struny. Klucz: sąsiednie struny (E–A–D–G) są oddalone o czystą kwartę (5 półtonów), a G–B o tercję wielką (4 półtony). Jeśli znasz struny E i A, resztę wyliczysz w górę. Widzieć każdy dźwięk wszędzie w progach 0–12 — bez tego „podążanie za akordami” w wyższych pozycjach to zgadywanie."
+                "theory": "Teraz poszerzasz mapę na wszystkie struny. Sąsiednie struny E–A–D–G–H dzieli kwarta czysta (5 półtonów), z jednym wyjątkiem: między G a H jest tercja wielka (4 półtony). Dźwięk z 5. progu jednej struny to więc pusta struna następnej (na strunie G — z 4. progu). Celem jest widzieć każdy dźwięk w każdym miejscu na progach 1–12; bez tego granie po zmianach akordów w wyższych pozycjach to zgadywanie."
             },
             "pentatonic-positions": {
                 "name": "Pozycje pentatoniki",
                 "term": "Pentatonic Scale Positions",
-                "theory": "Te pięć boksów to jedna skala: G-moll pentatoniczna (G, Bb, C, D, F) rozłożona na cały gryf. Każdy boks zaczyna się od kolejnego stopnia tej pentatoniki, a nazwa boksu pochodzi od akordu, któremu jego dźwięk startowy służy: G min pent (3 fr), Bb major pent (5 fr), C dorian pent (7 fr), D phrygian pent (10 fr), F mixo pent (12 fr). W każdym boksie te same pięć dźwięków — zmienia się tylko to, który z nich brzmi jak „dom”. Opanuj każdy boks, potem łącz je ze sobą."
+                "theory": "Pięć boksów to jedna skala — G-moll pentatoniczna (G, B, C, D, F) — rozłożona na cały gryf. Każdy kolejny boks zaczyna się od następnego dźwięku tej skali. Film nazywa boksy od dźwięku, od którego się zaczynają: G-moll pent (próg 3), B-dur pent (próg 5), C dorycka pent (próg 7), D frygijska pent (próg 10), F miksolidyjska pent (próg 12). W każdym boksie grasz tych samych pięć dźwięków; zmienia się tylko kształt pod palcami. Opanuj boksy po kolei, a potem łącz sąsiednie."
             },
             "modes": {
-                "name": "Tryby kościelne",
+                "name": "Tryby",
                 "term": "Modes",
-                "theory": "Tryby (modes) to siedem obrotów skali majorowej: I Ionian, II Dorian, III Phrygian, IV Lydian, V Mixolydian, VI Aeolian, VII Locrian. Względem majora: Dorian = b3 b7, Phrygian = b2, Lydian = #4, Mixolydian = b7, Aeolian = b3 b6 b7, Locrian = b2 b3 b5 b6 b7. Ucz się wzoru (W/H) i słuchaj stopnia charakterystycznego (characteristic note): Lydian poznasz po #4, Mixolydian po b7, Phrygian po b2."
+                "theory": "Tryby to siedem skal, które powstają ze skali durowej, gdy zaczynasz ją od kolejnych stopni: I joński, II dorycki, III frygijski, IV lidyjski, V miksolidyjski, VI eolski, VII lokryjski. W porównaniu ze skalą durową od tego samego dźwięku dorycki ma b3 i b7, frygijski b2 b3 b6 b7, lidyjski #4, miksolidyjski b7, eolski b3 b6 b7, a lokryjski b2 b3 b5 b6 b7. Każdy tryb ma dźwięk charakterystyczny, który odróżnia go od zwykłej skali durowej lub molowej: w doryckim to seksta wielka, we frygijskim b2, w lidyjskim #4, w miksolidyjskim b7. Te dźwięki podkreślasz, gdy chcesz, żeby tryb było słychać."
             },
             "chord-construction": {
                 "name": "Budowa akordów",
                 "term": "How Chords Are Built",
-                "theory": "Akordy buduje się z gamy: bierzesz co drugi dźwięk — 1-3-5 — od wybranego stopnia. W tonacji F: F-A-C to I stopień (major), G-Bb-D to ii (minor), a E-G-Bb to vii (diminished). Typ trójdźwięku (triad) rozpoznajesz po odległościach: tercja wielka + czysta kwinta = major, tercja mała + czysta kwinta = minor, tercja mała + kwinta zmniejszona = dim, tercja wielka + kwinta zwiększona = aug. To samo budowanie rozciąga się na akordy septymowe i wszystkie rozszerzenia używane w improwizacji."
+                "theory": "Akord buduje się ze skali, biorąc co drugi dźwięk od wybranego stopnia: 1-3-5. W F-dur (F G A B C D E) stopień I daje F-A-C (durowy), II daje G-B-D (molowy), a VII — E-G-B (zmniejszony). Rodzaj trójdźwięku poznasz po interwałach od prymy: tercja wielka i kwinta czysta to akord durowy, tercja mała i kwinta czysta — molowy, tercja mała i kwinta zmniejszona — zmniejszony, tercja wielka i kwinta zwiększona — zwiększony. Dokładając jeszcze jedną tercję (1-3-5-7), dostajesz akordy septymowe."
             },
             "chord-scale-major": {
-                "name": "Akordy a skala (major)",
+                "name": "Akordy i skale (dur)",
                 "term": "Chord/Scale Relationships (Major)",
-                "theory": "Każdy akord diatoniczny ma „swoją” skalę: Dm7 → Dorian (Dm13 to ten sam świat z rozszerzeniami), Em7 → Phrygian, Fmaj7 → Lydian (stąd charakterystyczny #11), G7 → Mixolydian, Am7 → Aeolian, Bm7b5 → Locrian. W praktyce: graj skalę tonacji, ale celuj w dźwięki charakterystyczne danego akordu. To pierwszy krok od „gram w tonacji” do „podążam za akordami” (following the changes)."
+                "theory": "Każdy akord w tonacji ma „swój” tryb. W C-dur: Cmaj7 → joński, Dm7 → dorycki (Dm13 to ten sam akord z rozszerzeniami), Em7 → frygijski, Fmaj7 → lidyjski (stąd #11 w Fmaj7#11), G7 → miksolidyjski, Am7 → eolski, Hm7b5 → lokryjski. W praktyce grasz dźwiękami tonacji, ale na każdym akordzie celujesz w jego dźwięk charakterystyczny. To pierwszy krok od „gram w tonacji” do „gram po zmianach” (following the changes)."
             },
             "triads": {
                 "name": "Trójdźwięki",
                 "term": "Triads",
-                "theory": "Trójdźwięki na trzech najwyższych strunach (G-B-E) to ekonomiczny sposób widzenia harmonii: kształt, podzbiór dźwięków akordu i jego inwersje leżą obok siebie na gryfie. Znając je, zagrasz komping i jednocześnie zobaczysz cele linii melodycznej. Powtórz też nazwy → interwały: major 1 3 5, minor 1 b3 5, diminished 1 b3 b5, augmented 1 3 #5 — bez tego quizy harmoniczne będą zgadywanką."
+                "theory": "Trójdźwięki na trzech najwyższych strunach (G-H-E) to najoszczędniejszy sposób, żeby widzieć harmonię na gryfie. Każdy akord ma tu trzy przewroty, które leżą obok siebie, więc przy zmianie akordu wystarczy przesunąć palce o próg lub dwa. Te same kształty służą do akompaniamentu i jako cele dla linii melodycznej. Powtórz też interwały: durowy 1 3 5, molowy 1 b3 5, zmniejszony 1 b3 b5, zwiększony 1 3 #5."
             },
             "arpeggios": {
                 "name": "Arpeggia",
                 "term": "Arpeggios",
-                "theory": "Arpeggio to akord zagrany nuta po nucie — najbardziej „bezpieczny” materiał nad zmieniającymi się akordami, bo zawiera wyłącznie dźwięki, które pasują. Kształt septymowy (1 3 5 b7 dla dom7, 1 b3 5 b7 dla m7) rozłożony po jednej nucie na strunę (E-A-D-G) pokazuje całą strukturę akordu w jednej pozycji. W improwizacji arpeggio wyznacza kierunek linii: od tego szkieletu dodajesz skale, chromatykę i dźwięki podejściowe."
+                "theory": "Arpeggio to akord zagrany dźwięk po dźwięku. Zawiera tylko dźwięki akordu, więc nad tym akordem zawsze pasuje — to najpewniejszy materiał, gdy akordy się zmieniają. Diagramy pokazują arpeggio na wszystkich sześciu strunach w jednej pozycji: 1 b3 5 b7 dla m7 i 1 3 5 b7 dla akordu dominantowego 7. Arpeggio to szkielet linii; dźwięki skali, chromatykę i dźwięki przejściowe dokładasz dopiero wokół niego."
             },
             "target-chord-tones": {
                 "name": "Celowanie w dźwięki akordu",
                 "term": "How to Target Chord Tones",
-                "theory": "„Podążanie za akordami” (following the changes) zaczyna się od lądowania na dźwiękach akordu (chord tones) dokładnie w momencie zmiany. Na progresji Am–C–Em–D celuj w tercję (C, E, G, F#) albo kwintę (E, G, B, A) każdego akordu — tercja definiuje kolor major/minor, kwinta jest stabilna i bezpieczna. Rozbieg bierzesz z poprzedniego akordu, lądowanie jest nowe — ten kontrast napędza linię."
+                "theory": "Granie po zmianach (following the changes) zaczyna się od lądowania na dźwięku akordu dokładnie wtedy, gdy akord się zmienia. Na progresji Am–C–Em–D przejdź cztery poziomy: najpierw prymy, potem tercje (C, E, G, F#), kwinty (E, G, H, A) i septymy. Tercja mówi, czy akord jest durowy czy molowy, kwinta brzmi stabilnie, a septyma dodaje koloru. Linię zaczynasz jeszcze na poprzednim akordzie, a kończysz na nowym — dzięki temu słychać, że improwizacja idzie za harmonią."
             },
             "voice-leading": {
                 "name": "Prowadzenie głosów",
                 "term": "Voice Leading",
-                "theory": "Voice leading to minimalny ruch między akordami: szukaj dźwięku wspólnego (common tone) albo kroku o półton/ton od dźwięku następnego akordu. Gm→Bbm ma wspólne Bb, Gm→Cm wspólne G — zagraj ten dźwięk tuż przed zmianą, a linia „przeniknie” przez harmonię zamiast skakać. Ta sama zasada kieruje kompingiem i głosami akordów: ruch o 1–2 progi zamiast przeskoku na drugi koniec gryfu."
+                "theory": "Prowadzenie głosów to przechodzenie między akordami najkrótszą drogą: przez dźwięk wspólny albo krokiem o pół tonu lub ton. Gm i Bm mają wspólne B, a D z akordu Gm schodzi o pół tonu do Db w Bm — to ruch pokazany w filmie. Gm i Cm łączy dźwięk G. Zagraj taki dźwięk tuż przed zmianą, a linia płynnie przejdzie do nowego akordu zamiast skakać. W ii–V–I (Dm7–G7–Cmaj7) najkrótszą drogę tworzą tercje i septymy: F→F→E oraz C→H→H."
             },
             "switching-keys": {
                 "name": "Zmiana tonacji w improwizacji",
                 "term": "How to Switch Keys While Improvising",
-                "theory": "Modulacja w improwizacji: znajdź akord wspólny dla dwóch tonacji (pivot chord) albo użyj ii–V, by „wprowadzić” nową tonację. W ćwiczeniu tonacja zmienia się w połowie pętli (G → B): twój materiał — pentatonika, skala, arpeggia — musi się przesunąć razem z nią. Trenuj to świadomie: najpierw usłysz zmianę, potem wybierz kształt w nowej tonacji, na końcu połącz oba światy jedną linią."
+                "theory": "Gdy utwór zmienia tonację, twoje skale i arpeggia muszą zmienić się razem z nim. Pomaga akord wspólny dla obu tonacji (pivot chord) albo ii–V, które wprowadza nową tonację. Zacznij od łatwej zmiany C-dur → F-dur, w której różni się tylko jeden dźwięk (H zmienia się w B), potem przejdź do zmiany G-dur → H-dur. Kolejność pracy: usłysz zmianę, wybierz kształt w nowej tonacji, a na końcu połącz obie tonacje jedną linią."
             },
             "tritone-subs": {
                 "name": "Zamiany trytonowe",
                 "term": "Tritone Substitutions",
-                "theory": "Zamiana trytonowa (tritone substitution): dominantę zastępujesz dominantą o tryton wyżej — G7 → Db7. Oba akordy mają ten sam tryton (tercja i septyma są zamienione miejscami), więc pełnią tę samą funkcję, ale bas schodzi chromatycznie: Dm7–Db7–C zamiast Dm7–G7–C. Podkreśl tercję i b7 subV i rozwiąż je krokowo — to klasyczne jazzowe zejście basu: napięcie i rozwiązanie."
+                "theory": "Zamiana trytonowa (tritone substitution) to zastąpienie akordu dominantowego innym akordem dominantowym odległym o tryton: G7 → Db7. Oba akordy mają ten sam tryton (H i F w G7, F i Cb, czyli H, w Db7), więc prowadzą do tego samego akordu, ale bas schodzi chromatycznie: Dm7–Db7–Cmaj7 zamiast Dm7–G7–Cmaj7. Nad Db7 podkreślaj tercję i septymę i rozwiązuj je o pół tonu. Film pokazuje ten mechanizm w ciągu Hm7–B7–Am7–Ab7–Gmaj7."
             },
             "secondary-dominants": {
                 "name": "Dominanty poboczne",
                 "term": "Secondary Dominants",
-                "theory": "Dominanta poboczna (secondary dominant) to V7 „tymczasowej” tonacji akordu gamy: A7 prowadzi do Dm7 (V7/ii), B7 do Em7, C7 do Fmaj7, D7 do G7, E7 do Am7. Wprowadzają napięcie i ruch wewnątrz jednej tonacji, nie zmieniając jej na stałe. Progresja C–A7–Dm7–G7–C pokazuje mechanizm: każda dominanta „celuje” w dźwięki — najlepiej tercję — akordu docelowego."
+                "theory": "Dominanta poboczna to akord dominantowy (V7), który na chwilę traktuje inny akord tonacji jak tonikę. W C-dur: A7 prowadzi do Dm7 (V7/ii), H7 do Em7, C7 do Fmaj7, D7 do G7, E7 do Am7; tabela z filmu dodaje G7 → Cmaj7, czyli zwykłą dominantę. Dominanty poboczne dodają napięcia i ruchu, nie zmieniając tonacji. W progresji Cmaj7–A7–Dm7–G7 każda dominanta prowadzi do następnego akordu, a najmocniej słychać to, gdy po niej wylądujesz na tercji akordu docelowego."
             },
             "borrowed-chords": {
                 "name": "Akordy pożyczone",
                 "term": "Borrowed Chords",
-                "theory": "Akordy pożyczone (borrowed chords) przychodzą z tonacji równoległej molowej: bVII7 (Bb7 w C), iv m (Fm), bVI (Ab), bIII (Eb). Najpopularniejszy przypadek to backdoor ii–V: Fm7–Bb7→C. Nad Fm7 graj F dorian; nad Bb7 Bb lydian dominant (albo zwykły Bb mixolydian). Root Bb wchodzi o ton w górę do C — ten ruch to brzmienie backdoor."
+                "theory": "Akordy pożyczone pochodzą z tonacji jednoimiennej molowej. W C-dur pożyczasz je z c-moll: Fm (iv), B7 (bVII7), Ab (bVI) i Eb (bIII). Najczęstszy przypadek to backdoor ii–V: Fm7–B7–Cmaj7. Nad Fm7 graj skalę F dorycką, nad B7 — B lidyjską dominantową albo B miksolidyjską. Bas B idzie o cały ton w górę do C i właśnie ten ruch daje brzmienie „wejścia tylnymi drzwiami”."
             },
             "melodic-minor": {
                 "name": "Skala molowa melodyczna",
                 "term": "Melodic Minor Scale and Modes",
-                "theory": "Mol melodyczny (melodic minor: 1 2 b3 4 5 6 7) to „skala jazzu”: minor w dolnej części, major u góry — zróżnicowane brzmienie bez skoku harmonicznego. W improwizacji jest użyteczniejsza niż mol harmoniczna, bo jej tryby obsłużą m(Maj7), 7alt, Lydian Dominant i całą rodzinę nowoczesnych brzmień. Opanuj box A w pozycji ~4fr, potem przenoś kształt na inne tonacje przełącznikiem."
+                "theory": "Skala molowa melodyczna (1 2 b3 4 5 6 7) to skala molowa z sekstą i septymą wielką: dół brzmi molowo, góra durowo. W improwizacji jest bardziej przydatna niż harmoniczna, bo z jej trybów pochodzą skale do akordów m(maj7), 7alt, 7#11 i innych typowo jazzowych brzmień. Zacznij od boksu A-moll melodycznej w okolicy 4. progu, potem zagraj pozycję wyżej, a przełącznikiem przenieś oba kształty do innych tonacji."
             },
             "chord-scale-melodic": {
-                "name": "Akordy a skala (mol melodyczny)",
+                "name": "Akordy i skale (mol melodyczny)",
                 "term": "Melodic Minor Chord/Scale Relationships",
-                "theory": "Tryby mola melodycznego parują się z akordami: I Melodic Minor → m(Maj7), II Dorian b2 → m7, III Lydian Augmented → Maj7#5, IV Lydian Dominant → 7(#11), V Mixolydian b6 → 7(b13), VI Aeolian b5 → m7b5, VII Altered → 7alt. (Niektórzy grają też Altered nad m7b5; standardowo skala Altered służy akordom 7alt.) Rozpoznajesz symbol akordu i wiesz, która skala da jego „jazzowy” kolor."
+                "theory": "Każdy tryb skali molowej melodycznej pasuje do innego akordu: I mol melodyczny → m(maj7), II dorycki b2 → m7 (sus b9), III lidyjski zwiększony → maj7#5, IV lidyjski dominantowy → 7#11, V miksolidyjski b6 → 7b13, VI eolski b5 (lokryjski ♮2) → m7b5, VII alterowany → 7alt. Film łączy skalę alterowaną także z akordem m7b5; zwykle jednak gra się ją na akordzie 7alt. Kiedy widzisz symbol akordu, wiesz, z której molowej melodycznej wziąć skalę: na G7alt grasz Ab-moll melodyczną."
             },
             "harmonic-minor": {
                 "name": "Skala molowa harmoniczna",
                 "term": "Harmonic Minor Scale and Modes",
-                "theory": "Mol harmoniczny (harmonic minor: 1 2 b3 4 5 b6 7) ma charakterystyczny skok b6→7 — natychmiast rozpoznawalne „arabskie” brzmienie. W kolejności nauki jest pod koniec nie dlatego, że jest trudny, ale dlatego, że jest mniej istotny w improwizacji niż wszystko, co było przed nim. Jego piąty tryb (Phrygian Dominant) i interwały zdarzają się jednak często — opanuj box C w pozycji ~6fr i przenieś na inne tonacje."
+                "theory": "Skala molowa harmoniczna (1 2 b3 4 5 b6 7) ma charakterystyczny skok o półtora tonu między b6 a 7, przez który brzmi „orientalnie”. W tej kolejności nauki jest blisko końca nie dlatego, że jest trudna, ale dlatego, że w improwizacji przydaje się rzadziej niż wszystko wcześniej. Najczęściej używa się jej nad dominantą tonacji molowej (E7 w a-moll), gdzie podkreśla dźwięk G#. Opanuj boks C-moll harmonicznej w okolicy 6. progu, potem pozycję wyżej, i przenieś oba kształty do innych tonacji."
             },
             "chord-scale-harmonic": {
-                "name": "Akordy a skala (mol harmoniczny)",
+                "name": "Akordy i skale (mol harmoniczny)",
                 "term": "Harmonic Minor Chord/Scale Relationships",
-                "theory": "Tryby mola harmonicznego parują się z akordami: I Harmonic Minor → m(Maj7), II Locrian #6 → m7b5, III Ionian #5 → Maj7#5, IV Dorian #4 → m7. Dalej: V Phrygian Dominant → 7, VI Lydian #2 → Maj7, VII Superlocrian bb7 → dim7. W praktyce najczęściej użyjesz Phrygian Dominant nad dominantą prowadzącą do mola (V7/x w molu) i samej skali nad m(Maj7)."
+                "theory": "Tryby skali molowej harmonicznej i ich akordy: I mol harmoniczny → m(maj7), II lokryjski #6 → m7b5, III joński #5 → maj7#5, IV dorycki #4 → m7, V frygijski dominantowy → 7, VI lidyjski #2 → maj7, VII superlokryjski bb7 → dim7. W praktyce najczęściej sięgasz po frygijski dominantowy: nad akordem V7 prowadzącym do akordu molowego (E7 → Am) daje on b9 i b13, które ciągną do rozwiązania. Pozostałe tryby spotkasz rzadziej, ale warto rozpoznawać ich symbole akordów."
             },
             "giant-steps": {
                 "name": "Giant Steps",
                 "term": "Giant Steps",
-                "theory": "„Giant Steps” Coltrane'a to finał systemu: tonacje w trójkach tercji wielkich (B–G–Eb), progresja |Bmaj7 D7|Gmaj7 Bb7|Ebmaj7 F#7|Bmaj7|. Dominanty (D7, Bb7, F#7) rozwiązują się o kwintę w dół do „nowej” tonacji co dwa akordy, a tonacje zmieniają się szybciej niż w jakimkolwiek standardzie. Graj tercje akordów (arpeggia) przez zmiany i zwalniaj do 60 BPM — po opanowaniu tego cała wcześniejsza lista składa się w jeden system."
+                "theory": "„Giant Steps” Johna Coltrane’a zamyka listę. Tonacje zmieniają się tu co tercję wielką w dół (H → G → Eb), a akordy często co dwa uderzenia. Każdą nową tonację wprowadza jej dominanta (D7 → G, B7 → Eb, F#7 → H) albo ii–V (Am7–D7, Fm7–B7, C#m7–F#7). Ćwicz całą 16-taktową formę w trzech krokach: najpierw same prymy, potem wzór 1-2-3-5 na każdym akordzie, na końcu arpeggia. Zacznij od 60 BPM; kiedy przejdziesz formę bez gubienia się, wszystkie wcześniejsze moduły złożą się w jeden system."
             }
         },
         "ex": {
             "e-string-notes.e1": {
-                "name": "Quiz: pozycja → nuta (struna E)",
-                "desc": "Otwórz sesję treningową (gryf → nuta, struna E, progi 0–12) i opanuj każdą pozycję: co najmniej 3 odpowiedzi, 80% trafności."
+                "name": "Trening: pozycja → dźwięk (struna E)",
+                "desc": "Otwórz trening „gryf → dźwięk” na strunie E, progi 1–12. Każda pozycja potrzebuje co najmniej 3 odpowiedzi i 80% trafności."
             },
             "e-string-notes.e2": {
-                "name": "Quiz: nuta → pozycja (struna E)",
-                "desc": "Otwórz sesję treningową (nuta → tab, struna E, progi 0–12) i opanuj każdą pozycję: co najmniej 3 odpowiedzi, 80% trafności."
+                "name": "Trening: dźwięk → pozycja (struna E)",
+                "desc": "Odwrotny kierunek: widzisz nazwę dźwięku i wskazujesz go w tabulaturze. Korzysta z tych samych wyników pozycji co poprzednie ćwiczenie. Ćwiczenie dodatkowe — nie jest wymagane do zaliczenia modułu."
             },
             "key-signatures.e1": {
-                "name": "Tonacja → liczba znaków",
-                "desc": "Ile znaków przykluczowych ma tonacja major?"
+                "name": "Quiz: tonacje i znaki",
+                "desc": "Liczba i rodzaj znaków przykluczowych, tonacja jednoimienna molowa — pytania o różne strony tego samego tematu."
             },
             "key-signatures.e2": {
                 "name": "Znaki → tonacja",
-                "desc": "Rozpoznaj tonację major po liczbie i typie znaków przykluczowych (koło kwintowe)."
+                "desc": "Rozpoznaj tonację durową po liczbie krzyżyków lub bemoli."
             },
             "pentatonic-scale.e1": {
-                "name": "Diagram: minor pentatonic (5 fr)",
-                "desc": "Box pentatoniki w progach 5–8, przełącznik tonacji C/A/D/E/G. Pełny przebieg to góra i dół."
+                "name": "Diagram: pentatonika molowa, boks 1",
+                "desc": "Pierwszy boks pentatoniki molowej (domyślnie a-moll, progi 5–8). Przełącznik zmienia tonację, a kształt przesuwa się po gryfie. Przebieg to cała skala w górę i w dół."
             },
             "pentatonic-scale.e2": {
-                "name": "Diagram: minor pentatonic (12 fr)",
-                "desc": "Ten sam kształt w wyższej pozycji (12–15)."
+                "name": "Diagram: pentatonika molowa, boks 2",
+                "desc": "Drugi boks, zaczynający się od tercji małej (w a-moll progi 7–10). Łączy się z pierwszym i przedłuża skalę w górę gryfu."
             },
             "major-scale.e1": {
-                "name": "Diagram: A major (2–6)",
-                "desc": "Skala majorowa w jednym boxie pozycyjnym."
+                "name": "Diagram: skala durowa, pozycja niższa",
+                "desc": "Skala durowa w jednej pozycji (A-dur, progi 2–6). Przełącznikiem przeniesiesz ją do innych tonacji."
             },
             "major-scale.e2": {
-                "name": "Diagram: C major (7–11)",
-                "desc": "Major w wyższej pozycji z przełącznikiem tonacji."
+                "name": "Diagram: skala durowa, pozycja wyższa",
+                "desc": "Ta sama skala w kolejnej pozycji (C-dur, progi 7–11)."
             },
             "fretboard-notes.e1": {
-                "name": "Quiz: pozycja → nuta (cały gryf)",
-                "desc": "Otwórz sesję treningową (gryf → nuta, wszystkie struny, progi 0–12) i opanuj każdą pozycję: co najmniej 3 odpowiedzi, 80% trafności."
+                "name": "Trening: pozycja → dźwięk (cały gryf)",
+                "desc": "Otwórz trening „gryf → dźwięk” na wszystkich strunach, progi 1–12. Każda pozycja potrzebuje co najmniej 3 odpowiedzi i 80% trafności."
             },
             "fretboard-notes.e2": {
-                "name": "Quiz: nuta → pozycja (cały gryf)",
-                "desc": "Otwórz sesję treningową (nuta → tab, wszystkie struny, progi 0–12) i opanuj każdą pozycję: co najmniej 3 odpowiedzi, 80% trafności."
+                "name": "Trening: dźwięk → pozycja (cały gryf)",
+                "desc": "Odwrotny kierunek na całym gryfie. Korzysta z tych samych wyników pozycji co poprzednie ćwiczenie. Ćwiczenie dodatkowe — nie jest wymagane do zaliczenia modułu."
             },
             "pentatonic-positions.e1": {
-                "name": "G minor pentatonic (3 fr)",
-                "desc": "Pierwsza odmiana pentatoniki w pozycji 3–6."
+                "name": "Boks 1: od G (próg 3)",
+                "desc": "Pierwszy boks G-moll pentatonicznej, progi 3–6."
             },
             "pentatonic-positions.e2": {
-                "name": "Bb major pentatonic (5 fr)",
-                "desc": "Druga odmiana (major pent) w pozycji 5–8."
+                "name": "Boks 2: od B (próg 5)",
+                "desc": "Drugi boks tej samej skali, zaczyna się od B — w filmie „B-dur pent”. Progi 5–8."
             },
             "pentatonic-positions.e3": {
-                "name": "C dorian pentatonic (7 fr)",
-                "desc": "Trzecia odmiana (1 2 b3 5 6) w pozycji 7–10."
+                "name": "Boks 3: od C (próg 7)",
+                "desc": "Trzeci boks, zaczyna się od C — w filmie „C dorycka pent”. Progi 7–11."
             },
             "pentatonic-positions.e4": {
-                "name": "D phrygian pentatonic (10 fr)",
-                "desc": "Czwarta odmiana (1 b2 3 5 b6) w pozycji 10–13."
+                "name": "Boks 4: od D (próg 10)",
+                "desc": "Czwarty boks, zaczyna się od D — w filmie „D frygijska pent”. Progi 10–13."
             },
             "pentatonic-positions.e5": {
-                "name": "F mixolydian pentatonic (12 fr)",
-                "desc": "Piąta odmiana (1 3 4 5 b7) w pozycji 12–15."
+                "name": "Boks 5: od F (próg 12)",
+                "desc": "Piąty boks, zaczyna się od F — w filmie „F miksolidyjska pent”. Progi 12–15."
             },
             "modes.e1": {
-                "name": "Kolejność i nazwy trybów",
-                "desc": "I → VII: nazwij tryb po numerze i wzorze względem majora."
+                "name": "Quiz: tryby",
+                "desc": "Kolejność trybów, ich dźwięki od danej prymy, skala macierzysta i rozpoznawanie trybu ze słuchu."
             },
             "modes.e2": {
-                "name": "Stopnie charakterystyczne",
-                "desc": "Lydian ma #4, Mixolydian b7, Phrygian b2 — rozpoznaj tryb po charakterystycznym dźwięku."
+                "name": "Tryby: dźwięk charakterystyczny",
+                "desc": "Rozpoznaj tryb po jego dźwięku charakterystycznym: lidyjski po #4, miksolidyjski po b7, frygijski po b2…"
             },
             "chord-construction.e1": {
-                "name": "Triada ze stopnia gamy",
-                "desc": "Zbuduj 1-3-5 z gamy majorowej i rozpoznaj typ trójdźwięku."
+                "name": "Quiz: akordy ze skali",
+                "desc": "Zbuduj akord na stopniu skali durowej i rozpoznaj jego rodzaj — trójdźwięki i akordy septymowe."
             },
             "chord-construction.e2": {
-                "name": "Symbol trójdźwięku stopnia",
-                "desc": "Wybierz poprawny symbol akordu dla stopnia gamy (np. ii w D)."
+                "name": "Zapis trójdźwięku",
+                "desc": "Wybierz poprawny symbol trójdźwięku na danym stopniu skali (np. II stopień w D-dur to Em)."
             },
             "chord-scale-major.e1": {
-                "name": "Akord → tryb (major)",
-                "desc": "Dm7 → Dorian, Fmaj7 → Lydian, G7 → Mixolydian…"
+                "name": "Akord → tryb",
+                "desc": "Dla akordu w danej tonacji durowej wybierz pasujący tryb (np. Dm7 w C-dur → dorycki)."
             },
             "chord-scale-major.e2": {
-                "name": "Tryb → akord (major)",
-                "desc": "Odwrotna strona parowania + tensy charakterystyczne (Dm13, Fmaj7#11)."
+                "name": "Tryb → akord",
+                "desc": "Odwrotnie: dla trybu wybierz akord, do którego pasuje — także z rozszerzeniami (Dm13, Fmaj7#11)."
             },
             "triads.e1": {
-                "name": "Loop: triady nad Am–C–Em–D",
-                "desc": "Grając nad loopem, używaj wyłącznie triad i zmieniaj inwersję o najmniejszy ruch palców. 2 udane obiegi."
+                "name": "Pętla: trójdźwięki nad Am–C–Em–D",
+                "desc": "Graj tylko trójdźwięki i przy każdej zmianie wybieraj przewrót leżący najbliżej poprzedniego."
             },
             "triads.e2": {
-                "name": "Nazwa → interwały",
-                "desc": "Major 1 3 5, minor 1 b3 5, dim, aug + akordy septymowe."
+                "name": "Rodzaj akordu → interwały",
+                "desc": "Durowy 1 3 5, molowy 1 b3 5, zmniejszony, zwiększony i akordy septymowe."
             },
             "arpeggios.e1": {
-                "name": "Diagram: m7 arpeggio (EADG)",
-                "desc": "1 b3 5 b7 po jednej nucie na strunę."
+                "name": "Diagram: arpeggio m7",
+                "desc": "Arpeggio Cm7 (1 b3 5 b7) na wszystkich strunach, progi 8–12."
             },
             "arpeggios.e2": {
-                "name": "Diagram: dom7 arpeggio (EADG)",
-                "desc": "1 3 5 b7 po jednej nucie na strunę."
+                "name": "Diagram: arpeggio 7 (dominantowe)",
+                "desc": "Arpeggio G7 (1 3 5 b7) na wszystkich strunach, progi 3–7."
             },
             "target-chord-tones.e1": {
-                "name": "Loop: ląduj na tercji",
-                "desc": "Am–C–Em–D ze stopniami trudności: ląduj na prymach, potem tercjach, kwintach i septymach. 2 udane obiegi na poziom."
+                "name": "Pętla: prymy, tercje, kwinty, septymy",
+                "desc": "Am–C–Em–D w czterech poziomach. Na każdej zmianie ląduj na wskazanym dźwięku akordu; każdy poziom wymaga osobnych udanych obiegów."
             },
             "target-chord-tones.e2": {
-                "name": "Loop: ląduj na kwincie",
-                "desc": "Ta sama progresja bez stałego celu — ląduj na każdym dźwięku akordu, który usłyszysz. 2 udane obiegi."
+                "name": "Pętla: dowolny dźwięk akordu",
+                "desc": "Ta sama progresja bez stałego celu — ląduj na dowolnym dźwięku akordu."
             },
             "voice-leading.e1": {
-                "name": "Loop: Gm → Bbm",
-                "desc": "Przed zmianą zagraj dźwięk wspólny (Bb) lub sąsiedni krok."
+                "name": "Pętla: Gm → Bm",
+                "desc": "Przed zmianą zagraj dźwięk wspólny (B) albo przejdź krokiem, np. D → Db."
             },
             "voice-leading.e2": {
-                "name": "Loop: Gm → Cm",
-                "desc": "Dźwięk wspólny: G. Zminimalizuj ruch palców."
+                "name": "Pętla: Gm → Cm",
+                "desc": "Dźwięk wspólny to G. Przechodź do nowego akordu najkrótszą drogą."
             },
             "switching-keys.e1": {
-                "name": "Quiz: akordy wspólne i ii–V",
-                "desc": "Pivot chord między tonacjami i ii–V wprowadzające tonację."
+                "name": "Quiz: akord wspólny i ii–V",
+                "desc": "Znajdź akord wspólny dwóch tonacji i ii–V, które wprowadza nową tonację."
             },
             "switching-keys.e2": {
-                "name": "Loop: modulacja G → B",
-                "desc": "Łatwiejsza zmiana: tonacja przechodzi C → F (jedna zmieniona nuta). 2 udane obiegi."
+                "name": "Pętla: zmiana C-dur → F-dur",
+                "desc": "Łatwiejsza zmiana — różni się jeden dźwięk (H zmienia się w B)."
             },
             "tritone-subs.e1": {
                 "name": "Quiz: zamiany trytonowe",
-                "desc": "SubV dla G7? V dla subV? Rozwiązanie subV→I."
+                "desc": "Znajdź zamianę trytonową dominanty, dominantę dla zamiany i akord, do którego obie prowadzą."
             },
             "tritone-subs.e2": {
-                "name": "Loop: G7 vs Ab7 (subV)",
-                "desc": "Przełącz tryb normal/subV; graj tercję i b7 subV z rozwiązaniem krokowym."
+                "name": "Pętla: G7 i Db7",
+                "desc": "Trzy warianty: zwykłe ii–V–I, ta sama progresja z Db7 i ciąg z filmu. Każdy wariant wymaga osobnych udanych obiegów."
             },
             "secondary-dominants.e1": {
                 "name": "Quiz: dominanty poboczne",
-                "desc": "Która V7/x prowadzi do Dm7, Em7, Fmaj7, G7, Am7 w tonacji C?"
+                "desc": "Znajdź dominantę poboczną dla akordu tonacji i akord, do którego prowadzi — we wszystkich tonacjach durowych."
             },
             "secondary-dominants.e2": {
-                "name": "Loop: C–A7–Dm7–G7–C",
-                "desc": "Po każdej dominantie pobocznej celuj w tercję akordu docelowego."
+                "name": "Pętla: dominanty poboczne",
+                "desc": "Dwa warianty: Cmaj7–A7–Dm7–G7 i progresja z pięcioma dominantami. Po każdej dominancie ląduj na tercji następnego akordu."
             },
             "borrowed-chords.e1": {
                 "name": "Quiz: akordy pożyczone",
-                "desc": "bVII7, iv m, bVI, backdoor ii–V — rozpoznaj stopień i źródło."
+                "desc": "Rozpoznaj stopień akordu pożyczonego z tonacji jednoimiennej molowej i progresję backdoor."
             },
             "borrowed-chords.e2": {
-                "name": "Loop: backdoor Fm7–Bb7–C",
-                "desc": "Nad Bb7 graj dźwięki C mixolydian / bVII i rozwiązuj krokowo do C."
+                "name": "Pętla: ii–V–I i backdoor",
+                "desc": "Dwa warianty prowadzące do Cmaj7: Dm7–G7 i Fm7–B7. Porównaj ich brzmienie."
             },
             "melodic-minor.e1": {
-                "name": "Diagram: A melodic minor (~4 fr)",
-                "desc": "1 2 b3 4 5 6 7 w pozycji 3–7."
+                "name": "Diagram: A-moll melodyczna, pozycja niższa",
+                "desc": "Skala 1 2 b3 4 5 6 7 na progach 3–7. Przełącznikiem przeniesiesz ją do innych tonacji."
             },
             "melodic-minor.e2": {
-                "name": "Diagram: C melodic minor (~8 fr)",
-                "desc": "Ten sam kształt wyżej + przełącznik tonacji."
+                "name": "Diagram: A-moll melodyczna, pozycja wyższa",
+                "desc": "Kolejna pozycja tej samej skali, progi 7–11."
             },
             "chord-scale-melodic.e1": {
-                "name": "Akord → tryb (mol melodyczny)",
-                "desc": "m(Maj7), 7alt, 7#11, 7b13… rozpoznaj skalę."
+                "name": "Quiz: tryby molowej melodycznej",
+                "desc": "Akord → tryb, tryb → akord i skala macierzysta konkretnego akordu."
             },
             "chord-scale-melodic.e2": {
-                "name": "Tryb → akord (mol melodyczny)",
-                "desc": "Odwrotnie: tryb → akord, który obsługuje."
+                "name": "Quiz: z której molowej melodycznej?",
+                "desc": "Dla akordu (np. D7#11) wskaż molową melodyczną, z której pochodzi jego skala."
             },
             "harmonic-minor.e1": {
-                "name": "Diagram: C harmonic minor (~6 fr)",
-                "desc": "1 2 b3 4 5 b6 7 w pozycji 5–9."
+                "name": "Diagram: C-moll harmoniczna, pozycja niższa",
+                "desc": "Skala 1 2 b3 4 5 b6 7 na progach 5–9. Przełącznikiem przeniesiesz ją do innych tonacji."
             },
             "harmonic-minor.e2": {
-                "name": "Diagram: A harmonic minor (~2 fr)",
-                "desc": "Niższa pozycja + przełącznik tonacji."
+                "name": "Diagram: C-moll harmoniczna, pozycja wyższa",
+                "desc": "Kolejna pozycja tej samej skali, progi 10–14."
             },
             "chord-scale-harmonic.e1": {
-                "name": "Akord → tryb (mol harmoniczny)",
-                "desc": "Harmonic Minor, Locrian #6, Phrygian Dominant…"
+                "name": "Quiz: tryby molowej harmonicznej",
+                "desc": "Akord → tryb, tryb → akord i skala macierzysta konkretnego akordu."
             },
             "chord-scale-harmonic.e2": {
-                "name": "Tryb → akord (mol harmoniczny)",
-                "desc": "Odwrotna strona parowania."
+                "name": "Quiz: z której molowej harmonicznej?",
+                "desc": "Dla akordu (np. E7) wskaż molową harmoniczną, z której pochodzi jego skala."
             },
             "giant-steps.e1": {
-                "name": "Quiz: cykl Coltrane'a",
-                "desc": "Kolejność tonacji B–G–Eb; rozwiązania D7→G, Bb7→Eb, F#7→B."
+                "name": "Quiz: cykl Coltrane’a",
+                "desc": "Kolejność tonacji, dominanty i ii–V prowadzące do H, G i Eb oraz cykl przeniesiony do innych tonacji."
             },
             "giant-steps.e2": {
-                "name": "Loop: Giant Steps (60–120 BPM)",
-                "desc": "Pełna 16-taktowa forma, dwa uderzenia na akord, start od 60 BPM. Trzy poziomy: prymy, potem wzór 1-2-3-5, na końcu arpeggia."
+                "name": "Pętla: Giant Steps",
+                "desc": "Cała 16-taktowa forma od 60 BPM, w trzech poziomach: prymy, wzór 1-2-3-5, arpeggia. Każdy poziom wymaga udanego obiegu."
             },
             "pentatonic-scale.e3": {
-                "name": "Trening: A-moll pentatoniczna",
-                "desc": "Zagraj dźwięki A-moll pentatonicznej (progi 5–8) w sesji treningowej z oceną na żywo. Sesja dodatkowa — nie jest wymagana do zaliczenia modułu."
+                "name": "Trening: dźwięki A-moll pentatonicznej",
+                "desc": "Zagraj dźwięki A-moll pentatonicznej na progach 5–8 w treningu z oceną na żywo. Ćwiczenie dodatkowe — nie jest wymagane do zaliczenia modułu."
             },
             "major-scale.e3": {
-                "name": "Trening: C-dur",
-                "desc": "Zagraj dźwięki skali C-dur (progi 8–12) w sesji treningowej z oceną na żywo. Sesja dodatkowa — nie jest wymagana do zaliczenia modułu."
+                "name": "Trening: dźwięki C-dur",
+                "desc": "Zagraj dźwięki skali C-dur na progach 8–12 w treningu z oceną na żywo. Ćwiczenie dodatkowe — nie jest wymagane do zaliczenia modułu."
             },
             "melodic-minor.e3": {
-                "name": "Trening: A-moll melodyczna",
-                "desc": "Zagraj dźwięki A-moll melodycznej (progi 5–9) w sesji treningowej z oceną na żywo. Sesja dodatkowa — nie jest wymagana do zaliczenia modułu."
+                "name": "Trening: dźwięki A-moll melodycznej",
+                "desc": "Zagraj dźwięki A-moll melodycznej na progach 5–9 w treningu z oceną na żywo. Ćwiczenie dodatkowe — nie jest wymagane do zaliczenia modułu."
             },
             "harmonic-minor.e3": {
-                "name": "Trening: C-moll harmoniczna",
-                "desc": "Zagraj dźwięki C-moll harmonicznej (progi 5–9) w sesji treningowej z oceną na żywo. Sesja dodatkowa — nie jest wymagana do zaliczenia modułu."
+                "name": "Trening: dźwięki C-moll harmonicznej",
+                "desc": "Zagraj dźwięki C-moll harmonicznej na progach 5–9 w treningu z oceną na żywo. Ćwiczenie dodatkowe — nie jest wymagane do zaliczenia modułu."
             },
             "pentatonic-scale.e4": {
-                "name": "Loop: improwizuj w boksie 1",
-                "desc": "Improwizuj nad Am7 (4 takty) – Dm7 – Em7 wyłącznie w pierwszym boksie pentatoniki (progi 5–8). 2 udane obiegi."
+                "name": "Pętla: improwizacja w boksie 1",
+                "desc": "Improwizuj nad Am7 (4 takty), Dm7 i Em7, używając tylko pierwszego boksu (progi 5–8)."
             },
             "major-scale.e4": {
-                "name": "Loop: frazy C-dur",
-                "desc": "Frazuj skalą C-dur nad Cmaj7–Am7–Fmaj7–G7 i kończ linie na dźwięku C. 2 udane obiegi."
+                "name": "Pętla: frazy w C-dur",
+                "desc": "Buduj frazy ze skali C-dur nad Cmaj7–Am7–Fmaj7–G7 i kończ je na C."
             },
             "pentatonic-positions.e6": {
-                "name": "Loop: boks sąsiedni",
-                "desc": "Gm7–Cm7: z każdą pętlą przechodź do sąsiedniego boksu pentatoniki. 2 udane obiegi."
+                "name": "Pętla: sąsiednie boksy",
+                "desc": "Gm7–Cm7: z każdym obiegiem przejdź do sąsiedniego boksu."
             },
             "modes.e3": {
-                "name": "Loop: kolory trybów",
-                "desc": "Cztery warianty (Dorian, Phrygian, Lydian, Mixolydian). Podkreśl stopień charakterystyczny trybu nad podkładem. 2 udane obiegi na wariant."
+                "name": "Pętla: kolory trybów",
+                "desc": "Cztery warianty: dorycki, frygijski, lidyjski i miksolidyjski. W każdym podkreślaj dźwięk charakterystyczny trybu."
             },
             "chord-scale-major.e3": {
-                "name": "Loop: dźwięki charakterystyczne",
-                "desc": "Dm7–G7–Cmaj7 z podpowiedzią skali przy każdym akordzie. Na każdej zmianie zagraj dźwięk charakterystyczny akordu. 2 udane obiegi."
+                "name": "Pętla: dźwięki charakterystyczne",
+                "desc": "Dm7–G7–Cmaj7 z podpowiedzią skali przy każdym akordzie. Na każdej zmianie zagraj dźwięk charakterystyczny."
             },
             "arpeggios.e3": {
-                "name": "Loop: arpeggia nad ii–V–I",
-                "desc": "Dm7–G7–Cmaj7: graj wyłącznie arpeggia akordów — bez dźwięków skalowych. 2 udane obiegi."
+                "name": "Pętla: arpeggia nad ii–V–I",
+                "desc": "Dm7–G7–Cmaj7: graj wyłącznie dźwięki akordów, bez innych dźwięków skali."
             },
             "voice-leading.e3": {
-                "name": "Loop: tercje i septymy",
-                "desc": "Dm7–G7–Cmaj7: prowadź tercje F→F→E albo septymy C→B→B przez zmiany. 2 udane obiegi."
+                "name": "Pętla: tercje i septymy w ii–V–I",
+                "desc": "Dm7–G7–Cmaj7: prowadź tercje i septymy (F→F→E, C→H→H). Mikrofon sprawdza tercje i septymy."
             },
             "switching-keys.e3": {
-                "name": "Loop: zmiana tonacji G → B",
-                "desc": "Tonacja zmienia się z G na B w połowie pętli — przestaw swoje linie na nową tonację. 2 udane obiegi."
+                "name": "Pętla: zmiana G-dur → H-dur",
+                "desc": "W połowie pętli tonacja przeskakuje o tercję wielką — przenieś skale i arpeggia do nowej tonacji."
             },
             "chord-scale-melodic.e3": {
-                "name": "Loop: molowy ii–V–i z mol melodyczną",
-                "desc": "Dm7b5–G7alt–Cmmaj7 (wariant: vamp D7#11) z podpowiedzią skali przy każdym akordzie. 2 udane obiegi."
+                "name": "Pętla: molowe ii–V–i",
+                "desc": "Dm7b5–G7alt–Cm(maj7) albo jeden akord D7#11 — przy każdym akordzie podpowiedź skali."
             },
             "melodic-minor.e4": {
-                "name": "Loop: Am6 – Am(maj7)",
-                "desc": "Dwa odcienie a-moll: podkreśl 6 (F#) i wielką septymę (G#). 2 udane obiegi."
+                "name": "Pętla: Am6 – Am(maj7)",
+                "desc": "Dwa odcienie a-moll: podkreślaj sekstę wielką (F#) i septymę wielką (G#)."
             },
             "harmonic-minor.e4": {
-                "name": "Loop: Am – E7",
-                "desc": "Nad E7 podkreśl G# — dźwięk charakterystyczny A-moll harmonicznej. 2 udane obiegi."
+                "name": "Pętla: Am – E7",
+                "desc": "Nad E7 podkreślaj G# — dźwięk charakterystyczny a-moll harmonicznej."
             },
             "chord-scale-harmonic.e3": {
-                "name": "Loop: molowy ii–V z mol harmoniczną",
-                "desc": "Bm7b5–E7–Am: nad E7 użyj E Phrygian dominant. 2 udane obiegi."
+                "name": "Pętla: molowe ii–V–i",
+                "desc": "Hm7b5–E7–Am: nad E7 graj skalę E frygijską dominantową."
             },
             "pentatonic-scale.e5": {
-                "name": "Loop: blues 12-taktowy",
-                "desc": "Blues 12-taktowy w A (A7–D7–E7). Improwizuj w boksie 1. 2 udane obiegi."
+                "name": "Pętla: blues 12-taktowy",
+                "desc": "Blues w A (A7–D7–E7). Improwizuj w pierwszym boksie pentatoniki."
             },
             "target-chord-tones.e3": {
-                "name": "Loop: blues 12-taktowy",
-                "desc": "Blues 12-taktowy w A — ląduj na dźwięku akordu przy każdej zmianie. 2 udane obiegi."
+                "name": "Pętla: blues 12-taktowy",
+                "desc": "Blues w A — na każdej zmianie ląduj na dźwięku akordu."
             }
         },
         "practiceLink": {
-            "threshold": "Każda pozycja: ≥{{minAnswers}} odpowiedzi, ≥{{minAccuracy}}% trafności",
+            "threshold": "Każda pozycja: co najmniej {{minAnswers}} odpowiedzi i {{minAccuracy}}% trafności",
             "coverage": "Opanowane pozycje",
             "coverageValue": "{{done}}/{{total}}",
-            "hint": "Otwórz sesję treningową i odpowiadaj, aż każda podświetlona pozycja będzie opanowana. Postęp bierze się ze statystyk treningu (powtórki SM2, tryb z mikrofonem).",
+            "hint": "Otwórz trening i odpowiadaj, aż każda zaznaczona pozycja zrobi się zielona. Liczą się wyniki z treningu na gryfie, także z trybu z mikrofonem.",
             "open": "Otwórz trening: {{mode}}",
-            "recordPass": "Zapisz zaliczenie ćwiczenia",
-            "extra": "Ćwiczenie dodatkowe",
-            "extraHint": "Dodatkowa sesja treningowa — nie jest wymagana do zaliczenia modułu."
+            "recordPass": "Zapisz zaliczenie",
+            "extra": "Ćwiczenie dodatkowe"
         },
         "supplementary": {
             "earTraining": "Otwórz trening słuchu",
-            "chordQuality": "Otwórz trening rozpoznawania akordów"
+            "chordQuality": "Otwórz rozpoznawanie akordów"
         },
         "hints": {
-            "dorianDm7": "D dorian — celuj w B",
-            "phrygianEm": "E phrygian — celuj w F",
-            "lydianF": "F lydian — celuj w B",
-            "mixolydianG": "G mixolydian — celuj w F",
-            "csDorian": "Dm7 → D dorian",
-            "csMixolydian": "G7 → G mixolydian",
-            "csIonian": "Cmaj7 → C ionian",
+            "dorianDm7": "Skala D dorycka — celuj w H",
+            "phrygianEm": "Skala E frygijska — celuj w F",
+            "lydianF": "Skala F lidyjska — celuj w H",
+            "mixolydianG": "Skala G miksolidyjska — celuj w F",
+            "csDorian": "Dm7 → D dorycka",
+            "csMixolydian": "G7 → G miksolidyjska",
+            "csIonian": "Cmaj7 → C jońska (durowa)",
             "videoDb": "Ruch z filmu: D → Db",
-            "keyC": "Tonacja: C major",
-            "keyF": "Tonacja: F major",
-            "keyG": "Tonacja: G major",
-            "keyB": "Tonacja: B major",
-            "mmLocrian2": "D Locrian ♮2 (z C melodic minor)",
-            "mmAb": "Ab melodic minor",
-            "mmC": "C melodic minor",
-            "mmDLydDom": "D Lydian dominant (z G melodic minor)",
-            "hmA": "A harmonic minor",
+            "keyC": "Tonacja: C-dur",
+            "keyF": "Tonacja: F-dur",
+            "keyG": "Tonacja: G-dur",
+            "keyB": "Tonacja: H-dur",
+            "mmLocrian2": "D lokryjska ♮2 (z F-moll melodycznej)",
+            "mmAb": "Ab-moll melodyczna (G alterowana)",
+            "mmC": "C-moll melodyczna",
+            "mmDLydDom": "D lidyjska dominantowa (z A-moll melodycznej)",
+            "hmA": "A-moll harmoniczna",
             "hmE7": "E7 — celuj w G#",
-            "hmLocrian": "B Locrian (z A harmonic minor)",
-            "hmPhrygianDom": "E Phrygian dominant (z A harmonic minor)"
+            "hmLocrian": "H lokryjska #6 (z A-moll harmonicznej)",
+            "hmPhrygianDom": "E frygijska dominantowa (z A-moll harmonicznej)"
         },
         "stage": {
             "podstawy": "Podstawy (1–6)",
             "harmonia": "Harmonia (7–11)",
             "granie": "Granie po zmianach (12–17)",
-            "zaawansowane": "Zaawansowane (18–22)"
+            "zaawansowane": "Dla zaawansowanych (18–22)"
         },
         "review": {
             "name": "Powtórka: quiz mieszany",
-            "desc": "10 pytań z modułów, które już zaliczyłeś — harmonogram SM-2 szybciej wraca do słabszych generatorów.",
-            "button": "Powtórki",
-            "disabledHint": "Dostępne po zaliczeniu pierwszego modułu."
+            "desc": "10 pytań z zaliczonych modułów. Najpierw wracają tematy, które dawno nie były powtarzane albo sprawiły ci trudność.",
+            "button": "Powtórka",
+            "disabledHint": "Dostępna po zaliczeniu pierwszego modułu."
+        },
+        "term": {
+            "major": "durowy",
+            "minor": "molowy",
+            "diminished": "zmniejszony",
+            "augmented": "zwiększony",
+            "major (M)": "durowy",
+            "minor (m)": "molowy (m)",
+            "diminished (dim)": "zmniejszony (dim)",
+            "augmented (aug)": "zwiększony (aug)",
+            "7 (dominant)": "dominantowy (7)",
+            "m7b5 (half-dim)": "półzmniejszony (m7b5)",
+            "Ionian": "joński (Ionian)",
+            "Dorian": "dorycki (Dorian)",
+            "Phrygian": "frygijski (Phrygian)",
+            "Lydian": "lidyjski (Lydian)",
+            "Mixolydian": "miksolidyjski (Mixolydian)",
+            "Aeolian": "eolski (Aeolian)",
+            "Locrian": "lokryjski (Locrian)",
+            "Melodic Minor": "mol melodyczny",
+            "Dorian b2": "dorycki b2",
+            "Lydian Augmented": "lidyjski zwiększony",
+            "Lydian Dominant": "lidyjski dominantowy",
+            "Mixolydian b6": "miksolidyjski b6",
+            "Aeolian b5": "eolski b5 (lokryjski ♮2)",
+            "Altered": "alterowany (Altered)",
+            "Harmonic Minor": "mol harmoniczny",
+            "Locrian #6": "lokryjski #6",
+            "Ionian #5": "joński #5",
+            "Dorian #4": "dorycki #4",
+            "Phrygian Dominant": "frygijski dominantowy",
+            "Lydian #2": "lidyjski #2",
+            "Superlocrian bb7": "superlokryjski bb7",
+            "parentMinor": {
+                "melodic": "{{key}}-moll melodyczna",
+                "harmonic": "{{key}}-moll harmoniczna"
+            }
         }
     }
 }

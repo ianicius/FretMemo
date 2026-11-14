@@ -24,7 +24,7 @@ import { selectModuleProgress, useImprovStore } from "@/stores/useImprovStore";
 import { useProgressStore } from "@/stores/useProgressStore";
 import { cn } from "@/lib/utils";
 import { ExerciseFrame, ScoreStrip } from "./ExerciseFrame";
-import { localizePromptValues, localizeToken } from "@/lib/improv/display";
+import { localizeAnswer, localizePromptValues } from "@/lib/improv/display";
 
 interface ChoiceQuizProps {
     moduleId: string;
@@ -38,10 +38,7 @@ interface ChoiceQuizProps {
 
 const ANSWER_ADVANCE_MS = 1300;
 
-/** Options that are i18n keys (borrowed-chord answers) get translated. */
-function formatOption(option: string, translate: (key: string) => string): string {
-    return option.startsWith("improv.") ? translate(option) : localizeToken(option);
-}
+
 
 export function ChoiceQuiz({ moduleId, exercise, onQuestionAnswered, onRunFinished }: ChoiceQuizProps) {
     const { t } = useTranslation();
@@ -185,7 +182,7 @@ export function ChoiceQuiz({ moduleId, exercise, onQuestionAnswered, onRunFinish
                                     )}
                                     onClick={() => choose(option)}
                                 >
-                                    {formatOption(option, t)}
+                                    {localizeAnswer(option)}
                                 </Button>
                             );
                         })}
@@ -194,7 +191,7 @@ export function ChoiceQuiz({ moduleId, exercise, onQuestionAnswered, onRunFinish
                         <p className="text-xs text-muted-foreground">
                             {selected === question.options[question.correctIndex]
                                 ? t("improv.quiz.correct")
-                                : t("improv.quiz.wrong", { answer: formatOption(question.options[question.correctIndex], t) })}
+                                : t("improv.quiz.wrong", { answer: localizeAnswer(question.options[question.correctIndex]) })}
                             {" "}
                             {t(question.hintKey, localizePromptValues(question.hintValues ?? {}))}
                         </p>

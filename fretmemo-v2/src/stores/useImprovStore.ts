@@ -20,6 +20,7 @@ import {
     CURRICULUM,
     getImprovModule,
     isModuleComplete,
+    loopRunKey,
     type ImprovExercise,
 } from "@/data/improv/curriculum";
 
@@ -39,7 +40,8 @@ export interface ImprovStoreState {
     reviewSRS: Record<string, SpacedRepetitionEntry>;
     recordQuizResult: (moduleId: string, exerciseId: string, correct: number) => void;
     recordDrillRun: (moduleId: string, exerciseId: string) => void;
-    recordLoopPass: (moduleId: string, exerciseId: string) => void;
+    /** `variantId` counts the pass for that variant (every variant must pass). */
+    recordLoopPass: (moduleId: string, exerciseId: string, variantId?: string) => void;
     /** practice-link: pass criteria live in useProgressStore; the component
      * calls this once they are all met (plan phase 2). */
     recordPracticePass: (moduleId: string, exerciseId: string) => void;
@@ -147,13 +149,14 @@ export const useImprovStore = create<ImprovStoreState>()(
                     })),
                 }));
             },
-            recordLoopPass: (moduleId, exerciseId) => {
+            recordLoopPass: (moduleId, exerciseId, variantId) => {
+                const runKey = loopRunKey(exerciseId, variantId);
                 set((state) => ({
                     moduleState: updateModule(state.moduleState, moduleId, (progress) => ({
                         ...progress,
                         exerciseRuns: {
                             ...progress.exerciseRuns,
-                            [exerciseId]: (progress.exerciseRuns[exerciseId] ?? 0) + 1,
+                            [runKey]: (progress.exerciseRuns[runKey] ?? 0) + 1,
                         },
                     })),
                 }));

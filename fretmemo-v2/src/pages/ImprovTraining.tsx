@@ -28,6 +28,7 @@ import { PracticeLinkExercise } from "@/components/improv/PracticeLinkExercise";
 import { CURRICULUM, countCompletedModules, getImprovModule, isModuleUnlocked, isModuleComplete } from "@/data/improv/curriculum";
 import type { ChoiceGeneratorId } from "@/lib/improv/questions";
 import { useImprovStore } from "@/stores/useImprovStore";
+import { isDueForReview } from "@/lib/sm2";
 import { cn } from "@/lib/utils";
 import { trackFeatureOpened } from "@/lib/analytics";
 import { ArrowLeft as ArrowLeftIcon } from "lucide-react";
@@ -57,6 +58,7 @@ function RoadmapView() {
     const setUnlockAll = useImprovStore((state) => state.setUnlockAll);
     const entranceUnlockCount = useImprovStore((state) => state.entranceUnlockCount);
     const updateReviewSR = useImprovStore((state) => state.updateReviewSR);
+    const reviewSRS = useImprovStore((state) => state.reviewSRS);
     const setEntranceUnlockCount = useImprovStore((state) => state.setEntranceUnlockCount);
 
     const completed = countCompletedModules(moduleState);
@@ -78,6 +80,15 @@ function RoadmapView() {
         }
         return [...generators];
     }, [moduleState]);
+    // SM-2 schedule: review the generators that are due (never reviewed or
+    // past their date); when nothing is due, review everything passed.
+    const reviewGenerators = useMemo(() => {
+        const due = passedGenerators.filter((generatorId) => {
+            const entry = reviewSRS[generatorId];
+            return !entry || isDueForReview(entry);
+        });
+        return due.length > 0 ? due : passedGenerators;
+    }, [passedGenerators, reviewSRS]);
     const [reviewOpen, setReviewOpen] = useState(false);
     const reviewExercise = useMemo(() => ({
         id: "review.quiz",
@@ -86,12 +97,12 @@ function RoadmapView() {
         descKey: "improv.review.desc",
         params: {
             generatorId: "mixed" as const,
-            allowedGenerators: passedGenerators as ChoiceGeneratorId[],
+            allowedGenerators: reviewGenerators as ChoiceGeneratorId[],
             questionCount: 10,
             requiredCorrect: 7,
             answerOptions: 4,
         },
-    }), [passedGenerators]);
+    }), [reviewGenerators]);
     const handleReviewAnswered = useCallback((generatorId: string, correct: boolean) => {
         updateReviewSR(generatorId, correct ? 5 : 2);
     }, [updateReviewSR]);
@@ -128,6 +139,8 @@ function RoadmapView() {
             questionCount: orderedEntranceGenerators.length,
             requiredCorrect: orderedEntranceGenerators.length,
             answerOptions: 4,
+            // One question per module, in curriculum order.
+            sequential: true,
         },
     }), [orderedEntranceGenerators]);
     const handleEntranceAnswered = useCallback((generatorId: string, correct: boolean) => {
@@ -136,12 +149,13 @@ function RoadmapView() {
         if (order) failedOrdersRef.current.add(order);
     }, [generatorModuleOrder]);
     const handleEntranceFinished = useCallback(() => {
-        const firstFailed = failedOrdersRef.current.size > 0 ? Math.min(...failedOrdersRef.current) : 22;
-        // Modules up to (not including) the first failed one unlock.
-        setEntranceUnlockCount(firstFailed - 1);
+        const firstFailed = failedOrdersRef.current.size > 0 ? Math.min(...failedOrdersRef.current) : CURRICULUM.length;
+        // Modules up to AND including the first failed one unlock — the
+        // failed module is the one to study next.
+        setEntranceUnlockCount(firstFailed);
         failedOrdersRef.current = new Set();
         setEntranceOpen(false);
-    }, [setEntranceUnlockCount]);
+    }, [setEntranceUnlockCount, setEntranceOpen]);
 
     return (
         <div className="space-y-5 pb-8">
@@ -201,7 +215,7 @@ function RoadmapView() {
 
             {reviewOpen && completed > 0 && (
                 <ChoiceQuiz
-                    key={`review-${passedGenerators.join(",")}`}
+                    key={`review-${reviewGenerators.join(",")}`}
                     moduleId="review"
                     exercise={reviewExercise}
                     onQuestionAnswered={handleReviewAnswered}
@@ -294,6 +308,7 @@ function ModuleView({ moduleId }: { moduleId: string }) {
     const navigate = useNavigate();
     const moduleState = useImprovStore((state) => state.moduleState);
     const unlockAll = useImprovStore((state) => state.unlockAll);
+    const entranceUnlockCount = useImprovStore((state) => state.entranceUnlockCount);
 
     const module = getImprovModule(moduleId);
 
@@ -314,7 +329,6 @@ function ModuleView({ moduleId }: { moduleId: string }) {
         );
     }
 
-    const entranceUnlockCount = useImprovStore((state) => state.entranceUnlockCount);
     const unlocked = isModuleUnlocked(module.id, moduleState, unlockAll, entranceUnlockCount);
     const isComplete = isModuleComplete(module, moduleState[module.id]);
     const moduleName = t(`improv.modules.${module.id}.name`);

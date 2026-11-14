@@ -18,7 +18,8 @@ export interface ImprovChordInfo {
 
 /** Parses a chord symbol; returns null for unknown input (never throws). */
 export function getChordInfo(chordName: string): ImprovChordInfo | null {
-    const chord = Chord.get(chordName);
+    // tonal reads "mMaj7" but not the "m(maj7)" spelling used in the curriculum texts.
+    const chord = Chord.get(chordName.replace("(maj7)", "Maj7"));
     if (!chord || typeof chord.tonic !== "string" || chord.notes.length === 0) {
         return null;
     }
@@ -52,6 +53,9 @@ export function getChordPitchClasses(chordName: string): number[] {
 
 /** MIDI number for a tonic placed in the octave starting at `baseMidi`. */
 export function tonicMidi(key: string, baseMidi = 48): number {
-    const pc = Note.chroma(key) ?? 0;
+    // Chord symbols like "Ammaj7" carry a suffix that Note.chroma cannot
+    // parse — extract the root (letter + optional accidental) first.
+    const root = key.match(/^[A-G][#b]?/)?.[0] ?? key;
+    const pc = Note.chroma(root) ?? 0;
     return baseMidi + pc;
 }

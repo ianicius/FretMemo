@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { Key, Note } from "tonal";
-import { chordScaleMajorPairs } from "../questions";
+import { Key, Note, Scale } from "tonal";
+import { chordScaleMajorPairs, modeNotesFromRoot, secondaryDomPairs } from "../questions";
 import {
     CHORD_SCALE_MELODIC,
     generateChoiceQuiz,
@@ -37,11 +37,52 @@ describe("choice quiz generators", () => {
         expect(tritoneSub("Ab7")).toBe("D7");
     });
 
-    it("secondary dominant questions map Dm7 to A7", () => {
-        const questions = generateChoiceQuiz({ generatorId: "secondaryDom", questionCount: 12, direction: "chord-to-secondary" }, "sec-dom-seed");
-        const dm7 = questions.find((question) => question.promptValues.target === "Dm7");
-        expect(dm7).toBeDefined();
-        expect(dm7?.options[dm7.correctIndex]).toBe("A7");
+    it("secondary dominants in C: Dm7←A7 … and the video's Cmaj7←G7 row", () => {
+        const pairs = new Map(secondaryDomPairs("C").map((pair) => [pair.target, pair.dominant]));
+        expect(pairs.get("Dm7")).toBe("A7");
+        expect(pairs.get("Am7")).toBe("E7");
+        expect(pairs.get("Cmaj7")).toBe("G7");
+        // Questions name the drawn key in the prompt.
+        for (const question of generateChoiceQuiz({ generatorId: "secondaryDom", questionCount: 20 }, "sec-dom-key")) {
+            expect(typeof question.promptValues.key).toBe("string");
+        }
+    });
+
+    it("mode notes start on the mode's root (D dorian, G mixolydian, E phrygian)", () => {
+        expect(modeNotesFromRoot("D", 2).join(" ")).toBe("D E F G A B C");
+        expect(modeNotesFromRoot("G", 5).join(" ")).toBe("G A B C D E F");
+        expect(modeNotesFromRoot("E", 3).join(" ")).toBe("E F G A B C D");
+    });
+
+    it("Coltrane ii–V and transposed cycle answers are musically right", () => {
+        const expectedIiV: Record<string, string> = { B: "C#m7–F#7", G: "Am7–D7", Eb: "Fm7–Bb7" };
+        for (const question of generateChoiceQuiz({ generatorId: "coltrane", questionCount: 40, direction: "ii-v-of" }, "iiv")) {
+            expect(question.options[question.correctIndex]).toBe(expectedIiV[String(question.promptValues.target)]);
+        }
+        for (const question of generateChoiceQuiz({ generatorId: "coltrane", questionCount: 40, direction: "cycle-transposed" }, "cyc")) {
+            const answer = question.options[question.correctIndex] as string;
+            expect(answer.split("–")[0]).toBe(question.promptValues.offset);
+        }
+    });
+
+    it("in-context chords sit on the right degree of their parent minor scale", () => {
+        for (const kind of ["chordScaleMelodic", "chordScaleHarmonic"] as const) {
+            for (const question of generateChoiceQuiz({ generatorId: kind, questionCount: 40, direction: "in-context" }, "ctx:" + kind)) {
+                const parent = question.options[question.correctIndex] as string;
+                const parentRoot = parent.split(" ")[0] as string;
+                const scale = Scale.get(kind === "chordScaleMelodic" ? parentRoot + " melodic minor" : parentRoot + " harmonic minor");
+                const chordRoot = /^[A-G][#b]?/.exec(String(question.promptValues.chord))?.[0] as string;
+                expect(scale.notes.map((note) => Note.chroma(note)), String(question.promptValues.chord) + " in " + parent).toContain(Note.chroma(chordRoot));
+                // The tonic chord would give the answer away through the key name.
+                expect(Note.chroma(chordRoot)).not.toBe(Note.chroma(parentRoot));
+            }
+        }
+    });
+
+    it("mixed quizzes tag each question with its real generator; sequential = one per generator", () => {
+        const allowed = ["keySig", "modes", "coltrane"] as const;
+        const questions = generateChoiceQuiz({ generatorId: "mixed", allowedGenerators: [...allowed], sequential: true, questionCount: 3 }, "seq");
+        expect(questions.map((question) => question.id.split(":")[0])).toEqual([...allowed]);
     });
 
     it("melodic minor chord/scale pairing: 7alt → Altered", () => {
@@ -100,7 +141,7 @@ describe("question pools (plan phase 5)", () => {
             if (distinct < threshold) console.log("LOW:", generatorId, distinct);
             expect(distinct).toBeGreaterThanOrEqual(threshold);
         }
-    });
+    }, 20_000); // 12 × 300 draws: close to the 5 s default under full-suite load
 
     it("chordScaleMajor draws from all 12 keys (plan 5: module 9)", () => {
         const keys = new Set<string>();
