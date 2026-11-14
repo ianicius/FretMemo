@@ -1,8 +1,8 @@
 /**
  * E4 backing-improv engine (run improv-training-2026-11-13).
  *
- * Loops a chord progression as block chords (chord tones staggered a few
- * dozen ms through `playTone`), driven by the lookahead scheduler in
+ * Loops a chord progression as block chords (chord tones strummed a few
+ * dozen ms apart through `playChord`), driven by the lookahead scheduler in
  * src/lib/improv/backingLoop.ts. The prompter shows the CURRENT chord big
  * and the NEXT chord small, the exercise goal is always visible, and after
  * each full pass of the progression the user marks the loop as successful.
@@ -17,7 +17,7 @@ import { Select } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { getSoundEngineContext } from "@/audio/engine";
-import { playTone } from "@/lib/audio";
+import { playChord } from "@/lib/audio";
 import { getChordMidis } from "@/lib/improv/chords";
 import { BackingLoopScheduler, type BackingLoopEntry } from "@/lib/improv/backingLoop";
 import type { BackingLoopParams, ImprovExercise } from "@/data/improv/curriculum";
@@ -31,16 +31,8 @@ interface BackingLoopExerciseProps {
     exercise: ImprovExercise;
 }
 
-const CHORD_TONE_STAGGER_MS = 55;
-
-function playBlockChord(chord: string) {
-    const midis = getChordMidis(chord, 48);
-    midis.forEach((midi, index) => {
-        window.setTimeout(() => {
-            void playTone(midi, 1.1);
-        }, index * CHORD_TONE_STAGGER_MS);
-    });
-}
+const CHORD_DURATION_SEC = 1.1;
+const CHORD_TONE_STAGGER_SEC = 0.055;
 
 export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseProps) {
     const { t } = useTranslation();
@@ -99,7 +91,13 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
                 const timer = window.setTimeout(() => {
                     setCurrentChordIndex(info.chordIndex);
                     setBeatsIntoChord(0);
-                    playBlockChord(info.chord);
+                    try {
+                        void playChord(getChordMidis(info.chord, 48), CHORD_DURATION_SEC, {
+                            strumDelaySec: CHORD_TONE_STAGGER_SEC,
+                        });
+                    } catch {
+                        // Audio unavailable — the visual prompter still runs.
+                    }
                 }, info.delayMs);
                 timersRef.current.push(timer);
             },

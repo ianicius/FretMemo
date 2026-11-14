@@ -44,6 +44,15 @@ function getRouteMeta(pathname: string): SeoRouteMeta {
         };
     }
 
+    if (pathname.startsWith("/improv/")) {
+        return {
+            title: "Guitar Improv Training Module | FretMemo",
+            description:
+                "Practice one improvisation skill at a time: a short theory recap plus graded exercises with pass thresholds inside the 22-module improv roadmap.",
+            path: pathname,
+        };
+    }
+
     if (pathname === "/challenges") {
         return {
             title: "Daily Guitar Challenges | FretMemo",

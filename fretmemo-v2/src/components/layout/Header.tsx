@@ -4,6 +4,7 @@ import {
     CircleHelp,
     Coffee,
     Flame,
+    Guitar,
     History,
     Mail,
     Menu,
@@ -135,6 +136,17 @@ export function Header() {
                                         >
                                             <Target className="mr-2 h-4 w-4" />
                                             {t('nav.practice')}
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            className="justify-start"
+                                            onClick={() => {
+                                                trackNavigationClicked("header_quick_actions", "/improv", "improv");
+                                                navigate("/improv");
+                                            }}
+                                        >
+                                            <Guitar className="mr-2 h-4 w-4" />
+                                            {t('nav.improv')}
                                         </Button>
                                         <Button
                                             variant="outline"

@@ -13,7 +13,7 @@ import { persist } from "zustand/middleware";
 import {
     CURRICULUM,
     getImprovModule,
-    type ImprovExercise,
+    isModuleComplete,
 } from "@/data/improv/curriculum";
 
 export interface ImprovModuleProgress {
@@ -62,23 +62,8 @@ function updateModule(
     if (!module) return previous;
     const current = previous[moduleId] ?? emptyProgress();
     const next = update({ ...current });
-    const completed = module.exercises.every((exercise: ImprovExercise) => {
-        switch (exercise.engine) {
-            case "fretboard-quiz":
-            case "choice-quiz": {
-                const params = exercise.params as { requiredCorrect: number };
-                return next.quizBest >= params.requiredCorrect;
-            }
-            case "diagram-drill":
-            case "backing-improv": {
-                const params = exercise.params as { requiredRuns?: number; requiredPasses?: number };
-                const required = params.requiredRuns ?? params.requiredPasses ?? 0;
-                return (next.exerciseRuns[exercise.id] ?? 0) >= required;
-            }
-            default:
-                return false;
-        }
-    });
+    // Single source of truth for the pass predicate (curriculum.ts).
+    const completed = isModuleComplete(module, next);
     return {
         ...previous,
         [moduleId]: { ...next, completed },

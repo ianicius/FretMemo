@@ -81,6 +81,8 @@ function RoadmapView() {
                 {CURRICULUM.map((module) => {
                     const unlocked = isModuleUnlocked(module.id, moduleState, unlockAll);
                     const isComplete = isModuleComplete(module, moduleState[module.id]);
+                    const moduleName = t(`improv.modules.${module.id}.name`);
+                    const moduleTerm = t(`improv.modules.${module.id}.term`);
                     return (
                         <button
                             key={module.id}
@@ -109,11 +111,13 @@ function RoadmapView() {
                             </span>
                             <div className="min-w-0 flex-1">
                                 <p className="truncate text-sm font-semibold text-card-foreground">
-                                    {t(`improv.modules.${module.id}.name`)}
+                                    {moduleName}
                                 </p>
-                                <p className="truncate text-xs text-muted-foreground">
-                                    {t(`improv.modules.${module.id}.term`)}
-                                </p>
+                                {moduleTerm !== moduleName && (
+                                    <p className="truncate text-xs text-muted-foreground">
+                                        {moduleTerm}
+                                    </p>
+                                )}
                             </div>
                             {isComplete ? (
                                 <Badge variant="outline" className="shrink-0 border-emerald-500/50 bg-emerald-500/10 text-[10px] text-emerald-600 dark:text-emerald-300">

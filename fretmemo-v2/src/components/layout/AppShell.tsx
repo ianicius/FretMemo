@@ -200,7 +200,7 @@ export function AppShell() {
                         </Button>
                         <Button variant="ghost" className="flex-1 min-w-0 justify-start text-muted-foreground px-2" onClick={() => navigate("/me?section=settings")}>
                             <Settings className="w-5 h-5 lg:mr-2 shrink-0" />
-                            <span className="hidden lg:inline truncate">{t('nav.settings')}</span>
+                            <span className="hidden lg:inline truncate text-xs">{t('nav.settings')}</span>
                         </Button>
                         <LanguageSwitcher className="hidden lg:flex shrink-0" />
                         <div className="shrink-0"><DarkModeToggle /></div>

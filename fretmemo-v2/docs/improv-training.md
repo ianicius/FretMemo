@@ -1,6 +1,6 @@
 # Improv Training — architektura modułu
 
-Date: 2026-11-13 (round 5 update — fix flat keys w scaleShapes: `notePitchClass` resolvuje spellingi bemolowe `Bb/Db/Eb/Gb/Ab` z `ImprovKey` zamiast mapować je na pitch class C; testy pcs/rootów dla Bb/Db/Eb oraz weryfikacja pcs per defaultKey w curriculum.test.ts)
+Date: 2026-11-14 (round 6 update — deferred findings z integracji: XP-2 predykat zaliczenia tylko w `isModuleComplete`/`isExercisePassed` (store bez własnej kopii), XP-3 E4 przez `playChord` (strum 55 ms) zamiast własnego staggeru `playTone`, XP-4 `localizePromptValues` (notacja polska w treści pytań/podpowiedzi na polach notowych; matching nadal surowe tokeny), EN roadmapa ukrywa `.term` gdy == `.name`, SEO prefix dla `/improv/`, Improv w quick-actions headeru, sidebar label `text-xs` bez ucinania)
 Scope: `fretmemo-v2` (`src/pages/ImprovTraining.tsx`, `src/components/improv/`, `src/lib/improv/`, `src/data/improv/`, `src/stores/useImprovStore.ts`)
 Objective: kompletny system nauki improwizacji — 22 moduły w kolejności z wideo źródłowego
 (Brandon D'Eon, "What To Learn For Guitar Improv (in Order)"), z ćwiczeniami zmapowanymi na
@@ -30,8 +30,8 @@ moduł N jest dostępny po zaliczeniu modułu N-1 (albo globalny przełącznik �
 | `src/lib/improv/chords.ts` | Dane akordowe do E4: `getChordInfo` (tonal `Chord.get`), `getChordMidis` (rosnące MIDI od `baseMidi`), `getChordPitchClasses`, `tonicMidi`. |
 | `src/lib/improv/backingLoop.ts` | `BackingLoopScheduler` — lookahead scheduler pętli akordowej (wstrzykiwany `LoopClock` → testowalny z fake clockiem; warstwy callbacków: `onBeatSchedule` z dokładnym czasem audio, `onChordChange`/`onBeat`/`onLoopEnd` z `delayMs` dla UI i `playTone`). |
 | `src/lib/improv/click.ts` | `MetronomeClicker` — minimalny lookahead scheduler klików (triangle, akcent na 1) prosto do `ctx.destination` (ta sama polityka co `playCountInClicks`); degraduje się do no-op bez AudioContext. |
-| `src/lib/improv/display.ts` | `ENGINE_LABEL_KEYS`, `localizeToken` (notacja polska B→H przez `formatLocalizedNoteToken`) — wydzielone, by pliki komponentów eksportowały wyłącznie komponenty (fast refresh). |
-| `src/stores/useImprovStore.ts` | zustand + persist (`fretmemo-improv-v1`): `moduleState[id] = { quizBest, drillsDone, loopPasses, exerciseRuns, completed }`, `unlockAll`; akcje `recordQuizResult`, `recordDrillRun`, `recordLoopPass`, `resetModule`, `resetProgress`, `setUnlockAll`. Flaga `completed` przeliczana z progu każdego ćwiczenia modułu. |
+| `src/lib/improv/display.ts` | `ENGINE_LABEL_KEYS`, `localizeToken` (notacja polska B→H przez `formatLocalizedNoteToken`), `localizePromptValues` (lokalizuje wyłącznie pola notowe prompt/hint: `key/chord/sub/v/dominant/target/ii/first/second/source` + listy `list/keys` i `notes/cycle`; matching zawsze na surowych tokenach) — wydzielone, by pliki komponentów eksportowały wyłącznie komponenty (fast refresh). |
+| `src/stores/useImprovStore.ts` | zustand + persist (`fretmemo-improv-v1`): `moduleState[id] = { quizBest, drillsDone, loopPasses, exerciseRuns, completed }`, `unlockAll`; akcje `recordQuizResult`, `recordDrillRun`, `recordLoopPass`, `resetModule`, `resetProgress`, `setUnlockAll`. Flaga `completed` przeliczana przez `isModuleComplete` z curriculum (jedno źródło prawdy predykatu zaliczenia). |
 | `src/pages/ImprovTraining.tsx` | Dwa widoki na jednym komponencie strony: roadmapa (postęp, switch unlockAll, lista 22 ze statusami) i szczegół modułu (TheoryCard + ćwiczenia wg silnika; blokada/404 jak w `EarTraining`). |
 | `src/components/improv/TheoryCard.tsx` | Karta teorii (tekst z `improv.modules.<id>.theory`). |
 | `src/components/improv/ExerciseFrame.tsx` | Wspólna rama ćwiczenia: badge silnika, badge progu, badge „zaliczone", tytuł + opis; `ScoreStrip`. |
@@ -81,9 +81,9 @@ Moduł jest zaliczony (`completed`), gdy **każde** jego ćwiczenie osiągnie w�
   w rundzie 2); moduł jest osiągalny wyłącznie z nawigacji głównej. Klucze locale
   `library.improv`, `library.improvSummary`, `improv.libraryCard.*` pozostały w plikach tłumaczeń
   (nierozwiązane, bez wpływu na UI).
-- **Audio**: E3/E4 grają przez `playTone` (sampler/synteza → voice bus silnika dźwięku);
+- **Audio**: E3 gra root przez `playTone` (sampler/synteza → voice bus silnika dźwięku);
   kliki metronomu (`MetronomeClicker`) w E3 idą bezpośrednio do `ctx.destination`; E4 gra
-  wyłącznie bloki akordowe przez `playTone` (bez klika) — zgodnie z polityką z
+  bloki akordowe przez `playChord` (strum 55 ms, bez klika) — zgodnie z polityką z
   `docs/sound-engine.md`. Brak modyfikacji `src/audio/**` i `src/rhythm/**`.
 - **Fretboard**: reuse `src/components/fretboard/Fretboard.tsx` (props `activeNotes: NoteStatus[]`,
   `onNoteClick`, `fitContainer`) — plik niezmieniony. Diagramy skal oznaczają dźwięki przez
@@ -99,7 +99,10 @@ Moduł jest zaliczony (`completed`), gdy **każde** jego ćwiczenie osiągnie w�
   form liczby mnogiej i18next zamiast „(s)" (EN `_one`/`_other`, PL `_one`/`_few`/`_many`/`_other`
   — `drill.threshold` interpoluje `{{count}}`, wywołanie w `DiagramDrill.tsx` przekazuje
   `{ count }`), a nagłówek widoku modułu renderuje termin EN (`.term`) tylko wtedy, gdy różni
-  się od nazwy (w EN ukryty dla wszystkich 22 modułów, w PL dla `giant-steps`).
+  się od nazwy (w EN ukryty dla wszystkich 22 modułów, w PL dla `giant-steps`); od rundy 6 ta
+  sama reguła obowiązuje wiersze roadmapy. Runda 6: treść pytań/podpowiedzi E2 interpoluje
+  wartości przez `localizePromptValues` (Bb→B, B→H na polach notowych; surowe tokeny opcji
+  bez zmian).
 - **Notacja polska**: nazwy nut/akordów przechodzą przez `localizeToken` (Bb→B, B→H) wyłącznie na
   warstwie wyświetlania; logika odpowiedzi porównuje surowe tokeny.
 

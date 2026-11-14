@@ -20,7 +20,7 @@ import type { ChoiceQuizParams, ImprovExercise } from "@/data/improv/curriculum"
 import { useImprovStore } from "@/stores/useImprovStore";
 import { cn } from "@/lib/utils";
 import { ExerciseFrame, ScoreStrip } from "./ExerciseFrame";
-import { localizeToken } from "@/lib/improv/display";
+import { localizePromptValues, localizeToken } from "@/lib/improv/display";
 
 interface ChoiceQuizProps {
     moduleId: string;
@@ -116,7 +116,7 @@ export function ChoiceQuiz({ moduleId, exercise }: ChoiceQuizProps) {
                         label={t("improv.quiz.question", { current: index + 1, total: questions.length })}
                         value={t("improv.quiz.scoreValue", { correct, total: questions.length })}
                     />
-                    <p className="text-sm font-medium">{t(question.promptKey, question.promptValues)}</p>
+                    <p className="text-sm font-medium">{t(question.promptKey, localizePromptValues(question.promptValues))}</p>
                     <div className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-2">
                         {question.options.map((option) => {
                             const isCorrectOption = option === question.options[question.correctIndex];
@@ -146,7 +146,7 @@ export function ChoiceQuiz({ moduleId, exercise }: ChoiceQuizProps) {
                                 ? t("improv.quiz.correct")
                                 : t("improv.quiz.wrong", { answer: formatOption(question.options[question.correctIndex], t) })}
                             {" "}
-                            {t(question.hintKey, question.hintValues ?? {})}
+                            {t(question.hintKey, localizePromptValues(question.hintValues ?? {}))}
                         </p>
                     )}
                 </div>
