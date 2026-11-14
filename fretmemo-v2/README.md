@@ -1,5 +1,25 @@
 # React + TypeScript + Vite
 
+## FretMemo v2 — funkcje / Features
+
+Aplikacja treningowa dla gitarzysty (SPA, React 19 + Vite + Tailwind + zustand + tonal + i18n PL/EN).
+UI po polsku z terminami angielskimi; dokumentacja modułów w `docs/`.
+
+- **Train (biblioteka `/train`)** — katalog wszystkich ćwiczeń z mastery i przypinaniem.
+- **Practice** — ćwiczenia na gryfie (Fretboard→Note, Note→Tab itd.) z pętlą metronomu i prompterem akordów.
+- **Technique** — treningi techniczne (Spider Walk, Permutation Trainer, …).
+- **Your Songs (ScoreViewer)** — import Guitar Pro, odtwarzanie alphaTab, praktyka z pętlami taktów.
+- **Sound** — silnik dźwięku z presetami classic (synteza) i NAM (neural amp modeling), projektowanie tonu (`docs/sound-engine.md`).
+- **Theory** — eksplorator skal, koło kwintowe, CAGED, triady, biblioteka akordów, interwały.
+- **Ear Training** — dźwięk→gryf, interwały, jakość akordów, słuch funkcjonalny.
+- **Rhythm Dojo** — Tap the Beat, Strum Patterns, Rhythm Reading, Groove Lab.
+- **Improv Training (`/improv`)** — 22 moduły nauki improwizacji w kolejności z wideo źródłowego
+  (od dźwięków struny E po „Giant Steps"): teoria PL + terminy EN, quizy na gryfie, quizy zamknięte,
+  diagramy skal z metronomem i loopy akordowe z progami przejścia; postęp persystowany.
+  Moduł ma własną zakładkę „Improv" w nawigacji głównej (dolna belka + sidebar desktop); nie jest
+  osiągalny z biblioteki Train.
+  Architektura: `docs/improv-training.md`.
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:

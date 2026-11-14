@@ -7,11 +7,13 @@
  * partially-written record cannot crash the Library page.
  */
 import type { GuitarProFormat, ScoreRecord, ScoreSummary } from "@/types/scores";
+import type { SongProgress } from "@/lib/songProgress";
 
 const DB_NAME = "fretmemo-scores-v1";
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const STORE = "files";
 const TRACK_CONFIGS_STORE = "trackConfigs";
+const SONG_PROGRESS_STORE = "songProgress";
 
 let dbPromise: Promise<IDBDatabase> | null = null;
 
@@ -26,6 +28,9 @@ function openDb(): Promise<IDBDatabase> {
                 }
                 if (!db.objectStoreNames.contains(TRACK_CONFIGS_STORE)) {
                     db.createObjectStore(TRACK_CONFIGS_STORE, { keyPath: "scoreId" });
+                }
+                if (!db.objectStoreNames.contains(SONG_PROGRESS_STORE)) {
+                    db.createObjectStore(SONG_PROGRESS_STORE, { keyPath: "hash" });
                 }
             };
             request.onsuccess = () => {
@@ -188,4 +193,48 @@ export async function updateScoreBytes(id: string, bytes: ArrayBuffer): Promise<
     const updated = { ...(record as Record<string, unknown>), bytes, sizeBytes: bytes.byteLength };
     store.put(updated);
     await transactionDone(tx);
+}
+
+// ─── Song progress (R-08: state keyed by file-content hash) ──────────────
+
+/** Reads the practice progress for a score-content hash (null when absent). */
+export async function getSongProgress(hash: string): Promise<unknown | null> {
+    try {
+        const db = await openDb();
+        const tx = db.transaction(SONG_PROGRESS_STORE, "readonly");
+        const request = tx.objectStore(SONG_PROGRESS_STORE).get(hash);
+        const result = await requestToPromise(request);
+        return (result as unknown) ?? null;
+    } catch {
+        // No IndexedDB (private mode, tests) — progress is best-effort.
+        return null;
+    }
+}
+
+/** Upserts the practice progress record for a hash (best-effort). */
+export async function setSongProgress(record: SongProgress): Promise<void> {
+    try {
+        const db = await openDb();
+        const tx = db.transaction(SONG_PROGRESS_STORE, "readwrite");
+        tx.objectStore(SONG_PROGRESS_STORE).put(record);
+        await transactionDone(tx);
+    } catch {
+        // Best-effort persistence — playback works without it.
+    }
+}
+
+/**
+ * Copies progress from one content hash to another (after an editor save
+ * the bytes change; the practice history must follow the song).
+ */
+export async function copySongProgress(fromHash: string, toHash: string): Promise<void> {
+    if (fromHash === toHash) return;
+    const progress = await getSongProgress(fromHash);
+    if (progress && typeof progress === "object") {
+        await setSongProgress({
+            ...(progress as SongProgress),
+            hash: toHash,
+            updatedAt: Date.now(),
+        });
+    }
 }

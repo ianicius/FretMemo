@@ -35,6 +35,15 @@ function getRouteMeta(pathname: string): SeoRouteMeta {
         };
     }
 
+    if (pathname === "/improv") {
+        return {
+            title: "Guitar Improv Training Roadmap | FretMemo",
+            description:
+                "Learn guitar improvisation step by step with a 22-module roadmap covering scales, modes, arpeggios, chord tones, and backing-track practice.",
+            path: "/improv",
+        };
+    }
+
     if (pathname === "/challenges") {
         return {
             title: "Daily Guitar Challenges | FretMemo",

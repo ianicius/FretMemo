@@ -50,11 +50,11 @@ export function Header() {
     return (
         <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="container flex h-14 items-center gap-1 px-2.5 min-[390px]:px-3 md:px-6">
-                <div className="min-w-0 flex-1">
-                    <span className="block truncate text-base font-bold tracking-tight text-primary min-[390px]:text-lg">FretMemo</span>
+                <div className="flex-1">
+                    <span className="block whitespace-nowrap text-base font-bold tracking-tight text-primary min-[390px]:text-lg">FretMemo</span>
                 </div>
 
-                <div className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-muted/40 px-2 py-1 max-[359px]:hidden min-[390px]:px-2.5">
+                <div className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-muted/40 px-2 py-1 max-[420px]:hidden min-[390px]:px-2.5">
                     <span
                         className="inline-flex items-center gap-1 text-amber-700 dark:text-amber-300"
                         title={t("header.currentStreak")}

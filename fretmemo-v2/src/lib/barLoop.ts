@@ -86,3 +86,29 @@ export function barRangeToMsWindow(
     }
     return { startMs: startMs ?? 0, endMs };
 }
+
+/**
+ * Inverse walk: converts a playback position (ms) into a tick position for
+ * `api.tickPosition`, following the same tempo map. Clamps to the song end.
+ */
+export function msToTicks(score: ScoreLike, timeMs: number): number {
+    if (!Number.isFinite(timeMs) || timeMs <= 0) return 0;
+    let tempo = score.tempo || 120;
+    let offsetMs = 0;
+    let lastTick = 0;
+    for (const masterBar of score.masterBars) {
+        const automation = masterBar.tempoAutomations.find(
+            (entry) => entry.type === TEMPO_AUTOMATION_TYPE,
+        );
+        if (automation) tempo = automation.value;
+        const barTicks = masterBar.calculateDuration();
+        const barMs = ticksToMs(barTicks, tempo);
+        if (timeMs < offsetMs + barMs) {
+            const fraction = (timeMs - offsetMs) / barMs;
+            return Math.round(masterBar.start + barTicks * fraction);
+        }
+        offsetMs += barMs;
+        lastTick = masterBar.start + barTicks;
+    }
+    return lastTick;
+}
