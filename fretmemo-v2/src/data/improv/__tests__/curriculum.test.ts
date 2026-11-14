@@ -289,6 +289,24 @@ describe("micLoopPass", () => {
         }
     });
 
+    it("non-gating practice-link (playNotes) never blocks module completion (plan 5 fix)", () => {
+        const module = getImprovModule("pentatonic-scale") as NonNullable<ReturnType<typeof getImprovModule>>;
+        const e3 = module.exercises.find((exercise) => exercise.id === "pentatonic-scale.e3") as NonNullable<ReturnType<typeof getImprovExercise>>;
+        expect((e3.params as PracticeLinkParams).nonGating).toBe(true);
+        // Only drills + loop gate the module: empty runs still complete it
+        // once the gating exercises meet their thresholds.
+        const gatingMet = {
+            exerciseRuns: {
+                "pentatonic-scale.e1": 2,
+                "pentatonic-scale.e2": 2,
+                "pentatonic-scale.e4": 2,
+                "pentatonic-scale.e5": 2,
+            } as Record<string, number>,
+            completed: false,
+        };
+        expect(isModuleComplete(module, gatingMet)).toBe(true);
+    });
+
     it("module 15 subV variant plays the tritone sub of G7 (plan 0.3)", () => {
         const module = getImprovModule("tritone-subs") as NonNullable<ReturnType<typeof getImprovModule>>;
         const e2 = module.exercises.find((exercise) => exercise.id === "tritone-subs.e2") as NonNullable<ReturnType<typeof getImprovExercise>>;

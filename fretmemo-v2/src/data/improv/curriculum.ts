@@ -71,6 +71,10 @@ export interface PracticeLinkParams {
      * `minAnswers` recorded answers with accuracy ≥ `minAccuracy`. */
     minAnswers: number;
     minAccuracy: number;
+    /** Plan phase 5 fix: playNotes sessions never record positionStats, so
+     * playNotes-based links are EXTRA practice — they never gate module
+     * completion (unlike fretboardToNote/noteToTab links in modules 1/5). */
+    nonGating?: boolean;
 }
 
 /**
@@ -157,7 +161,7 @@ function practiceLinkExercise(
     enabledStrings: number[],
     offsetsFrom: number,
     offsetsTo: number,
-    options?: { rootNote?: NoteName; scaleType?: ScaleType },
+    options?: { rootNote?: NoteName; scaleType?: ScaleType; nonGating?: boolean },
 ): ImprovExercise {
     return {
         id: `${moduleId}.${suffix}`,
@@ -171,6 +175,7 @@ function practiceLinkExercise(
             offsetsTo,
             rootNote: options?.rootNote,
             scaleType: options?.scaleType,
+            nonGating: options?.nonGating,
             minAnswers: 3,
             minAccuracy: 0.8,
         },
@@ -281,6 +286,7 @@ export const CURRICULUM: ImprovModule[] = [
             practiceLinkExercise("pentatonic-scale", "e3", "playNotes", [0, 1, 2, 3, 4, 5], 5, 8, {
                 rootNote: "A",
                 scaleType: "minorPentatonic",
+            nonGating: true,
             }),
             loopExercise("pentatonic-scale", "e4", {
                 progression: [{ chord: "Am7", beats: 16 }, { chord: "Dm7", beats: 4 }, { chord: "Em7", beats: 4 }],
@@ -330,6 +336,7 @@ export const CURRICULUM: ImprovModule[] = [
             practiceLinkExercise("major-scale", "e3", "playNotes", [0, 1, 2, 3, 4, 5], 8, 12, {
                 rootNote: "C",
                 scaleType: "major",
+            nonGating: true,
             }),
             loopExercise("major-scale", "e4", {
                 progression: ["Cmaj7", "Am7", "Fmaj7", "G7"],
@@ -791,6 +798,7 @@ export const CURRICULUM: ImprovModule[] = [
             practiceLinkExercise("melodic-minor", "e3", "playNotes", [0, 1, 2, 3, 4, 5], 5, 9, {
                 rootNote: "A",
                 scaleType: "melodicMinor",
+            nonGating: true,
             }),
             loopExercise("melodic-minor", "e4", {
                 progression: ["Am6", "Ammaj7"],
@@ -865,6 +873,7 @@ export const CURRICULUM: ImprovModule[] = [
             practiceLinkExercise("harmonic-minor", "e3", "playNotes", [0, 1, 2, 3, 4, 5], 5, 9, {
                 rootNote: "C",
                 scaleType: "harmonicMinor",
+            nonGating: true,
             }),
             loopExercise("harmonic-minor", "e4", {
                 progression: [
@@ -1037,7 +1046,11 @@ export function isModuleComplete(
     module: ImprovModule,
     progress: ImprovProgressShape | undefined,
 ): boolean {
-    return module.exercises.every((exercise) => isExercisePassed(exercise, progress));
+    // Non-gating exercises (plan phase 5 fix: playNotes practice-links) are
+    // extra practice — they never block module completion.
+    return module.exercises.every((exercise) =>
+        (exercise.engine === "practice-link" && (exercise.params as PracticeLinkParams).nonGating)
+        || isExercisePassed(exercise, progress));
 }
 
 /**

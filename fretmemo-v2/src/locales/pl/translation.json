@@ -2358,19 +2358,19 @@
             },
             "pentatonic-scale.e3": {
                 "name": "Trening: A-moll pentatoniczna",
-                "desc": "Zagraj dźwięki A-moll pentatonicznej (progi 5–8) w sesji treningowej z oceną na żywo."
+                "desc": "Zagraj dźwięki A-moll pentatonicznej (progi 5–8) w sesji treningowej z oceną na żywo. Sesja dodatkowa — nie jest wymagana do zaliczenia modułu."
             },
             "major-scale.e3": {
                 "name": "Trening: C-dur",
-                "desc": "Zagraj dźwięki skali C-dur (progi 8–12) w sesji treningowej z oceną na żywo."
+                "desc": "Zagraj dźwięki skali C-dur (progi 8–12) w sesji treningowej z oceną na żywo. Sesja dodatkowa — nie jest wymagana do zaliczenia modułu."
             },
             "melodic-minor.e3": {
                 "name": "Trening: A-moll melodyczna",
-                "desc": "Zagraj dźwięki A-moll melodycznej (progi 5–9) w sesji treningowej z oceną na żywo."
+                "desc": "Zagraj dźwięki A-moll melodycznej (progi 5–9) w sesji treningowej z oceną na żywo. Sesja dodatkowa — nie jest wymagana do zaliczenia modułu."
             },
             "harmonic-minor.e3": {
                 "name": "Trening: C-moll harmoniczna",
-                "desc": "Zagraj dźwięki C-moll harmonicznej (progi 5–9) w sesji treningowej z oceną na żywo."
+                "desc": "Zagraj dźwięki C-moll harmonicznej (progi 5–9) w sesji treningowej z oceną na żywo. Sesja dodatkowa — nie jest wymagana do zaliczenia modułu."
             },
             "pentatonic-scale.e4": {
                 "name": "Loop: improwizuj w boksie 1",
@@ -2435,7 +2435,9 @@
             "coverageValue": "{{done}}/{{total}}",
             "hint": "Otwórz sesję treningową i odpowiadaj, aż każda podświetlona pozycja będzie opanowana. Postęp bierze się ze statystyk treningu (powtórki SM2, tryb z mikrofonem).",
             "open": "Otwórz trening: {{mode}}",
-            "recordPass": "Zapisz zaliczenie ćwiczenia"
+            "recordPass": "Zapisz zaliczenie ćwiczenia",
+            "extra": "Ćwiczenie dodatkowe",
+            "extraHint": "Dodatkowa sesja treningowa — nie jest wymagana do zaliczenia modułu."
         },
         "supplementary": {
             "earTraining": "Otwórz trening słuchu",

@@ -2344,19 +2344,19 @@
             },
             "pentatonic-scale.e3": {
                 "name": "Practice: A minor pentatonic",
-                "desc": "Play the A minor pentatonic notes (frets 5–8) in the practice session with live scoring."
+                "desc": "Play the A minor pentatonic notes (frets 5–8) in the practice session with live scoring. Extra practice session — not required to pass the module."
             },
             "major-scale.e3": {
                 "name": "Practice: C major scale",
-                "desc": "Play the C major scale notes (frets 8–12) in the practice session with live scoring."
+                "desc": "Play the C major scale notes (frets 8–12) in the practice session with live scoring. Extra practice session — not required to pass the module."
             },
             "melodic-minor.e3": {
                 "name": "Practice: A melodic minor",
-                "desc": "Play the A melodic minor notes (frets 5–9) in the practice session with live scoring."
+                "desc": "Play the A melodic minor notes (frets 5–9) in the practice session with live scoring. Extra practice session — not required to pass the module."
             },
             "harmonic-minor.e3": {
                 "name": "Practice: C harmonic minor",
-                "desc": "Play the C harmonic minor notes (frets 5–9) in the practice session with live scoring."
+                "desc": "Play the C harmonic minor notes (frets 5–9) in the practice session with live scoring. Extra practice session — not required to pass the module."
             },
             "pentatonic-scale.e4": {
                 "name": "Loop: improvise in box 1",
@@ -2421,7 +2421,9 @@
             "coverageValue": "{{done}}/{{total}}",
             "hint": "Open the practice session and answer until every highlighted position is mastered. Progress comes from your practice stats (spaced repetition, mic mode).",
             "open": "Open practice: {{mode}}",
-            "recordPass": "Record exercise pass"
+            "recordPass": "Record exercise pass",
+            "extra": "Extra practice",
+            "extraHint": "Extra practice session — not required to pass the module."
         },
         "supplementary": {
             "earTraining": "Open ear training",

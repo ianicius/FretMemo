@@ -16,6 +16,7 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { ExternalLink } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Fretboard } from "@/components/fretboard/Fretboard";
 import { STANDARD_TUNING, getNoteAt } from "@/lib/constants";
@@ -118,10 +119,14 @@ export function PracticeLinkExercise({ moduleId, exercise }: PracticeLinkExercis
                 <ExternalLink className="mr-2 h-4 w-4" />
                 {t("improv.practiceLink.open", { mode: t(`practice.modes.${params.mode}`) })}
             </Button>
-            {criteriaMet && !passed && (
-                <Button type="button" size="sm" variant="outline" onClick={() => recordPracticePass(moduleId, exercise.id)}>
-                    {t("improv.practiceLink.recordPass")}
-                </Button>
+            {params.nonGating ? (
+                <Badge variant="secondary" className="text-[10px]">{t("improv.practiceLink.extra")}</Badge>
+            ) : (
+                criteriaMet && !passed && (
+                    <Button type="button" size="sm" variant="outline" onClick={() => recordPracticePass(moduleId, exercise.id)}>
+                        {t("improv.practiceLink.recordPass")}
+                    </Button>
+                )
             )}
         </ExerciseFrame>
     );
