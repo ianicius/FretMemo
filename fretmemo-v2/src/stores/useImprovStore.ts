@@ -15,6 +15,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { calculateNextReview, type SpacedRepetitionEntry } from "@/lib/sm2";
 import {
     CURRICULUM,
     getImprovModule,
@@ -31,12 +32,21 @@ export interface ImprovModuleProgress {
 export interface ImprovStoreState {
     moduleState: Record<string, ImprovModuleProgress>;
     unlockAll: boolean;
+    /** Entrance test (plan phase 6): modules with order ≤ this count are
+     * unlocked regardless of the sequential gate; null = no test taken. */
+    entranceUnlockCount: number | null;
+    /** SM-2 entries per review generator (plan phase 6: review scheduling). */
+    reviewSRS: Record<string, SpacedRepetitionEntry>;
     recordQuizResult: (moduleId: string, exerciseId: string, correct: number) => void;
     recordDrillRun: (moduleId: string, exerciseId: string) => void;
     recordLoopPass: (moduleId: string, exerciseId: string) => void;
     /** practice-link: pass criteria live in useProgressStore; the component
      * calls this once they are all met (plan phase 2). */
     recordPracticePass: (moduleId: string, exerciseId: string) => void;
+    /** Review session (plan phase 6): update the SM-2 entry for a generator
+     * from the review run's quality (0-5). */
+    updateReviewSR: (generatorId: string, quality: number) => void;
+    setEntranceUnlockCount: (count: number | null) => void;
     resetModule: (moduleId: string) => void;
     resetProgress: () => void;
     setUnlockAll: (value: boolean) => void;
@@ -107,6 +117,8 @@ export const useImprovStore = create<ImprovStoreState>()(
         (set) => ({
             moduleState: createInitialModuleState(),
             unlockAll: false,
+            entranceUnlockCount: null,
+            reviewSRS: {},
             recordQuizResult: (moduleId, exerciseId, correct) => {
                 set((state) => ({
                     moduleState: updateModule(state.moduleState, moduleId, (progress) => {
@@ -157,6 +169,18 @@ export const useImprovStore = create<ImprovStoreState>()(
                     })),
                 }));
             },
+            updateReviewSR: (generatorId, quality) => {
+                set((state) => {
+                    const previous = state.reviewSRS[generatorId] ?? null;
+                    // SM-2 quality scale: 5 = correct, 2 = failed after seeing
+                    // the answer (mapped from the review run per question).
+                    const next = calculateNextReview(quality, previous);
+                    return { reviewSRS: { ...state.reviewSRS, [generatorId]: next } };
+                });
+            },
+            setEntranceUnlockCount: (count) => {
+                set({ entranceUnlockCount: count });
+            },
             resetModule: (moduleId) => {
                 set((state) => ({
                     moduleState: {
@@ -177,6 +201,8 @@ export const useImprovStore = create<ImprovStoreState>()(
             partialize: (state) => ({
                 moduleState: state.moduleState,
                 unlockAll: state.unlockAll,
+                entranceUnlockCount: state.entranceUnlockCount,
+                reviewSRS: state.reviewSRS,
             }),
             merge: (persistedState, currentState) => {
                 const persisted = persistedState as

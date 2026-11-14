@@ -1755,6 +1755,12 @@
             "low": "Low: {{value}}%",
             "trendLegend": "Accuracy trend",
             "confidenceLegend": "Confidence zone"
+        },
+        "improv": {
+            "title": "Improv Training",
+            "desc": "Modules completed in Improv Training.",
+            "completed": "{{done}} of {{total}}",
+            "open": "Open roadmap"
         }
     },
     "me": {
@@ -1777,7 +1783,10 @@
             "percent": "{{percent}}% of the roadmap",
             "unlockAll": "Unlock all modules",
             "unlockAllHint": "By default passing a module unlocks the next one.",
-            "openModuleAria": "Module {{order}}: {{name}}"
+            "openModuleAria": "Module {{order}}: {{name}}",
+            "entranceTest": "Placement test",
+            "entranceTestName": "Placement test",
+            "entranceTestDesc": "One question per module. The test unlocks modules up to your first wrong answer."
         },
         "status": {
             "done": "Passed",
@@ -1859,7 +1868,8 @@
             "micHits": "Hits: {{done}}/{{total}}",
             "micWindowHint": "Play a note from the target set when the chord changes — the first beat is checked.",
             "micError": "Microphone unavailable — use the self-mark button.",
-            "micDetected": "Detected: {{note}}"
+            "micDetected": "Detected: {{note}}",
+            "bass": "Bass"
         },
         "shapes": {
             "min-pent": "Minor pentatonic",
@@ -1924,7 +1934,9 @@
             "giantStepsArps": "Play chord arpeggios through the whole form.",
             "giantStepsRootsLabel": "Level 1: roots",
             "giantStepsPatternLabel": "Level 2: 1-2-3-5",
-            "giantStepsArpsLabel": "Level 3: arpeggios"
+            "giantStepsArpsLabel": "Level 3: arpeggios",
+            "bluesBox1": "12-bar blues in A — improvise in pentatonic box 1.",
+            "bluesChordTones": "12-bar blues in A — land on a chord tone at every change."
         },
         "q": {
             "keySig": {
@@ -2393,6 +2405,14 @@
             "chord-scale-harmonic.e3": {
                 "name": "Loop: minor ii–V with harmonic minor",
                 "desc": "Bm7b5–E7–Am: use Phrygian dominant over E7. 2 successful loops."
+            },
+            "pentatonic-scale.e5": {
+                "name": "Loop: 12-bar blues",
+                "desc": "12-bar blues in A (A7–D7–E7). Improvise in pentatonic box 1. 2 successful loops."
+            },
+            "target-chord-tones.e3": {
+                "name": "Loop: 12-bar blues",
+                "desc": "12-bar blues in A — land on a chord tone at every change. 2 successful loops."
             }
         },
         "practiceLink": {
@@ -2428,6 +2448,18 @@
             "hmE7": "E7 — aim for G#",
             "hmLocrian": "B Locrian (from A harmonic minor)",
             "hmPhrygianDom": "E Phrygian dominant (from A harmonic minor)"
+        },
+        "stage": {
+            "podstawy": "Foundations (1–6)",
+            "harmonia": "Harmony (7–11)",
+            "granie": "Playing over changes (12–17)",
+            "zaawansowane": "Advanced (18–22)"
+        },
+        "review": {
+            "name": "Review: mixed quiz",
+            "desc": "10 questions from modules you have already passed — SM-2 scheduling brings weak generators back sooner.",
+            "button": "Review",
+            "disabledHint": "Available after passing your first module."
         }
     }
 }

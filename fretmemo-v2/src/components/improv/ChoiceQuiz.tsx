@@ -29,6 +29,11 @@ import { localizePromptValues, localizeToken } from "@/lib/improv/display";
 interface ChoiceQuizProps {
     moduleId: string;
     exercise: ImprovExercise;
+    /** Plan phase 6: per-question event for review SM-2 scheduling and the
+     * placement test (generator id = the prefix of question.id). */
+    onQuestionAnswered?: (generatorId: string, correct: boolean) => void;
+    /** Fired once when a run finishes, before the summary renders. */
+    onRunFinished?: (correct: number, total: number) => void;
 }
 
 const ANSWER_ADVANCE_MS = 1300;
@@ -38,7 +43,7 @@ function formatOption(option: string, translate: (key: string) => string): strin
     return option.startsWith("improv.") ? translate(option) : localizeToken(option);
 }
 
-export function ChoiceQuiz({ moduleId, exercise }: ChoiceQuizProps) {
+export function ChoiceQuiz({ moduleId, exercise, onQuestionAnswered, onRunFinished }: ChoiceQuizProps) {
     const { t } = useTranslation();
     const params = exercise.params as ChoiceQuizParams;
     const recordQuizResult = useImprovStore((state) => state.recordQuizResult);
@@ -69,6 +74,7 @@ export function ChoiceQuiz({ moduleId, exercise }: ChoiceQuizProps) {
         const nextCorrect = wasCorrect ? correct + 1 : correct;
         if (wasCorrect) setCorrect(nextCorrect);
         setSelected(option);
+        onQuestionAnswered?.(question.id.split(":")[0] ?? "", wasCorrect);
         timerRef.current = window.setTimeout(() => {
             setSelected(null);
             if (index + 1 >= questions.length) {
@@ -79,6 +85,7 @@ export function ChoiceQuiz({ moduleId, exercise }: ChoiceQuizProps) {
                     incorrect: Math.max(0, questions.length - nextCorrect),
                     durationSeconds: Math.max(1, Math.round((Date.now() - runStart) / 1000)),
                 });
+                onRunFinished?.(nextCorrect, questions.length);
                 setFinished(true);
             } else {
                 setIndex((previous) => previous + 1);

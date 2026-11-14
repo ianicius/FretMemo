@@ -10,10 +10,10 @@
  *   diagram drill, backing loop).
  */
 
-import { useEffect } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, Fragment } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, CheckCircle2, ChevronRight, Lock } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ChevronRight, GraduationCap, Lock, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,6 +26,7 @@ import { DiagramDrill } from "@/components/improv/DiagramDrill";
 import { BackingLoopExercise } from "@/components/improv/BackingLoopExercise";
 import { PracticeLinkExercise } from "@/components/improv/PracticeLinkExercise";
 import { CURRICULUM, countCompletedModules, getImprovModule, isModuleUnlocked, isModuleComplete } from "@/data/improv/curriculum";
+import type { ChoiceGeneratorId } from "@/lib/improv/questions";
 import { useImprovStore } from "@/stores/useImprovStore";
 import { cn } from "@/lib/utils";
 import { trackFeatureOpened } from "@/lib/analytics";
@@ -40,15 +41,107 @@ export default function ImprovTraining() {
     return <ModuleView moduleId={moduleId} />;
 }
 
+/** Plan phase 6: display stages over the canonical order (display only). */
+const STAGES: Array<{ labelKey: string; from: number; to: number }> = [
+    { labelKey: "improv.stage.podstawy", from: 1, to: 6 },
+    { labelKey: "improv.stage.harmonia", from: 7, to: 11 },
+    { labelKey: "improv.stage.granie", from: 12, to: 17 },
+    { labelKey: "improv.stage.zaawansowane", from: 18, to: 22 },
+];
+
 function RoadmapView() {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const moduleState = useImprovStore((state) => state.moduleState);
     const unlockAll = useImprovStore((state) => state.unlockAll);
     const setUnlockAll = useImprovStore((state) => state.setUnlockAll);
+    const entranceUnlockCount = useImprovStore((state) => state.entranceUnlockCount);
+    const updateReviewSR = useImprovStore((state) => state.updateReviewSR);
+    const setEntranceUnlockCount = useImprovStore((state) => state.setEntranceUnlockCount);
 
     const completed = countCompletedModules(moduleState);
     const total = CURRICULUM.length;
+
+    // Plan phase 6: mixed review quiz from the choice-quiz generators of
+    // passed modules; SM-2 entries per generator schedule the review.
+    const passedGenerators = useMemo(() => {
+        const passedIds = new Set(
+            CURRICULUM.filter((module) => isModuleComplete(module, moduleState[module.id])).map((module) => module.id),
+        );
+        const generators = new Set<string>();
+        for (const module of CURRICULUM) {
+            if (!passedIds.has(module.id)) continue;
+            for (const exercise of module.exercises) {
+                if (exercise.engine !== "choice-quiz") continue;
+                generators.add((exercise.params as { generatorId: string }).generatorId);
+            }
+        }
+        return [...generators];
+    }, [moduleState]);
+    const [reviewOpen, setReviewOpen] = useState(false);
+    const reviewExercise = useMemo(() => ({
+        id: "review.quiz",
+        engine: "choice-quiz" as const,
+        nameKey: "improv.review.name",
+        descKey: "improv.review.desc",
+        params: {
+            generatorId: "mixed" as const,
+            allowedGenerators: passedGenerators as ChoiceGeneratorId[],
+            questionCount: 10,
+            requiredCorrect: 7,
+            answerOptions: 4,
+        },
+    }), [passedGenerators]);
+    const handleReviewAnswered = useCallback((generatorId: string, correct: boolean) => {
+        updateReviewSR(generatorId, correct ? 5 : 2);
+    }, [updateReviewSR]);
+
+    // Plan phase 6: placement quiz — one question per module (in canonical
+    // order where the module has a choice-quiz generator); unlocks modules
+    // up to the first failed one.
+    const generatorModuleOrder = useMemo(() => {
+        const map = new Map<string, number>();
+        for (const module of CURRICULUM) {
+            for (const exercise of module.exercises) {
+                if (exercise.engine !== "choice-quiz") continue;
+                const generatorId = (exercise.params as { generatorId: string }).generatorId;
+                const previous = map.get(generatorId);
+                if (previous === undefined || module.order < previous) map.set(generatorId, module.order);
+            }
+        }
+        return map;
+    }, []);
+    const orderedEntranceGenerators = useMemo(
+        () => [...generatorModuleOrder.entries()].sort((a, b) => a[1] - b[1]).map(([generatorId]) => generatorId),
+        [generatorModuleOrder],
+    );
+    const [entranceOpen, setEntranceOpen] = useState(false);
+    const failedOrdersRef = useRef<Set<number>>(new Set());
+    const entranceExercise = useMemo(() => ({
+        id: "entrance.quiz",
+        engine: "choice-quiz" as const,
+        nameKey: "improv.roadmap.entranceTestName",
+        descKey: "improv.roadmap.entranceTestDesc",
+        params: {
+            generatorId: "mixed" as const,
+            allowedGenerators: orderedEntranceGenerators as ChoiceGeneratorId[],
+            questionCount: orderedEntranceGenerators.length,
+            requiredCorrect: orderedEntranceGenerators.length,
+            answerOptions: 4,
+        },
+    }), [orderedEntranceGenerators]);
+    const handleEntranceAnswered = useCallback((generatorId: string, correct: boolean) => {
+        if (correct) return;
+        const order = generatorModuleOrder.get(generatorId);
+        if (order) failedOrdersRef.current.add(order);
+    }, [generatorModuleOrder]);
+    const handleEntranceFinished = useCallback(() => {
+        const firstFailed = failedOrdersRef.current.size > 0 ? Math.min(...failedOrdersRef.current) : 22;
+        // Modules up to (not including) the first failed one unlock.
+        setEntranceUnlockCount(firstFailed - 1);
+        failedOrdersRef.current = new Set();
+        setEntranceOpen(false);
+    }, [setEntranceUnlockCount]);
 
     return (
         <div className="space-y-5 pb-8">
@@ -75,16 +168,72 @@ function RoadmapView() {
                         </div>
                         <Switch checked={unlockAll} onCheckedChange={setUnlockAll} aria-label={t("improv.roadmap.unlockAll")} />
                     </div>
+                    <div className="flex flex-wrap gap-2 pt-1">
+                        <Button
+                            type="button"
+                            size="sm"
+                            variant={reviewOpen ? "secondary" : "outline"}
+                            disabled={completed === 0}
+                            onClick={() => {
+                                setEntranceOpen(false);
+                                setReviewOpen((previous) => !previous);
+                            }}
+                        >
+                            <RotateCcw className="mr-2 h-4 w-4" />
+                            {t("improv.review.button")}
+                        </Button>
+                        <Button
+                            type="button"
+                            size="sm"
+                            variant={entranceOpen ? "secondary" : "outline"}
+                            onClick={() => {
+                                setReviewOpen(false);
+                                failedOrdersRef.current = new Set();
+                                setEntranceOpen((previous) => !previous);
+                            }}
+                        >
+                            <GraduationCap className="mr-2 h-4 w-4" />
+                            {t("improv.roadmap.entranceTest")}
+                        </Button>
+                    </div>
                 </CardContent>
             </Card>
 
+            {reviewOpen && completed > 0 && (
+                <ChoiceQuiz
+                    key={`review-${passedGenerators.join(",")}`}
+                    moduleId="review"
+                    exercise={reviewExercise}
+                    onQuestionAnswered={handleReviewAnswered}
+                />
+            )}
+            {reviewOpen && completed === 0 && (
+                <p className="text-xs text-muted-foreground">{t("improv.review.disabledHint")}</p>
+            )}
+            {entranceOpen && (
+                <ChoiceQuiz
+                    key="entrance-quiz"
+                    moduleId="entrance"
+                    exercise={entranceExercise}
+                    onQuestionAnswered={handleEntranceAnswered}
+                    onRunFinished={handleEntranceFinished}
+                />
+            )}
+
             <div className="space-y-2">
                 {CURRICULUM.map((module) => {
-                    const unlocked = isModuleUnlocked(module.id, moduleState, unlockAll);
+                    const stageLabel = STAGES.find((stage) => stage.from === module.order)?.labelKey;
+                    const unlocked = isModuleUnlocked(module.id, moduleState, unlockAll, entranceUnlockCount);
                     const isComplete = isModuleComplete(module, moduleState[module.id]);
                     const moduleName = t(`improv.modules.${module.id}.name`);
                     const moduleTerm = t(`improv.modules.${module.id}.term`);
                     return (
+                        <Fragment key={`m-${module.order}`}>
+                        {stageLabel && (
+                            <p className="pt-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                {t(stageLabel)}
+                            </p>
+                        )}
                         <button
                             key={module.id}
                             type="button"
@@ -132,6 +281,7 @@ function RoadmapView() {
                             )}
                             {unlocked && <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />}
                         </button>
+                        </Fragment>
                     );
                 })}
             </div>
@@ -164,7 +314,8 @@ function ModuleView({ moduleId }: { moduleId: string }) {
         );
     }
 
-    const unlocked = isModuleUnlocked(module.id, moduleState, unlockAll);
+    const entranceUnlockCount = useImprovStore((state) => state.entranceUnlockCount);
+    const unlocked = isModuleUnlocked(module.id, moduleState, unlockAll, entranceUnlockCount);
     const isComplete = isModuleComplete(module, moduleState[module.id]);
     const moduleName = t(`improv.modules.${module.id}.name`);
     const moduleTerm = t(`improv.modules.${module.id}.term`);

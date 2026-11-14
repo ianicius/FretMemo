@@ -963,10 +963,13 @@ function generateQuestion(generatorId: ChoiceGeneratorId, rng: Rng, direction: s
 }
 
 export interface ChoiceQuizGenerationParams {
-    generatorId: ChoiceGeneratorId;
+    generatorId: ChoiceGeneratorId | "mixed";
     questionCount: number;
     answerOptions?: number;
     direction?: string;
+    /** For "mixed": restrict questions to these generators (plan phase 6:
+     * review sessions draw from passed modules only). */
+    allowedGenerators?: ChoiceGeneratorId[];
 }
 
 /**
@@ -977,7 +980,15 @@ export function generateChoiceQuiz(params: ChoiceQuizGenerationParams, seed: str
     const questions: ChoiceQuestion[] = [];
     for (let index = 0; index < params.questionCount; index += 1) {
         const rng = createRng(`${seed}:${params.generatorId}:${index}`);
-        const question = generateQuestion(params.generatorId, rng, params.direction);
+        // "mixed" draws a concrete generator per question (plan phase 6:
+        // review sessions). With allowedGenerators, the draw is restricted.
+        const effectiveGenerator = params.generatorId === "mixed"
+            ? rng.pick(params.allowedGenerators ?? listChoiceGeneratorIds())
+            : params.generatorId;
+        const direction = params.generatorId === "mixed"
+            ? (params.direction ?? undefined)
+            : params.direction;
+        const question = generateQuestion(effectiveGenerator, rng, direction);
         const { options, correctIndex, ...rest } = question;
         const trimmed = options.slice(0, params.answerOptions ?? 4);
         questions.push({

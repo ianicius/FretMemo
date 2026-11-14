@@ -1406,6 +1406,12 @@
             "low": "Min: {{value}}%",
             "trendLegend": "Trend celności",
             "confidenceLegend": "Strefa pewności"
+        },
+        "improv": {
+            "title": "Trening improwizacji",
+            "desc": "Moduły zaliczone w Treningu improwizacji.",
+            "completed": "{{done}} z {{total}}",
+            "open": "Otwórz mapę"
         }
     },
     "ear": {
@@ -1791,7 +1797,10 @@
             "percent": "{{percent}}% planu",
             "unlockAll": "Odblokuj wszystkie moduły",
             "unlockAllHint": "Domyślnie kolejny moduł odblokowuje zaliczenie poprzedniego.",
-            "openModuleAria": "Moduł {{order}}: {{name}}"
+            "openModuleAria": "Moduł {{order}}: {{name}}",
+            "entranceTest": "Test na wejście",
+            "entranceTestName": "Test na wejście",
+            "entranceTestDesc": "Po jednym pytaniu z każdego modułu. Test odblokowuje moduły do pierwszego błędnego pytania."
         },
         "status": {
             "done": "Zaliczony",
@@ -1873,7 +1882,8 @@
             "micHits": "Trafienia: {{done}}/{{total}}",
             "micWindowHint": "Zagraj dźwięk z dozwolonego zbioru w momencie zmiany akordu — sprawdzane jest pierwsze uderzenie.",
             "micError": "Mikrofon niedostępny — użyj przycisku samooceny.",
-            "micDetected": "Wykryto: {{note}}"
+            "micDetected": "Wykryto: {{note}}",
+            "bass": "Bas"
         },
         "shapes": {
             "min-pent": "Minor pentatonic",
@@ -1938,7 +1948,9 @@
             "giantStepsArps": "Graj arpeggia akordów przez całą formę.",
             "giantStepsRootsLabel": "Poziom 1: prymy",
             "giantStepsPatternLabel": "Poziom 2: 1-2-3-5",
-            "giantStepsArpsLabel": "Poziom 3: arpeggia"
+            "giantStepsArpsLabel": "Poziom 3: arpeggia",
+            "bluesBox1": "Blues 12-taktowy w A — improwizuj w boksie 1 pentatoniki.",
+            "bluesChordTones": "Blues 12-taktowy w A — ląduj na dźwięku akordu przy każdej zmianie."
         },
         "q": {
             "keySig": {
@@ -2407,6 +2419,14 @@
             "chord-scale-harmonic.e3": {
                 "name": "Loop: molowy ii–V z mol harmoniczną",
                 "desc": "Bm7b5–E7–Am: nad E7 użyj E Phrygian dominant. 2 udane obiegi."
+            },
+            "pentatonic-scale.e5": {
+                "name": "Loop: blues 12-taktowy",
+                "desc": "Blues 12-taktowy w A (A7–D7–E7). Improwizuj w boksie 1. 2 udane obiegi."
+            },
+            "target-chord-tones.e3": {
+                "name": "Loop: blues 12-taktowy",
+                "desc": "Blues 12-taktowy w A — ląduj na dźwięku akordu przy każdej zmianie. 2 udane obiegi."
             }
         },
         "practiceLink": {
@@ -2442,6 +2462,18 @@
             "hmE7": "E7 — celuj w G#",
             "hmLocrian": "B Locrian (z A harmonic minor)",
             "hmPhrygianDom": "E Phrygian dominant (z A harmonic minor)"
+        },
+        "stage": {
+            "podstawy": "Podstawy (1–6)",
+            "harmonia": "Harmonia (7–11)",
+            "granie": "Granie po zmianach (12–17)",
+            "zaawansowane": "Zaawansowane (18–22)"
+        },
+        "review": {
+            "name": "Powtórka: quiz mieszany",
+            "desc": "10 pytań z modułów, które już zaliczyłeś — harmonogram SM-2 szybciej wraca do słabszych generatorów.",
+            "button": "Powtórki",
+            "disabledHint": "Dostępne po zaliczeniu pierwszego modułu."
         }
     }
 }

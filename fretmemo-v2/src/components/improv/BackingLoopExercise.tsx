@@ -16,10 +16,10 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
-import { Mic, MicOff } from "lucide-react";
+import { AudioLines, Mic, MicOff } from "lucide-react";
 import { getSoundEngineContext } from "@/audio/engine";
-import { playChord } from "@/lib/audio";
-import { getChordMidis } from "@/lib/improv/chords";
+import { playChord, playTone } from "@/lib/audio";
+import { getChordMidis, tonicMidi } from "@/lib/improv/chords";
 import { BackingLoopScheduler, type BackingLoopEntry } from "@/lib/improv/backingLoop";
 import { micLoopPass, type BackingLoopParams, type ImprovExercise, type ProgressionEntry } from "@/data/improv/curriculum";
 import { useImprovStore } from "@/stores/useImprovStore";
@@ -89,6 +89,7 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
     // is checked against the allowed pitch classes. ≥3/4 hits auto-records
     // the loop; without a mic the self-mark button works as before.
     const [micOn, setMicOn] = useState(false);
+    const [bassOn, setBassOn] = useState(false);
     const detector = usePitchDetector(micOn);
     const inputLatencyMs = useRhythmDojoStore((state) => state.inputLatencyMs);
     const [chordHit, setChordHit] = useState(false);
@@ -140,6 +141,8 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
                         void playChord(getChordMidis(info.chord, 48), CHORD_DURATION_SEC, {
                             strumDelaySec: CHORD_TONE_STAGGER_SEC,
                         });
+                        // Plan phase 6: optional bass root on the chord start.
+                        if (bassOn) void playTone(tonicMidi(info.chord, 36), 1.6);
                     } catch {
                         // Audio unavailable — the visual prompter still runs.
                     }
@@ -154,6 +157,14 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
                         // shifted by the measured input latency (plan phase 4).
                         const evalTimer = window.setTimeout(() => evaluateMicHit(info.chordIndex), Math.max(0, inputLatencyMs));
                         timersRef.current.push(evalTimer);
+                    }
+                    // Plan phase 6: bass root on the back half of the chord.
+                    if (bassOn && info.beatInChord === 2) {
+                        try {
+                            void playTone(tonicMidi(info.chord, 36), 1.2);
+                        } catch {
+                            // Audio unavailable.
+                        }
                     }
                 }, info.delayMs);
                 timersRef.current.push(timer);
@@ -288,6 +299,17 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
                 </div>
             </div>
 
+            <div className="flex flex-wrap items-center gap-2">
+                <Button
+                    type="button"
+                    size="sm"
+                    variant={bassOn ? "secondary" : "outline"}
+                    onClick={() => setBassOn((previous) => !previous)}
+                >
+                    <AudioLines className="mr-2 h-4 w-4" />
+                    {t("improv.loop.bass")}
+                </Button>
+            </div>
             {targets && (
                 <div className="flex flex-wrap items-center justify-between gap-2">
                     <Button

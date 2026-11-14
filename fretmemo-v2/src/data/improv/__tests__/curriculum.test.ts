@@ -188,6 +188,7 @@ describe("improv curriculum", () => {
             exerciseRuns: {
                 "target-chord-tones.e1": requiredPasses,
                 "target-chord-tones.e2": requiredPasses,
+                "target-chord-tones.e3": requiredPasses,
             } as Record<string, number>,
             completed: false,
         };

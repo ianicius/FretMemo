@@ -11,6 +11,8 @@ import { StatLine } from "@/components/ui/stat-line";
 import { useFeedbackStore, type AppFeedbackTone } from "@/stores/useFeedbackStore";
 import { useProgressStore } from "@/stores/useProgressStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
+import { useImprovStore } from "@/stores/useImprovStore";
+import { CURRICULUM, isModuleComplete } from "@/data/improv/curriculum";
 import type { NoteStatus } from "@/types/fretboard";
 import { getNoteAt } from "@/lib/constants";
 import { normalizeTuning } from "@/lib/tuning";
@@ -47,7 +49,14 @@ export default function ProgressPage() {
     const quickTuning = useSettingsStore((state) => state.quick.tuning);
     const tuning = useMemo(() => normalizeTuning(quickTuning), [quickTuning]);
     const enqueueFeedback = useFeedbackStore((state) => state.enqueue);
+    const improvModuleState = useImprovStore((state) => state.moduleState);
     const { t } = useTranslation();
+
+    // Plan phase 6: improv progress card (completed modules).
+    const completedImprovModules = CURRICULUM.filter((module) =>
+        isModuleComplete(module, improvModuleState[module.id]));
+    const improvTotalXP = 0;
+    void improvTotalXP;
     const [searchParams, setSearchParams] = useSearchParams();
     const [isResetHeatMapConfirmOpen, setIsResetHeatMapConfirmOpen] = useState(false);
 
@@ -260,6 +269,26 @@ export default function ProgressPage() {
                             fitContainer
                         />
                     </div>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader className="pb-2">
+                    <CardTitle className="text-base">{t("progress.improv.title")}</CardTitle>
+                    <CardDescription>{t("progress.improv.desc")}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                    <p className="text-2xl font-bold tabular-nums">
+                        {t("progress.improv.completed", { done: completedImprovModules.length, total: CURRICULUM.length })}
+                    </p>
+                    {completedImprovModules.length > 0 && (
+                        <p className="text-xs text-muted-foreground">
+                            {completedImprovModules.map((module) => t(`improv.modules.${module.id}.name`)).join(" · ")}
+                        </p>
+                    )}
+                    <Button variant="outline" size="sm" onClick={() => navigate("/improv")}>
+                        {t("progress.improv.open")}
+                    </Button>
                 </CardContent>
             </Card>
 

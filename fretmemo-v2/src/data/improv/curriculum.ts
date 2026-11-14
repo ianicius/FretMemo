@@ -26,7 +26,11 @@ export type ImprovEngineType = "choice-quiz" | "diagram-drill" | "backing-improv
 export type ImprovKey = NoteName | "Bb" | "Db" | "Eb" | "Gb" | "Ab";
 
 export interface ChoiceQuizParams {
-    generatorId: ChoiceGeneratorId;
+    /** "mixed" (plan phase 6) draws a generator per question — used by the
+     * review and placement quizzes, optionally restricted by
+     * `allowedGenerators`. */
+    generatorId: ChoiceGeneratorId | "mixed";
+    allowedGenerators?: ChoiceGeneratorId[];
     questionCount: number;
     requiredCorrect: number;
     answerOptions: number;
@@ -287,6 +291,15 @@ export const CURRICULUM: ImprovModule[] = [
                 maxBpm: 140,
                 requiredPasses: 2,
             }),
+            loopExercise("pentatonic-scale", "e5", {
+                progression: ["A7", "A7", "A7", "A7", "D7", "D7", "A7", "A7", "E7", "D7", "A7", "A7"],
+                goalKey: "improv.goals.bluesBox1",
+                beatsPerChord: 4,
+                defaultBpm: 80,
+                minBpm: 50,
+                maxBpm: 160,
+                requiredPasses: 2,
+            }),
         ],
     },
     {
@@ -542,6 +555,20 @@ export const CURRICULUM: ImprovModule[] = [
                 minBpm: 50,
                 maxBpm: 160,
                 requiredPasses: 2,
+            }),
+            loopExercise("target-chord-tones", "e3", {
+                progression: ["A7", "A7", "A7", "A7", "D7", "D7", "A7", "A7", "E7", "D7", "A7", "A7"],
+                goalKey: "improv.goals.bluesChordTones",
+                beatsPerChord: 4,
+                defaultBpm: 80,
+                minBpm: 50,
+                maxBpm: 160,
+                requiredPasses: 2,
+                targets: [
+                    { chord: "A7", pitchClasses: ["A", "C#", "E", "G"] },
+                    { chord: "D7", pitchClasses: ["D", "F#", "A", "C"] },
+                    { chord: "E7", pitchClasses: ["E", "G#", "B", "D"] },
+                ],
             }),
         ],
     },
@@ -1006,9 +1033,13 @@ export function isModuleUnlocked(
     moduleId: string,
     moduleState: Record<string, ImprovProgressShape & { completed: boolean }> | undefined,
     unlockAll: boolean,
+    entranceUnlockCount?: number | null,
 ): boolean {
     if (unlockAll) return true;
     const index = IMPROV_ORDER.indexOf(moduleId);
+    // Entrance test (plan phase 6): modules up to the first failed one are
+    // unlocked by the result of the placement quiz.
+    if (typeof entranceUnlockCount === "number" && index < entranceUnlockCount) return true;
     if (index <= 0) return true;
     const previousId = IMPROV_ORDER[index - 1] as string;
     const previousState = moduleState?.[previousId];
