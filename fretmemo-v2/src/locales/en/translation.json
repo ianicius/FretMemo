@@ -1846,7 +1846,19 @@
             "passButton": "Mark loop passed",
             "passes": "Successful loops: {{done}}/{{required}}",
             "markAfterLoop": "The button unlocks after a full pass of the progression.",
-            "variant": "Variant"
+            "variant": "Variant",
+            "loop.micEnable": "Verify with mic",
+            "loop.micDisable": "Mic verification on",
+            "loop.micHits": "Hits: {{done}}/{{total}}",
+            "loop.micWindowHint": "Play a note from the target set when the chord changes — the first beat is checked.",
+            "loop.micError": "Microphone unavailable — use the self-mark button.",
+            "loop.micDetected": "Detected: {{note}}",
+            "micEnable": "Verify with mic",
+            "micDisable": "Mic verification on",
+            "micHits": "Hits: {{done}}/{{total}}",
+            "micWindowHint": "Play a note from the target set when the chord changes — the first beat is checked.",
+            "micError": "Microphone unavailable — use the self-mark button.",
+            "micDetected": "Detected: {{note}}"
         },
         "shapes": {
             "min-pent": "Minor pentatonic",

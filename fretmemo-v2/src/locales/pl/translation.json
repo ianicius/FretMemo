@@ -1860,7 +1860,19 @@
             "passButton": "Obieg zaliczony",
             "passes": "Udane obiegi: {{done}}/{{required}}",
             "markAfterLoop": "Przycisk aktywuje się po pełnym obiegu progresji.",
-            "variant": "Wariant"
+            "variant": "Wariant",
+            "loop.micEnable": "Sprawdzaj mikrofonem",
+            "loop.micDisable": "Weryfikacja mikrofonem włączona",
+            "loop.micHits": "Trafienia: {{done}}/{{total}}",
+            "loop.micWindowHint": "Zagraj dźwięk z dozwolonego zbioru w momencie zmiany akordu — sprawdzane jest pierwsze uderzenie.",
+            "loop.micError": "Mikrofon niedostępny — użyj przycisku samooceny.",
+            "loop.micDetected": "Wykryto: {{note}}",
+            "micEnable": "Sprawdzaj mikrofonem",
+            "micDisable": "Weryfikacja mikrofonem włączona",
+            "micHits": "Trafienia: {{done}}/{{total}}",
+            "micWindowHint": "Zagraj dźwięk z dozwolonego zbioru w momencie zmiany akordu — sprawdzane jest pierwsze uderzenie.",
+            "micError": "Mikrofon niedostępny — użyj przycisku samooceny.",
+            "micDetected": "Wykryto: {{note}}"
         },
         "shapes": {
             "min-pent": "Minor pentatonic",

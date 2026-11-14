@@ -77,11 +77,19 @@ export interface PracticeLinkParams {
  */
 export type ProgressionEntry = { chord: string; hintKey?: string; beats?: number };
 
+/** Mic-verification targets (plan phase 4): for each chord (matched by
+ * symbol), pitch classes the player may hit in the first-beat window. */
+export interface ChordMicTargets {
+    chord: string;
+    pitchClasses: string[];
+}
+
 export interface BackingLoopVariant {
     id: string;
     labelKey: string;
     progression: Array<string | ProgressionEntry>;
     goalKey: string;
+    targets?: ChordMicTargets[];
 }
 
 export interface BackingLoopParams {
@@ -95,6 +103,8 @@ export interface BackingLoopParams {
     requiredPasses: number;
     /** Optional selectable variants (different progression and/or goal). */
     variants?: BackingLoopVariant[];
+    /** Optional mic-verification targets (plan phase 4). */
+    targets?: ChordMicTargets[];
 }
 
 /** Theory tool embedded in the module's theory card (plan phase 2). */
@@ -491,13 +501,37 @@ export const CURRICULUM: ImprovModule[] = [
                 requiredPasses: 2,
                 variants: [
                     { id: "root", labelKey: "improv.goals.targetRootLabel",
-                      progression: ["Am", "C", "Em", "D"], goalKey: "improv.goals.targetRoot" },
+                      progression: ["Am", "C", "Em", "D"], goalKey: "improv.goals.targetRoot",
+                      targets: [
+                          { chord: "Am", pitchClasses: ["A"] },
+                          { chord: "C", pitchClasses: ["C"] },
+                          { chord: "Em", pitchClasses: ["E"] },
+                          { chord: "D", pitchClasses: ["D"] },
+                      ] },
                     { id: "third", labelKey: "improv.goals.targetThirdLabel",
-                      progression: ["Am", "C", "Em", "D"], goalKey: "improv.goals.targetThird" },
+                      progression: ["Am", "C", "Em", "D"], goalKey: "improv.goals.targetThird",
+                      targets: [
+                          { chord: "Am", pitchClasses: ["C"] },
+                          { chord: "C", pitchClasses: ["E"] },
+                          { chord: "Em", pitchClasses: ["G"] },
+                          { chord: "D", pitchClasses: ["F#"] },
+                      ] },
                     { id: "fifth", labelKey: "improv.goals.targetFifthLabel",
-                      progression: ["Am", "C", "Em", "D"], goalKey: "improv.goals.targetFifth" },
+                      progression: ["Am", "C", "Em", "D"], goalKey: "improv.goals.targetFifth",
+                      targets: [
+                          { chord: "Am", pitchClasses: ["E"] },
+                          { chord: "C", pitchClasses: ["G"] },
+                          { chord: "Em", pitchClasses: ["B"] },
+                          { chord: "D", pitchClasses: ["A"] },
+                      ] },
                     { id: "seventh", labelKey: "improv.goals.targetSeventhLabel",
-                      progression: ["Am7", "Cmaj7", "Em7", "D7"], goalKey: "improv.goals.targetSeventh" },
+                      progression: ["Am7", "Cmaj7", "Em7", "D7"], goalKey: "improv.goals.targetSeventh",
+                      targets: [
+                          { chord: "Am7", pitchClasses: ["G"] },
+                          { chord: "Cmaj7", pitchClasses: ["B"] },
+                          { chord: "Em7", pitchClasses: ["D"] },
+                          { chord: "D7", pitchClasses: ["C"] },
+                      ] },
                 ],
             }),
             loopExercise("target-chord-tones", "e2", {
@@ -542,6 +576,11 @@ export const CURRICULUM: ImprovModule[] = [
                 minBpm: 50,
                 maxBpm: 160,
                 requiredPasses: 2,
+                targets: [
+                    { chord: "Dm7", pitchClasses: ["D", "F", "A", "C"] },
+                    { chord: "G7", pitchClasses: ["G", "B", "D", "F"] },
+                    { chord: "Cmaj7", pitchClasses: ["C", "E", "G", "B"] },
+                ],
             }),
         ],
     },
@@ -640,13 +679,34 @@ export const CURRICULUM: ImprovModule[] = [
                 minBpm: 50,
                 maxBpm: 160,
                 requiredPasses: 2,
+                targets: [
+                    { chord: "Cmaj7", pitchClasses: ["C", "E", "G", "B"] },
+                    { chord: "A7", pitchClasses: ["A", "C#", "E", "G"] },
+                    { chord: "Dm7", pitchClasses: ["D", "F", "A", "C"] },
+                    { chord: "G7", pitchClasses: ["G", "B", "D", "F"] },
+                ],
                 variants: [
                     { id: "classic", labelKey: "improv.goals.secondaryClassic",
                       progression: ["Cmaj7", "A7", "Dm7", "G7", "Cmaj7"],
-                      goalKey: "improv.goals.secondaryDominants" },
+                      goalKey: "improv.goals.secondaryDominants",
+                      targets: [
+                          { chord: "Cmaj7", pitchClasses: ["C", "E", "G", "B"] },
+                          { chord: "A7", pitchClasses: ["A", "C#", "E", "G"] },
+                          { chord: "Dm7", pitchClasses: ["D", "F", "A", "C"] },
+                          { chord: "G7", pitchClasses: ["G", "B", "D", "F"] },
+                      ] },
                     { id: "five-dominants", labelKey: "improv.goals.secondaryFiveLabel",
                       progression: ["Cmaj7", "E7", "Am7", "C7", "Fmaj7", "D7", "G7"],
-                      goalKey: "improv.goals.secondaryDominants" },
+                      goalKey: "improv.goals.secondaryDominants",
+                      targets: [
+                          { chord: "Cmaj7", pitchClasses: ["C", "E", "G", "B"] },
+                          { chord: "E7", pitchClasses: ["E", "G#", "B", "D"] },
+                          { chord: "Am7", pitchClasses: ["A", "C", "E", "G"] },
+                          { chord: "C7", pitchClasses: ["C", "E", "G", "Bb"] },
+                          { chord: "Fmaj7", pitchClasses: ["F", "A", "C", "E"] },
+                          { chord: "D7", pitchClasses: ["D", "F#", "A", "C"] },
+                          { chord: "G7", pitchClasses: ["G", "B", "D", "F"] },
+                      ] },
                 ],
             }),
         ],
@@ -838,7 +898,16 @@ export const CURRICULUM: ImprovModule[] = [
                           "Bmaj7", "D7", "Gmaj7", "Bb7", "Ebmaj7", "F#7", "Bmaj7", "Bmaj7",
                           "Bm7", "D7", "Gmaj7", "Bb7", "Ebmaj7", "F#7", "Bmaj7", "Bmaj7",
                       ],
-                      goalKey: "improv.goals.giantStepsRoots" },
+                      goalKey: "improv.goals.giantStepsRoots",
+                      targets: [
+                          { chord: "Bmaj7", pitchClasses: ["B"] },
+                          { chord: "D7", pitchClasses: ["D"] },
+                          { chord: "Gmaj7", pitchClasses: ["G"] },
+                          { chord: "Bb7", pitchClasses: ["A#"] },
+                          { chord: "Ebmaj7", pitchClasses: ["D#"] },
+                          { chord: "F#7", pitchClasses: ["F#"] },
+                          { chord: "Bm7", pitchClasses: ["B"] },
+                      ] },
                     { id: "pattern-1235", labelKey: "improv.goals.giantStepsPatternLabel",
                       progression: [
                           "Bmaj7", "D7", "Gmaj7", "Bb7", "Ebmaj7", "F#7", "Bmaj7", "Bmaj7",
@@ -876,6 +945,16 @@ export function getImprovExercise(moduleId: string, exerciseId: string): ImprovE
  * `requiredCorrect` (plan 1.3: one lucky run must not lock the exercise in).
  */
 export const QUIZ_PASSED_ATTEMPTS = 2;
+
+/**
+ * Mic-verified loop pass (plan phase 4): a loop counts when at least 3 of
+ * every 4 chord changes were hit (ratio rounded up), minimum one hit.
+ */
+export function micLoopPass(hits: number, chordCount: number): boolean {
+    if (chordCount <= 0) return false;
+    const required = Math.max(1, Math.ceil((chordCount * 3) / 4));
+    return hits >= required;
+}
 
 /** Progress shape shared by the store and the pass predicates. */
 export interface ImprovProgressShape {

@@ -16,6 +16,7 @@ import {
     type DiagramDrillParams,
 } from "../curriculum";
 import { coversAllDegrees, getShapePositions, shapeSemitones, tonicAnchorFret } from "@/lib/improv/scaleShapes";
+import { micLoopPass } from "../curriculum";
 import { tritoneSub } from "@/lib/improv/questions";
 import { Note } from "tonal";
 
@@ -243,6 +244,30 @@ describe("improv curriculum", () => {
         }
     });
 
+    it("mic pass requires 3/4 hits and module 12 variants carry per-degree targets (plan phase 4)", () => {
+        const module = getImprovModule("target-chord-tones") as NonNullable<ReturnType<typeof getImprovModule>>;
+        const e1 = module.exercises.find((exercise) => exercise.id === "target-chord-tones.e1") as NonNullable<ReturnType<typeof getImprovExercise>>;
+        const params = e1.params as BackingLoopParams;
+        const third = params.variants?.find((variant) => variant.id === "third");
+        const targetsByChord = new Map((third?.targets ?? []).map((entry) => [entry.chord, entry.pitchClasses]));
+        // Thirds of Am–C–Em–D: C, E, G, F#.
+        expect(targetsByChord.get("Am")).toEqual(["C"]);
+        expect(targetsByChord.get("C")).toEqual(["E"]);
+        expect(targetsByChord.get("Em")).toEqual(["G"]);
+        expect(targetsByChord.get("D")).toEqual(["F#"]);
+    });
+});
+
+describe("micLoopPass", () => {
+    it("requires ceil(3/4) of the chord changes", () => {
+        expect(micLoopPass(3, 4)).toBe(true);
+        expect(micLoopPass(2, 4)).toBe(false);
+        expect(micLoopPass(5, 7)).toBe(false); // ceil(21/4) = 6
+        expect(micLoopPass(6, 7)).toBe(true);
+        expect(micLoopPass(1, 1)).toBe(true);
+    });
+});
+
     it("module 15 subV variant plays the tritone sub of G7 (plan 0.3)", () => {
         const module = getImprovModule("tritone-subs") as NonNullable<ReturnType<typeof getImprovModule>>;
         const e2 = module.exercises.find((exercise) => exercise.id === "tritone-subs.e2") as NonNullable<ReturnType<typeof getImprovExercise>>;
@@ -252,4 +277,3 @@ describe("improv curriculum", () => {
         expect(subvVariant?.progression).toEqual(["Dm7", tritoneSub("G7"), "Cmaj7"]);
         expect(tritoneSub("G7")).toBe("Db7");
     });
-});

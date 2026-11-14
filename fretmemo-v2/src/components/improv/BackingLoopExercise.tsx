@@ -16,12 +16,16 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
+import { Mic, MicOff } from "lucide-react";
 import { getSoundEngineContext } from "@/audio/engine";
 import { playChord } from "@/lib/audio";
 import { getChordMidis } from "@/lib/improv/chords";
 import { BackingLoopScheduler, type BackingLoopEntry } from "@/lib/improv/backingLoop";
-import type { BackingLoopParams, ImprovExercise, ProgressionEntry } from "@/data/improv/curriculum";
+import { micLoopPass, type BackingLoopParams, type ImprovExercise, type ProgressionEntry } from "@/data/improv/curriculum";
 import { useImprovStore } from "@/stores/useImprovStore";
+import { useRhythmDojoStore } from "@/stores/useRhythmDojoStore";
+import { usePitchDetector } from "@/services/pitch";
+import { Note } from "tonal";
 import { cn } from "@/lib/utils";
 import { ExerciseFrame } from "./ExerciseFrame";
 import { localizeToken } from "@/lib/improv/display";
@@ -65,6 +69,7 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
     );
     const rawProgression = variant?.progression ?? params.progression;
     const goalKey = variant?.goalKey ?? params.goalKey;
+    const targets = variant?.targets ?? params.targets;
     const entries = useMemo(
         () => normalizeEntries(rawProgression, params.beatsPerChord),
         [rawProgression, params.beatsPerChord],
@@ -78,6 +83,18 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
     const [loopsCompleted, setLoopsCompleted] = useState(0);
     const [markedLoop, setMarkedLoop] = useState(0);
     const [beatsIntoChord, setBeatsIntoChord] = useState(0);
+
+    // Mic verification (plan phase 4): optional toggle; when on and the
+    // exercise defines targets, the first-beat window of every chord change
+    // is checked against the allowed pitch classes. ≥3/4 hits auto-records
+    // the loop; without a mic the self-mark button works as before.
+    const [micOn, setMicOn] = useState(false);
+    const detector = usePitchDetector(micOn);
+    const inputLatencyMs = useRhythmDojoStore((state) => state.inputLatencyMs);
+    const [chordHit, setChordHit] = useState(false);
+    const [loopHits, setLoopHits] = useState(0);
+    const hitsRef = useRef(0);
+    const hitThisChordRef = useRef(false);
 
     const schedulerRef = useRef<BackingLoopScheduler | null>(null);
     const timersRef = useRef<number[]>([]);
@@ -103,6 +120,9 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
         }
         setCurrentChordIndex(0);
         setBeatsIntoChord(0);
+        hitsRef.current = 0;
+        hitThisChordRef.current = false;
+        setLoopHits(0);
         setPlaying(true);
 
         const loopEntries: BackingLoopEntry[] = entries.map((entry) => ({ chord: entry.chord, beats: entry.beats }));
@@ -114,6 +134,8 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
                 const timer = window.setTimeout(() => {
                     setCurrentChordIndex(info.chordIndex);
                     setBeatsIntoChord(0);
+                    hitThisChordRef.current = false;
+                    setChordHit(false);
                     try {
                         void playChord(getChordMidis(info.chord, 48), CHORD_DURATION_SEC, {
                             strumDelaySec: CHORD_TONE_STAGGER_SEC,
@@ -127,12 +149,25 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
             onBeat: (info) => {
                 const timer = window.setTimeout(() => {
                     setBeatsIntoChord(info.beatInChord + 1);
+                    if (info.beatInChord === 1) {
+                        // End of the first-beat window — evaluate the mic hit,
+                        // shifted by the measured input latency (plan phase 4).
+                        const evalTimer = window.setTimeout(() => evaluateMicHit(info.chordIndex), Math.max(0, inputLatencyMs));
+                        timersRef.current.push(evalTimer);
+                    }
                 }, info.delayMs);
                 timersRef.current.push(timer);
             },
             onLoopEnd: () => {
                 const timer = window.setTimeout(() => {
                     setLoopsCompleted((previous) => previous + 1);
+                    // Mic-verified pass: ≥3/4 chord changes hit (plan phase 4).
+                    if (micOn && targets && micLoopPass(hitsRef.current, entries.length)) {
+                        recordLoopPass(moduleId, exercise.id);
+                        setMarkedLoop((previous) => previous + 1);
+                    }
+                    hitsRef.current = 0;
+                    setLoopHits(0);
                 }, 200);
                 timersRef.current.push(timer);
             },
@@ -147,11 +182,38 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
         clearTimers();
         setPlaying(false);
         setBeatsIntoChord(0);
+        hitsRef.current = 0;
+        hitThisChordRef.current = false;
+        setLoopHits(0);
     };
 
     const handleBpmChange = (value: number) => {
         setBpm(value);
         schedulerRef.current?.setBpm(value);
+    };
+
+    // Mirror the detector's stable note into a ref so scheduler callbacks
+    // (timer closures) can read the latest detection.
+    const detectedNoteRef = useRef<string | null>(null);
+    useEffect(() => {
+        detectedNoteRef.current = detector.note;
+    }, [detector.note]);
+
+    /** Mic hit check at the end of the first beat: the detected pitch class
+     * must belong to the current chord's target set (plan phase 4). */
+    const evaluateMicHit = (chordIndex: number) => {
+        if (!micOn || !targets || hitThisChordRef.current) return;
+        const currentChord = entries[chordIndex]?.chord;
+        const targetsForChord = targets.find((entry) => entry.chord === currentChord);
+        const detected = detectedNoteRef.current;
+        if (!currentChord || !targetsForChord || !detected) return;
+        const detectedPc = Note.chroma(detected);
+        if (targetsForChord.pitchClasses.some((pitchClass) => Note.chroma(pitchClass) === detectedPc)) {
+            hitThisChordRef.current = true;
+            hitsRef.current += 1;
+            setChordHit(true);
+            setLoopHits(hitsRef.current);
+        }
     };
 
     const handleMarkPass = () => {
@@ -201,7 +263,14 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
             <div className="grid grid-cols-[auto_auto] items-baseline justify-center gap-x-6 rounded-lg border border-border bg-card/60 px-4 py-5">
                 <p className="text-center text-xs uppercase tracking-wide text-muted-foreground">{t("improv.loop.current")}</p>
                 <p className="text-center text-[10px] uppercase tracking-wide text-muted-foreground">{t("improv.loop.next")}</p>
-                <p className="mt-1 text-center text-4xl font-bold tabular-nums text-primary">{localizeToken(currentChord)}</p>
+                <p
+                    className={cn(
+                        "mt-1 text-center text-4xl font-bold tabular-nums",
+                        micOn && targets && chordHit ? "text-emerald-500 dark:text-emerald-300" : "text-primary",
+                    )}
+                >
+                    {localizeToken(currentChord)}
+                </p>
                 <p className="mt-1 text-center text-xl font-semibold text-foreground opacity-70">{localizeToken(nextChord)}</p>
                 <p className="col-span-2 mt-1 min-h-[1.25rem] text-center text-xs text-muted-foreground">
                     {hintKeys[currentChordIndex] ? t(hintKeys[currentChordIndex] as string) : ""}
@@ -218,6 +287,42 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
                     ))}
                 </div>
             </div>
+
+            {targets && (
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                    <Button
+                        type="button"
+                        size="sm"
+                        variant={micOn ? "secondary" : "outline"}
+                        onClick={() => {
+                            setMicOn((previous) => !previous);
+                            if (micOn) {
+                                setChordHit(false);
+                            }
+                        }}
+                    >
+                        {micOn ? <MicOff className="mr-2 h-4 w-4" /> : <Mic className="mr-2 h-4 w-4" />}
+                        {micOn ? t("improv.loop.micDisable") : t("improv.loop.micEnable")}
+                    </Button>
+                    {micOn && (
+                        <Badge variant="outline" className="text-xs">
+                            {t("improv.loop.micHits", { done: loopHits, total: entries.length })}
+                        </Badge>
+                    )}
+                </div>
+            )}
+            {micOn && (
+                <p className="text-xs text-muted-foreground">
+                    {detector.error
+                        ? t("improv.loop.micError")
+                        : t("improv.loop.micWindowHint")}
+                </p>
+            )}
+            {micOn && detector.error === null && detector.note !== null && (
+                <p className="text-xs text-muted-foreground" aria-live="polite">
+                    {t("improv.loop.micDetected", { note: localizeToken(detector.note) })}
+                </p>
+            )}
 
             <div className="flex flex-wrap items-end gap-3">
                 <div className="min-w-40 flex-1 space-y-1">

@@ -1,6 +1,6 @@
 # Improv Training — architektura modułu
 
-Date: 2026-11-14 (round 9 — wdrożona Faza 3 planu `docs/improv-training-plan.md`: pętle nad podkładem w modułach 3/4/6/7/9/11/13/14/18/19/20/21/22 wg tabeli planu, wpis `ProgressionEntry { chord, hintKey?, beats? }` (hint w prompterze, Am7 trzymane 4 takty), moduł 12 = drabinka pryma→tercja→kwinta→septyma + wolna improwizacja, moduł 14 = łatwiejsza pętla C→F, moduł 15 = wariant z filmu Bm7–Bb7–Am7–Ab7–Gmaj7, moduł 16 = pięć dominant, moduł 17 = dwa warianty 2-5-1 vs backdoor, moduł 22 = pełna 16-taktowa forma 2 uderzenia/akord od 60 BPM z trzema poziomami; round 8 — Faza 2 planu `docs/improv-training-plan.md`: silnik practice-link (moduły 1/5 + playNotes w 3/4/18/20), theory-embed (koło kwintowe/ScaleExplorer/ChordLibrary/TriadVisualizer z propsami początkowymi), okna drillów względem toniki (`offsetsFrom/offsetsTo`, `tonicAnchorFret`), arpeggia jako pełne kształty + maj7/m7b5-arp, usunięte FretboardQuiz + getChordShapePositions + kształt triad; round 7 — Fazy 0+1: `docs/improv-training-plan.md`: poprawki merytoryczne generatorów i treści, uczciwe zaliczanie; poprzednio round 6: deferred findings z integracji: XP-2 predykat zaliczenia tylko w `isModuleComplete`/`isExercisePassed` (store bez własnej kopii), XP-3 E4 przez `playChord` (strum 55 ms) zamiast własnego staggeru `playTone`, XP-4 `localizePromptValues` (notacja polska w treści pytań/podpowiedzi na polach notowych; matching nadal surowe tokeny), EN roadmapa ukrywa `.term` gdy == `.name`, SEO prefix dla `/improv/`, Improv w quick-actions headeru, sidebar label `text-xs` bez ucinania)
+Date: 2026-11-14 (round 10 — wdrożona Faza 4 planu: weryfikacja mikrofonem — `ChordMicTargets { chord, pitchClasses }` w params/wariantach modułów 12/13/16/22, `micLoopPass` (≥3/4 trafień), toggle mikrofonu w BackingLoopExercise z oknem pierwszego uderzenia skorygowanym o `inputLatencyMs` z kalibracji rytmu, auto-zapis obiegu przy weryfikacji; round 9 — Faza 3 planu `docs/improv-training-plan.md`: pętle nad podkładem w modułach 3/4/6/7/9/11/13/14/18/19/20/21/22 wg tabeli planu, wpis `ProgressionEntry { chord, hintKey?, beats? }` (hint w prompterze, Am7 trzymane 4 takty), moduł 12 = drabinka pryma→tercja→kwinta→septyma + wolna improwizacja, moduł 14 = łatwiejsza pętla C→F, moduł 15 = wariant z filmu Bm7–Bb7–Am7–Ab7–Gmaj7, moduł 16 = pięć dominant, moduł 17 = dwa warianty 2-5-1 vs backdoor, moduł 22 = pełna 16-taktowa forma 2 uderzenia/akord od 60 BPM z trzema poziomami; round 8 — Faza 2 planu `docs/improv-training-plan.md`: silnik practice-link (moduły 1/5 + playNotes w 3/4/18/20), theory-embed (koło kwintowe/ScaleExplorer/ChordLibrary/TriadVisualizer z propsami początkowymi), okna drillów względem toniki (`offsetsFrom/offsetsTo`, `tonicAnchorFret`), arpeggia jako pełne kształty + maj7/m7b5-arp, usunięte FretboardQuiz + getChordShapePositions + kształt triad; round 7 — Fazy 0+1: `docs/improv-training-plan.md`: poprawki merytoryczne generatorów i treści, uczciwe zaliczanie; poprzednio round 6: deferred findings z integracji: XP-2 predykat zaliczenia tylko w `isModuleComplete`/`isExercisePassed` (store bez własnej kopii), XP-3 E4 przez `playChord` (strum 55 ms) zamiast własnego staggeru `playTone`, XP-4 `localizePromptValues` (notacja polska w treści pytań/podpowiedzi na polach notowych; matching nadal surowe tokeny), EN roadmapa ukrywa `.term` gdy == `.name`, SEO prefix dla `/improv/`, Improv w quick-actions headeru, sidebar label `text-xs` bez ucinania)
 Scope: `fretmemo-v2` (`src/pages/ImprovTraining.tsx`, `src/components/improv/`, `src/lib/improv/`, `src/data/improv/`, `src/stores/useImprovStore.ts`)
 Objective: kompletny system nauki improwizacji — 22 moduły w kolejności z wideo źródłowego
 (Brandon D'Eon, "What To Learn For Guitar Improv (in Order)"), z ćwiczeniami zmapowanymi na
@@ -65,7 +65,8 @@ Silniki i parametry:
 
 Moduł jest zaliczony (`completed`), gdy **każde** jego ćwiczenie osiągnie własny próg
 (quiz: `exerciseRuns[exerciseId] ≥ QUIZ_PASSED_ATTEMPTS` — 2 zaliczone podejścia; drill/loop: `exerciseRuns[exerciseId] ≥ requiredRuns/requiredPasses`;
-  practice-link: `≥ 1` po spełnieniu kryteriów z `useProgressStore.positionStats`). Moduł 6 (faza 0.2): pięć boksów JEDNEJ pentatoniki (min-pent w G, okna 3–6/5–8/7–11/10–13/12–15); nazwy boksov (major/dorian/phrygian/mixo pent) pochodzą od stopnia, od którego boks się zaczyna.
+  practice-link: `≥ 1` po spełnieniu kryteriów z `useProgressStore.positionStats`). Obiegi z włączoną weryfikacją mikrofonem
+  zapisują się automatycznie przy ≥3/4 trafień (`micLoopPass`). Moduł 6 (faza 0.2): pięć boksów JEDNEJ pentatoniki (min-pent w G, okna 3–6/5–8/7–11/10–13/12–15); nazwy boksov (major/dorian/phrygian/mixo pent) pochodzą od stopnia, od którego boks się zaczyna.
 
 ## 4. Integracje
 
@@ -126,6 +127,10 @@ Moduł jest zaliczony (`completed`), gdy **każde** jego ćwiczenie osiągnie w�
 - **XP i sesje** (faza 1.4 planu): pierwsze zaliczenie ćwiczenia daje +50 XP (`useProgressStore.addBonusXP`)
   z toastem `useXPToast` (w `ExerciseFrame`, tylko na przejściu niezaliczone→zaliczone); koniec podejścia quizowego
   zapisuje sesję (`recordSession`) z wynikiem i czasem trwania.
+- **Weryfikacja mikrofonem** (faza 4 planu): `BackingLoopExercise` ma toggle „Sprawdzaj mikrofonem” (`usePitchDetector`);
+  w oknie pierwszego uderzenia każdego akordu (skorygowanym o `inputLatencyMs` z kalibracji rytmu) wykryta klasa
+  dźwięku musi należeć do `targets` akordu (`ChordMicTargets`); trafienie podświetla akord na zielono; obieg auto-zapisuje
+  się przy ≥3/4 trafień; bez mikrofonu ćwiczenie działa jak wcześniej (samoocena) i nie blokuje użytkownika.
 - **Uczciwe zaliczanie** (faza 1.2 planu): przycisk „Przebieg zaliczony” w E3 aktywuje się dopiero po tylu
   uderzeniach metronomu, ile nut ma przebieg góra–dół (`MetronomeClicker` ma opcję `onBeat`); bez uruchomienia
   metronomu przebiegu nie da się zapisać.
@@ -143,10 +148,10 @@ Moduł jest zaliczony (`completed`), gdy **każde** jego ćwiczenie osiągnie w�
 
 ## 6. Ograniczenia / świadome uproszczenia
 
-- Ćwiczenia E3/E4 są „guided practice bez mikrofonu": E3 wymaga metronomu (przycisk przebiegu aktywuje
-  się po tylu uderzeniach, ile nut ma przebieg góra–dół), E4 wymaga pełnego obiegu schedulera przed
-  oznaczeniem. Rozpoznawanie dźwięku z mikrofonu pozostaje poza zakresem tego etapu (faza 4 planu
-  `docs/improv-training-plan.md`).
+- Ćwiczenia E3/E4: E3 wymaga metronomu (gating po uderzeniach), E4 ma opcjonalną weryfikację mikrofonem
+  (faza 4 planu) — bez mikrofonu pozostaje samoocena. Uwaga z planu: przed dalszym wdrażaniem mikrofonu
+  (poza modułem 12) sprawdzić na prawdziwej gitarze, czy detekcja jest wiarygodna, gdy podkład gra z głośnika;
+  jeśli nie — weryfikacja wymaga słuchawek i trzeba to napisać w interfejsie.
 - Parowanie Altered→m7b5 z wideo (moduł 19) jest opisane w teorii z notką; quiz używa standardowej
   pary 7alt→Altered.
 - Diagramy skal to „okno progów" (wszystkie dźwięki skali w zakresie), a nie przypisanie palcowania
