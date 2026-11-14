@@ -171,7 +171,8 @@ export function PositionAnswerButtons({
                         type="button"
                         variant="outline"
                         className={cn(
-                            "h-auto px-2.5 py-3 min-[390px]:px-3 min-[390px]:py-3.5 sm:px-6 sm:py-6 justify-start text-left rounded-xl sm:rounded-2xl border-2 transition-all relative overflow-hidden group",
+                            // tab-answer-btn opts out of the .landscape-controls button height clamp (index.css)
+                            "tab-answer-btn h-auto px-2.5 py-3 min-[390px]:px-3 min-[390px]:py-3.5 sm:px-6 sm:py-6 justify-start text-left rounded-xl sm:rounded-2xl border-2 transition-all relative overflow-hidden group",
                             "hover:border-primary/50 hover:bg-card/80",
                             isCorrectOption && "border-emerald-500 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 ring-2 ring-emerald-500/30",
                             isChosenOption && !isCorrect && "border-rose-500 bg-rose-500/10 text-rose-700 dark:text-rose-400 shake"

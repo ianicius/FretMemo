@@ -74,6 +74,8 @@ export interface ChoiceQuestion {
     /** Optional i18n key + values of an after-answer explanation. */
     hintKey?: string;
     hintValues?: Record<string, string | number>;
+    /** Optional audio prompt (plan phase 5: mode recognition by ear). */
+    audio?: { root: string; order: number };
 }
 
 export type FretboardQuestionDirection = "position-to-note" | "note-to-position";
@@ -201,6 +203,65 @@ function pcOf(note: string): number {
 }
 
 /** Tritone (subV) dominant of a dominant chord, flat-spelled: G7 → Db7. */
+const KEY_POOL = ["C", "G", "D", "A", "E", "B", "F", "Bb", "Eb", "Ab", "Db", "Gb"];
+const MINOR_KEY_POOL = ["C", "G", "D", "A", "E", "B", "F", "Bb", "Eb", "Ab", "Db", "Gb"];
+
+/** Flat-spelled pitch class name for a chromatic index. */
+function flatName(pc: number): string {
+    return FLAT_NAMES[((pc % 12) + 12) % 12];
+}
+
+/** Chord/scale pairs for a major key at question time (plan phase 5: all 12 keys). */
+export function chordScaleMajorPairs(key: string): Array<{ chord: string; mode: string }> {
+    const scale = Key.majorKey(key).scale as string[];
+    return [
+        { chord: `${scale[0]}maj7`, mode: "Ionian" },
+        { chord: `${scale[1]}m7`, mode: "Dorian" },
+        { chord: `${scale[1]}m13`, mode: "Dorian" },
+        { chord: `${scale[2]}m7`, mode: "Phrygian" },
+        { chord: `${scale[2]}7sus(b9)`, mode: "Phrygian" },
+        { chord: `${scale[3]}maj7`, mode: "Lydian" },
+        { chord: `${scale[3]}maj7#11`, mode: "Lydian" },
+        { chord: `${scale[4]}7`, mode: "Mixolydian" },
+        { chord: `${scale[5]}m7`, mode: "Aeolian" },
+        { chord: `${scale[6]}m7b5`, mode: "Locrian" },
+    ];
+}
+
+/** Secondary-dominant pairs for a major key, incl. the V7/I note from the video. */
+function secondaryDomPairs(key: string): Array<{ target: string; dominant: string }> {
+    const scale = Key.majorKey(key).scale as string[];
+    const qualities = ["m7", "m7", "maj7", "7", "m7"];
+    const pairs: Array<{ target: string; dominant: string }> = [];
+    for (let idx = 1; idx <= 5; idx += 1) {
+        pairs.push({
+            target: `${scale[idx]}${qualities[idx - 1]}`,
+            dominant: `${scale[(idx + 4) % 7]}7`,
+        });
+    }
+    // V7/I from the video: C7 in C major pulls to the tonic as well.
+    pairs.push({ target: `${scale[0]}maj7`, dominant: `${scale[0]}7` });
+    return pairs;
+}
+
+/** Borrowed-chord pairs for a major key (parallel minor), flat-spelled. */
+function borrowedPairs(key: string): Array<{ chord: string; degree: string }> {
+    const pc = pcOf(key);
+    return [
+        { chord: `${flatName(pc + 10)}7`, degree: "bVII7" },
+        { chord: `${flatName(pc + 5)}m7`, degree: "iv7" },
+        { chord: `${flatName(pc + 8)}maj7`, degree: "bVImaj7" },
+        { chord: `${flatName(pc + 3)}maj7`, degree: "bIIImaj7" },
+        { chord: `${flatName(pc + 5)}m7–${flatName(pc + 10)}7–${key}`, degree: "backdoor ii-V" },
+    ];
+}
+
+/** The notes of a mode rooted on `root` (parent major scale a (order-1) fifth-ish below). */
+export function modeNotesFromRoot(root: string, order: number): string[] {
+    const parentPc = (pcOf(root) - (order - 1) + 12) % 12;
+    return Key.majorKey(flatName(parentPc)).scale as string[];
+}
+
 export function tritoneSub(chord: string): string {
     const root = chord.replace(/7.*$/, "");
     const pc = pcOf(root);
@@ -253,6 +314,50 @@ export function listChoiceGeneratorIds(): ChoiceGeneratorId[] {
 
 function generateKeySig(rng: Rng, direction: string): ChoiceQuestion {
     const entry = rng.pick(MAJOR_KEY_SIGNATURES);
+    if (direction === "key-type") {
+        // Sharps or flats — only keys that actually carry accidentals.
+        const pool = MAJOR_KEY_SIGNATURES.filter((item) => item.count > 0);
+        const picked = rng.pick(pool);
+        const other = picked.type === "sharps" ? "flats" : "sharps";
+        const { options, correctIndex } = chordOptions(picked.type, [other], rng);
+        return {
+            id: "keySig",
+            promptKey: "improv.q.keySig.keyType",
+            promptValues: { key: picked.key },
+            options,
+            correctIndex,
+            hintKey: "improv.q.keySig.hintAccidentals",
+            hintValues: { key: picked.key, list: picked.list.join(", ") || "—" },
+        };
+    }
+    if (direction === "key-accidentals") {
+        const raised = rng.pick(MAJOR_KEY_SIGNATURES.filter((item) => item.count > 0));
+        const distractorKeys = MAJOR_KEY_SIGNATURES.filter((item) => item.count > 0 && item.key !== raised.key);
+        const distractors = rng.shuffle(distractorKeys).slice(0, 3).map((item) => item.list.join(", "));
+        const { options, correctIndex } = chordOptions(raised.list.join(", "), distractors, rng);
+        return {
+            id: "keySig",
+            promptKey: "improv.q.keySig.keyAccidentals",
+            promptValues: { key: raised.key },
+            options,
+            correctIndex,
+            hintKey: "improv.q.keySig.hintCount",
+            hintValues: { key: raised.key, count: raised.count },
+        };
+    }
+    if (direction === "parallel-minor") {
+        const picked = rng.pick(MAJOR_KEY_SIGNATURES);
+        const { options, correctIndex } = chordOptions(`${picked.key}m`, rng.shuffle(MAJOR_KEY_SIGNATURES.filter((item) => item.key !== picked.key)).slice(0, 3).map((item) => `${item.key}m`), rng);
+        return {
+            id: "keySig",
+            promptKey: "improv.q.keySig.parallelMinor",
+            promptValues: { key: picked.key },
+            options,
+            correctIndex,
+            hintKey: "improv.q.keySig.hintAccidentals",
+            hintValues: { key: picked.key, list: picked.list.join(", ") || "—" },
+        };
+    }
     if (direction === "count-to-key") {
         // Only keys with accidentals: "0 accidentals" would be ambiguous.
         const pool = MAJOR_KEY_SIGNATURES.filter((item) => item.count > 0);
@@ -322,6 +427,52 @@ function generateModes(rng: Rng, direction: string): ChoiceQuestion {
             hintValues: { mode: entry.name, characteristic: entry.characteristic },
         };
     }
+    if (direction === "mode-notes") {
+        const root = rng.pick(["C", "D", "E", "G", "A", "Bb"]);
+        const notes = modeNotesFromRoot(root, entry.order);
+        const distractorRoots = ["C", "D", "E", "G", "A", "Bb"].filter((item) => item !== root);
+        const distractors = rng.shuffle(distractorRoots).slice(0, 3).map((other) => modeNotesFromRoot(other, entry.order).join(" "));
+        const { options, correctIndex } = chordOptions(notes.join(" "), distractors, rng);
+        return {
+            id: "modes",
+            promptKey: "improv.q.modes.modeNotesFromRoot",
+            promptValues: { mode: entry.name, root },
+            options,
+            correctIndex,
+            hintKey: "improv.q.modes.hintPattern",
+            hintValues: { mode: entry.name, pattern: entry.pattern },
+        };
+    }
+    if (direction === "mode-parent") {
+        const root = rng.pick(["C", "D", "E", "G", "A", "Bb"]);
+        const parent = flatName((pcOf(root) - (entry.order - 1) + 12) % 12);
+        const otherParents = KEY_POOL.filter((item) => item !== parent);
+        const { options, correctIndex } = chordOptions(parent, rng.shuffle(otherParents).slice(0, 3), rng);
+        return {
+            id: "modes",
+            promptKey: "improv.q.modes.modeParent",
+            promptValues: { mode: entry.name, root },
+            options,
+            correctIndex,
+            hintKey: "improv.q.modes.hintCharacteristic",
+            hintValues: { mode: entry.name, characteristic: entry.characteristic },
+        };
+    }
+    if (direction === "sound-to-mode") {
+        const root = rng.pick(["C", "D", "E", "G", "A"]);
+        const modeNames = MODES.map((mode) => mode.name);
+        const { options, correctIndex } = chordOptions(entry.name, rng.shuffle(modeNames.filter((name) => name !== entry.name)).slice(0, 3), rng);
+        return {
+            id: "modes",
+            promptKey: "improv.q.modes.soundToMode",
+            promptValues: { root },
+            options,
+            correctIndex,
+            audio: { root, order: entry.order },
+            hintKey: "improv.q.modes.hintPattern",
+            hintValues: { mode: entry.name, pattern: entry.pattern },
+        };
+    }
     if (direction === "characteristic-to-mode") {
         const withCharacteristic = MODES.filter((mode) => mode.characteristic !== "—");
         const picked = rng.pick(withCharacteristic);
@@ -366,6 +517,25 @@ const TRIAD_TYPE_LABELS: Record<string, string> = {
     aug: "augmented",
 };
 
+const TRIAD_SEVENTH_LABELS: Record<string, string> = {
+    maj7: "maj7",
+    "7": "7 (dominant)",
+    m7: "m7",
+    "m7b5": "m7b5",
+};
+
+/** Seventh-chord suffix from stacked scale notes (root, 3rd, 5th, 7th). */
+function triadSeventhSuffix(root: string, third: string, fifth: string, seventh: string): string {
+    const thirdSemi = (pcOf(third) - pcOf(root) + 12) % 12;
+    const fifthSemi = (pcOf(fifth) - pcOf(root) + 12) % 12;
+    const seventhSemi = (pcOf(seventh) - pcOf(root) + 12) % 12;
+    if (thirdSemi === 4 && fifthSemi === 7 && seventhSemi === 11) return "maj7";
+    if (thirdSemi === 4 && fifthSemi === 7 && seventhSemi === 10) return "7";
+    if (thirdSemi === 3 && fifthSemi === 7 && seventhSemi === 10) return "m7";
+    if (thirdSemi === 3 && fifthSemi === 6 && seventhSemi === 10) return "m7b5";
+    return "m7";
+}
+
 function generateTriadBuild(rng: Rng, direction: string): ChoiceQuestion {
     const keyName = rng.pick(["C", "D", "E", "F", "G", "A", "Bb", "Eb"]);
     const scale = Key.majorKey(keyName).scale;
@@ -375,6 +545,23 @@ function generateTriadBuild(rng: Rng, direction: string): ChoiceQuestion {
     const fifth = scale[(degree + 3) % 7] as string;
     const suffix = triadTypeOf(root, third, fifth);
     const typeLabel = TRIAD_TYPE_LABELS[suffix] ?? "major";
+    if (direction === "degree-to-seventh") {
+        const seventh = scale[(degree + 5) % 7] as string;
+        const seventhSuffix = triadSeventhSuffix(root, third, fifth, seventh);
+        const typeLabelSeventh = TRIAD_SEVENTH_LABELS[seventhSuffix] ?? seventhSuffix;
+        const symbol = `${root}${seventhSuffix}`;
+        const distractors = Object.keys(TRIAD_SEVENTH_LABELS).filter((item) => item !== seventhSuffix);
+        const { options, correctIndex } = chordOptions(symbol, distractors.map((item) => `${root}${item}`), rng);
+        return {
+            id: "triadBuild",
+            promptKey: "improv.q.triadBuild.degreeToSeventh",
+            promptValues: { key: keyName, degree, notes: `${root}-${third}-${fifth}-${seventh}` },
+            options,
+            correctIndex,
+            hintKey: "improv.q.triadBuild.hintType",
+            hintValues: { type: typeLabelSeventh },
+        };
+    }
     if (direction === "degree-to-triad") {
         const distractorSuffixes = Object.keys(TRIAD_TYPE_LABELS).filter((item) => item !== suffix);
         const { options, correctIndex } = chordOptions(`${root}${suffix}`, distractorSuffixes.map((item) => `${root}${item}`), rng);
@@ -400,7 +587,7 @@ function generateTriadBuild(rng: Rng, direction: string): ChoiceQuestion {
     };
 }
 
-function chordScaleQuestion(rng: Rng, direction: string, pairs: Array<{ chord: string; mode: string }>, modeOptions: string[], idPrefix: string, chordToModePromptKey = "improv.q.chordScale.chordToMode"): ChoiceQuestion {
+function chordScaleQuestion(rng: Rng, direction: string, pairs: Array<{ chord: string; mode: string }>, modeOptions: string[], idPrefix: string, chordToModePromptKey = "improv.q.chordScale.chordToMode", modeToChordPromptKey = "improv.q.chordScale.modeToChord", keyName?: string): ChoiceQuestion {
     const entry = rng.pick(pairs);
     if (direction === "mode-to-chord") {
         // Distractors must map to a *different* mode (Dm13 would also be Dorian).
@@ -408,8 +595,8 @@ function chordScaleQuestion(rng: Rng, direction: string, pairs: Array<{ chord: s
         const { options, correctIndex } = chordOptions(entry.chord, rng.shuffle(distractors).slice(0, 3), rng);
         return {
             id: idPrefix,
-            promptKey: "improv.q.chordScale.modeToChord",
-            promptValues: { mode: entry.mode },
+            promptKey: modeToChordPromptKey,
+            promptValues: keyName ? { mode: entry.mode, key: keyName } : { mode: entry.mode },
             options,
             correctIndex,
             hintKey: "improv.q.chordScale.hintPair",
@@ -421,7 +608,7 @@ function chordScaleQuestion(rng: Rng, direction: string, pairs: Array<{ chord: s
     return {
         id: idPrefix,
         promptKey: chordToModePromptKey,
-        promptValues: { chord: entry.chord },
+        promptValues: keyName ? { chord: entry.chord, key: keyName } : { chord: entry.chord },
         options,
         correctIndex,
         hintKey: "improv.q.chordScale.hintPair",
@@ -458,7 +645,7 @@ function generateTriadType(rng: Rng, direction: string): ChoiceQuestion {
 }
 
 function generateTritone(rng: Rng, direction: string): ChoiceQuestion {
-    const dominant = rng.pick(["G7", "C7", "D7", "Bb7", "E7", "Ab7"]);
+    const dominant = rng.pick(["C7", "Db7", "D7", "Eb7", "E7", "F7", "Gb7", "G7", "Ab7", "A7", "Bb7", "B7"]);
     const sub = tritoneSub(dominant);
     if (direction === "subv-to-v") {
         const originalRoot = FLAT_NAMES[(pcOf(sub.replace(/7$/, "")) + 6) % 12];
@@ -502,8 +689,57 @@ function generateTritone(rng: Rng, direction: string): ChoiceQuestion {
     };
 }
 
+const MELODIC_MINOR_CHORD_PAIRS: Array<{ offset: number; quality: string; labelKey: string }> = [
+    { offset: 0, quality: "m(maj7)", labelKey: "improv.goals.mmMinor251" },
+    { offset: 2, quality: "m7", labelKey: "improv.goals.mmDorian2" },
+    { offset: 4, quality: "Maj7#5", labelKey: "improv.goals.mmLydianAug" },
+    { offset: 7, quality: "7#11", labelKey: "improv.goals.mmLydianDom" },
+    { offset: 9, quality: "7b13", labelKey: "improv.goals.mmMixolydian6" },
+    { offset: 10, quality: "m7b5", labelKey: "improv.goals.mmAeolian5" },
+    { offset: 11, quality: "7alt", labelKey: "improv.goals.mmAltered" },
+];
+
+const HARMONIC_MINOR_CHORD_PAIRS: Array<{ offset: number; quality: string; labelKey: string }> = [
+    { offset: 0, quality: "m(maj7)", labelKey: "improv.goals.hmTonic" },
+    { offset: 2, quality: "m7b5", labelKey: "improv.goals.hmLocrian2" },
+    { offset: 4, quality: "Maj7#5", labelKey: "improv.goals.hmIonian5" },
+    { offset: 5, quality: "m7", labelKey: "improv.goals.hmDorian4" },
+    { offset: 7, quality: "7", labelKey: "improv.goals.hmPhrygianDom" },
+    { offset: 9, quality: "Maj7", labelKey: "improv.goals.hmLydian2" },
+    { offset: 11, quality: "dim7", labelKey: "improv.goals.hmSuperlocrian" },
+];
+
+/** In-context chord/scale question (plan phase 5): a concrete chord in a
+ * minor key; the answer is the parent melodic/harmonic minor scale. */
+function generateChordScaleInContext(rng: Rng, kind: "melodic" | "harmonic"): ChoiceQuestion {
+    const parentKey = rng.pick(MINOR_KEY_POOL);
+    const parentPc = pcOf(parentKey);
+    const pairs = kind === "melodic" ? MELODIC_MINOR_CHORD_PAIRS : HARMONIC_MINOR_CHORD_PAIRS;
+    const entry = rng.pick(pairs);
+    const root = flatName(parentPc + entry.offset);
+    const chord = `${root}${entry.quality}`;
+    const parent = `${parentKey} ${kind === "melodic" ? "melodic" : "harmonic"} minor`;
+    const otherParents = MINOR_KEY_POOL.filter((item) => item !== parentKey)
+        .slice(0, 6);
+    const { options, correctIndex } = chordOptions(
+        parent,
+        rng.shuffle(otherParents).slice(0, 3).map((item) => `${item} ${kind === "melodic" ? "melodic" : "harmonic"} minor`),
+        rng,
+    );
+    return {
+        id: `chordScale${kind === "melodic" ? "Melodic" : "Harmonic"}`,
+        promptKey: kind === "melodic" ? "improv.q.chordScaleMM.inContext" : "improv.q.chordScaleHM.inContext",
+        promptValues: { chord, key: parentKey },
+        options,
+        correctIndex,
+        hintKey: "improv.q.chordScale.hintParent",
+        hintValues: { chord, parent },
+    };
+}
+
 function generateSecondaryDom(rng: Rng, direction: string): ChoiceQuestion {
-    const entry = rng.pick(SECONDARY_DOMINANTS);
+    const key = rng.pick(KEY_POOL);
+    const entry = rng.pick(secondaryDomPairs(key));
     if (direction === "secondary-to-chord") {
         const distractors = SECONDARY_DOMINANTS.filter((item) => item.target !== entry.target).map((item) => item.target);
         const { options, correctIndex } = chordOptions(entry.target, rng.shuffle(distractors).slice(0, 3), rng);
@@ -532,11 +768,12 @@ function generateSecondaryDom(rng: Rng, direction: string): ChoiceQuestion {
 
 function generateBorrowed(rng: Rng, direction: string): ChoiceQuestion {
     const degrees = ["bVII7", "iv7", "bVImaj7", "bIIImaj7", "ii7", "V7", "vi7"];
-    const entry = rng.pick(BORROWED_CHORDS);
+    const key = rng.pick(["C", "G", "D", "A", "E", "B", "F", "Bb", "Eb", "Ab", "Db", "Gb"]);
+    const pairs = borrowedPairs(key);
+    const entry = rng.pick(pairs);
     if (direction === "backdoor") {
-        // Always the full backdoor sequence from the video: Fm7–Bb7–C. A single
-        // borrowed chord in this question would make the classification random.
-        const backdoorEntry = BORROWED_CHORDS.find((item) => item.degree === "backdoor ii-V") ?? BORROWED_CHORDS[BORROWED_CHORDS.length - 1];
+        // Always the full backdoor sequence for the drawn key: iv m7 – bVII7 – I.
+        const backdoorEntry = pairs.find((item) => item.degree === "backdoor ii-V") ?? pairs[pairs.length - 1];
         const { options, correctIndex } = chordOptions(
             "improv.q.borrowed.answerBackdoor",
             ["improv.q.borrowed.answerDiatonic251", "improv.q.borrowed.answerMinor251", "improv.q.borrowed.answerTurnaround"],
@@ -545,22 +782,22 @@ function generateBorrowed(rng: Rng, direction: string): ChoiceQuestion {
         return {
             id: "borrowed",
             promptKey: "improv.q.borrowed.backdoor",
-            promptValues: { chord: backdoorEntry.chord },
+            promptValues: { chord: backdoorEntry.chord, key },
             options,
             correctIndex,
             hintKey: "improv.q.borrowed.hintBackdoor",
-            hintValues: { source: backdoorEntry.source },
+            hintValues: { source: "Cm" },
         };
     }
     const { options, correctIndex } = chordOptions(entry.degree, rng.shuffle(degrees.filter((degree) => degree !== entry.degree)).slice(0, 3), rng);
     return {
         id: "borrowed",
         promptKey: "improv.q.borrowed.identifyDegree",
-        promptValues: { chord: entry.chord, key: "C" },
+        promptValues: { chord: entry.chord, key },
         options,
         correctIndex,
         hintKey: "improv.q.borrowed.hintSource",
-        hintValues: { chord: entry.chord, source: entry.source },
+        hintValues: { chord: entry.chord, source: "Cm" },
     };
 }
 
@@ -631,13 +868,39 @@ function generateColtrane(rng: Rng, direction: string): ChoiceQuestion {
             hintValues: { cycle: GIANT_STEPS_CYCLE.join("–") },
         };
     }
-    const correct = GIANT_STEPS_CYCLE.join("–");
-    const distractors = ["B–Eb–G", "B–F#–C#", "C–Ab–E", "G–Db–A"];
+    if (direction === "ii-v-of") {
+        const target = rng.pick(GIANT_STEPS_CYCLE);
+        const targetPc = pcOf(target);
+        const ii = `${flatName(targetPc + 2)}m7`;
+        const v = `${flatName(targetPc + 5)}7`;
+        const correct = `${ii}–${v}`;
+        const distractors = GIANT_STEPS_CYCLE.filter((item) => item !== target)
+            .map((item) => {
+                const itemPc = pcOf(item);
+                return `${flatName(itemPc + 2)}m7–${flatName(itemPc + 5)}7`;
+            });
+        const { options, correctIndex } = chordOptions(correct, distractors, rng);
+        return {
+            id: "coltrane",
+            promptKey: "improv.q.coltrane.iiVOf",
+            promptValues: { target },
+            options,
+            correctIndex,
+            hintKey: "improv.q.coltrane.hintCycle",
+            hintValues: { cycle: GIANT_STEPS_CYCLE.join("–") },
+        };
+    }
+    const offset = rng.int(12) - 6;
+    const shifted = GIANT_STEPS_CYCLE.map((root) => flatName(pcOf(root) + offset + 12));
+    const correct = shifted.join("–");
+    const distractorOffsets = [3, -2, 1, 5].filter((value) => value !== offset);
+    const distractors = distractorOffsets.map((value) =>
+        GIANT_STEPS_CYCLE.map((root) => flatName(pcOf(root) + value + 12)).join("–"));
     const { options, correctIndex } = chordOptions(correct, distractors, rng);
     return {
         id: "coltrane",
-        promptKey: "improv.q.coltrane.cycleOrder",
-        promptValues: { keys: GIANT_STEPS_CYCLE.join(", ") },
+        promptKey: "improv.q.coltrane.cycleTransposed",
+        promptValues: { offset: offset === 0 ? "B" : offset === 3 ? "Eb" : offset === -2 ? "A" : "C" },
         options,
         correctIndex,
         hintKey: "improv.q.coltrane.hintCycle",
@@ -650,18 +913,18 @@ function generateQuestion(generatorId: ChoiceGeneratorId, rng: Rng, direction: s
     const pickDirection = (): string => {
         if (resolvedDirection !== "mixed") return resolvedDirection;
         switch (generatorId) {
-            case "keySig": return rng.pick(["key-to-count", "count-to-key", "key-to-accidentals"]);
-            case "modes": return rng.pick(["order-to-mode", "mode-to-order", "pattern-to-mode", "characteristic-to-mode"]);
-            case "triadBuild": return rng.pick(["degree-to-type", "degree-to-triad"]);
+            case "keySig": return rng.pick(["key-to-count", "count-to-key", "key-to-accidentals", "key-type", "key-accidentals", "parallel-minor"]);
+            case "modes": return rng.pick(["order-to-mode", "mode-to-order", "pattern-to-mode", "characteristic-to-mode", "mode-notes", "mode-parent", "sound-to-mode"]);
+            case "triadBuild": return rng.pick(["degree-to-type", "degree-to-triad", "degree-to-seventh", "degree-to-seventh"]);
             case "chordScaleMajor": return rng.pick(["chord-to-mode", "mode-to-chord", "chord-to-mode"]);
             case "triadType": return rng.pick(["name-to-intervals", "intervals-to-name"]);
             case "chordScaleMelodic":
-            case "chordScaleHarmonic": return rng.pick(["chord-to-mode", "mode-to-chord"]);
+            case "chordScaleHarmonic": return rng.pick(["chord-to-mode", "mode-to-chord", "in-context"]);
             case "tritone": return rng.pick(["v-to-subv", "subv-to-v", "subv-resolution"]);
             case "secondaryDom": return rng.pick(["chord-to-secondary", "secondary-to-chord"]);
             case "borrowed": return rng.pick(["identify-degree", "backdoor"]);
             case "pivot": return rng.pick(["common-chord", "pivot-target"]);
-            case "coltrane": return rng.pick(["cycle-order", "resolution"]);
+            case "coltrane": return rng.pick(["cycle-order", "resolution", "ii-v-of", "cycle-transposed"]);
             default: return "mixed";
         }
     };
@@ -670,10 +933,26 @@ function generateQuestion(generatorId: ChoiceGeneratorId, rng: Rng, direction: s
         case "keySig": return generateKeySig(rng, pickDirection());
         case "modes": return generateModes(rng, pickDirection());
         case "triadBuild": return generateTriadBuild(rng, pickDirection());
-        case "chordScaleMajor": return chordScaleQuestion(rng, pickDirection() === "mode-to-chord" ? "mode-to-chord" : "chord-to-mode", CHORD_SCALE_MAJOR, MODES.map((mode) => mode.name), "chordScaleMajor", "improv.q.chordScale.chordToMode");
+        case "chordScaleMajor": {
+            const key = rng.pick(KEY_POOL);
+            return chordScaleQuestion(
+                rng,
+                pickDirection() === "mode-to-chord" ? "mode-to-chord" : "chord-to-mode",
+                chordScaleMajorPairs(key),
+                MODES.map((mode) => mode.name),
+                "chordScaleMajor",
+                "improv.q.chordScale.chordToModeKey",
+                "improv.q.chordScale.modeToChordKey",
+                key,
+            );
+        }
         case "triadType": return generateTriadType(rng, pickDirection());
-        case "chordScaleMelodic": return chordScaleQuestion(rng, pickDirection() === "mode-to-chord" ? "mode-to-chord" : "chord-to-mode", CHORD_SCALE_MELODIC, MELODIC_MINOR_MODES, "chordScaleMelodic", "improv.q.chordScale.chordToModeGeneric");
-        case "chordScaleHarmonic": return chordScaleQuestion(rng, pickDirection() === "mode-to-chord" ? "mode-to-chord" : "chord-to-mode", CHORD_SCALE_HARMONIC, HARMONIC_MINOR_MODES, "chordScaleHarmonic", "improv.q.chordScale.chordToModeGeneric");
+        case "chordScaleMelodic": return pickDirection() === "in-context"
+            ? generateChordScaleInContext(rng, "melodic")
+            : chordScaleQuestion(rng, pickDirection() === "mode-to-chord" ? "mode-to-chord" : "chord-to-mode", CHORD_SCALE_MELODIC, MELODIC_MINOR_MODES, "chordScaleMelodic", "improv.q.chordScale.chordToModeGeneric");
+        case "chordScaleHarmonic": return pickDirection() === "in-context"
+            ? generateChordScaleInContext(rng, "harmonic")
+            : chordScaleQuestion(rng, pickDirection() === "mode-to-chord" ? "mode-to-chord" : "chord-to-mode", CHORD_SCALE_HARMONIC, HARMONIC_MINOR_MODES, "chordScaleHarmonic", "improv.q.chordScale.chordToModeGeneric");
         case "tritone": return generateTritone(rng, pickDirection());
         case "secondaryDom": return generateSecondaryDom(rng, pickDirection());
         case "borrowed": return generateBorrowed(rng, pickDirection());

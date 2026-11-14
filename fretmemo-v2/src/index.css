@@ -524,8 +524,10 @@
   }
 }
 
-/* Landscape controls panel: compact answer buttons */
-.landscape-controls button {
+/* Landscape controls panel: compact buttons.
+   Exempt .tab-answer-btn (Note → Tab options): they render a full 6-string
+   tab diagram and get vertically clipped to two visible rows otherwise. */
+.landscape-controls button:not(.tab-answer-btn) {
   height: 2.25rem !important;
   min-height: 0 !important;
   font-size: 0.875rem !important;

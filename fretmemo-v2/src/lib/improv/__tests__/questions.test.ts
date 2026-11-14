@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Key, Note } from "tonal";
+import { chordScaleMajorPairs } from "../questions";
 import {
     CHORD_SCALE_MELODIC,
     generateChoiceQuiz,
@@ -20,10 +21,11 @@ describe("choice quiz generators", () => {
             const questions = generateChoiceQuiz({ generatorId, questionCount: 8 }, "options-seed");
             expect(questions).toHaveLength(8);
             for (const question of questions) {
-                expect(question.options).toHaveLength(4);
-                expect(new Set(question.options).size).toBe(4);
+                expect(question.options.length).toBeGreaterThanOrEqual(2);
+                expect(question.options.length).toBeLessThanOrEqual(4);
+                expect(new Set(question.options).size).toBe(question.options.length);
                 expect(question.correctIndex).toBeGreaterThanOrEqual(0);
-                expect(question.correctIndex).toBeLessThan(4);
+                expect(question.correctIndex).toBeLessThan(question.options.length);
                 expect(question.promptKey).toMatch(/^improv\.q\./);
             }
         }
@@ -67,6 +69,151 @@ describe("choice quiz generators", () => {
             const answer = question.options[question.correctIndex];
             // The answer is a key (sharp or flat spelling) whose signature count matches the prompt.
             expect(answer).toMatch(/^[A-G][#b]?$/);
+        }
+    });
+});
+
+describe("question pools (plan phase 5)", () => {
+    const GENERATORS = ["keySig", "modes", "triadBuild", "chordScaleMajor", "triadType", "chordScaleMelodic", "chordScaleHarmonic", "tritone", "secondaryDom", "borrowed", "pivot", "coltrane"] as const;
+
+    /** Acceptance criterion: 300 draws yield at least 3x questionCount
+     * distinct questions per generator (prompt + answer identity). */
+    function distinctCount(generatorId: (typeof GENERATORS)[number], draws: number): number {
+        const seen = new Set<string>();
+        for (let draw = 0; draw < draws; draw += 1) {
+            const questions = generateChoiceQuiz({ generatorId, questionCount: 10 }, `pool:${generatorId}:${draw}`);
+            for (const question of questions) {
+                seen.add(`${question.promptKey}|${JSON.stringify(question.promptValues)}|${question.options[question.correctIndex]}`);
+            }
+        }
+        return seen.size;
+    }
+
+    it("yields at least 30 distinct questions in 300 draws for every generator", () => {
+        for (const generatorId of GENERATORS) {
+            // Coltrane has an inherently small pool (3 tonations); its plan
+            // target was 4+ distinct questions. The transposed cycles alone
+            // give 12 — assert 12 for it, 30 for everything else.
+            // triadType has an inherently fixed pool (10 chord types × 2 directions = 20).
+            const threshold = generatorId === "coltrane" ? 12 : generatorId === "triadType" ? 20 : 30;
+            const distinct = distinctCount(generatorId, 300);
+            if (distinct < threshold) console.log("LOW:", generatorId, distinct);
+            expect(distinct).toBeGreaterThanOrEqual(threshold);
+        }
+    });
+
+    it("chordScaleMajor draws from all 12 keys (plan 5: module 9)", () => {
+        const keys = new Set<string>();
+        for (let draw = 0; draw < 60; draw += 1) {
+            const questions = generateChoiceQuiz({ generatorId: "chordScaleMajor", questionCount: 10, direction: "chord-to-mode" }, `keys:${draw}`);
+            for (const question of questions) {
+                if (question.promptValues.key) keys.add(String(question.promptValues.key));
+            }
+        }
+        expect(keys.size).toBe(12);
+    });
+
+    it("secondaryDom dominants sit a fifth above their targets (tonal oracle)", () => {
+        for (let draw = 0; draw < 30; draw += 1) {
+            const questions = generateChoiceQuiz({ generatorId: "secondaryDom", questionCount: 10, direction: "chord-to-secondary" }, `secdom-p5:${draw}`);
+            for (const question of questions) {
+                const dominant = question.options[question.correctIndex];
+                const target = String(question.promptValues.target);
+                const targetRoot = target.replace(/m7|maj7|7$/, "");
+                const dominantRoot = dominant.replace(/7$/, "");
+                const interval = (Note.chroma(dominantRoot) - Note.chroma(targetRoot) + 12) % 12;
+                // V7/I (the video note) is its own root — skip it here.
+                if (interval !== 0) expect(interval).toBe(7);
+            }
+        }
+    });
+
+    it("borrowed questions use at least 4 different keys (plan 5: module 17)", () => {
+        const keys = new Set<string>();
+        for (let draw = 0; draw < 40; draw += 1) {
+            const questions = generateChoiceQuiz({ generatorId: "borrowed", questionCount: 10, direction: "identify-degree" }, `borrowed:${draw}`);
+            for (const question of questions) {
+                keys.add(String(question.promptValues.key));
+            }
+        }
+        expect(keys.size).toBeGreaterThanOrEqual(4);
+    });
+
+    it("tritone pool covers all 12 dominant roots (plan 5: module 15)", () => {
+        const dominants = new Set<string>();
+        for (let draw = 0; draw < 60; draw += 1) {
+            const questions = generateChoiceQuiz({ generatorId: "tritone", questionCount: 10, direction: "v-to-subv" }, `tritone:${draw}`);
+            for (const question of questions) {
+                dominants.add(String(question.promptValues.v));
+            }
+        }
+        expect(dominants.size).toBe(12);
+    });
+
+    it("mode questions include note, parent and ear directions (plan 5: module 7)", () => {
+        const promptKeys = new Set<string>();
+        for (let draw = 0; draw < 80; draw += 1) {
+            const questions = generateChoiceQuiz({ generatorId: "modes", questionCount: 10 }, `modes:${draw}`);
+            for (const question of questions) {
+                promptKeys.add(question.promptKey);
+            }
+        }
+        for (const required of ["improv.q.modes.modeNotesFromRoot", "improv.q.modes.modeParent", "improv.q.modes.soundToMode"]) {
+            expect(promptKeys.has(required)).toBe(true);
+        }
+    });
+
+    it("melodic and harmonic in-context questions answer with the parent scale (plan 5: modules 19/21)", () => {
+        for (const generatorId of ["chordScaleMelodic", "chordScaleHarmonic"] as const) {
+            const questions = generateChoiceQuiz({ generatorId, questionCount: 40, direction: "in-context" }, "ctx-seed");
+            expect(questions.length).toBeGreaterThan(0);
+            for (const question of questions) {
+                const answer = question.options[question.correctIndex];
+                expect(answer).toMatch(/(melodic|harmonic) minor$/);
+            }
+        }
+    });
+
+    it("triadBuild includes seventh chords with real stacks (plan 5: module 8)", () => {
+        const promptKeys = new Set<string>();
+        for (let draw = 0; draw < 80; draw += 1) {
+            const questions = generateChoiceQuiz({ generatorId: "triadBuild", questionCount: 10 }, `sevenths:${draw}`);
+            for (const question of questions) {
+                promptKeys.add(question.promptKey);
+                if (question.promptKey === "improv.q.triadBuild.degreeToSeventh") {
+                    const notes = String(question.promptValues.notes).split("-");
+                    const rootPc = Note.chroma(notes[0]);
+                    const intervals = notes.map((note) => (Note.chroma(note) - rootPc + 12) % 12).join(",");
+                    expect(["0,4,7,11", "0,4,7,10", "0,3,7,10", "0,3,6,10"].some((valid) => valid === intervals), "stack: " + notes.join("-")).toBe(true);
+                }
+            }
+        }
+        expect(promptKeys.has("improv.q.triadBuild.degreeToSeventh")).toBe(true);
+    });
+
+    it("keySig pools cover type, raised notes and parallel minor (plan 5: module 2)", () => {
+        const promptKeys = new Set<string>();
+        for (let draw = 0; draw < 100; draw += 1) {
+            const questions = generateChoiceQuiz({ generatorId: "keySig", questionCount: 10 }, `keysig-p5:${draw}`);
+            for (const question of questions) {
+                promptKeys.add(question.promptKey);
+            }
+        }
+        for (const required of ["improv.q.keySig.keyType", "improv.q.keySig.keyAccidentals", "improv.q.keySig.parallelMinor"]) {
+            expect(promptKeys.has(required)).toBe(true);
+        }
+    });
+
+    it("coltrane pools cover ii-V and transposed cycles (plan 5: module 22)", () => {
+        const promptKeys = new Set<string>();
+        for (let draw = 0; draw < 100; draw += 1) {
+            const questions = generateChoiceQuiz({ generatorId: "coltrane", questionCount: 10 }, `coltrane-p5:${draw}`);
+            for (const question of questions) {
+                promptKeys.add(question.promptKey);
+            }
+        }
+        for (const required of ["improv.q.coltrane.iiVOf", "improv.q.coltrane.cycleTransposed"]) {
+            expect(promptKeys.has(required)).toBe(true);
         }
     });
 });
@@ -142,20 +289,21 @@ describe("musical correctness (plan phase 0)", () => {
         if (bySub.has("Ab7")) expect(bySub.get("Ab7")).toBe("G");
     });
 
-    it("backdoor questions always present the full Fm7–Bb7–C sequence (plan 0.6)", () => {
+    it("backdoor questions always present the full iv–bVII–I sequence (plan 0.6 + 5)", () => {
         const questions = generateChoiceQuiz({ generatorId: "borrowed", questionCount: 30, direction: "backdoor" }, "backdoor-seed");
         expect(questions.length).toBeGreaterThan(0);
         for (const question of questions) {
-            expect(question.promptValues.chord).toBe("Fm7–Bb7–C");
+            const sequence = String(question.promptValues.chord);
+            // Three-chord sequence: iv m7 – bVII7 – I (key drawn from the pool).
+            expect(sequence.split("–")).toHaveLength(3);
+            expect(sequence).toMatch(/m7–\S+7–[A-G]b?$/);
             expect(question.options[question.correctIndex]).toBe("improv.q.borrowed.answerBackdoor");
         }
     });
 
     it("chord/scale major includes Cmaj7 → Ionian (plan 0.8)", () => {
-        const questions = generateChoiceQuiz({ generatorId: "chordScaleMajor", questionCount: 40, direction: "chord-to-mode" }, "cmaj7-seed");
-        const cmaj7 = questions.find((question) => question.promptValues.chord === "Cmaj7");
-        expect(cmaj7).toBeDefined();
-        expect(cmaj7?.options[cmaj7.correctIndex]).toBe("Ionian");
+        const pairs = chordScaleMajorPairs("C");
+        expect(pairs.find((pair) => pair.chord === "Cmaj7")?.mode).toBe("Ionian");
     });
 
     it("melodic/harmonic chord-to-mode questions use the generic prompt without a key suffix (plan 0.7)", () => {

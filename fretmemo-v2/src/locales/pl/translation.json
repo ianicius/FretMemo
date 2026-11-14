@@ -1826,7 +1826,8 @@
             "passed": "Podejście zaliczone — ćwiczenie wymaga {{required}} zaliczonych podejść.",
             "failed": "Spróbuj jeszcze raz — potrzebujesz {{required}} poprawnych odpowiedzi.",
             "attempts": "Zaliczone podejścia",
-            "attemptsValue": "{{done}}/{{required}}"
+            "attemptsValue": "{{done}}/{{required}}",
+            "play": "Odtwórz"
         },
         "fretQuiz": {
             "promptPositionToNote": "Jaka nuta jest zaznaczona na gryfie?",
@@ -2010,6 +2011,36 @@
                 "cycleOrder": "Kolejność tonacji w cyklu Coltrane'a („Giant Steps”) to:",
                 "resolution": "W „Giant Steps” {{dominant}} rozwiązuje do:",
                 "hintCycle": "Cykl: {{cycle}} (tercje wielkie w dół)."
+            },
+            "q": {
+                "keySig": {
+                    "keyType": "Czy tonacja {{key}} major ma znaki krzyżykowe, czy bemolowe?",
+                    "keyAccidentals": "Które dźwięki podwyższa tonacja {{key}} major?",
+                    "parallelMinor": "Tonacja paralelna molowa do {{key}} dur to:"
+                },
+                "modes": {
+                    "modeNotesFromRoot": "Tryb {{mode}} od dźwięku {{root}} zawiera nuty:",
+                    "modeParent": "Tryb {{mode}} od {{root}} pochodzi ze skali majorowej:",
+                    "soundToMode": "Posłuchaj skali zagranej od {{root}} — jaki to tryb?"
+                },
+                "triadBuild": {
+                    "degreeToSeventh": "Zbuduj 1-3-5-7 z gamy {{key}} major na stopniu {{degree}} — jaki to akord septymowy?"
+                },
+                "chordScale": {
+                    "chordToModeKey": "Jaki tryb pasuje do {{chord}} w tonacji {{key}} major?",
+                    "modeToChordKey": "W tonacji {{key}} major jaki akord obsługuje tryb {{mode}}?",
+                    "hintParent": "{{chord}} → {{parent}}"
+                },
+                "chordScaleMM": {
+                    "inContext": "Jaka mol melodyczna pasuje do {{chord}} w tonacji {{key}} moll?"
+                },
+                "chordScaleHM": {
+                    "inContext": "Jaka mol harmoniczna pasuje do {{chord}} w tonacji {{key}} moll?"
+                },
+                "coltrane": {
+                    "iiVOf": "ii–V prowadzące do {{target}} to:",
+                    "cycleTransposed": "Cykl Coltrane’a transponowany od {{offset}} to:"
+                }
             }
         },
         "modules": {

@@ -1812,7 +1812,8 @@
             "passed": "Run passed — the exercise needs {{required}} passed runs.",
             "failed": "Try again — you need {{required}} correct answers.",
             "attempts": "Passed attempts",
-            "attemptsValue": "{{done}}/{{required}}"
+            "attemptsValue": "{{done}}/{{required}}",
+            "play": "Play"
         },
         "fretQuiz": {
             "promptPositionToNote": "Which note is highlighted on the fretboard?",
@@ -1996,6 +1997,36 @@
                 "cycleOrder": "The key order of Coltrane's cycle (“Giant Steps”) is:",
                 "resolution": "In “Giant Steps”, {{dominant}} resolves to:",
                 "hintCycle": "Cycle: {{cycle}} (descending major thirds)."
+            },
+            "q": {
+                "keySig": {
+                    "keyType": "Does the {{key}} major key signature use sharps or flats?",
+                    "keyAccidentals": "Which notes are raised in {{key}} major?",
+                    "parallelMinor": "The parallel minor of {{key}} major is:"
+                },
+                "modes": {
+                    "modeNotesFromRoot": "The {{mode}} mode from {{root}} contains the notes:",
+                    "modeParent": "The {{mode}} mode from {{root}} comes from which major scale?",
+                    "soundToMode": "Listen to the scale played from {{root}} — which mode is it?"
+                },
+                "triadBuild": {
+                    "degreeToSeventh": "Build 1-3-5-7 from the {{key}} major scale on degree {{degree}} — which seventh chord?"
+                },
+                "chordScale": {
+                    "chordToModeKey": "Which mode fits {{chord}} in {{key}} major?",
+                    "modeToChordKey": "In {{key}} major, which chord does the {{mode}} mode serve?",
+                    "hintParent": "{{chord}} → {{parent}}"
+                },
+                "chordScaleMM": {
+                    "inContext": "Which melodic minor scale fits {{chord}} in the key of {{key}} minor?"
+                },
+                "chordScaleHM": {
+                    "inContext": "Which harmonic minor scale fits {{chord}} in the key of {{key}} minor?"
+                },
+                "coltrane": {
+                    "iiVOf": "The ii–V leading into {{target}} is:",
+                    "cycleTransposed": "The Coltrane cycle transposed from {{offset}} is:"
+                }
             }
         },
         "modules": {

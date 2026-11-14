@@ -10,6 +10,8 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Note } from "tonal";
+import { playTone } from "@/lib/audio";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +19,7 @@ import {
     type ChoiceQuestion,
 } from "@/lib/improv/questions";
 import { isExercisePassed, QUIZ_PASSED_ATTEMPTS, type ChoiceQuizParams, type ImprovExercise } from "@/data/improv/curriculum";
+import { modeNotesFromRoot } from "@/lib/improv/questions";
 import { selectModuleProgress, useImprovStore } from "@/stores/useImprovStore";
 import { useProgressStore } from "@/stores/useProgressStore";
 import { cn } from "@/lib/utils";
@@ -83,6 +86,27 @@ export function ChoiceQuiz({ moduleId, exercise }: ChoiceQuizProps) {
         }, ANSWER_ADVANCE_MS);
     };
 
+    const audioTimersRef = useRef<number[]>([]);
+
+    useEffect(() => () => {
+        for (const id of audioTimersRef.current) window.clearTimeout(id);
+        audioTimersRef.current = [];
+    }, []);
+
+    /** Plan phase 5: ear recognition — plays the mode's scale up and down. */
+    const playScaleAudio = useCallback((root: string, order: number) => {
+        for (const id of audioTimersRef.current) window.clearTimeout(id);
+        audioTimersRef.current = [];
+        const rootPc = Note.chroma(root) ?? 0;
+        const notes = modeNotesFromRoot(root, order);
+        const midis = notes.map((note) => 60 + ((Note.chroma(note) - rootPc + 12) % 12));
+        midis.push(72); // octave top
+        const sequence = [...midis, ...[...midis].slice(0, -1).reverse()];
+        sequence.forEach((midi, position) => {
+            audioTimersRef.current.push(window.setTimeout(() => void playTone(midi, 0.7), position * 280));
+        });
+    }, []);
+
     const restart = useCallback(() => {
         attemptSeed.current += 1;
         setQuestions(generateChoiceQuiz(params, `${exercise.id}:${attemptSeed.current}:${Date.now()}`));
@@ -131,6 +155,11 @@ export function ChoiceQuiz({ moduleId, exercise }: ChoiceQuizProps) {
                         value={t("improv.quiz.attemptsValue", { done: Math.min(passedAttempts, 2), required: 2 })}
                     />
                     <p className="text-sm font-medium">{t(question.promptKey, localizePromptValues(question.promptValues))}</p>
+                    {question.audio && (
+                        <Button type="button" size="sm" variant="outline" onClick={() => playScaleAudio(question.audio!.root, question.audio!.order)}>
+                            {t("improv.quiz.play")}
+                        </Button>
+                    )}
                     <div className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-2">
                         {question.options.map((option) => {
                             const isCorrectOption = option === question.options[question.correctIndex];
