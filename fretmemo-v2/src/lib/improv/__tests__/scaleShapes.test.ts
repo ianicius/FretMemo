@@ -3,11 +3,10 @@ import { STANDARD_TUNING, getNoteAt } from "@/lib/constants";
 import {
     SCALE_SHAPES,
     coversAllDegrees,
-    getChordShapePositions,
     getScaleShapePositions,
     getShapePitchClasses,
     getShapePositions,
-    resolveChordSemitones,
+    shapeSemitones,
 } from "../scaleShapes";
 
 describe("scaleShapes — scale boxes", () => {
@@ -42,22 +41,23 @@ describe("scaleShapes — scale boxes", () => {
         expect(coversAllDegrees("min-pent", "A", { fretFrom: 6, fretTo: 6 })).toBe(false);
         expect(coversAllDegrees("min-pent", "A", { fretFrom: 5, fretTo: 8 })).toBe(true);
     });
+
+    it("is invariant under the tonic shift: same shape in A and C after subtracting the anchor (plan phase 2)", () => {
+        // A anchors at fret 5, C at fret 8 — the same min-pent box rendered
+        // with tonic-relative offsets [0,3] must produce identical relative
+        // layouts.
+        const relative = (positions: Array<{ stringIndex: number; fret: number; degreeIndex: number }>, anchor: number) =>
+            positions.map((p) => `${p.stringIndex}:${p.fret - anchor}:${p.degreeIndex}`).sort();
+        const inA = relative(getScaleShapePositions("min-pent", "A", { fretFrom: 5, fretTo: 8 }), 5);
+        const inC = relative(getScaleShapePositions("min-pent", "C", { fretFrom: 8, fretTo: 11 }), 8);
+        expect(inC).toEqual(inA);
+    });
 });
 
 describe("scaleShapes — flat key spellings (ImprovKey)", () => {
     it("resolves Bb maj-pent to Bb pitch classes, not the C fallback", () => {
         // Bb maj-pent: Bb C D F G → chroma [10, 0, 2, 5, 7].
         expect(getShapePitchClasses("maj-pent", "Bb").sort((a, b) => a - b)).toEqual([0, 2, 5, 7, 10]);
-    });
-
-    it("renders the Bb m7 arpeggio with every chord tone and the root only on A#(Bb)", () => {
-        const positions = getChordShapePositions("m7-arp", "Bb", { fretFrom: 0, fretTo: 12 });
-        expect(positions).toHaveLength(4);
-        // Bb m7: Bb Db F Ab — sharp spelling from getNoteAt: A# C# F G#.
-        expect(positions.map((p) => p.note).sort()).toEqual(["A#", "C#", "F", "G#"].sort());
-        const roots = positions.filter((p) => p.isRoot);
-        expect(roots).toHaveLength(1);
-        expect(roots.every((p) => p.note === "A#")).toBe(true);
     });
 
     it("resolves Db and Eb (and the remaining ImprovKey flats) to correct pitch classes", () => {
@@ -82,42 +82,57 @@ describe("scaleShapes — flat key spellings (ImprovKey)", () => {
     });
 });
 
-describe("scaleShapes — chord shapes (one note per string)", () => {
-    it("builds a compact Am triad on the top three strings with every chord tone once", () => {
-        const positions = getChordShapePositions("triad", "A", { fretFrom: 0, fretTo: 12, triadQuality: "min" });
-        expect(positions).toHaveLength(3);
-        const notes = positions.map((p) => p.note).sort();
-        expect(notes).toEqual(["A", "C", "E"].sort());
-        const spread = Math.max(...positions.map((p) => p.fret)) - Math.min(...positions.map((p) => p.fret));
-        expect(spread).toBeLessThanOrEqual(2);
-        expect(positions.filter((p) => p.isRoot)).toHaveLength(1);
+describe("scaleShapes — arpeggios as full-window shapes (plan phase 2)", () => {
+    it("shows every Cm7 chord tone in the window across six strings (like the video's Cm7 at fret 8)", () => {
+        const positions = getScaleShapePositions("m7-arp", "C", { fretFrom: 8, fretTo: 11 });
+        expect(positions.length).toBeGreaterThan(0);
+        // Cm7: C Eb G Bb — sharp spelling from getNoteAt.
+        const allowed = ["A#", "C", "D#", "G"];
+        expect(positions.every((p) => allowed.includes(p.note))).toBe(true);
+        const roots = positions.filter((p) => p.isRoot);
+        expect(roots.length).toBeGreaterThan(0);
+        expect(roots.every((p) => p.note === "C")).toBe(true);
     });
 
-    it("resolves the triad quality (maj vs min change the third)", () => {
-        expect(resolveChordSemitones("triad", "maj")).toEqual([0, 4, 7]);
-        expect(resolveChordSemitones("triad", "min")).toEqual([0, 3, 7]);
-        expect(resolveChordSemitones("m7-arp")).toEqual([0, 3, 7, 10]);
+    it("keeps the four arp shapes with correct semitone sets", () => {
+        expect(shapeSemitones("m7-arp")).toEqual([0, 3, 7, 10]);
+        expect(shapeSemitones("dom7-arp")).toEqual([0, 4, 7, 10]);
+        expect(shapeSemitones("maj7-arp")).toEqual([0, 4, 7, 11]);
+        expect(shapeSemitones("m7b5-arp")).toEqual([0, 3, 6, 10]);
     });
 
-    it("builds an m7 arpeggio across EADG covering 1 b3 5 b7", () => {
-        const positions = getChordShapePositions("m7-arp", "C", { fretFrom: 0, fretTo: 12 });
-        expect(positions).toHaveLength(4);
-        expect(positions.map((p) => p.stringIndex).sort()).toEqual([2, 3, 4, 5]);
-        const notes = positions.map((p) => p.note).sort();
-        // Sharp spelling: A#(Bb) C D#(Eb) G.
-        expect(notes).toEqual(["A#", "C", "D#", "G"].sort());
-        expect(positions.filter((p) => p.isRoot)).toHaveLength(1);
+    it("maj7-arp in G renders G B D F# tones in the window", () => {
+        const positions = getScaleShapePositions("maj7-arp", "G", { fretFrom: 0, fretTo: 7 });
+        const notes = new Set(positions.map((p) => p.note));
+        // Sharp spelling: F#(Gb) G B D.
+        for (const note of ["F#", "G", "B", "D"] as const) {
+            expect(notes.has(note)).toBe(true);
+        }
+        expect(positions.filter((p) => p.isRoot).every((p) => p.note === "G")).toBe(true);
     });
 
-    it("dom7 arpeggio in G uses 1 3 5 b7", () => {
-        const positions = getChordShapePositions("dom7-arp", "G", { fretFrom: 0, fretTo: 12 });
-        const notes = positions.map((p) => p.note).sort();
-        expect(notes).toEqual(["B", "D", "F", "G"].sort());
+    it("m7b5-arp spells 1 b3 b5 b7 (B half-diminished in C: B D F Ab)", () => {
+        const pcs = getShapePitchClasses("m7b5-arp", "B").sort((a, b) => a - b);
+        // B D F A (b7 of B is A natural) → chroma [2, 5, 9, 11].
+        expect(pcs).toEqual([2, 5, 9, 11]);
     });
 
-    it("dispatches chord shapes through getShapePositions by kind", () => {
-        const viaDispatch = getShapePositions("dom7-arp", "G", { fretFrom: 0, fretTo: 12 });
-        expect(viaDispatch).toHaveLength(4);
-        expect(SCALE_SHAPES["dom7-arp"].kind).toBe("chord");
+    it("dispatches every shape through getShapePositions", () => {
+        const viaDispatch = getShapePositions("dom7-arp", "G", { fretFrom: 0, fretTo: 7 });
+        expect(viaDispatch.length).toBeGreaterThan(0);
+    });
+});
+
+describe("scaleShapes — registry", () => {
+    it("keeps the plan-0.2 removal: no dorian/phrygian/mixo pent shapes", () => {
+        for (const removed of ["dorian-pent", "phrygian-pent", "mixo-pent", "triad"]) {
+            expect(removed in SCALE_SHAPES).toBe(false);
+        }
+    });
+
+    it("keeps the teaching shapes used by the curriculum", () => {
+        for (const required of ["min-pent", "maj-pent", "major", "melodic-minor", "harmonic-minor", "m7-arp", "dom7-arp", "maj7-arp", "m7b5-arp"]) {
+            expect(required in SCALE_SHAPES).toBe(true);
+        }
     });
 });

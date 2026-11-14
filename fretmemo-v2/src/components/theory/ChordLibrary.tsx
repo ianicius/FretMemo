@@ -115,11 +115,11 @@ function ChordDiagram({ frets, label }: { frets: number[]; label: string }) {
     );
 }
 
-export default function ChordLibrary() {
+export default function ChordLibrary({ initialRoot }: { initialRoot?: string } = {}) {
     const { t, i18n } = useTranslation();
     const language = i18n.resolvedLanguage ?? i18n.language;
     const notation = useSettingsStore((state) => state.full.instrument.notation);
-    const [root, setRoot] = useState("C");
+    const [root, setRoot] = useState(initialRoot ?? "C");
     const [selectedType, setSelectedType] = useState("major");
 
     const chordName = `${root}${getChordSuffix(selectedType)}`;

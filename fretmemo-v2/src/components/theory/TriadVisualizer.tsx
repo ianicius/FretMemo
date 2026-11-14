@@ -117,9 +117,9 @@ function computeShapes(
 
 /* ── component ── */
 
-export default function TriadVisualizer() {
+export default function TriadVisualizer({ initialRoot }: { initialRoot?: NoteName } = {}) {
     const { t } = useTranslation();
-    const [root, setRoot] = useState<NoteName>("C");
+    const [root, setRoot] = useState<NoteName>(initialRoot ?? "C");
     const [qualityIdx, setQualityIdx] = useState(0);
     const quality = QUALITIES[qualityIdx];
     const quickTuning = useSettingsStore((state) => state.quick.tuning);

@@ -65,10 +65,10 @@ function formatInterval(interval: string): string {
     return interval;
 }
 
-export default function ScaleExplorer() {
+export default function ScaleExplorer({ initialRoot, initialScaleType }: { initialRoot?: NoteName; initialScaleType?: string } = {}) {
     const { t } = useTranslation();
-    const [root, setRoot] = useState<NoteName>("C");
-    const [scaleType, setScaleType] = useState("major");
+    const [root, setRoot] = useState<NoteName>(initialRoot ?? "C");
+    const [scaleType, setScaleType] = useState(initialScaleType ?? "major");
     const [showIntervals, setShowIntervals] = useState(false);
     const quickTuning = useSettingsStore((state) => state.quick.tuning);
     const notation = useSettingsStore((state) => state.full.instrument.notation);

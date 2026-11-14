@@ -7,14 +7,14 @@ import { ArrowLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { trackEvent, trackFeatureOpened } from "@/lib/analytics";
 
-const ScaleExplorer = lazy(() => import("@/components/theory/ScaleExplorer"));
-const CircleOfFifths = lazy(() => import("@/components/theory/CircleOfFifths"));
+const ScaleExplorer = lazy(() => import("@/components/theory/ScaleExplorer")) as LazyExoticComponent<ComponentType<Record<string, never> | undefined>>;
+const CircleOfFifths = lazy(() => import("@/components/theory/CircleOfFifths")) as LazyExoticComponent<ComponentType<Record<string, never> | undefined>>;
 const CagedVisualizer = lazy(() => import("@/components/theory/CagedVisualizer"));
-const TriadVisualizer = lazy(() => import("@/components/theory/TriadVisualizer"));
-const ChordLibrary = lazy(() => import("@/components/theory/ChordLibrary"));
+const TriadVisualizer = lazy(() => import("@/components/theory/TriadVisualizer")) as LazyExoticComponent<ComponentType<Record<string, never> | undefined>>;
+const ChordLibrary = lazy(() => import("@/components/theory/ChordLibrary")) as LazyExoticComponent<ComponentType<Record<string, never> | undefined>>;
 const IntervalFretboardTrainer = lazy(() => import("@/components/theory/IntervalFretboardTrainer"));
 
-type LazyComponent = LazyExoticComponent<ComponentType<unknown>>;
+type LazyComponent = LazyExoticComponent<ComponentType<Record<string, never> | undefined>>;
 
 const TOOLS: Record<string, { component: LazyComponent; titleKey: string }> = {
     scales: { component: ScaleExplorer, titleKey: "theory.page.tools.scaleExplorer" },

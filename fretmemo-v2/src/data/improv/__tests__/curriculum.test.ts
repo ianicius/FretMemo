@@ -12,10 +12,10 @@ import {
     isModuleUnlocked,
     type BackingLoopParams,
     type ChoiceQuizParams,
+    type PracticeLinkParams,
     type DiagramDrillParams,
-    type FretboardQuizParams,
 } from "../curriculum";
-import { coversAllDegrees, getShapePositions, resolveChordSemitones } from "@/lib/improv/scaleShapes";
+import { coversAllDegrees, getShapePositions, shapeSemitones, tonicAnchorFret } from "@/lib/improv/scaleShapes";
 import { tritoneSub } from "@/lib/improv/questions";
 import { Note } from "tonal";
 
@@ -70,10 +70,16 @@ describe("improv curriculum", () => {
                 expect(exercise.nameKey).toBe(`improv.ex.${exercise.id}.name`);
                 expect(exercise.descKey).toBe(`improv.ex.${exercise.id}.desc`);
                 switch (exercise.engine) {
-                    case "fretboard-quiz":
                     case "choice-quiz": {
-                        const params = exercise.params as FretboardQuizParams | ChoiceQuizParams;
+                        const params = exercise.params as ChoiceQuizParams;
                         expect(params.requiredCorrect).toBeGreaterThan(0);
+                        break;
+                    }
+                    case "practice-link": {
+                        const params = exercise.params as PracticeLinkParams;
+                        expect(params.enabledStrings.length).toBeGreaterThan(0);
+                        expect(params.minAnswers).toBeGreaterThan(0);
+                        expect(params.minAccuracy).toBeGreaterThan(0);
                         break;
                     }
                     case "diagram-drill": {
@@ -100,11 +106,11 @@ describe("improv curriculum", () => {
                 if (exercise.engine !== "diagram-drill") continue;
                 const params = exercise.params as DiagramDrillParams;
                 for (const shape of params.shapes) {
+                    const anchor = tonicAnchorFret(shape.defaultKey);
                     expect(
                         coversAllDegrees(shape.shapeId, shape.defaultKey, {
-                            fretFrom: params.fretFrom,
-                            fretTo: params.fretTo,
-                            triadQuality: shape.triadQuality,
+                            fretFrom: anchor + params.offsetsFrom,
+                            fretTo: anchor + params.offsetsTo,
                         }),
                     ).toBe(true);
                 }
@@ -121,15 +127,15 @@ describe("improv curriculum", () => {
                 if (exercise.engine !== "diagram-drill") continue;
                 const params = exercise.params as DiagramDrillParams;
                 for (const shape of params.shapes) {
+                    const anchor = tonicAnchorFret(shape.defaultKey);
                     const options = {
-                        fretFrom: params.fretFrom,
-                        fretTo: params.fretTo,
-                        triadQuality: shape.triadQuality,
+                        fretFrom: anchor + params.offsetsFrom,
+                        fretTo: anchor + params.offsetsTo,
                     };
                     const rootPc = Note.chroma(shape.defaultKey) ?? 0;
-                    const expectedPcs = resolveChordSemitones(shape.shapeId, shape.triadQuality)
-                        .map((offset) => (rootPc + offset) % 12)
-                        .sort((a, b) => a - b);
+                    const expectedPcs = shapeSemitones(shape.shapeId)
+                        .map((offset: number) => (rootPc + offset) % 12)
+                        .sort((a: number, b: number) => a - b);
                     const positions = getShapePositions(shape.shapeId, shape.defaultKey, options);
                     const renderedPcs = [...new Set(positions.map((p) => Note.chroma(p.note) ?? 0))]
                         .sort((a, b) => a - b);
@@ -145,7 +151,7 @@ describe("improv curriculum", () => {
 
     it("covers all four engine types across the curriculum", () => {
         const engines = new Set(CURRICULUM.flatMap((module) => module.exercises.map((exercise) => exercise.engine)));
-        expect([...engines].sort()).toEqual(["backing-improv", "choice-quiz", "diagram-drill", "fretboard-quiz"].sort());
+        expect([...engines].sort()).toEqual(["backing-improv", "choice-quiz", "diagram-drill", "practice-link"].sort());
     });
 
     it("unlocks modules sequentially and honors unlockAll", () => {
@@ -216,9 +222,10 @@ describe("improv curriculum", () => {
             for (const shape of params.shapes) {
                 expect(shape.shapeId).toBe("min-pent");
                 expect(shape.defaultKey).toBe("G");
+                const gAnchor = 3; // tonic G on the low E string
                 const positions = getShapePositions(shape.shapeId, shape.defaultKey, {
-                    fretFrom: params.fretFrom,
-                    fretTo: params.fretTo,
+                    fretFrom: gAnchor + params.offsetsFrom,
+                    fretTo: gAnchor + params.offsetsTo,
                 });
                 expect(positions.length).toBeGreaterThan(0);
                 for (const position of positions) {

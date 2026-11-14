@@ -1,11 +1,10 @@
 /**
  * Question generators for the Improv Training module (run improv-training-2026-11-13).
  *
- * Two families:
- * - E1 fretboard questions (position→note / note→position) driven by
- *   parameters from the curriculum;
- * - E2 closed choice questions produced by named generators (`keySig`,
- *   `modes`, `triadBuild`, …) — one canonical correct answer plus distractors.
+ * E2 closed choice questions produced by named generators (`keySig`,
+ * `modes`, `triadBuild`, …) — one canonical correct answer plus distractors.
+ * Fretboard note drills moved to the `practice-link` engine in plan phase 2
+ * (module 1/5 practice /practice with SM2 progress and mic support).
  *
  * Everything is a pure function of (generator, seed, index): a seeded
  * mulberry32 PRNG keeps runs reproducible for tests. Answer matching happens
@@ -13,7 +12,7 @@
  */
 
 import type { NoteName } from "@/types/fretboard";
-import { NOTES, STANDARD_TUNING, getNoteAt } from "@/lib/constants";
+import { NOTES } from "@/lib/constants";
 import { Key } from "tonal";
 
 /* ─────────── Seeded PRNG ─────────── */
@@ -78,109 +77,6 @@ export interface ChoiceQuestion {
 }
 
 export type FretboardQuestionDirection = "position-to-note" | "note-to-position";
-
-export interface FretboardQuestion {
-    id: string;
-    direction: FretboardQuestionDirection;
-    stringIndex: number;
-    fret: number;
-    /** Canonical answer (raw sharp spelling). */
-    note: NoteName;
-    /** Only for `position-to-note`: display options incl. the answer. */
-    options?: string[];
-    correctIndex?: number;
-}
-
-/* ─────────── E1: fretboard questions ─────────── */
-
-export interface FretboardQuizGenerationParams {
-    direction: "position-to-note" | "note-to-position" | "both";
-    stringIndices: number[];
-    fretFrom: number;
-    fretTo: number;
-    /** Restrict answers to these pitch classes ("all" = every chromatic note). */
-    pitchClasses: readonly NoteName[] | "all";
-    questionCount: number;
-    answerOptions: number;
-}
-
-function allowedNotes(pitchClasses: readonly NoteName[] | "all"): NoteName[] {
-    return pitchClasses === "all" ? [...NOTES] : [...pitchClasses];
-}
-
-function notesOnStrings(strings: readonly number[], fretFrom: number, fretTo: number, tuning: NoteName[]): Set<NoteName> {
-    const notes = new Set<NoteName>();
-    for (const stringIndex of strings) {
-        const openNote = tuning[stringIndex];
-        if (!openNote) continue;
-        for (let fret = fretFrom; fret <= fretTo; fret += 1) {
-            notes.add(getNoteAt(openNote, fret));
-        }
-    }
-    return notes;
-}
-
-function buildNoteOptions(correct: NoteName, rng: Rng, count: number): { options: string[]; correctIndex: number } {
-    const distractors = rng.shuffle(NOTES.filter((note) => note !== correct)).slice(0, Math.max(0, count - 1));
-    const options = rng.shuffle([correct, ...distractors]);
-    return { options, correctIndex: options.indexOf(correct) };
-}
-
-export function generateFretboardQuestions(params: FretboardQuizGenerationParams, seed: string): FretboardQuestion[] {
-    const rng = createRng(seed);
-    const tuning = STANDARD_TUNING;
-    const strings = params.stringIndices.filter((stringIndex) => stringIndex >= 0 && stringIndex < tuning.length);
-    const usableNotes = allowedNotes(params.pitchClasses)
-        .filter((note) => notesOnStrings(strings, params.fretFrom, params.fretTo, tuning).has(note));
-    const pool = usableNotes.length > 0 ? usableNotes : [...NOTES];
-
-    const questions: FretboardQuestion[] = [];
-    const usedPositions = new Set<string>();
-    let guard = 0;
-    while (questions.length < params.questionCount && guard < params.questionCount * 40) {
-        guard += 1;
-        const direction = params.direction === "both"
-            ? (questions.length % 2 === 0 ? "position-to-note" : "note-to-position")
-            : params.direction;
-        const note = rng.pick(pool);
-        // All positions within the window on the allowed strings playing `note`.
-        const positions: Array<{ stringIndex: number; fret: number }> = [];
-        for (const stringIndex of strings) {
-            const openNote = tuning[stringIndex];
-            if (!openNote) continue;
-            for (let fret = params.fretFrom; fret <= params.fretTo; fret += 1) {
-                if (getNoteAt(openNote, fret) === note) positions.push({ stringIndex, fret });
-            }
-        }
-        if (positions.length === 0) continue;
-        const position = rng.pick(positions);
-        const dedupeKey = `${direction}:${position.stringIndex}:${position.fret}`;
-        if (usedPositions.has(dedupeKey)) continue;
-        usedPositions.add(dedupeKey);
-
-        if (direction === "position-to-note") {
-            const { options, correctIndex } = buildNoteOptions(note, rng, params.answerOptions);
-            questions.push({
-                id: `fq:${questions.length}`,
-                direction,
-                stringIndex: position.stringIndex,
-                fret: position.fret,
-                note,
-                options,
-                correctIndex,
-            });
-        } else {
-            questions.push({
-                id: `fq:${questions.length}`,
-                direction,
-                stringIndex: position.stringIndex,
-                fret: position.fret,
-                note,
-            });
-        }
-    }
-    return questions;
-}
 
 /* ─────────── E2 data tables ─────────── */
 

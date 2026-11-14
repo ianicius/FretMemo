@@ -17,7 +17,7 @@ import { Slider } from "@/components/ui/slider";
 import { Fretboard } from "@/components/fretboard/Fretboard";
 import { STANDARD_TUNING, getNoteAt } from "@/lib/constants";
 import type { NoteStatus } from "@/types/fretboard";
-import { SCALE_SHAPES, getShapePositions } from "@/lib/improv/scaleShapes";
+import { SCALE_SHAPES, getShapePositions, tonicAnchorFret } from "@/lib/improv/scaleShapes";
 import { tonicMidi } from "@/lib/improv/chords";
 import { MetronomeClicker } from "@/lib/improv/click";
 import { playTone } from "@/lib/audio";
@@ -54,14 +54,18 @@ export function DiagramDrill({ moduleId, exercise }: DiagramDrillProps) {
         };
     }, []);
 
+    // Plan phase 2: the window is relative to the tonic, so a key switch
+    // slides the same shape instead of jumping to a different fret range.
+    const windowFrom = Math.max(0, tonicAnchorFret(key) + params.offsetsFrom);
+    const windowTo = tonicAnchorFret(key) + params.offsetsTo;
+
     const positions = useMemo(
         () => getShapePositions(shape.shapeId, key, {
             tuning: STANDARD_TUNING,
-            fretFrom: params.fretFrom,
-            fretTo: params.fretTo,
-            triadQuality: shape.triadQuality,
+            fretFrom: windowFrom,
+            fretTo: windowTo,
         }),
-        [key, params.fretFrom, params.fretTo, shape.shapeId, shape.triadQuality],
+        [key, windowFrom, windowTo, shape.shapeId],
     );
 
     // Plan 1.2: a run counts only after the metronome has clicked through the
@@ -136,8 +140,8 @@ export function DiagramDrill({ moduleId, exercise }: DiagramDrillProps) {
                             className="h-9 w-44 text-xs"
                         >
                             {params.shapes.map((item, itemIndex) => (
-                                <option key={`${item.shapeId}-${item.triadQuality ?? ""}-${item.defaultKey}`} value={itemIndex}>
-                                    {t(`improv.shapes.${item.shapeId}`)} · {localizeToken(item.triadQuality === "min" && item.shapeId === "triad" ? `${item.defaultKey}m` : item.defaultKey)}
+                                <option key={`${item.shapeId}-${item.defaultKey}`} value={itemIndex}>
+                                    {t(`improv.shapes.${item.shapeId}`)} · {localizeToken(item.defaultKey)}
                                 </option>
                             ))}
                         </Select>
@@ -176,7 +180,7 @@ export function DiagramDrill({ moduleId, exercise }: DiagramDrillProps) {
             </div>
 
             <Fretboard
-                frets={params.fretTo}
+                frets={Math.max(12, windowTo + 1)}
                 activeNotes={activeNotes}
                 fitContainer
                 className="rounded-lg border border-border bg-card/60"

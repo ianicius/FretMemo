@@ -14,30 +14,16 @@
  */
 
 import type { NoteName } from "@/types/fretboard";
-import type { ScaleShapeId, TriadQuality } from "@/lib/improv/scaleShapes";
+import type { ScaleShapeId } from "@/lib/improv/scaleShapes";
 import type { ChoiceGeneratorId } from "@/lib/improv/questions";
+import type { PracticeMode, ScaleType } from "@/stores/useGameStore";
 
 /* ─────────── Engine parameter types ─────────── */
 
-export type ImprovEngineType = "fretboard-quiz" | "choice-quiz" | "diagram-drill" | "backing-improv";
-
-export type FretboardQuizDirection = "position-to-note" | "note-to-position" | "both";
+export type ImprovEngineType = "choice-quiz" | "diagram-drill" | "backing-improv" | "practice-link";
 
 /** Tonic for shapes/keys: sharp spellings plus the flat keys the curriculum needs. */
 export type ImprovKey = NoteName | "Bb" | "Db" | "Eb" | "Gb" | "Ab";
-
-export interface FretboardQuizParams {
-    direction: FretboardQuizDirection;
-    /** Guitar string indices, 0 = high E … 5 = low E. */
-    stringIndices: number[];
-    fretFrom: number;
-    fretTo: number;
-    pitchClasses: readonly NoteName[] | "all";
-    questionCount: number;
-    /** Pass threshold: requiredCorrect / questionCount. */
-    requiredCorrect: number;
-    answerOptions: number;
-}
 
 export interface ChoiceQuizParams {
     generatorId: ChoiceGeneratorId;
@@ -53,17 +39,34 @@ export interface DiagramShapeRef {
     defaultKey: ImprovKey;
     /** Keys selectable in the drill (defaults to [defaultKey]). */
     keys?: ImprovKey[];
-    /** Only for shapeId "triad". */
-    triadQuality?: TriadQuality;
 }
 
 export interface DiagramDrillParams {
     shapes: DiagramShapeRef[];
-    fretFrom: number;
-    fretTo: number;
+    /**
+     * Fret window RELATIVE to the tonic's fret on the low E string (plan
+     * phase 2): switching keys slides the same shape. Negative offsets are
+     * allowed (a box may start below the tonic).
+     */
+    offsetsFrom: number;
+    offsetsTo: number;
     defaultBpm: number;
     /** Full up+down runs required to pass the drill. */
     requiredRuns: number;
+}
+
+export interface PracticeLinkParams {
+    mode: PracticeMode;
+    /** Guitar string indices, 0 = high E … 5 = low E. */
+    enabledStrings: number[];
+    offsetsFrom: number;
+    offsetsTo: number;
+    rootNote?: NoteName;
+    scaleType?: ScaleType;
+    /** Pass criteria (plan phase 2): every position in range has at least
+     * `minAnswers` recorded answers with accuracy ≥ `minAccuracy`. */
+    minAnswers: number;
+    minAccuracy: number;
 }
 
 export interface BackingLoopVariant {
@@ -86,11 +89,18 @@ export interface BackingLoopParams {
     variants?: BackingLoopVariant[];
 }
 
+/** Theory tool embedded in the module's theory card (plan phase 2). */
+export interface TheoryEmbed {
+    tool: "circle-of-fifths" | "scale-explorer" | "chord-library" | "triad-visualizer";
+    root?: string;
+    scaleType?: string;
+}
+
 export type ImprovExerciseParams =
-    | FretboardQuizParams
     | ChoiceQuizParams
     | DiagramDrillParams
-    | BackingLoopParams;
+    | BackingLoopParams
+    | PracticeLinkParams;
 
 export interface ImprovExercise {
     /** Stable id: "<moduleId>.<eN>" (used as the persist key). */
@@ -106,36 +116,41 @@ export interface ImprovModule {
     /** 1-based position in the canonical order (matches the video 1–22). */
     order: number;
     theoryKey: string;
+    /** Theory tool embedded below the theory text (plan phase 2). */
+    embed?: TheoryEmbed;
     exercises: ImprovExercise[];
+    /** Optional extras that do NOT gate module completion (plan: ear-training links). */
+    supplementary?: Array<{ labelKey: string; href: string }>;
 }
 
 /* ─────────── Shared curriculum helpers ─────────── */
 
 const PENTATONIC_KEYS: ImprovKey[] = ["C", "A", "D", "E", "G"];
-const PENT_POSITION_KEYS: ImprovKey[] = ["G", "Bb", "C", "D", "F", "A", "E"];
 const SCALE_KEYS: ImprovKey[] = ["A", "C", "D", "E", "G"];
 
-function fretboardExercise(
+function practiceLinkExercise(
     moduleId: string,
     suffix: string,
-    direction: Exclude<FretboardQuizDirection, "both">,
-    stringIndices: number[],
-    questionCount: number,
+    mode: PracticeMode,
+    enabledStrings: number[],
+    offsetsFrom: number,
+    offsetsTo: number,
+    options?: { rootNote?: NoteName; scaleType?: ScaleType },
 ): ImprovExercise {
     return {
         id: `${moduleId}.${suffix}`,
-        engine: "fretboard-quiz",
+        engine: "practice-link",
         nameKey: `improv.ex.${moduleId}.${suffix}.name`,
         descKey: `improv.ex.${moduleId}.${suffix}.desc`,
         params: {
-            direction,
-            stringIndices,
-            fretFrom: 0,
-            fretTo: 12,
-            pitchClasses: "all",
-            questionCount,
-            requiredCorrect: questionCount,
-            answerOptions: 4,
+            mode,
+            enabledStrings,
+            offsetsFrom,
+            offsetsTo,
+            rootNote: options?.rootNote,
+            scaleType: options?.scaleType,
+            minAnswers: 3,
+            minAccuracy: 0.8,
         },
     };
 }
@@ -166,8 +181,8 @@ function drillExercise(
     moduleId: string,
     suffix: string,
     shapes: DiagramShapeRef[],
-    fretFrom: number,
-    fretTo: number,
+    offsetsFrom: number,
+    offsetsTo: number,
     defaultBpm: number,
     requiredRuns: number,
 ): ImprovExercise {
@@ -176,7 +191,7 @@ function drillExercise(
         engine: "diagram-drill",
         nameKey: `improv.ex.${moduleId}.${suffix}.name`,
         descKey: `improv.ex.${moduleId}.${suffix}.desc`,
-        params: { shapes, fretFrom, fretTo, defaultBpm, requiredRuns },
+        params: { shapes, offsetsFrom, offsetsTo, defaultBpm, requiredRuns },
     };
 }
 
@@ -202,14 +217,15 @@ export const CURRICULUM: ImprovModule[] = [
         order: 1,
         theoryKey: "improv.modules.e-string-notes.theory",
         exercises: [
-            fretboardExercise("e-string-notes", "e1", "position-to-note", [5], 10),
-            fretboardExercise("e-string-notes", "e2", "note-to-position", [5], 10),
+            practiceLinkExercise("e-string-notes", "e1", "fretboardToNote", [5], 0, 12),
+            practiceLinkExercise("e-string-notes", "e2", "noteToTab", [5], 0, 12),
         ],
     },
     {
         id: "key-signatures",
         order: 2,
         theoryKey: "improv.modules.key-signatures.theory",
+        embed: { tool: "circle-of-fifths" },
         exercises: [
             choiceExercise("key-signatures", "e1", "keySig", 10, "key-to-count"),
             choiceExercise("key-signatures", "e2", "keySig", 10, "count-to-key"),
@@ -219,13 +235,15 @@ export const CURRICULUM: ImprovModule[] = [
         id: "pentatonic-scale",
         order: 3,
         theoryKey: "improv.modules.pentatonic-scale.theory",
+        embed: { tool: "scale-explorer", root: "A", scaleType: "minor pentatonic" },
+        supplementary: [{ labelKey: "improv.supplementary.earTraining", href: "/ear-training/intervals" }],
         exercises: [
             drillExercise(
                 "pentatonic-scale",
                 "e1",
                 [{ shapeId: "min-pent", defaultKey: "A", keys: PENTATONIC_KEYS }],
-                5,
-                8,
+                0,
+                3,
                 70,
                 2,
             ),
@@ -238,19 +256,25 @@ export const CURRICULUM: ImprovModule[] = [
                 70,
                 2,
             ),
+            practiceLinkExercise("pentatonic-scale", "e3", "playNotes", [0, 1, 2, 3, 4, 5], 5, 8, {
+                rootNote: "A",
+                scaleType: "minorPentatonic",
+            }),
         ],
     },
     {
         id: "major-scale",
         order: 4,
         theoryKey: "improv.modules.major-scale.theory",
+        embed: { tool: "scale-explorer", root: "C", scaleType: "major" },
+        supplementary: [{ labelKey: "improv.supplementary.earTraining", href: "/ear-training/intervals" }],
         exercises: [
             drillExercise(
                 "major-scale",
                 "e1",
                 [{ shapeId: "major", defaultKey: "A", keys: SCALE_KEYS }],
-                2,
-                6,
+                -3,
+                1,
                 60,
                 2,
             ),
@@ -258,11 +282,15 @@ export const CURRICULUM: ImprovModule[] = [
                 "major-scale",
                 "e2",
                 [{ shapeId: "major", defaultKey: "C", keys: SCALE_KEYS }],
-                7,
-                11,
+                -1,
+                3,
                 60,
                 2,
             ),
+            practiceLinkExercise("major-scale", "e3", "playNotes", [0, 1, 2, 3, 4, 5], 8, 12, {
+                rootNote: "C",
+                scaleType: "major",
+            }),
         ],
     },
     {
@@ -270,29 +298,35 @@ export const CURRICULUM: ImprovModule[] = [
         order: 5,
         theoryKey: "improv.modules.fretboard-notes.theory",
         exercises: [
-            fretboardExercise("fretboard-notes", "e1", "position-to-note", [0, 1, 2, 3, 4, 5], 15),
-            fretboardExercise("fretboard-notes", "e2", "note-to-position", [0, 1, 2, 3, 4, 5], 15),
+            practiceLinkExercise("fretboard-notes", "e1", "fretboardToNote", [0, 1, 2, 3, 4, 5], 0, 12),
+            practiceLinkExercise("fretboard-notes", "e2", "noteToTab", [0, 1, 2, 3, 4, 5], 0, 12),
         ],
     },
     {
         id: "pentatonic-positions",
         order: 6,
         theoryKey: "improv.modules.pentatonic-positions.theory",
+        embed: { tool: "scale-explorer", root: "G", scaleType: "minor pentatonic" },
         exercises: [
-            // Five boxes of one pentatonic (G minor pent): each window is the
-            // next position, named in the video after the degree it starts on
-            // (Bb major, C dorian, D phrygian, F mixo pent).
-            drillExercise("pentatonic-positions", "e1", [{ shapeId: "min-pent", defaultKey: "G" }], 3, 6, 70, 1),
-            drillExercise("pentatonic-positions", "e2", [{ shapeId: "min-pent", defaultKey: "G" }], 5, 8, 70, 1),
-            drillExercise("pentatonic-positions", "e3", [{ shapeId: "min-pent", defaultKey: "G" }], 7, 11, 70, 1),
-            drillExercise("pentatonic-positions", "e4", [{ shapeId: "min-pent", defaultKey: "G" }], 10, 13, 70, 1),
-            drillExercise("pentatonic-positions", "e5", [{ shapeId: "min-pent", defaultKey: "G" }], 12, 15, 70, 1),
+            // Five boxes of one pentatonic (G minor pent, tonic at fret 3):
+            // each window is the next position, named in the video after the
+            // degree it starts on (Bb major, C dorian, D phrygian, F mixo).
+            drillExercise("pentatonic-positions", "e1", [{ shapeId: "min-pent", defaultKey: "G" }], 0, 3, 70, 1),
+            drillExercise("pentatonic-positions", "e2", [{ shapeId: "min-pent", defaultKey: "G" }], 2, 5, 70, 1),
+            drillExercise("pentatonic-positions", "e3", [{ shapeId: "min-pent", defaultKey: "G" }], 4, 8, 70, 1),
+            drillExercise("pentatonic-positions", "e4", [{ shapeId: "min-pent", defaultKey: "G" }], 7, 10, 70, 1),
+            drillExercise("pentatonic-positions", "e5", [{ shapeId: "min-pent", defaultKey: "G" }], 9, 12, 70, 1),
         ],
     },
     {
         id: "modes",
         order: 7,
         theoryKey: "improv.modules.modes.theory",
+        embed: { tool: "scale-explorer", root: "D", scaleType: "dorian" },
+        supplementary: [
+            { labelKey: "improv.supplementary.earTraining", href: "/ear-training/functional" },
+            { labelKey: "improv.supplementary.chordQuality", href: "/ear-training/chord-quality" },
+        ],
         exercises: [
             choiceExercise("modes", "e1", "modes", 10, "order-to-mode"),
             choiceExercise("modes", "e2", "modes", 10, "characteristic-to-mode"),
@@ -302,6 +336,7 @@ export const CURRICULUM: ImprovModule[] = [
         id: "chord-construction",
         order: 8,
         theoryKey: "improv.modules.chord-construction.theory",
+        embed: { tool: "chord-library" },
         exercises: [
             choiceExercise("chord-construction", "e1", "triadBuild", 10, "degree-to-type"),
             choiceExercise("chord-construction", "e2", "triadBuild", 10, "degree-to-triad"),
@@ -320,19 +355,18 @@ export const CURRICULUM: ImprovModule[] = [
         id: "triads",
         order: 10,
         theoryKey: "improv.modules.triads.theory",
+        embed: { tool: "triad-visualizer" },
+        supplementary: [{ labelKey: "improv.supplementary.earTraining", href: "/ear-training/chord-quality" }],
         exercises: [
-            drillExercise(
-                "triads",
-                "e1",
-                [
-                    { shapeId: "triad", defaultKey: "A", triadQuality: "min", keys: PENTATONIC_KEYS },
-                    { shapeId: "triad", defaultKey: "C", triadQuality: "maj", keys: PENTATONIC_KEYS },
-                ],
-                0,
-                12,
-                70,
-                2,
-            ),
+            loopExercise("triads", "e1", {
+                progression: ["Am", "C", "Em", "D"],
+                goalKey: "improv.goals.triads",
+                beatsPerChord: 4,
+                defaultBpm: 80,
+                minBpm: 50,
+                maxBpm: 160,
+                requiredPasses: 2,
+            }),
             choiceExercise("triads", "e2", "triadType", 10, "name-to-intervals"),
         ],
     },
@@ -340,22 +374,23 @@ export const CURRICULUM: ImprovModule[] = [
         id: "arpeggios",
         order: 11,
         theoryKey: "improv.modules.arpeggios.theory",
+        supplementary: [{ labelKey: "improv.supplementary.earTraining", href: "/ear-training/chord-quality" }],
         exercises: [
             drillExercise(
                 "arpeggios",
                 "e1",
-                [{ shapeId: "m7-arp", defaultKey: "C", keys: PENT_POSITION_KEYS }],
+                [{ shapeId: "m7-arp", defaultKey: "C" }],
                 0,
-                12,
+                4,
                 70,
                 1,
             ),
             drillExercise(
                 "arpeggios",
                 "e2",
-                [{ shapeId: "dom7-arp", defaultKey: "G", keys: PENT_POSITION_KEYS }],
+                [{ shapeId: "dom7-arp", defaultKey: "G" }],
                 0,
-                12,
+                4,
                 70,
                 1,
             ),
@@ -497,13 +532,15 @@ export const CURRICULUM: ImprovModule[] = [
         id: "melodic-minor",
         order: 18,
         theoryKey: "improv.modules.melodic-minor.theory",
+        embed: { tool: "scale-explorer", root: "A", scaleType: "melodic minor" },
+        supplementary: [{ labelKey: "improv.supplementary.earTraining", href: "/ear-training/intervals" }],
         exercises: [
             drillExercise(
                 "melodic-minor",
                 "e1",
                 [{ shapeId: "melodic-minor", defaultKey: "A", keys: SCALE_KEYS }],
-                3,
-                7,
+                -2,
+                2,
                 60,
                 2,
             ),
@@ -511,11 +548,15 @@ export const CURRICULUM: ImprovModule[] = [
                 "melodic-minor",
                 "e2",
                 [{ shapeId: "melodic-minor", defaultKey: "C", keys: SCALE_KEYS }],
-                7,
-                11,
+                -1,
+                3,
                 60,
                 2,
             ),
+            practiceLinkExercise("melodic-minor", "e3", "playNotes", [0, 1, 2, 3, 4, 5], 5, 9, {
+                rootNote: "A",
+                scaleType: "melodicMinor",
+            }),
         ],
     },
     {
@@ -531,13 +572,15 @@ export const CURRICULUM: ImprovModule[] = [
         id: "harmonic-minor",
         order: 20,
         theoryKey: "improv.modules.harmonic-minor.theory",
+        embed: { tool: "scale-explorer", root: "C", scaleType: "harmonic minor" },
+        supplementary: [{ labelKey: "improv.supplementary.earTraining", href: "/ear-training/intervals" }],
         exercises: [
             drillExercise(
                 "harmonic-minor",
                 "e1",
                 [{ shapeId: "harmonic-minor", defaultKey: "C", keys: SCALE_KEYS }],
-                5,
-                9,
+                -3,
+                1,
                 60,
                 2,
             ),
@@ -545,11 +588,15 @@ export const CURRICULUM: ImprovModule[] = [
                 "harmonic-minor",
                 "e2",
                 [{ shapeId: "harmonic-minor", defaultKey: "A", keys: SCALE_KEYS }],
-                2,
-                6,
+                -3,
+                1,
                 60,
                 2,
             ),
+            practiceLinkExercise("harmonic-minor", "e3", "playNotes", [0, 1, 2, 3, 4, 5], 5, 9, {
+                rootNote: "C",
+                scaleType: "harmonicMinor",
+            }),
         ],
     },
     {
@@ -612,7 +659,6 @@ export function isExercisePassed(
 ): boolean {
     if (!progress) return false;
     switch (exercise.engine) {
-        case "fretboard-quiz":
         case "choice-quiz": {
             // exerciseRuns holds the number of PASSED attempts (plan 1.1/1.3).
             return (progress.exerciseRuns[exercise.id] ?? 0) >= QUIZ_PASSED_ATTEMPTS;
@@ -624,6 +670,10 @@ export function isExercisePassed(
         case "backing-improv": {
             const params = exercise.params as BackingLoopParams;
             return (progress.exerciseRuns[exercise.id] ?? 0) >= params.requiredPasses;
+        }
+        case "practice-link": {
+            // Recorded once the useProgressStore criteria are met (plan phase 2).
+            return (progress.exerciseRuns[exercise.id] ?? 0) >= 1;
         }
         default:
             return false;

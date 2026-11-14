@@ -3,7 +3,6 @@ import { Key, Note } from "tonal";
 import {
     CHORD_SCALE_MELODIC,
     generateChoiceQuiz,
-    generateFretboardQuestions,
     tritoneSub,
 } from "../questions";
 
@@ -69,46 +68,6 @@ describe("choice quiz generators", () => {
             // The answer is a key (sharp or flat spelling) whose signature count matches the prompt.
             expect(answer).toMatch(/^[A-G][#b]?$/);
         }
-    });
-});
-
-describe("fretboard quiz generation (E1)", () => {
-    const params = {
-        direction: "both" as const,
-        stringIndices: [5],
-        fretFrom: 0,
-        fretTo: 12,
-        pitchClasses: "all" as const,
-        questionCount: 10,
-        answerOptions: 4,
-    };
-
-    it("generates alternating directions with valid options", () => {
-        const questions = generateFretboardQuestions(params, "fret-seed");
-        expect(questions).toHaveLength(10);
-        questions.forEach((question, index) => {
-            expect(question.stringIndex).toBe(5);
-            expect(question.fret).toBeGreaterThanOrEqual(0);
-            expect(question.fret).toBeLessThanOrEqual(12);
-            if (index % 2 === 0) {
-                expect(question.direction).toBe("position-to-note");
-                expect(question.options).toHaveLength(4);
-                expect(question.options?.[question.correctIndex ?? -1]).toBe(question.note);
-            } else {
-                expect(question.direction).toBe("note-to-position");
-                expect(question.options).toBeUndefined();
-            }
-        });
-    });
-
-    it("restricts notes to the requested strings and is deterministic per seed", () => {
-        const questions = generateFretboardQuestions({ ...params, stringIndices: [5], direction: "position-to-note" }, "restrict-seed");
-        // Low E string notes: E F F# G G# A A# B C C# D D#
-        const eStringNotes = new Set(["E", "F", "F#", "G", "G#", "A", "A#", "B", "C", "C#", "D", "D#"]);
-        for (const question of questions) {
-            expect(eStringNotes.has(question.note)).toBe(true);
-        }
-        expect(questions).toEqual(generateFretboardQuestions({ ...params, stringIndices: [5], direction: "position-to-note" }, "restrict-seed"));
     });
 });
 

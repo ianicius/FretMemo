@@ -9,7 +9,7 @@ import i18n from "@/lib/i18n";
 import type { ImprovEngineType } from "@/data/improv/curriculum";
 
 export const ENGINE_LABEL_KEYS: Record<ImprovEngineType, string> = {
-    "fretboard-quiz": "improv.engine.fretboardQuiz",
+    "practice-link": "improv.engine.practiceLink",
     "choice-quiz": "improv.engine.choiceQuiz",
     "diagram-drill": "improv.engine.diagramDrill",
     "backing-improv": "improv.engine.backingLoop",

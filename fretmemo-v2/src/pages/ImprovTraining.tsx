@@ -21,14 +21,15 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import { TheoryCard } from "@/components/improv/TheoryCard";
-import { FretboardQuiz } from "@/components/improv/FretboardQuiz";
 import { ChoiceQuiz } from "@/components/improv/ChoiceQuiz";
 import { DiagramDrill } from "@/components/improv/DiagramDrill";
 import { BackingLoopExercise } from "@/components/improv/BackingLoopExercise";
+import { PracticeLinkExercise } from "@/components/improv/PracticeLinkExercise";
 import { CURRICULUM, countCompletedModules, getImprovModule, isModuleUnlocked, isModuleComplete } from "@/data/improv/curriculum";
 import { useImprovStore } from "@/stores/useImprovStore";
 import { cn } from "@/lib/utils";
 import { trackFeatureOpened } from "@/lib/analytics";
+import { ArrowLeft as ArrowLeftIcon } from "lucide-react";
 
 export default function ImprovTraining() {
     const { moduleId } = useParams<{ moduleId: string }>();
@@ -201,24 +202,38 @@ function ModuleView({ moduleId }: { moduleId: string }) {
                 </Card>
             ) : (
                 <>
-                    <TheoryCard theoryKey={module.theoryKey} />
+                    <TheoryCard theoryKey={module.theoryKey} embed={module.embed} />
                     <div className="space-y-3">
                         <h2 className="text-sm font-semibold text-foreground">{t("improv.module.exercisesTitle")}</h2>
                         {module.exercises.map((exercise) => {
                             switch (exercise.engine) {
-                                case "fretboard-quiz":
-                                    return <FretboardQuiz key={exercise.id} moduleId={module.id} exercise={exercise} />;
                                 case "choice-quiz":
                                     return <ChoiceQuiz key={exercise.id} moduleId={module.id} exercise={exercise} />;
                                 case "diagram-drill":
                                     return <DiagramDrill key={exercise.id} moduleId={module.id} exercise={exercise} />;
                                 case "backing-improv":
                                     return <BackingLoopExercise key={exercise.id} moduleId={module.id} exercise={exercise} />;
+                                case "practice-link":
+                                    return <PracticeLinkExercise key={exercise.id} moduleId={module.id} exercise={exercise} />;
                                 default:
                                     return null;
                             }
                         })}
                     </div>
+                    {module.supplementary && module.supplementary.length > 0 && (
+                        <div className="space-y-2">
+                            <h2 className="text-sm font-semibold text-foreground">{t("improv.module.supplementaryTitle")}</h2>
+                            <div className="flex flex-wrap gap-2">
+                                {module.supplementary.map((link) => (
+                                    <Button key={link.href} variant="outline" size="sm" onClick={() => navigate(link.href)}>
+                                        <ArrowLeftIcon className="mr-2 h-4 w-4 rotate-180" />
+                                        {t(link.labelKey)}
+                                    </Button>
+                                ))}
+                            </div>
+                            <p className="text-xs text-muted-foreground">{t("improv.module.supplementaryHint")}</p>
+                        </div>
+                    )}
                 </>
             )}
         </div>

@@ -79,7 +79,9 @@ const SCALE_INTERVALS: Record<ScaleType, number[]> = {
     minor: [0, 2, 3, 5, 7, 8, 10],
     majorPentatonic: [0, 2, 4, 7, 9],
     minorPentatonic: [0, 3, 5, 7, 10],
-};
+
+    melodicMinor: [0, 2, 3, 5, 7, 9, 11],
+    harmonicMinor: [0, 2, 3, 5, 7, 8, 11],};
 const SEQUENCE_SCALE_MAP: Partial<Record<NoteSequence, ScaleType>> = {
     majorScale: "major",
     naturalMinorScale: "minor",

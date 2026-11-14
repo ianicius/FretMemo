@@ -34,6 +34,9 @@ export interface ImprovStoreState {
     recordQuizResult: (moduleId: string, exerciseId: string, correct: number) => void;
     recordDrillRun: (moduleId: string, exerciseId: string) => void;
     recordLoopPass: (moduleId: string, exerciseId: string) => void;
+    /** practice-link: pass criteria live in useProgressStore; the component
+     * calls this once they are all met (plan phase 2). */
+    recordPracticePass: (moduleId: string, exerciseId: string) => void;
     resetModule: (moduleId: string) => void;
     resetProgress: () => void;
     setUnlockAll: (value: boolean) => void;
@@ -85,7 +88,7 @@ function migrateLegacyModuleState(
         const quizBest = typeof legacy.quizBest === "number" ? legacy.quizBest : 0;
         if (quizBest > 0) {
             const firstQuizExercise = getImprovModule(moduleId)?.exercises.find(
-                (exercise: ImprovExercise) => exercise.engine === "fretboard-quiz" || exercise.engine === "choice-quiz",
+                (exercise: ImprovExercise) => exercise.engine === "choice-quiz",
             );
             if (firstQuizExercise && (exerciseRuns[firstQuizExercise.id] ?? 0) === 0) {
                 const params = firstQuizExercise.params as { requiredCorrect: number };
@@ -139,6 +142,17 @@ export const useImprovStore = create<ImprovStoreState>()(
                         exerciseRuns: {
                             ...progress.exerciseRuns,
                             [exerciseId]: (progress.exerciseRuns[exerciseId] ?? 0) + 1,
+                        },
+                    })),
+                }));
+            },
+            recordPracticePass: (moduleId, exerciseId) => {
+                set((state) => ({
+                    moduleState: updateModule(state.moduleState, moduleId, (progress) => ({
+                        ...progress,
+                        exerciseRuns: {
+                            ...progress.exerciseRuns,
+                            [exerciseId]: Math.max(progress.exerciseRuns[exerciseId] ?? 0, 1),
                         },
                     })),
                 }));

@@ -13,10 +13,10 @@ function polarToCartesian(cx: number, cy: number, r: number, angleDeg: number) {
     return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
 }
 
-export default function CircleOfFifths() {
+export default function CircleOfFifths({ initialKey }: { initialKey?: string } = {}) {
     const { t, i18n } = useTranslation();
     const language = i18n.resolvedLanguage ?? i18n.language;
-    const [selectedKey, setSelectedKey] = useState<string>("C");
+    const [selectedKey, setSelectedKey] = useState<string>(initialKey ?? "C");
 
     const keyData = useMemo(() => {
         const major = Key.majorKey(selectedKey);

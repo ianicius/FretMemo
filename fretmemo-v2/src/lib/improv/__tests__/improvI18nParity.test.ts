@@ -15,7 +15,7 @@ import { CURRICULUM, IMPROV_ORDER } from "@/data/improv/curriculum";
 
 const IMPROV_SOURCES = [
     path.resolve(process.cwd(), "src/pages/ImprovTraining.tsx"),
-    ...["TheoryCard", "ExerciseFrame", "FretboardQuiz", "ChoiceQuiz", "DiagramDrill", "BackingLoopExercise"]
+    ...["TheoryCard", "ExerciseFrame", "ChoiceQuiz", "DiagramDrill", "BackingLoopExercise", "PracticeLinkExercise"]
         .map((name) => path.resolve(process.cwd(), `src/components/improv/${name}.tsx`)),
 ];
 

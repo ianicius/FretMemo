@@ -1,6 +1,6 @@
 import type { NoteName } from "@/types/fretboard";
 
-export type PracticeScaleType = "major" | "minor" | "majorPentatonic" | "minorPentatonic";
+export type PracticeScaleType = "major" | "minor" | "majorPentatonic" | "minorPentatonic" | "melodicMinor" | "harmonicMinor";
 export type NoteNotationPreference = "sharps" | "flats" | "random";
 export type NotationRandomizationMode = "session" | "question";
 export type AccidentalComplexity = "standard" | "advanced";

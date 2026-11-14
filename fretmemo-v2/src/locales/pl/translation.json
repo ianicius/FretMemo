@@ -1805,13 +1805,15 @@
             "notFoundDesc": "Nie ma modułu „{{moduleId}}” w mapie drogowej.",
             "backToRoadmap": "Wróć do mapy drogowej",
             "lockedTitle": "Moduł zablokowany",
-            "lockedDesc": "Zalicz poprzedni moduł albo włącz „Odblokuj wszystkie” na mapie drogowej."
+            "lockedDesc": "Zalicz poprzedni moduł albo włącz „Odblokuj wszystkie” na mapie drogowej.",
+            "supplementaryTitle": "Trening uzupełniający",
+            "supplementaryHint": "Dodatkowe narzędzia, które nie wpływają na zaliczenie modułu."
         },
         "engine": {
-            "fretboardQuiz": "Quiz na gryfie",
             "choiceQuiz": "Quiz zamknięty",
             "diagramDrill": "Diagram + metronom",
-            "backingLoop": "Loop akordowy"
+            "backingLoop": "Loop akordowy",
+            "practiceLink": "Sesja treningowa"
         },
         "quiz": {
             "threshold": "Próg: {{required}}/{{total}}",
@@ -1884,7 +1886,8 @@
             "variantSubV": "Progresja z subV (Ab7)",
             "secondaryDominants": "Po każdej dominantie pobocznej celuj w tercję akordu docelowego.",
             "borrowedBackdoor": "Nad Bb7 graj dźwięki C mixolydian / bVII i rozwiązuj krokowo do C.",
-            "giantSteps": "Graj tercje (arpeggia) akordów przez zmiany tonacji B–G–Eb."
+            "giantSteps": "Graj tercje (arpeggia) akordów przez zmiany tonacji B–G–Eb.",
+            "triads": "Nad loopem graj wyłącznie triady — przechodź do najbliższej inwersji akordu zamiast przeskakiwać kształty."
         },
         "q": {
             "keySig": {
@@ -2074,11 +2077,11 @@
         "ex": {
             "e-string-notes.e1": {
                 "name": "Quiz: pozycja → nuta (struna E)",
-                "desc": "Zobacz zaznaczony prog na strunie E (0–12) i wybierz nazwę nuty."
+                "desc": "Otwórz sesję treningową (gryf → nuta, struna E, progi 0–12) i opanuj każdą pozycję: co najmniej 3 odpowiedzi, 80% trafności."
             },
             "e-string-notes.e2": {
                 "name": "Quiz: nuta → pozycja (struna E)",
-                "desc": "Kliknij wskazaną nutę na strunie E na gryfie."
+                "desc": "Otwórz sesję treningową (nuta → tab, struna E, progi 0–12) i opanuj każdą pozycję: co najmniej 3 odpowiedzi, 80% trafności."
             },
             "key-signatures.e1": {
                 "name": "Tonacja → liczba znaków",
@@ -2106,11 +2109,11 @@
             },
             "fretboard-notes.e1": {
                 "name": "Quiz: pozycja → nuta (cały gryf)",
-                "desc": "Wszystkie struny, progi 0–12."
+                "desc": "Otwórz sesję treningową (gryf → nuta, wszystkie struny, progi 0–12) i opanuj każdą pozycję: co najmniej 3 odpowiedzi, 80% trafności."
             },
             "fretboard-notes.e2": {
                 "name": "Quiz: nuta → pozycja (cały gryf)",
-                "desc": "Kliknij wskazaną nutę gdziekolwiek na gryfie (0–12)."
+                "desc": "Otwórz sesję treningową (nuta → tab, wszystkie struny, progi 0–12) i opanuj każdą pozycję: co najmniej 3 odpowiedzi, 80% trafności."
             },
             "pentatonic-positions.e1": {
                 "name": "G minor pentatonic (3 fr)",
@@ -2157,8 +2160,8 @@
                 "desc": "Odwrotna strona parowania + tensy charakterystyczne (Dm13, Fmaj7#11)."
             },
             "triads.e1": {
-                "name": "Diagram: triady na 3 strunach",
-                "desc": "Am i C na strunach G-B-E — podzbiór/inwersje obok siebie."
+                "name": "Loop: triady nad Am–C–Em–D",
+                "desc": "Grając nad loopem, używaj wyłącznie triad i zmieniaj inwersję o najmniejszy ruch palców. 2 udane obiegi."
             },
             "triads.e2": {
                 "name": "Nazwa → interwały",
@@ -2259,7 +2262,35 @@
             "giant-steps.e2": {
                 "name": "Loop: Giant Steps (60–120 BPM)",
                 "desc": "|Bmaj7 D7|Gmaj7 Bb7|Ebmaj7 F#7|Bmaj7| — graj tercje akordów przez zmiany."
+            },
+            "pentatonic-scale.e3": {
+                "name": "Trening: A-moll pentatoniczna",
+                "desc": "Zagraj dźwięki A-moll pentatonicznej (progi 5–8) w sesji treningowej z oceną na żywo."
+            },
+            "major-scale.e3": {
+                "name": "Trening: C-dur",
+                "desc": "Zagraj dźwięki skali C-dur (progi 8–12) w sesji treningowej z oceną na żywo."
+            },
+            "melodic-minor.e3": {
+                "name": "Trening: A-moll melodyczna",
+                "desc": "Zagraj dźwięki A-moll melodycznej (progi 5–9) w sesji treningowej z oceną na żywo."
+            },
+            "harmonic-minor.e3": {
+                "name": "Trening: C-moll harmoniczna",
+                "desc": "Zagraj dźwięki C-moll harmonicznej (progi 5–9) w sesji treningowej z oceną na żywo."
             }
+        },
+        "practiceLink": {
+            "threshold": "Każda pozycja: ≥{{minAnswers}} odpowiedzi, ≥{{minAccuracy}}% trafności",
+            "coverage": "Opanowane pozycje",
+            "coverageValue": "{{done}}/{{total}}",
+            "hint": "Otwórz sesję treningową i odpowiadaj, aż każda podświetlona pozycja będzie opanowana. Postęp bierze się ze statystyk treningu (powtórki SM2, tryb z mikrofonem).",
+            "open": "Otwórz trening: {{mode}}",
+            "recordPass": "Zapisz zaliczenie ćwiczenia"
+        },
+        "supplementary": {
+            "earTraining": "Otwórz trening słuchu",
+            "chordQuality": "Otwórz trening rozpoznawania akordów"
         }
     }
 }

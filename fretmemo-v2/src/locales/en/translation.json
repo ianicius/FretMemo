@@ -1791,13 +1791,15 @@
             "notFoundDesc": "There is no “{{moduleId}}” module in the roadmap.",
             "backToRoadmap": "Back to the roadmap",
             "lockedTitle": "Module locked",
-            "lockedDesc": "Pass the previous module or turn on “Unlock all” on the roadmap."
+            "lockedDesc": "Pass the previous module or turn on “Unlock all” on the roadmap.",
+            "supplementaryTitle": "Supplementary ear training",
+            "supplementaryHint": "Extra tools that do not affect module completion."
         },
         "engine": {
-            "fretboardQuiz": "Fretboard quiz",
             "choiceQuiz": "Choice quiz",
             "diagramDrill": "Diagram + metronome",
-            "backingLoop": "Backing loop"
+            "backingLoop": "Backing loop",
+            "practiceLink": "Practice session"
         },
         "quiz": {
             "threshold": "Threshold: {{required}}/{{total}}",
@@ -1870,7 +1872,8 @@
             "variantSubV": "subV progression (Ab7)",
             "secondaryDominants": "After each secondary dominant, aim at the target chord's third.",
             "borrowedBackdoor": "Over Bb7 play C mixolydian / bVII tones and resolve stepwise to C.",
-            "giantSteps": "Play chord thirds (arpeggios) through the B–G–Eb key changes."
+            "giantSteps": "Play chord thirds (arpeggios) through the B–G–Eb key changes.",
+            "triads": "Play only triads over the loop — move each chord to its closest inversion instead of jumping shapes."
         },
         "q": {
             "keySig": {
@@ -2060,11 +2063,11 @@
         "ex": {
             "e-string-notes.e1": {
                 "name": "Quiz: position → note (E string)",
-                "desc": "See the highlighted fret on the E string (0–12) and pick the note name."
+                "desc": "Open the practice session (fretboard → note, low E string, frets 0–12) and master every position: at least 3 answers each, 80% accuracy."
             },
             "e-string-notes.e2": {
                 "name": "Quiz: note → position (E string)",
-                "desc": "Click the named note on the E string on the fretboard."
+                "desc": "Open the practice session (note → tab, low E string, frets 0–12) and master every position: at least 3 answers each, 80% accuracy."
             },
             "key-signatures.e1": {
                 "name": "Key → accidental count",
@@ -2092,11 +2095,11 @@
             },
             "fretboard-notes.e1": {
                 "name": "Quiz: position → note (whole neck)",
-                "desc": "All strings, frets 0–12."
+                "desc": "Open the practice session (fretboard → note, all strings, frets 0–12) and master every position: at least 3 answers each, 80% accuracy."
             },
             "fretboard-notes.e2": {
                 "name": "Quiz: note → position (whole neck)",
-                "desc": "Click the named note anywhere on the neck (0–12)."
+                "desc": "Open the practice session (note → tab, all strings, frets 0–12) and master every position: at least 3 answers each, 80% accuracy."
             },
             "pentatonic-positions.e1": {
                 "name": "G minor pentatonic (3fr)",
@@ -2143,8 +2146,8 @@
                 "desc": "The reverse pairing plus characteristic tensions (Dm13, Fmaj7#11)."
             },
             "triads.e1": {
-                "name": "Diagram: triads on 3 strings",
-                "desc": "Am and C on the G-B-E strings — subsets/inversions side by side."
+                "name": "Loop: triads over Am–C–Em–D",
+                "desc": "Play only triads over the loop, moving each inversion by the smallest finger movement. 2 successful loops."
             },
             "triads.e2": {
                 "name": "Name → intervals",
@@ -2245,7 +2248,35 @@
             "giant-steps.e2": {
                 "name": "Loop: Giant Steps (60–120 BPM)",
                 "desc": "|Bmaj7 D7|Gmaj7 Bb7|Ebmaj7 F#7|Bmaj7| — play chord thirds through the changes."
+            },
+            "pentatonic-scale.e3": {
+                "name": "Practice: A minor pentatonic",
+                "desc": "Play the A minor pentatonic notes (frets 5–8) in the practice session with live scoring."
+            },
+            "major-scale.e3": {
+                "name": "Practice: C major scale",
+                "desc": "Play the C major scale notes (frets 8–12) in the practice session with live scoring."
+            },
+            "melodic-minor.e3": {
+                "name": "Practice: A melodic minor",
+                "desc": "Play the A melodic minor notes (frets 5–9) in the practice session with live scoring."
+            },
+            "harmonic-minor.e3": {
+                "name": "Practice: C harmonic minor",
+                "desc": "Play the C harmonic minor notes (frets 5–9) in the practice session with live scoring."
             }
+        },
+        "practiceLink": {
+            "threshold": "Every position: ≥{{minAnswers}} answers, ≥{{minAccuracy}}% accuracy",
+            "coverage": "Mastered positions",
+            "coverageValue": "{{done}}/{{total}}",
+            "hint": "Open the practice session and answer until every highlighted position is mastered. Progress comes from your practice stats (spaced repetition, mic mode).",
+            "open": "Open practice: {{mode}}",
+            "recordPass": "Record exercise pass"
+        },
+        "supplementary": {
+            "earTraining": "Open ear training",
+            "chordQuality": "Open chord-quality trainer"
         }
     }
 }
