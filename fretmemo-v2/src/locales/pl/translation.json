@@ -1887,7 +1887,45 @@
             "secondaryDominants": "Po każdej dominantie pobocznej celuj w tercję akordu docelowego.",
             "borrowedBackdoor": "Nad Bb7 graj dźwięki C mixolydian / bVII i rozwiązuj krokowo do C.",
             "giantSteps": "Graj tercje (arpeggia) akordów przez zmiany tonacji B–G–Eb.",
-            "triads": "Nad loopem graj wyłącznie triady — przechodź do najbliższej inwersji akordu zamiast przeskakiwać kształty."
+            "triads": "Nad loopem graj wyłącznie triady — przechodź do najbliższej inwersji akordu zamiast przeskakiwać kształty.",
+            "pentatonicBox1": "Improwizuj wyłącznie w boksie 1 (progi 5–8) — twoja pierwsza prawdziwa improwizacja.",
+            "majorC": "Frazuj skalą C-dur i kończ swoje linie na dźwięku C.",
+            "pentatonicBoxes": "Z każdą pętlą przechodź do sąsiedniego boksu pentatoniki.",
+            "modeCharacteristic": "Podkreśl stopień charakterystyczny trybu nad podkładem.",
+            "modeDorian": "Dorian (Dm7–G7)",
+            "modePhrygian": "Phrygian (Em–Fmaj7)",
+            "modeLydian": "Lydian (Fmaj7–G6)",
+            "modeMixolydian": "Mixolydian (G7–Cmaj7)",
+            "chordScaleCharacteristic": "Na każdym akordzie zagraj jego dźwięk charakterystyczny z podpowiedzianej skali.",
+            "arpeggiosOnly": "Graj wyłącznie arpeggia akordów — obrysuj harmonię.",
+            "targetRoot": "W momencie zmiany akordu ląduj na prymie — Am→A, C→C, Em→E, D→D.",
+            "targetRootLabel": "Poziom 1: prymy",
+            "targetThirdLabel": "Poziom 2: tercje",
+            "targetFifthLabel": "Poziom 3: kwinty",
+            "targetSeventhLabel": "Poziom 4: septymy",
+            "targetSeventh": "Ląduj na septymie akordu — Am7→G, Cmaj7→B, Em7→D, D7→C.",
+            "targetAny": "Bez stałego celu — ląduj na każdym dźwięku akordu, który usłyszysz. Twoja pierwsza wolna improwizacja.",
+            "voiceLeadingThirdsSevenths": "Prowadź tercje i septymy płynnie: F→F→E albo C→B→B przez Dm7–G7–Cmaj7.",
+            "switchingKeysEasy": "Jedna zmieniona nuta: tonacja przechodzi C → F. Dostosuj linie, gdy prompter zmieni tonację.",
+            "variantVideo": "Progresja z filmu",
+            "tritoneVideo": "Chromatyczne zejście basu: Bm7–Bb7–Am7–Ab7–Gmaj7.",
+            "secondaryClassic": "Klasyczna progresja",
+            "secondaryFiveLabel": "Pięć dominant pobocznych",
+            "variantDiatonic251": "Diatoniczny ii–V–I",
+            "variantBackdoor251": "Backdoor ii–V",
+            "borrowedDiatonic": "Diatoniczna droga do C: Dm7–G7. Porównaj jej brzmienie z backdoor.",
+            "melodicMinor67": "Podkreśl 6 (F#) i wielką septymę (G#) nad oboma akordami Am.",
+            "mmMinor251": "Molowy ii–V–i",
+            "mmD711": "Vamp D7#11",
+            "melodicMinorHints": "Korzystaj z podpowiedzi molowej melodicznej przy każdym akordzie.",
+            "harmonicMinorGSharp": "Nad E7 podkreśl G# — dźwięk charakterystyczny A-moll harmonicznej.",
+            "harmonicMinorPhrygian": "Nad E7 graj E Phrygian dominant (z A-moll harmonicznej).",
+            "giantStepsRoots": "Graj same prymy akordów przez całą 16-taktową formę.",
+            "giantStepsPattern": "Graj wzór 1-2-3-5 każdego akordu przez całą formę.",
+            "giantStepsArps": "Graj arpeggia akordów przez całą formę.",
+            "giantStepsRootsLabel": "Poziom 1: prymy",
+            "giantStepsPatternLabel": "Poziom 2: 1-2-3-5",
+            "giantStepsArpsLabel": "Poziom 3: arpeggia"
         },
         "q": {
             "keySig": {
@@ -2177,11 +2215,11 @@
             },
             "target-chord-tones.e1": {
                 "name": "Loop: ląduj na tercji",
-                "desc": "Am–C–Em–D; w momencie zmiany akordu ląduj na tercji (C, E, G, F#)."
+                "desc": "Am–C–Em–D ze stopniami trudności: ląduj na prymach, potem tercjach, kwintach i septymach. 2 udane obiegi na poziom."
             },
             "target-chord-tones.e2": {
                 "name": "Loop: ląduj na kwincie",
-                "desc": "Ta sama progresja, cel: kwinta akordu (E, G, B, A)."
+                "desc": "Ta sama progresja bez stałego celu — ląduj na każdym dźwięku akordu, który usłyszysz. 2 udane obiegi."
             },
             "voice-leading.e1": {
                 "name": "Loop: Gm → Bbm",
@@ -2197,7 +2235,7 @@
             },
             "switching-keys.e2": {
                 "name": "Loop: modulacja G → B",
-                "desc": "Gmaj7–Em7–Am7–D7 → Bmaj7–G#m7–C#m7–F#7; dostosuj linie do nowej tonacji."
+                "desc": "Łatwiejsza zmiana: tonacja przechodzi C → F (jedna zmieniona nuta). 2 udane obiegi."
             },
             "tritone-subs.e1": {
                 "name": "Quiz: zamiany trytonowe",
@@ -2261,7 +2299,7 @@
             },
             "giant-steps.e2": {
                 "name": "Loop: Giant Steps (60–120 BPM)",
-                "desc": "|Bmaj7 D7|Gmaj7 Bb7|Ebmaj7 F#7|Bmaj7| — graj tercje akordów przez zmiany."
+                "desc": "Pełna 16-taktowa forma, dwa uderzenia na akord, start od 60 BPM. Trzy poziomy: prymy, potem wzór 1-2-3-5, na końcu arpeggia."
             },
             "pentatonic-scale.e3": {
                 "name": "Trening: A-moll pentatoniczna",
@@ -2278,6 +2316,54 @@
             "harmonic-minor.e3": {
                 "name": "Trening: C-moll harmoniczna",
                 "desc": "Zagraj dźwięki C-moll harmonicznej (progi 5–9) w sesji treningowej z oceną na żywo."
+            },
+            "pentatonic-scale.e4": {
+                "name": "Loop: improwizuj w boksie 1",
+                "desc": "Improwizuj nad Am7 (4 takty) – Dm7 – Em7 wyłącznie w pierwszym boksie pentatoniki (progi 5–8). 2 udane obiegi."
+            },
+            "major-scale.e4": {
+                "name": "Loop: frazy C-dur",
+                "desc": "Frazuj skalą C-dur nad Cmaj7–Am7–Fmaj7–G7 i kończ linie na dźwięku C. 2 udane obiegi."
+            },
+            "pentatonic-positions.e6": {
+                "name": "Loop: boks sąsiedni",
+                "desc": "Gm7–Cm7: z każdą pętlą przechodź do sąsiedniego boksu pentatoniki. 2 udane obiegi."
+            },
+            "modes.e3": {
+                "name": "Loop: kolory trybów",
+                "desc": "Cztery warianty (Dorian, Phrygian, Lydian, Mixolydian). Podkreśl stopień charakterystyczny trybu nad podkładem. 2 udane obiegi na wariant."
+            },
+            "chord-scale-major.e3": {
+                "name": "Loop: dźwięki charakterystyczne",
+                "desc": "Dm7–G7–Cmaj7 z podpowiedzią skali przy każdym akordzie. Na każdej zmianie zagraj dźwięk charakterystyczny akordu. 2 udane obiegi."
+            },
+            "arpeggios.e3": {
+                "name": "Loop: arpeggia nad ii–V–I",
+                "desc": "Dm7–G7–Cmaj7: graj wyłącznie arpeggia akordów — bez dźwięków skalowych. 2 udane obiegi."
+            },
+            "voice-leading.e3": {
+                "name": "Loop: tercje i septymy",
+                "desc": "Dm7–G7–Cmaj7: prowadź tercje F→F→E albo septymy C→B→B przez zmiany. 2 udane obiegi."
+            },
+            "switching-keys.e3": {
+                "name": "Loop: zmiana tonacji G → B",
+                "desc": "Tonacja zmienia się z G na B w połowie pętli — przestaw swoje linie na nową tonację. 2 udane obiegi."
+            },
+            "chord-scale-melodic.e3": {
+                "name": "Loop: molowy ii–V–i z mol melodyczną",
+                "desc": "Dm7b5–G7alt–Cmmaj7 (wariant: vamp D7#11) z podpowiedzią skali przy każdym akordzie. 2 udane obiegi."
+            },
+            "melodic-minor.e4": {
+                "name": "Loop: Am6 – Am(maj7)",
+                "desc": "Dwa odcienie a-moll: podkreśl 6 (F#) i wielką septymę (G#). 2 udane obiegi."
+            },
+            "harmonic-minor.e4": {
+                "name": "Loop: Am – E7",
+                "desc": "Nad E7 podkreśl G# — dźwięk charakterystyczny A-moll harmonicznej. 2 udane obiegi."
+            },
+            "chord-scale-harmonic.e3": {
+                "name": "Loop: molowy ii–V z mol harmoniczną",
+                "desc": "Bm7b5–E7–Am: nad E7 użyj E Phrygian dominant. 2 udane obiegi."
             }
         },
         "practiceLink": {
@@ -2291,6 +2377,28 @@
         "supplementary": {
             "earTraining": "Otwórz trening słuchu",
             "chordQuality": "Otwórz trening rozpoznawania akordów"
+        },
+        "hints": {
+            "dorianDm7": "D dorian — celuj w B",
+            "phrygianEm": "E phrygian — celuj w F",
+            "lydianF": "F lydian — celuj w B",
+            "mixolydianG": "G mixolydian — celuj w F",
+            "csDorian": "Dm7 → D dorian",
+            "csMixolydian": "G7 → G mixolydian",
+            "csIonian": "Cmaj7 → C ionian",
+            "videoDb": "Ruch z filmu: D → Db",
+            "keyC": "Tonacja: C major",
+            "keyF": "Tonacja: F major",
+            "keyG": "Tonacja: G major",
+            "keyB": "Tonacja: B major",
+            "mmLocrian2": "D Locrian ♮2 (z C melodic minor)",
+            "mmAb": "Ab melodic minor",
+            "mmC": "C melodic minor",
+            "mmDLydDom": "D Lydian dominant (z G melodic minor)",
+            "hmA": "A harmonic minor",
+            "hmE7": "E7 — celuj w G#",
+            "hmLocrian": "B Locrian (z A harmonic minor)",
+            "hmPhrygianDom": "E Phrygian dominant (z A harmonic minor)"
         }
     }
 }

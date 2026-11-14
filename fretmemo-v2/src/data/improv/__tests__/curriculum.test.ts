@@ -218,6 +218,7 @@ describe("improv curriculum", () => {
         const module = getImprovModule("pentatonic-positions") as NonNullable<ReturnType<typeof getImprovModule>>;
         const allowedPcs = new Set(["G", "Bb", "C", "D", "F"].map((note) => Note.chroma(note)));
         for (const exercise of module.exercises) {
+            if (exercise.engine !== "diagram-drill") continue;
             const params = exercise.params as DiagramDrillParams;
             for (const shape of params.shapes) {
                 expect(shape.shapeId).toBe("min-pent");

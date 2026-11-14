@@ -69,15 +69,23 @@ export interface PracticeLinkParams {
     minAccuracy: number;
 }
 
+/**
+ * One entry of a backing progression (plan phase 3): a plain string is a
+ * chord lasting `beatsPerChord`; an object adds an optional i18n hint key
+ * (shown under the chord in the prompter) and/or an optional beat count
+ * (e.g. Am7 held for four bars in module 3).
+ */
+export type ProgressionEntry = { chord: string; hintKey?: string; beats?: number };
+
 export interface BackingLoopVariant {
     id: string;
     labelKey: string;
-    progression: string[];
+    progression: Array<string | ProgressionEntry>;
     goalKey: string;
 }
 
 export interface BackingLoopParams {
-    progression: string[];
+    progression: Array<string | ProgressionEntry>;
     goalKey: string;
     beatsPerChord: number;
     defaultBpm: number;
@@ -260,6 +268,15 @@ export const CURRICULUM: ImprovModule[] = [
                 rootNote: "A",
                 scaleType: "minorPentatonic",
             }),
+            loopExercise("pentatonic-scale", "e4", {
+                progression: [{ chord: "Am7", beats: 16 }, { chord: "Dm7", beats: 4 }, { chord: "Em7", beats: 4 }],
+                goalKey: "improv.goals.pentatonicBox1",
+                beatsPerChord: 4,
+                defaultBpm: 70,
+                minBpm: 50,
+                maxBpm: 140,
+                requiredPasses: 2,
+            }),
         ],
     },
     {
@@ -291,6 +308,15 @@ export const CURRICULUM: ImprovModule[] = [
                 rootNote: "C",
                 scaleType: "major",
             }),
+            loopExercise("major-scale", "e4", {
+                progression: ["Cmaj7", "Am7", "Fmaj7", "G7"],
+                goalKey: "improv.goals.majorC",
+                beatsPerChord: 4,
+                defaultBpm: 80,
+                minBpm: 50,
+                maxBpm: 160,
+                requiredPasses: 2,
+            }),
         ],
     },
     {
@@ -316,6 +342,15 @@ export const CURRICULUM: ImprovModule[] = [
             drillExercise("pentatonic-positions", "e3", [{ shapeId: "min-pent", defaultKey: "G" }], 4, 8, 70, 1),
             drillExercise("pentatonic-positions", "e4", [{ shapeId: "min-pent", defaultKey: "G" }], 7, 10, 70, 1),
             drillExercise("pentatonic-positions", "e5", [{ shapeId: "min-pent", defaultKey: "G" }], 9, 12, 70, 1),
+            loopExercise("pentatonic-positions", "e6", {
+                progression: ["Gm7", "Cm7"],
+                goalKey: "improv.goals.pentatonicBoxes",
+                beatsPerChord: 4,
+                defaultBpm: 80,
+                minBpm: 50,
+                maxBpm: 160,
+                requiredPasses: 2,
+            }),
         ],
     },
     {
@@ -330,6 +365,29 @@ export const CURRICULUM: ImprovModule[] = [
         exercises: [
             choiceExercise("modes", "e1", "modes", 10, "order-to-mode"),
             choiceExercise("modes", "e2", "modes", 10, "characteristic-to-mode"),
+            loopExercise("modes", "e3", {
+                progression: ["Dm7", "G7"],
+                goalKey: "improv.goals.modeCharacteristic",
+                beatsPerChord: 4,
+                defaultBpm: 80,
+                minBpm: 50,
+                maxBpm: 160,
+                requiredPasses: 2,
+                variants: [
+                    { id: "dorian", labelKey: "improv.goals.modeDorian",
+                      progression: [{ chord: "Dm7", hintKey: "improv.hints.dorianDm7" }, "G7"],
+                      goalKey: "improv.goals.modeCharacteristic" },
+                    { id: "phrygian", labelKey: "improv.goals.modePhrygian",
+                      progression: [{ chord: "Em7", hintKey: "improv.hints.phrygianEm" }, "Fmaj7"],
+                      goalKey: "improv.goals.modeCharacteristic" },
+                    { id: "lydian", labelKey: "improv.goals.modeLydian",
+                      progression: [{ chord: "Fmaj7", hintKey: "improv.hints.lydianF" }, "G6"],
+                      goalKey: "improv.goals.modeCharacteristic" },
+                    { id: "mixolydian", labelKey: "improv.goals.modeMixolydian",
+                      progression: [{ chord: "G7", hintKey: "improv.hints.mixolydianG" }, "Cmaj7"],
+                      goalKey: "improv.goals.modeCharacteristic" },
+                ],
+            }),
         ],
     },
     {
@@ -349,6 +407,19 @@ export const CURRICULUM: ImprovModule[] = [
         exercises: [
             choiceExercise("chord-scale-major", "e1", "chordScaleMajor", 10, "chord-to-mode"),
             choiceExercise("chord-scale-major", "e2", "chordScaleMajor", 10, "mode-to-chord"),
+            loopExercise("chord-scale-major", "e3", {
+                progression: [
+                    { chord: "Dm7", hintKey: "improv.hints.csDorian" },
+                    { chord: "G7", hintKey: "improv.hints.csMixolydian" },
+                    { chord: "Cmaj7", hintKey: "improv.hints.csIonian" },
+                ],
+                goalKey: "improv.goals.chordScaleCharacteristic",
+                beatsPerChord: 4,
+                defaultBpm: 80,
+                minBpm: 50,
+                maxBpm: 160,
+                requiredPasses: 2,
+            }),
         ],
     },
     {
@@ -394,6 +465,15 @@ export const CURRICULUM: ImprovModule[] = [
                 70,
                 1,
             ),
+            loopExercise("arpeggios", "e3", {
+                progression: ["Dm7", "G7", "Cmaj7"],
+                goalKey: "improv.goals.arpeggiosOnly",
+                beatsPerChord: 4,
+                defaultBpm: 80,
+                minBpm: 50,
+                maxBpm: 160,
+                requiredPasses: 2,
+            }),
         ],
     },
     {
@@ -403,21 +483,31 @@ export const CURRICULUM: ImprovModule[] = [
         exercises: [
             loopExercise("target-chord-tones", "e1", {
                 progression: ["Am", "C", "Em", "D"],
-                goalKey: "improv.goals.targetThird",
+                goalKey: "improv.goals.targetRoot",
                 beatsPerChord: 4,
                 defaultBpm: 80,
                 minBpm: 50,
                 maxBpm: 160,
-                requiredPasses: 3,
+                requiredPasses: 2,
+                variants: [
+                    { id: "root", labelKey: "improv.goals.targetRootLabel",
+                      progression: ["Am", "C", "Em", "D"], goalKey: "improv.goals.targetRoot" },
+                    { id: "third", labelKey: "improv.goals.targetThirdLabel",
+                      progression: ["Am", "C", "Em", "D"], goalKey: "improv.goals.targetThird" },
+                    { id: "fifth", labelKey: "improv.goals.targetFifthLabel",
+                      progression: ["Am", "C", "Em", "D"], goalKey: "improv.goals.targetFifth" },
+                    { id: "seventh", labelKey: "improv.goals.targetSeventhLabel",
+                      progression: ["Am7", "Cmaj7", "Em7", "D7"], goalKey: "improv.goals.targetSeventh" },
+                ],
             }),
             loopExercise("target-chord-tones", "e2", {
                 progression: ["Am", "C", "Em", "D"],
-                goalKey: "improv.goals.targetFifth",
+                goalKey: "improv.goals.targetAny",
                 beatsPerChord: 4,
                 defaultBpm: 80,
                 minBpm: 50,
                 maxBpm: 160,
-                requiredPasses: 3,
+                requiredPasses: 2,
             }),
         ],
     },
@@ -427,7 +517,7 @@ export const CURRICULUM: ImprovModule[] = [
         theoryKey: "improv.modules.voice-leading.theory",
         exercises: [
             loopExercise("voice-leading", "e1", {
-                progression: ["Gm", "Bbm"],
+                progression: ["Gm", { chord: "Bbm", hintKey: "improv.hints.videoDb" }],
                 goalKey: "improv.goals.voiceLeading",
                 beatsPerChord: 4,
                 defaultBpm: 70,
@@ -444,6 +534,15 @@ export const CURRICULUM: ImprovModule[] = [
                 maxBpm: 140,
                 requiredPasses: 3,
             }),
+            loopExercise("voice-leading", "e3", {
+                progression: ["Dm7", "G7", "Cmaj7"],
+                goalKey: "improv.goals.voiceLeadingThirdsSevenths",
+                beatsPerChord: 4,
+                defaultBpm: 80,
+                minBpm: 50,
+                maxBpm: 160,
+                requiredPasses: 2,
+            }),
         ],
     },
     {
@@ -453,7 +552,34 @@ export const CURRICULUM: ImprovModule[] = [
         exercises: [
             choiceExercise("switching-keys", "e1", "pivot", 10),
             loopExercise("switching-keys", "e2", {
-                progression: ["Gmaj7", "Em7", "Am7", "D7", "Bmaj7", "G#m7", "C#m7", "F#7"],
+                progression: [
+                    { chord: "Cmaj7", hintKey: "improv.hints.keyC" },
+                    { chord: "Am7", hintKey: "improv.hints.keyC" },
+                    { chord: "Dm7", hintKey: "improv.hints.keyC" },
+                    { chord: "G7", hintKey: "improv.hints.keyC" },
+                    { chord: "Fmaj7", hintKey: "improv.hints.keyF" },
+                    { chord: "Dm7", hintKey: "improv.hints.keyF" },
+                    { chord: "Gm7", hintKey: "improv.hints.keyF" },
+                    { chord: "C7", hintKey: "improv.hints.keyF" },
+                ],
+                goalKey: "improv.goals.switchingKeysEasy",
+                beatsPerChord: 4,
+                defaultBpm: 80,
+                minBpm: 50,
+                maxBpm: 160,
+                requiredPasses: 2,
+            }),
+            loopExercise("switching-keys", "e3", {
+                progression: [
+                    { chord: "Gmaj7", hintKey: "improv.hints.keyG" },
+                    { chord: "Em7", hintKey: "improv.hints.keyG" },
+                    { chord: "Am7", hintKey: "improv.hints.keyG" },
+                    { chord: "D7", hintKey: "improv.hints.keyG" },
+                    { chord: "Bmaj7", hintKey: "improv.hints.keyB" },
+                    { chord: "G#m7", hintKey: "improv.hints.keyB" },
+                    { chord: "C#m7", hintKey: "improv.hints.keyB" },
+                    { chord: "F#7", hintKey: "improv.hints.keyB" },
+                ],
                 goalKey: "improv.goals.switchingKeys",
                 beatsPerChord: 4,
                 defaultBpm: 90,
@@ -490,6 +616,12 @@ export const CURRICULUM: ImprovModule[] = [
                         progression: ["Dm7", "Db7", "Cmaj7"],
                         goalKey: "improv.goals.tritoneSubV",
                     },
+                    {
+                        id: "video",
+                        labelKey: "improv.goals.variantVideo",
+                        progression: ["Bm7", "Bb7", "Am7", "Ab7", "Gmaj7"],
+                        goalKey: "improv.goals.tritoneVideo",
+                    },
                 ],
             }),
         ],
@@ -508,6 +640,14 @@ export const CURRICULUM: ImprovModule[] = [
                 minBpm: 50,
                 maxBpm: 160,
                 requiredPasses: 2,
+                variants: [
+                    { id: "classic", labelKey: "improv.goals.secondaryClassic",
+                      progression: ["Cmaj7", "A7", "Dm7", "G7", "Cmaj7"],
+                      goalKey: "improv.goals.secondaryDominants" },
+                    { id: "five-dominants", labelKey: "improv.goals.secondaryFiveLabel",
+                      progression: ["Cmaj7", "E7", "Am7", "C7", "Fmaj7", "D7", "G7"],
+                      goalKey: "improv.goals.secondaryDominants" },
+                ],
             }),
         ],
     },
@@ -525,6 +665,14 @@ export const CURRICULUM: ImprovModule[] = [
                 minBpm: 50,
                 maxBpm: 160,
                 requiredPasses: 2,
+                variants: [
+                    { id: "diatonic-251", labelKey: "improv.goals.variantDiatonic251",
+                      progression: ["Dm7", "G7", "Cmaj7"],
+                      goalKey: "improv.goals.borrowedDiatonic" },
+                    { id: "backdoor-251", labelKey: "improv.goals.variantBackdoor251",
+                      progression: ["Fm7", "Bb7", "Cmaj7"],
+                      goalKey: "improv.goals.borrowedBackdoor" },
+                ],
             }),
         ],
     },
@@ -557,6 +705,15 @@ export const CURRICULUM: ImprovModule[] = [
                 rootNote: "A",
                 scaleType: "melodicMinor",
             }),
+            loopExercise("melodic-minor", "e4", {
+                progression: ["Am6", "Ammaj7"],
+                goalKey: "improv.goals.melodicMinor67",
+                beatsPerChord: 4,
+                defaultBpm: 80,
+                minBpm: 50,
+                maxBpm: 160,
+                requiredPasses: 2,
+            }),
         ],
     },
     {
@@ -566,6 +723,31 @@ export const CURRICULUM: ImprovModule[] = [
         exercises: [
             choiceExercise("chord-scale-melodic", "e1", "chordScaleMelodic", 10, "chord-to-mode"),
             choiceExercise("chord-scale-melodic", "e2", "chordScaleMelodic", 10, "mode-to-chord"),
+            loopExercise("chord-scale-melodic", "e3", {
+                progression: [
+                    { chord: "Dm7b5", hintKey: "improv.hints.mmLocrian2" },
+                    { chord: "G7alt", hintKey: "improv.hints.mmAb" },
+                    { chord: "Cmmaj7", hintKey: "improv.hints.mmC" },
+                ],
+                goalKey: "improv.goals.melodicMinorHints",
+                beatsPerChord: 4,
+                defaultBpm: 80,
+                minBpm: 50,
+                maxBpm: 160,
+                requiredPasses: 2,
+                variants: [
+                    { id: "minor-251", labelKey: "improv.goals.mmMinor251",
+                      progression: [
+                          { chord: "Dm7b5", hintKey: "improv.hints.mmLocrian2" },
+                          { chord: "G7alt", hintKey: "improv.hints.mmAb" },
+                          { chord: "Cmmaj7", hintKey: "improv.hints.mmC" },
+                      ],
+                      goalKey: "improv.goals.melodicMinorHints" },
+                    { id: "d7-11-vamp", labelKey: "improv.goals.mmD711",
+                      progression: [{ chord: "D7#11", hintKey: "improv.hints.mmDLydDom" }],
+                      goalKey: "improv.goals.melodicMinorHints" },
+                ],
+            }),
         ],
     },
     {
@@ -597,6 +779,18 @@ export const CURRICULUM: ImprovModule[] = [
                 rootNote: "C",
                 scaleType: "harmonicMinor",
             }),
+            loopExercise("harmonic-minor", "e4", {
+                progression: [
+                    { chord: "Am", hintKey: "improv.hints.hmA" },
+                    { chord: "E7", hintKey: "improv.hints.hmE7" },
+                ],
+                goalKey: "improv.goals.harmonicMinorGSharp",
+                beatsPerChord: 4,
+                defaultBpm: 80,
+                minBpm: 50,
+                maxBpm: 160,
+                requiredPasses: 2,
+            }),
         ],
     },
     {
@@ -606,6 +800,19 @@ export const CURRICULUM: ImprovModule[] = [
         exercises: [
             choiceExercise("chord-scale-harmonic", "e1", "chordScaleHarmonic", 10, "chord-to-mode"),
             choiceExercise("chord-scale-harmonic", "e2", "chordScaleHarmonic", 10, "mode-to-chord"),
+            loopExercise("chord-scale-harmonic", "e3", {
+                progression: [
+                    { chord: "Bm7b5", hintKey: "improv.hints.hmLocrian" },
+                    { chord: "E7", hintKey: "improv.hints.hmPhrygianDom" },
+                    { chord: "Am", hintKey: "improv.hints.hmA" },
+                ],
+                goalKey: "improv.goals.harmonicMinorPhrygian",
+                beatsPerChord: 4,
+                defaultBpm: 80,
+                minBpm: 50,
+                maxBpm: 160,
+                requiredPasses: 2,
+            }),
         ],
     },
     {
@@ -615,13 +822,36 @@ export const CURRICULUM: ImprovModule[] = [
         exercises: [
             choiceExercise("giant-steps", "e1", "coltrane", 10),
             loopExercise("giant-steps", "e2", {
-                progression: ["Bmaj7", "D7", "Gmaj7", "Bb7", "Ebmaj7", "F#7", "Bmaj7"],
-                goalKey: "improv.goals.giantSteps",
-                beatsPerChord: 4,
-                defaultBpm: 120,
-                minBpm: 60,
+                progression: [
+                    "Bmaj7", "D7", "Gmaj7", "Bb7", "Ebmaj7", "F#7", "Bmaj7", "Bmaj7",
+                    "Bm7", "D7", "Gmaj7", "Bb7", "Ebmaj7", "F#7", "Bmaj7", "Bmaj7",
+                ],
+                goalKey: "improv.goals.giantStepsRoots",
+                beatsPerChord: 2,
+                defaultBpm: 60,
+                minBpm: 40,
                 maxBpm: 180,
                 requiredPasses: 2,
+                variants: [
+                    { id: "roots", labelKey: "improv.goals.giantStepsRootsLabel",
+                      progression: [
+                          "Bmaj7", "D7", "Gmaj7", "Bb7", "Ebmaj7", "F#7", "Bmaj7", "Bmaj7",
+                          "Bm7", "D7", "Gmaj7", "Bb7", "Ebmaj7", "F#7", "Bmaj7", "Bmaj7",
+                      ],
+                      goalKey: "improv.goals.giantStepsRoots" },
+                    { id: "pattern-1235", labelKey: "improv.goals.giantStepsPatternLabel",
+                      progression: [
+                          "Bmaj7", "D7", "Gmaj7", "Bb7", "Ebmaj7", "F#7", "Bmaj7", "Bmaj7",
+                          "Bm7", "D7", "Gmaj7", "Bb7", "Ebmaj7", "F#7", "Bmaj7", "Bmaj7",
+                      ],
+                      goalKey: "improv.goals.giantStepsPattern" },
+                    { id: "arps", labelKey: "improv.goals.giantStepsArpsLabel",
+                      progression: [
+                          "Bmaj7", "D7", "Gmaj7", "Bb7", "Ebmaj7", "F#7", "Bmaj7", "Bmaj7",
+                          "Bm7", "D7", "Gmaj7", "Bb7", "Ebmaj7", "F#7", "Bmaj7", "Bmaj7",
+                      ],
+                      goalKey: "improv.goals.giantStepsArps" },
+                ],
             }),
         ],
     },

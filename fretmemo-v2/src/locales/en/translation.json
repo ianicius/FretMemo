@@ -1873,7 +1873,45 @@
             "secondaryDominants": "After each secondary dominant, aim at the target chord's third.",
             "borrowedBackdoor": "Over Bb7 play C mixolydian / bVII tones and resolve stepwise to C.",
             "giantSteps": "Play chord thirds (arpeggios) through the B–G–Eb key changes.",
-            "triads": "Play only triads over the loop — move each chord to its closest inversion instead of jumping shapes."
+            "triads": "Play only triads over the loop — move each chord to its closest inversion instead of jumping shapes.",
+            "pentatonicBox1": "Improvise using box 1 only (frets 5–8) — your first real improvisation.",
+            "majorC": "Phrase with the C major scale and end your lines on the note C.",
+            "pentatonicBoxes": "With each loop, move to the neighbouring pentatonic box.",
+            "modeCharacteristic": "Emphasize the mode's characteristic note over the backing.",
+            "modeDorian": "Dorian (Dm7–G7)",
+            "modePhrygian": "Phrygian (Em–Fmaj7)",
+            "modeLydian": "Lydian (Fmaj7–G6)",
+            "modeMixolydian": "Mixolydian (G7–Cmaj7)",
+            "chordScaleCharacteristic": "On every chord, play its characteristic tone from the hinted scale.",
+            "arpeggiosOnly": "Play chord arpeggios only — outline the harmony.",
+            "targetRoot": "Land on the chord's root at each change — Am→A, C→C, Em→E, D→D.",
+            "targetRootLabel": "Level 1: roots",
+            "targetThirdLabel": "Level 2: thirds",
+            "targetFifthLabel": "Level 3: fifths",
+            "targetSeventhLabel": "Level 4: sevenths",
+            "targetSeventh": "Land on the chord's seventh — Am7→G, Cmaj7→B, Em7→D, D7→C.",
+            "targetAny": "No fixed target: land on any chord tone you hear — your first free improvisation.",
+            "voiceLeadingThirdsSevenths": "Voice the thirds and sevenths smoothly: F→F→E or C→B→B through Dm7–G7–Cmaj7.",
+            "switchingKeysEasy": "One changed note: the key moves C → F. Adjust your lines when the prompter changes key.",
+            "variantVideo": "The video's progression",
+            "tritoneVideo": "Chromatic bass descent: Bm7–Bb7–Am7–Ab7–Gmaj7.",
+            "secondaryClassic": "Classic progression",
+            "secondaryFiveLabel": "Five secondary dominants",
+            "variantDiatonic251": "Diatonic ii–V–I",
+            "variantBackdoor251": "Backdoor ii–V",
+            "borrowedDiatonic": "The diatonic road to C: Dm7–G7. Compare its sound with the backdoor.",
+            "melodicMinor67": "Emphasize the 6 (F#) and the major 7 (G#) over both Am chords.",
+            "mmMinor251": "Minor ii–V–i",
+            "mmD711": "D7#11 vamp",
+            "melodicMinorHints": "Use the melodic-minor hint shown on each chord.",
+            "harmonicMinorGSharp": "Over E7 emphasize G# — the characteristic note of A harmonic minor.",
+            "harmonicMinorPhrygian": "Over E7 play E Phrygian dominant (from A harmonic minor).",
+            "giantStepsRoots": "Play chord roots through the whole 16-bar form.",
+            "giantStepsPattern": "Play a 1-2-3-5 pattern of each chord through the form.",
+            "giantStepsArps": "Play chord arpeggios through the whole form.",
+            "giantStepsRootsLabel": "Level 1: roots",
+            "giantStepsPatternLabel": "Level 2: 1-2-3-5",
+            "giantStepsArpsLabel": "Level 3: arpeggios"
         },
         "q": {
             "keySig": {
@@ -2163,11 +2201,11 @@
             },
             "target-chord-tones.e1": {
                 "name": "Loop: land on the third",
-                "desc": "Am–C–Em–D; land on the third (C, E, G, F#) at each change."
+                "desc": "Am–C–Em–D with a difficulty ladder: land on roots, then thirds, fifths and sevenths. 2 successful loops per level."
             },
             "target-chord-tones.e2": {
                 "name": "Loop: land on the fifth",
-                "desc": "Same progression, goal: the chord's fifth (E, G, B, A)."
+                "desc": "The same progression with no fixed target — land on any chord tone you hear. 2 successful loops."
             },
             "voice-leading.e1": {
                 "name": "Loop: Gm → Bbm",
@@ -2183,7 +2221,7 @@
             },
             "switching-keys.e2": {
                 "name": "Loop: modulation G → B",
-                "desc": "Gmaj7–Em7–Am7–D7 → Bmaj7–G#m7–C#m7–F#7; adapt your lines to the new key."
+                "desc": "An easier switch: the key moves C → F (one changed note). 2 successful loops."
             },
             "tritone-subs.e1": {
                 "name": "Quiz: tritone substitutions",
@@ -2247,7 +2285,7 @@
             },
             "giant-steps.e2": {
                 "name": "Loop: Giant Steps (60–120 BPM)",
-                "desc": "|Bmaj7 D7|Gmaj7 Bb7|Ebmaj7 F#7|Bmaj7| — play chord thirds through the changes."
+                "desc": "The full 16-bar form, two beats per chord, starting at 60 BPM. Three levels: roots, then the 1-2-3-5 pattern, then arpeggios."
             },
             "pentatonic-scale.e3": {
                 "name": "Practice: A minor pentatonic",
@@ -2264,6 +2302,54 @@
             "harmonic-minor.e3": {
                 "name": "Practice: C harmonic minor",
                 "desc": "Play the C harmonic minor notes (frets 5–9) in the practice session with live scoring."
+            },
+            "pentatonic-scale.e4": {
+                "name": "Loop: improvise in box 1",
+                "desc": "Improvise over Am7 (four bars) – Dm7 – Em7 using only the first pentatonic box (frets 5–8). 2 successful loops."
+            },
+            "major-scale.e4": {
+                "name": "Loop: C major phrases",
+                "desc": "Phrase with the C major scale over Cmaj7–Am7–Fmaj7–G7 and end your lines on C. 2 successful loops."
+            },
+            "pentatonic-positions.e6": {
+                "name": "Loop: box to box",
+                "desc": "Gm7–Cm7: move to a neighbouring pentatonic box with each loop. 2 successful loops."
+            },
+            "modes.e3": {
+                "name": "Loop: modal colors",
+                "desc": "Four variants (Dorian, Phrygian, Lydian, Mixolydian). Emphasize the mode's characteristic note over each backing. 2 successful loops per variant."
+            },
+            "chord-scale-major.e3": {
+                "name": "Loop: characteristic tones",
+                "desc": "Dm7–G7–Cmaj7 with a scale hint on each chord. Play the chord's characteristic tone at every change. 2 successful loops."
+            },
+            "arpeggios.e3": {
+                "name": "Loop: arpeggios over ii–V–I",
+                "desc": "Dm7–G7–Cmaj7: play only chord arpeggios — no scale notes. 2 successful loops."
+            },
+            "voice-leading.e3": {
+                "name": "Loop: thirds and sevenths",
+                "desc": "Dm7–G7–Cmaj7: lead the thirds F→F→E or the sevenths C→B→B through the changes. 2 successful loops."
+            },
+            "switching-keys.e3": {
+                "name": "Loop: switch keys G → B",
+                "desc": "The key moves from G to B halfway through the loop — shift your lines to the new key. 2 successful loops."
+            },
+            "chord-scale-melodic.e3": {
+                "name": "Loop: melodic minor minor ii–V–i",
+                "desc": "Dm7b5–G7alt–Cmmaj7 (variant: D7#11 vamp) with a scale hint on every chord. 2 successful loops."
+            },
+            "melodic-minor.e4": {
+                "name": "Loop: Am6 – Am(maj7)",
+                "desc": "Two shades of A minor: emphasize the 6 (F#) and the major 7 (G#). 2 successful loops."
+            },
+            "harmonic-minor.e4": {
+                "name": "Loop: Am – E7",
+                "desc": "Over E7 emphasize G# — the characteristic note of A harmonic minor. 2 successful loops."
+            },
+            "chord-scale-harmonic.e3": {
+                "name": "Loop: minor ii–V with harmonic minor",
+                "desc": "Bm7b5–E7–Am: use Phrygian dominant over E7. 2 successful loops."
             }
         },
         "practiceLink": {
@@ -2277,6 +2363,28 @@
         "supplementary": {
             "earTraining": "Open ear training",
             "chordQuality": "Open chord-quality trainer"
+        },
+        "hints": {
+            "dorianDm7": "D dorian — aim for B",
+            "phrygianEm": "E phrygian — aim for F",
+            "lydianF": "F lydian — aim for B",
+            "mixolydianG": "G mixolydian — aim for F",
+            "csDorian": "Dm7 → D dorian",
+            "csMixolydian": "G7 → G mixolydian",
+            "csIonian": "Cmaj7 → C ionian",
+            "videoDb": "The video's move: D → Db",
+            "keyC": "Key: C major",
+            "keyF": "Key: F major",
+            "keyG": "Key: G major",
+            "keyB": "Key: B major",
+            "mmLocrian2": "D Locrian ♮2 (from C melodic minor)",
+            "mmAb": "Ab melodic minor",
+            "mmC": "C melodic minor",
+            "mmDLydDom": "D Lydian dominant (from G melodic minor)",
+            "hmA": "A harmonic minor",
+            "hmE7": "E7 — aim for G#",
+            "hmLocrian": "B Locrian (from A harmonic minor)",
+            "hmPhrygianDom": "E Phrygian dominant (from A harmonic minor)"
         }
     }
 }

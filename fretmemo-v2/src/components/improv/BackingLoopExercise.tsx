@@ -20,7 +20,7 @@ import { getSoundEngineContext } from "@/audio/engine";
 import { playChord } from "@/lib/audio";
 import { getChordMidis } from "@/lib/improv/chords";
 import { BackingLoopScheduler, type BackingLoopEntry } from "@/lib/improv/backingLoop";
-import type { BackingLoopParams, ImprovExercise } from "@/data/improv/curriculum";
+import type { BackingLoopParams, ImprovExercise, ProgressionEntry } from "@/data/improv/curriculum";
 import { useImprovStore } from "@/stores/useImprovStore";
 import { cn } from "@/lib/utils";
 import { ExerciseFrame } from "./ExerciseFrame";
@@ -34,6 +34,23 @@ interface BackingLoopExerciseProps {
 const CHORD_DURATION_SEC = 1.1;
 const CHORD_TONE_STAGGER_SEC = 0.055;
 
+interface NormalizedEntry {
+    chord: string;
+    beats: number;
+    hintKey?: string;
+}
+
+/** Normalizes `string | ProgressionEntry` entries and applies per-entry beats. */
+function normalizeEntries(
+    progression: Array<string | ProgressionEntry>,
+    defaultBeats: number,
+): NormalizedEntry[] {
+    return progression.map((entry) => {
+        if (typeof entry === "string") return { chord: entry, beats: defaultBeats };
+        return { chord: entry.chord, beats: entry.beats ?? defaultBeats, hintKey: entry.hintKey };
+    });
+}
+
 export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseProps) {
     const { t } = useTranslation();
     const params = exercise.params as BackingLoopParams;
@@ -46,8 +63,14 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
         () => params.variants?.find((item) => item.id === variantId) ?? null,
         [params.variants, variantId],
     );
-    const progression = variant?.progression ?? params.progression;
+    const rawProgression = variant?.progression ?? params.progression;
     const goalKey = variant?.goalKey ?? params.goalKey;
+    const entries = useMemo(
+        () => normalizeEntries(rawProgression, params.beatsPerChord),
+        [rawProgression, params.beatsPerChord],
+    );
+    const progression = entries.map((entry) => entry.chord);
+    const hintKeys = entries.map((entry) => entry.hintKey);
 
     const [bpm, setBpm] = useState(params.defaultBpm);
     const [playing, setPlaying] = useState(false);
@@ -82,10 +105,10 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
         setBeatsIntoChord(0);
         setPlaying(true);
 
-        const entries: BackingLoopEntry[] = progression.map((chord) => ({ chord, beats: params.beatsPerChord }));
+        const loopEntries: BackingLoopEntry[] = entries.map((entry) => ({ chord: entry.chord, beats: entry.beats }));
         const scheduler = new BackingLoopScheduler({
             clock: { now: () => getSoundEngineContext().currentTime },
-            progression: entries,
+            progression: loopEntries,
             bpm,
             onChordChange: (info) => {
                 const timer = window.setTimeout(() => {
@@ -180,8 +203,11 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
                 <p className="text-center text-[10px] uppercase tracking-wide text-muted-foreground">{t("improv.loop.next")}</p>
                 <p className="mt-1 text-center text-4xl font-bold tabular-nums text-primary">{localizeToken(currentChord)}</p>
                 <p className="mt-1 text-center text-xl font-semibold text-foreground opacity-70">{localizeToken(nextChord)}</p>
-                <div className="mt-2 flex justify-center gap-1" aria-hidden="true">
-                    {Array.from({ length: params.beatsPerChord }).map((_, beat) => (
+                <p className="col-span-2 mt-1 min-h-[1.25rem] text-center text-xs text-muted-foreground">
+                    {hintKeys[currentChordIndex] ? t(hintKeys[currentChordIndex] as string) : ""}
+                </p>
+                <div className="col-span-2 flex justify-center gap-1" aria-hidden="true">
+                    {Array.from({ length: entries[currentChordIndex]?.beats ?? params.beatsPerChord }).map((_, beat) => (
                         <span
                             key={beat}
                             className={cn(
