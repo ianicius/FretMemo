@@ -10,6 +10,7 @@ import {
     isExercisePassed,
     isModuleComplete,
     isModuleUnlocked,
+    practiceLinkPositions,
     type BackingLoopParams,
     type ChoiceQuizParams,
     type PracticeLinkParams,
@@ -268,6 +269,25 @@ describe("micLoopPass", () => {
         expect(micLoopPass(1, 1)).toBe(true);
     });
 });
+
+    it("practice-link criteria exclude open strings — module 1 is passable (user report)", () => {
+        const module = getImprovModule("e-string-notes") as NonNullable<ReturnType<typeof getImprovModule>>;
+        for (const exercise of module.exercises) {
+            const params = exercise.params as PracticeLinkParams;
+            const positions = practiceLinkPositions(params as PracticeLinkParams);
+            expect(positions.length).toBeGreaterThan(0);
+            // Fret 0 never appears: Practice clamps minFret to 1, so an open
+            // string position could never be mastered.
+            expect(positions.every((position) => position.fret >= 1)).toBe(true);
+            expect(positions.every((position) => position.fret <= params.offsetsTo)).toBe(true);
+            expect(positions.every((position) => params.enabledStrings.includes(position.stringIndex))).toBe(true);
+        }
+        // Module 5 (all strings, frets 0–12): 6 strings × frets 1–12 = 72.
+        const m5 = getImprovModule("fretboard-notes") as NonNullable<ReturnType<typeof getImprovModule>>;
+        for (const exercise of m5.exercises) {
+            expect(practiceLinkPositions(exercise.params as PracticeLinkParams)).toHaveLength(72);
+        }
+    });
 
     it("module 15 subV variant plays the tritone sub of G7 (plan 0.3)", () => {
         const module = getImprovModule("tritone-subs") as NonNullable<ReturnType<typeof getImprovModule>>;

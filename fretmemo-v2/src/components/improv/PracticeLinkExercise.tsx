@@ -21,7 +21,7 @@ import { Fretboard } from "@/components/fretboard/Fretboard";
 import { STANDARD_TUNING, getNoteAt } from "@/lib/constants";
 import type { NoteStatus } from "@/types/fretboard";
 import { trackEvent } from "@/lib/analytics";
-import { isExercisePassed, type ImprovExercise, type PracticeLinkParams } from "@/data/improv/curriculum";
+import { isExercisePassed, practiceLinkPositions, type ImprovExercise, type PracticeLinkParams } from "@/data/improv/curriculum";
 import { selectModuleProgress, useImprovStore } from "@/stores/useImprovStore";
 import { useProgressStore } from "@/stores/useProgressStore";
 import { ExerciseFrame, ScoreStrip } from "./ExerciseFrame";
@@ -40,15 +40,13 @@ export function PracticeLinkExercise({ moduleId, exercise }: PracticeLinkExercis
     const passed = isExercisePassed(exercise, progress);
     const positionStats = useProgressStore((state) => state.positionStats);
 
-    const positions = useMemo(() => {
-        const list: Array<{ stringIndex: number; fret: number }> = [];
-        for (const stringIndex of params.enabledStrings) {
-            for (let fret = Math.max(0, params.offsetsFrom); fret <= params.offsetsTo; fret += 1) {
-                list.push({ stringIndex, fret });
-            }
-        }
-        return list;
-    }, [params.enabledStrings, params.offsetsFrom, params.offsetsTo]);
+    // Open strings (fret 0) are excluded: practice sessions never ask them
+    // and knowing the open string is implied by the string's name (user
+    // report — the old 0-based window made module 1 impossible to pass).
+    const positions = useMemo(
+        () => practiceLinkPositions(params),
+        [params],
+    );
 
     const isPositionQualified = (stringIndex: number, fret: number): boolean => {
         const stats = positionStats[`${stringIndex}-${fret}`];

@@ -983,6 +983,22 @@ export function micLoopPass(hits: number, chordCount: number): boolean {
     return hits >= required;
 }
 
+/**
+ * Positions the practice-link pass criterion covers (plan phase 2, refined
+ * after the user report): fret 0 is EXCLUDED — practice sessions never ask
+ * open strings (Practice clamps minFret to 1) and knowing the open string
+ * is trivially implied by the string's name.
+ */
+export function practiceLinkPositions(params: PracticeLinkParams): Array<{ stringIndex: number; fret: number }> {
+    const list: Array<{ stringIndex: number; fret: number }> = [];
+    for (const stringIndex of params.enabledStrings) {
+        for (let fret = Math.max(1, params.offsetsFrom); fret <= params.offsetsTo; fret += 1) {
+            list.push({ stringIndex, fret });
+        }
+    }
+    return list;
+}
+
 /** Progress shape shared by the store and the pass predicates. */
 export interface ImprovProgressShape {
     exerciseRuns: Record<string, number>;
