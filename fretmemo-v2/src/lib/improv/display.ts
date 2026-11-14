@@ -8,6 +8,13 @@ import { formatLocalizedNoteToken } from "@/lib/noteNotation";
 import i18n from "@/lib/i18n";
 import type { ImprovEngineType } from "@/data/improv/curriculum";
 
+/**
+ * Applied to (or around) every Fretboard rendered by improv: string rows grow with the
+ * note dot (`.note-dot` = clamp(16px, 4.6vw, 34px), ×1.12 when active), so markers on
+ * adjacent strings never overlap at desktop widths. Phone rows stay 1.75rem.
+ */
+export const IMPROV_FRETBOARD_ROWS = "[&_.fret-cell]:min-h-[clamp(1.75rem,5.6vw,2.75rem)]";
+
 export const ENGINE_LABEL_KEYS: Record<ImprovEngineType, string> = {
     "practice-link": "improv.engine.practiceLink",
     "choice-quiz": "improv.engine.choiceQuiz",

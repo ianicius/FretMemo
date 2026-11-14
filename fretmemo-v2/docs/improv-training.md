@@ -106,6 +106,11 @@ Moduł jest zaliczony (`completed`), gdy **każde** jego ćwiczenie osiągnie w�
 - **Fretboard**: reuse `src/components/fretboard/Fretboard.tsx` (props `activeNotes: NoteStatus[]`,
   `onNoteClick`, `fitContainer`) — plik niezmieniony. Diagramy skal oznaczają dźwięki przez
   `status: "active"` + `label` (stopień 1/b3/…) + `emphasis: "strong"` dla roota.
+  Wysokość rzędów strun: każdy gryf improvu (`BackingLoopExercise`, `DiagramDrill`, `PracticeLinkExercise`,
+  osadzenie w `TheoryCard`) dostaje klasę `IMPROV_FRETBOARD_ROWS` (`src/lib/improv/display.ts`):
+  `.fret-cell` ma `min-height: clamp(1.75rem, 5.6vw, 2.75rem)`, czyli rząd rośnie razem z kropką
+  (`clamp(16px, 4.6vw, 34px)`, ×1.12 aktywna) — przy 1280 px rząd 44 px na kropkę 38 px, bez nachodzenia
+  znaczników na sąsiednich strunach; na telefonie rząd zostaje 28 px. `src/components/fretboard/**` bez zmian.
 - **i18n**: top-level namespace `improv` w `src/locales/{en,pl}/translation.json` (291 liście każdy;
   parzystość testowana w `src/lib/improv/__tests__/improvI18nParity.test.ts`). Nazwy modułów: PL +
   termin EN (`.name` / `.term`); teoria 3–6 zdań PL z terminami EN (EN pełne tłumaczenie).

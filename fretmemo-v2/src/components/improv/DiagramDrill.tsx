@@ -26,7 +26,7 @@ import { isExercisePassed, type DiagramDrillParams, type ImprovExercise } from "
 import { selectModuleProgress, useImprovStore } from "@/stores/useImprovStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { ExerciseFrame } from "./ExerciseFrame";
-import { localizeToken } from "@/lib/improv/display";
+import { IMPROV_FRETBOARD_ROWS, localizeToken } from "@/lib/improv/display";
 
 interface DiagramDrillProps {
     moduleId: string;
@@ -191,7 +191,7 @@ export function DiagramDrill({ moduleId, exercise }: DiagramDrillProps) {
                 tuning={tuning}
                 leftHanded={leftHanded}
                 fitContainer
-                className="rounded-lg border border-border bg-card/60"
+                className={`rounded-lg border border-border bg-card/60 ${IMPROV_FRETBOARD_ROWS}`}
             />
             {!isStandardTuning(tuning) && (
                 <p className="text-xs text-muted-foreground">{t("improv.drill.tuningNotice")}</p>

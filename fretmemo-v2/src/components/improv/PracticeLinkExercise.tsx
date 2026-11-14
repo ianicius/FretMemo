@@ -28,6 +28,7 @@ import { selectModuleProgress, useImprovStore } from "@/stores/useImprovStore";
 import { useProgressStore } from "@/stores/useProgressStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { ExerciseFrame, ScoreStrip } from "./ExerciseFrame";
+import { IMPROV_FRETBOARD_ROWS } from "@/lib/improv/display";
 
 interface PracticeLinkExerciseProps {
     moduleId: string;
@@ -125,7 +126,7 @@ export function PracticeLinkExercise({ moduleId, exercise }: PracticeLinkExercis
                 tuning={tuning}
                 leftHanded={leftHanded}
                 fitContainer
-                className="rounded-lg border border-border bg-card/60"
+                className={`rounded-lg border border-border bg-card/60 ${IMPROV_FRETBOARD_ROWS}`}
             />
             <p className="text-xs text-muted-foreground">{t("improv.practiceLink.hint")}</p>
             <Button type="button" size="sm" onClick={openPractice}>

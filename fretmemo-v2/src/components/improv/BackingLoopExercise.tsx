@@ -60,7 +60,7 @@ import { Note } from "tonal";
 import { cn } from "@/lib/utils";
 import { ExerciseFrame } from "./ExerciseFrame";
 import { LoopHitReport } from "./LoopHitReport";
-import { localizeToken } from "@/lib/improv/display";
+import { IMPROV_FRETBOARD_ROWS, localizeToken } from "@/lib/improv/display";
 
 interface BackingLoopExerciseProps {
     moduleId: string;
@@ -447,7 +447,7 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
                         tuning={tuning}
                         leftHanded={leftHanded}
                         fitContainer
-                        className="rounded-lg border border-border bg-card/60"
+                        className={`rounded-lg border border-border bg-card/60 ${IMPROV_FRETBOARD_ROWS}`}
                     />
                     <p className="text-xs text-muted-foreground">
                         {t("improv.loop.fretboardLegend")}

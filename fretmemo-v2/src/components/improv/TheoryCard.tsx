@@ -13,6 +13,7 @@ import ScaleExplorer from "@/components/theory/ScaleExplorer";
 import ChordLibrary from "@/components/theory/ChordLibrary";
 import TriadVisualizer from "@/components/theory/TriadVisualizer";
 import type { TheoryEmbed } from "@/data/improv/curriculum";
+import { IMPROV_FRETBOARD_ROWS } from "@/lib/improv/display";
 
 interface TheoryCardProps {
     theoryKey: string;
@@ -48,7 +49,7 @@ export function TheoryCard({ theoryKey, embed }: TheoryCardProps) {
             <CardContent className="space-y-4">
                 <p className="text-sm leading-relaxed text-muted-foreground">{t(theoryKey)}</p>
                 {embed && (
-                    <div className="rounded-lg border border-border bg-card/40 p-2">
+                    <div className={`rounded-lg border border-border bg-card/40 p-2 ${IMPROV_FRETBOARD_ROWS}`}>
                         <TheoryEmbedView embed={embed} />
                     </div>
                 )}
