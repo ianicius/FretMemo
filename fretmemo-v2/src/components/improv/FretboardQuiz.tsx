@@ -20,8 +20,9 @@ import {
     generateFretboardQuestions,
     type FretboardQuestion,
 } from "@/lib/improv/questions";
-import type { FretboardQuizParams, ImprovExercise } from "@/data/improv/curriculum";
-import { useImprovStore } from "@/stores/useImprovStore";
+import { isExercisePassed, QUIZ_PASSED_ATTEMPTS, type FretboardQuizParams, type ImprovExercise } from "@/data/improv/curriculum";
+import { selectModuleProgress, useImprovStore } from "@/stores/useImprovStore";
+import { useProgressStore } from "@/stores/useProgressStore";
 import { cn } from "@/lib/utils";
 import { ExerciseFrame, ScoreStrip } from "./ExerciseFrame";
 import { localizeToken } from "@/lib/improv/display";
@@ -43,8 +44,10 @@ export function FretboardQuiz({ moduleId, exercise }: FretboardQuizProps) {
     const { t } = useTranslation();
     const params = exercise.params as FretboardQuizParams;
     const recordQuizResult = useImprovStore((state) => state.recordQuizResult);
-    const quizBest = useImprovStore((state) => state.moduleState[moduleId]?.quizBest ?? 0);
-    const passed = quizBest >= params.requiredCorrect;
+    const recordSession = useProgressStore((state) => state.recordSession);
+    const progress = useImprovStore((state) => selectModuleProgress(state, moduleId));
+    const passed = isExercisePassed(exercise, progress);
+    const passedAttempts = progress.exerciseRuns[exercise.id] ?? 0;
 
     const attemptSeed = useRef(0);
     const [questions, setQuestions] = useState<FretboardQuestion[]>(() =>
@@ -54,6 +57,7 @@ export function FretboardQuiz({ moduleId, exercise }: FretboardQuizProps) {
     const [answer, setAnswer] = useState<AnswerState | null>(null);
     const [finished, setFinished] = useState(false);
     const timerRef = useRef<number | null>(null);
+    const [runStart] = useState(() => Date.now());
 
     useEffect(() => () => {
         if (timerRef.current !== null) window.clearTimeout(timerRef.current);
@@ -63,8 +67,14 @@ export function FretboardQuiz({ moduleId, exercise }: FretboardQuizProps) {
 
     const finishRun = useCallback((finalCorrect: number) => {
         recordQuizResult(moduleId, exercise.id, finalCorrect);
+        recordSession({
+            startedAt: runStart,
+            correct: finalCorrect,
+            incorrect: Math.max(0, questions.length - finalCorrect),
+            durationSeconds: Math.max(1, Math.round((Date.now() - runStart) / 1000)),
+        });
         setFinished(true);
-    }, [exercise.id, moduleId, recordQuizResult]);
+    }, [exercise.id, moduleId, questions.length, recordQuizResult, recordSession, runStart]);
 
     const scheduleAdvance = useCallback((wasCorrect: boolean, hadAnswer: boolean) => {
         const nextCorrect = wasCorrect && hadAnswer ? correct + 1 : correct;
@@ -155,7 +165,7 @@ export function FretboardQuiz({ moduleId, exercise }: FretboardQuizProps) {
                     />
                     <p className={cn("text-sm font-medium", correct >= params.requiredCorrect ? "text-emerald-600 dark:text-emerald-300" : "text-amber-600 dark:text-amber-300")}>
                         {correct >= params.requiredCorrect
-                            ? t("improv.quiz.passed")
+                            ? t("improv.quiz.passed", { required: QUIZ_PASSED_ATTEMPTS })
                             : t("improv.quiz.failed", { required: params.requiredCorrect })}
                     </p>
                     <Button variant="outline" size="sm" onClick={restart}>
@@ -167,6 +177,10 @@ export function FretboardQuiz({ moduleId, exercise }: FretboardQuizProps) {
                     <ScoreStrip
                         label={t("improv.quiz.question", { current: index + 1, total: questions.length })}
                         value={t("improv.quiz.scoreValue", { correct, total: questions.length })}
+                    />
+                    <ScoreStrip
+                        label={t("improv.quiz.attempts")}
+                        value={t("improv.quiz.attemptsValue", { done: Math.min(passedAttempts, 2), required: 2 })}
                     />
                     {question.direction === "position-to-note" ? (
                         <>

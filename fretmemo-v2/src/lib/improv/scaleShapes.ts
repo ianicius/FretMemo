@@ -16,9 +16,6 @@ import { NOTES, STANDARD_TUNING, getNoteAt } from "@/lib/constants";
 export type ScaleShapeId =
     | "min-pent"
     | "maj-pent"
-    | "dorian-pent"
-    | "phrygian-pent"
-    | "mixo-pent"
     | "major"
     | "melodic-minor"
     | "harmonic-minor"
@@ -45,9 +42,6 @@ export interface ScaleShapeDefinition {
 export const SCALE_SHAPES: Record<ScaleShapeId, ScaleShapeDefinition> = {
     "min-pent": { id: "min-pent", kind: "scale", semitones: [0, 3, 5, 7, 10], degrees: ["1", "b3", "4", "5", "b7"] },
     "maj-pent": { id: "maj-pent", kind: "scale", semitones: [0, 2, 4, 7, 9], degrees: ["1", "2", "3", "5", "6"] },
-    "dorian-pent": { id: "dorian-pent", kind: "scale", semitones: [0, 2, 3, 7, 9], degrees: ["1", "2", "b3", "5", "6"] },
-    "phrygian-pent": { id: "phrygian-pent", kind: "scale", semitones: [0, 1, 4, 7, 8], degrees: ["1", "b2", "3", "5", "b6"] },
-    "mixo-pent": { id: "mixo-pent", kind: "scale", semitones: [0, 4, 5, 7, 10], degrees: ["1", "3", "4", "5", "b7"] },
     major: { id: "major", kind: "scale", semitones: [0, 2, 4, 5, 7, 9, 11], degrees: ["1", "2", "3", "4", "5", "6", "7"] },
     "melodic-minor": { id: "melodic-minor", kind: "scale", semitones: [0, 2, 3, 5, 7, 9, 11], degrees: ["1", "2", "b3", "4", "5", "6", "7"] },
     "harmonic-minor": { id: "harmonic-minor", kind: "scale", semitones: [0, 2, 3, 5, 7, 8, 11], degrees: ["1", "2", "b3", "4", "5", "b6", "7"] },

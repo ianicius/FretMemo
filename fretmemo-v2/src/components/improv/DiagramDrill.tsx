@@ -21,8 +21,8 @@ import { SCALE_SHAPES, getShapePositions } from "@/lib/improv/scaleShapes";
 import { tonicMidi } from "@/lib/improv/chords";
 import { MetronomeClicker } from "@/lib/improv/click";
 import { playTone } from "@/lib/audio";
-import type { DiagramDrillParams, ImprovExercise } from "@/data/improv/curriculum";
-import { useImprovStore } from "@/stores/useImprovStore";
+import { isExercisePassed, type DiagramDrillParams, type ImprovExercise } from "@/data/improv/curriculum";
+import { selectModuleProgress, useImprovStore } from "@/stores/useImprovStore";
 import { ExerciseFrame } from "./ExerciseFrame";
 import { localizeToken } from "@/lib/improv/display";
 
@@ -35,14 +35,16 @@ export function DiagramDrill({ moduleId, exercise }: DiagramDrillProps) {
     const { t } = useTranslation();
     const params = exercise.params as DiagramDrillParams;
     const recordDrillRun = useImprovStore((state) => state.recordDrillRun);
-    const runs = useImprovStore((state) => state.moduleState[moduleId]?.exerciseRuns[exercise.id] ?? 0);
-    const passed = runs >= params.requiredRuns;
+    const progress = useImprovStore((state) => selectModuleProgress(state, moduleId));
+    const runs = progress.exerciseRuns[exercise.id] ?? 0;
+    const passed = isExercisePassed(exercise, progress);
 
     const [shapeIndex, setShapeIndex] = useState(0);
     const shape = params.shapes[Math.min(shapeIndex, params.shapes.length - 1)] as NonNullable<typeof params.shapes[number]>;
     const [key, setKey] = useState<string>(shape.defaultKey);
     const [bpm, setBpm] = useState(params.defaultBpm);
     const [playing, setPlaying] = useState(false);
+    const [metronomeBeats, setMetronomeBeats] = useState(0);
     const clickerRef = useRef<MetronomeClicker | null>(null);
 
     useEffect(() => {
@@ -62,6 +64,11 @@ export function DiagramDrill({ moduleId, exercise }: DiagramDrillProps) {
         [key, params.fretFrom, params.fretTo, shape.shapeId, shape.triadQuality],
     );
 
+    // Plan 1.2: a run counts only after the metronome has clicked through the
+    // full up+down path — as many beats as the shape has notes, times two.
+    const runBeats = positions.length * 2;
+    const runEarned = playing && metronomeBeats >= runBeats;
+
     const activeNotes = useMemo((): NoteStatus[] => {
         const degrees = SCALE_SHAPES[shape.shapeId].degrees;
         return positions.map((position) => ({
@@ -77,7 +84,10 @@ export function DiagramDrill({ moduleId, exercise }: DiagramDrillProps) {
     }, [positions, shape.shapeId]);
 
     const handleStart = () => {
-        clickerRef.current = new MetronomeClicker(bpm);
+        clickerRef.current = new MetronomeClicker(bpm, {
+            onBeat: (beat) => setMetronomeBeats(beat),
+        });
+        setMetronomeBeats(0);
         clickerRef.current.start();
         setPlaying(true);
         void playTone(tonicMidi(key, 48), 1.4);
@@ -87,6 +97,7 @@ export function DiagramDrill({ moduleId, exercise }: DiagramDrillProps) {
         clickerRef.current?.stop();
         clickerRef.current = null;
         setPlaying(false);
+        setMetronomeBeats(0);
     };
 
     const handleBpmChange = (value: number) => {
@@ -95,7 +106,9 @@ export function DiagramDrill({ moduleId, exercise }: DiagramDrillProps) {
     };
 
     const handleRunDone = () => {
+        if (!runEarned) return;
         recordDrillRun(moduleId, exercise.id);
+        setMetronomeBeats(0);
     };
 
     const thresholdLabel = t("improv.drill.threshold", { count: params.requiredRuns });
@@ -173,7 +186,14 @@ export function DiagramDrill({ moduleId, exercise }: DiagramDrillProps) {
                 <p className="text-xs text-muted-foreground">
                     {t("improv.drill.runs", { done: Math.min(runs, params.requiredRuns), required: params.requiredRuns })}
                 </p>
-                <Button type="button" size="sm" variant={passed ? "secondary" : "default"} onClick={handleRunDone}>
+                <Button
+                    type="button"
+                    size="sm"
+                    variant={passed ? "secondary" : "default"}
+                    onClick={handleRunDone}
+                    disabled={!runEarned}
+                    title={runEarned ? undefined : t("improv.drill.runNeedsMetronome", { beats: runBeats })}
+                >
                     {t("improv.drill.runButton")}
                 </Button>
             </div>

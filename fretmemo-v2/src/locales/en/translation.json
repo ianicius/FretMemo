@@ -442,9 +442,7 @@
         "theorySummary_other": "{{count}} tools",
         "earSummary_one": "{{count}} mode",
         "earSummary_other": "{{count}} modes",
-        "soon": "Soon",
-        "improv": "Improv Training",
-        "improvSummary": "Passed: {{done}}/{{total}} modules"
+        "soon": "Soon"
     },
     "scores": {
         "back": "Back to Train",
@@ -1774,10 +1772,6 @@
     "improv": {
         "title": "Improv Training",
         "description": "Learn guitar improvisation in 22 graded modules, from the E-string notes to Giant Steps. Each module pairs a short theory recap with exercises; passing them unlocks the next module.",
-        "libraryCard": {
-            "title": "Improv Training",
-            "description": "22 modules: fretboard, keys, scales, modes, chords, backing loops."
-        },
         "roadmap": {
             "progress": "Modules passed: {{done}} of {{total}}",
             "percent": "{{percent}}% of the roadmap",
@@ -1813,8 +1807,10 @@
             "correct": "Correct!",
             "wrong": "Wrong — correct answer: {{answer}}",
             "restart": "Restart",
-            "passed": "Exercise passed!",
-            "failed": "Try again — you need {{required}} correct answers."
+            "passed": "Run passed — the exercise needs {{required}} passed runs.",
+            "failed": "Try again — you need {{required}} correct answers.",
+            "attempts": "Passed attempts",
+            "attemptsValue": "{{done}}/{{required}}"
         },
         "fretQuiz": {
             "promptPositionToNote": "Which note is highlighted on the fretboard?",
@@ -1834,7 +1830,8 @@
             "runButton": "Mark run complete (up + down)",
             "runs": "Runs: {{done}}/{{required}}",
             "shape": "Shape",
-            "key": "Key"
+            "key": "Key",
+            "runNeedsMetronome": "Play the full run (up and down) with the metronome first — {{beats}} clicks."
         },
         "loop": {
             "threshold": "Threshold: {{required}} successful loops",
@@ -1906,7 +1903,8 @@
             "chordScale": {
                 "chordToMode": "Which mode fits {{chord}} (in C major)?",
                 "modeToChord": "Which chord does the {{mode}} mode serve?",
-                "hintPair": "{{chord}} → {{mode}}"
+                "hintPair": "{{chord}} → {{mode}}",
+                "chordToModeGeneric": "Which mode fits {{chord}}?"
             },
             "triadType": {
                 "nameToIntervals": "Intervals of the {{label}} chord:",
@@ -1961,12 +1959,12 @@
             "pentatonic-scale": {
                 "name": "Pentatonic Scale",
                 "term": "Pentatonic Scale",
-                "theory": "The minor pentatonic (1 b3 4 5 b7) is most players' first improvising vocabulary — it works over blues, rock and funk. The standard box (e.g. A in frets 5–8) sits comfortably under the fingers and teaches phrasing inside one position instead of running all over the neck. Switching keys C/A/D/E/G teaches transposing the shape rather than memorizing random frets. Play full runs up and down with a metronome so your timing stays even."
+                "theory": "The minor pentatonic (1 b3 4 5 b7) is most players' first improvising vocabulary — it works over blues, rock and folk. The standard box (e.g. A in frets 5–8) sits comfortably under the fingers and teaches phrasing inside one position instead of running all over the neck. Switching keys C/A/D/E/G teaches transposing the shape rather than memorizing random frets. Play full runs up and down with a metronome so your timing stays even."
             },
             "major-scale": {
                 "name": "Major Scale",
                 "term": "Major Scale",
-                "theory": "The major scale (1 2 3 4 5 6 7) is the reference point for everything that follows — modes, chord construction and harmony analysis are all counted against it. A one-position box lays the whole pattern out where you can see it. Practice up and down with a metronome, then in thirds and fourths — that is how a scale turns into melodic material."
+                "theory": "The major scale (1 2 3 4 5 6 7) is the reference point for everything that follows — modes, chord construction and harmony analysis are all counted against it. A one-position box (three notes per string) lays the whole pattern out where you can see it. Practice up and down with a metronome, then in thirds and fourths — that is how a scale turns into melodic material."
             },
             "fretboard-notes": {
                 "name": "Notes of the Rest of the Fretboard",
@@ -1976,7 +1974,7 @@
             "pentatonic-positions": {
                 "name": "Pentatonic Scale Positions",
                 "term": "Pentatonic Scale Positions",
-                "theory": "The pentatonic scale has five modes: minor (1 b3 4 5 b7), major (1 2 3 5 6), dorian (1 2 b3 5 6), phrygian (1 b2 3 5 b6) and mixolydian (1 3 4 5 b7). Each brings a different colour over the same chord — dorian adds the “cool” 6, phrygian the b2, mixolydian the b7. Each mode in its position is a separate shape to own: G min pent (3fr), Bb maj pent (5fr), C dorian pent (7fr), D phrygian pent (10fr), F mixo pent (12fr)."
+                "theory": "These five boxes are one scale: G minor pentatonic (G, Bb, C, D, F) spread across the neck. Each box starts on the next degree of that pentatonic, and each box is named after the chord its starting note serves: G minor pent (3fr), Bb major pent (5fr), C dorian pent (7fr), D phrygian pent (10fr), F mixo pent (12fr). Same five notes in every box — what changes is which note feels like home. Own each box, then connect them."
             },
             "modes": {
                 "name": "Modes",
@@ -1986,7 +1984,7 @@
             "chord-construction": {
                 "name": "How Chords Are Built",
                 "term": "How Chords Are Built",
-                "theory": "Chords come from the scale: stack every other note (1-3-5) from a scale degree. In F major: F-A-C is degree I (major), G-Bb-D is ii (minor), E-G-Bb is vii (diminished). You recognize a triad type by its distances: major third + perfect fifth = major, minor third + perfect fifth = minor, both narrowed = dim, both widened = aug. The same stacking extends to seventh chords and every extension used in improvisation."
+                "theory": "Chords come from the scale: stack every other note (1-3-5) from a scale degree. In F major: F-A-C is degree I (major), G-Bb-D is ii (minor), E-G-Bb is vii (diminished). You recognize a triad type by its distances: major third + perfect fifth = major, minor third + perfect fifth = minor, minor third + diminished fifth = dim, major third + augmented fifth = aug. The same stacking extends to seventh chords and every extension used in improvisation."
             },
             "chord-scale-major": {
                 "name": "Chord/Scale Relationships (Major)",
@@ -2031,7 +2029,7 @@
             "borrowed-chords": {
                 "name": "Borrowed Chords",
                 "term": "Borrowed Chords",
-                "theory": "Borrowed chords come from the parallel minor key: bVII7 (Bb7 in C), iv m (Fm), bVI (Ab), bIII (Eb). The most famous case is the backdoor ii–V: Fm7–Bb7→C, where Bb7 works as a “back door” dominant whose b7 in the bass resolves down by a whole step. Over Bb7 play C mixolydian / bVII tones and resolve stepwise into the C chord."
+                "theory": "Borrowed chords come from the parallel minor key: bVII7 (Bb7 in C), iv m (Fm), bVI (Ab), bIII (Eb). The most famous case is the backdoor ii–V: Fm7–Bb7→C. Over Fm7 play F dorian; over Bb7 play Bb Lydian dominant (or plain Bb mixolydian). The Bb root rises a whole step into C — that whole-step rise is the backdoor sound."
             },
             "melodic-minor": {
                 "name": "Melodic Minor Scale and Modes",

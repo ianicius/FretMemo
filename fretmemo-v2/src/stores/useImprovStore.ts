@@ -2,10 +2,15 @@
  * Progress store for the Improv Training module (run improv-training-2026-11-13).
  *
  * zustand + persist, modeled on src/stores/useRhythmDojoStore.ts. One entry
- * per curriculum module: best quiz score, completed drill/loop exercises,
- * per-exercise run counters and the module completion flag. Sequential
- * unlocking lives in src/data/improv/curriculum.ts (pure function over this
- * state) — the store only persists the data.
+ * per curriculum module: per-exercise run counters and the module completion
+ * flag. Sequential unlocking lives in src/data/improv/curriculum.ts (pure
+ * function over this state) — the store only persists the data.
+ *
+ * Run counters mean different things per engine (plan 1.1/1.3):
+ * - quiz exercises: number of PASSED attempts (a run recording only when
+ *   correct >= requiredCorrect); the exercise passes after 2 passed attempts
+ *   (QUIZ_PASSED_ATTEMPTS) — one lucky run must not lock it in;
+ * - drills: completed up+down runs; - backing loops: successful loops.
  */
 
 import { create } from "zustand";
@@ -14,16 +19,11 @@ import {
     CURRICULUM,
     getImprovModule,
     isModuleComplete,
+    type ImprovExercise,
 } from "@/data/improv/curriculum";
 
 export interface ImprovModuleProgress {
-    /** Best correct-answer count from a single quiz run (any quiz exercise). */
-    quizBest: number;
-    /** Exercise ids whose pass threshold (drill runs / loop passes) is met. */
-    drillsDone: string[];
-    /** Total successful backing-loop passes ever recorded for the module. */
-    loopPasses: number;
-    /** Per-exercise counters: drill runs (E3) / loop passes (E4). */
+    /** Per-exercise counters (see the engine semantics in the header). */
     exerciseRuns: Record<string, number>;
     completed: boolean;
 }
@@ -42,7 +42,7 @@ export interface ImprovStoreState {
 const STORAGE_KEY = "fretmemo-improv-v1";
 
 export function emptyProgress(): ImprovModuleProgress {
-    return { quizBest: 0, drillsDone: [], loopPasses: 0, exerciseRuns: {}, completed: false };
+    return { exerciseRuns: {}, completed: false };
 }
 
 function createInitialModuleState(): Record<string, ImprovModuleProgress> {
@@ -70,52 +70,77 @@ function updateModule(
     };
 }
 
+/**
+ * Migration for pre-1.1 persisted state: the old shape kept a single
+ * `quizBest` per module, which silently passed every quiz exercise of the
+ * module. The value moves to the module's first quiz exercise as ONE passed
+ * attempt when it met that exercise's threshold; otherwise it is dropped.
+ */
+function migrateLegacyModuleState(
+    persisted: Record<string, Partial<ImprovModuleProgress> & { quizBest?: number; drillsDone?: string[]; loopPasses?: number }>,
+): Record<string, ImprovModuleProgress> {
+    const migrated: Record<string, ImprovModuleProgress> = createInitialModuleState();
+    for (const [moduleId, legacy] of Object.entries(persisted)) {
+        const exerciseRuns = { ...(legacy.exerciseRuns ?? {}) };
+        const quizBest = typeof legacy.quizBest === "number" ? legacy.quizBest : 0;
+        if (quizBest > 0) {
+            const firstQuizExercise = getImprovModule(moduleId)?.exercises.find(
+                (exercise: ImprovExercise) => exercise.engine === "fretboard-quiz" || exercise.engine === "choice-quiz",
+            );
+            if (firstQuizExercise && (exerciseRuns[firstQuizExercise.id] ?? 0) === 0) {
+                const params = firstQuizExercise.params as { requiredCorrect: number };
+                if (quizBest >= params.requiredCorrect) {
+                    exerciseRuns[firstQuizExercise.id] = 1;
+                }
+            }
+        }
+        migrated[moduleId] = { exerciseRuns, completed: Boolean(legacy.completed) };
+    }
+    return migrated;
+}
+
 export const useImprovStore = create<ImprovStoreState>()(
     persist(
         (set) => ({
             moduleState: createInitialModuleState(),
             unlockAll: false,
             recordQuizResult: (moduleId, exerciseId, correct) => {
-                void exerciseId;
                 set((state) => ({
-                    moduleState: updateModule(state.moduleState, moduleId, (progress) => ({
-                        ...progress,
-                        quizBest: Math.max(progress.quizBest, Math.max(0, Math.round(correct))),
-                    })),
+                    moduleState: updateModule(state.moduleState, moduleId, (progress) => {
+                        const exercise = getImprovModule(moduleId)?.exercises.find((item) => item.id === exerciseId);
+                        if (!exercise) return progress;
+                        const params = exercise.params as { requiredCorrect: number };
+                        if (Math.max(0, Math.round(correct)) < params.requiredCorrect) return progress;
+                        return {
+                            ...progress,
+                            exerciseRuns: {
+                                ...progress.exerciseRuns,
+                                [exerciseId]: (progress.exerciseRuns[exerciseId] ?? 0) + 1,
+                            },
+                        };
+                    }),
                 }));
             },
             recordDrillRun: (moduleId, exerciseId) => {
                 set((state) => ({
-                    moduleState: updateModule(state.moduleState, moduleId, (progress) => {
-                        const runs = (progress.exerciseRuns[exerciseId] ?? 0) + 1;
-                        const exerciseRuns = { ...progress.exerciseRuns, [exerciseId]: runs };
-                        const module = getImprovModule(moduleId);
-                        const exercise = module?.exercises.find((item) => item.id === exerciseId);
-                        const required = exercise && exercise.engine === "diagram-drill"
-                            ? (exercise.params as { requiredRuns: number }).requiredRuns
-                            : 0;
-                        const drillsDone = runs >= required && !progress.drillsDone.includes(exerciseId)
-                            ? [...progress.drillsDone, exerciseId]
-                            : progress.drillsDone;
-                        return { ...progress, exerciseRuns, drillsDone };
-                    }),
+                    moduleState: updateModule(state.moduleState, moduleId, (progress) => ({
+                        ...progress,
+                        exerciseRuns: {
+                            ...progress.exerciseRuns,
+                            [exerciseId]: (progress.exerciseRuns[exerciseId] ?? 0) + 1,
+                        },
+                    })),
                 }));
             },
             recordLoopPass: (moduleId, exerciseId) => {
                 set((state) => ({
-                    moduleState: updateModule(state.moduleState, moduleId, (progress) => {
-                        const passes = (progress.exerciseRuns[exerciseId] ?? 0) + 1;
-                        const exerciseRuns = { ...progress.exerciseRuns, [exerciseId]: passes };
-                        const module = getImprovModule(moduleId);
-                        const exercise = module?.exercises.find((item) => item.id === exerciseId);
-                        const required = exercise && exercise.engine === "backing-improv"
-                            ? (exercise.params as { requiredPasses: number }).requiredPasses
-                            : 0;
-                        const drillsDone = passes >= required && !progress.drillsDone.includes(exerciseId)
-                            ? [...progress.drillsDone, exerciseId]
-                            : progress.drillsDone;
-                        return { ...progress, exerciseRuns, drillsDone, loopPasses: progress.loopPasses + 1 };
-                    }),
+                    moduleState: updateModule(state.moduleState, moduleId, (progress) => ({
+                        ...progress,
+                        exerciseRuns: {
+                            ...progress.exerciseRuns,
+                            [exerciseId]: (progress.exerciseRuns[exerciseId] ?? 0) + 1,
+                        },
+                    })),
                 }));
             },
             resetModule: (moduleId) => {
@@ -140,14 +165,13 @@ export const useImprovStore = create<ImprovStoreState>()(
                 unlockAll: state.unlockAll,
             }),
             merge: (persistedState, currentState) => {
-                const persisted = persistedState as Partial<ImprovStoreState> | undefined;
+                const persisted = persistedState as
+                    | { moduleState?: Record<string, Partial<ImprovModuleProgress> & { quizBest?: number; drillsDone?: string[]; loopPasses?: number }>; unlockAll?: boolean }
+                    | undefined;
                 return {
                     ...currentState,
                     ...persisted,
-                    moduleState: {
-                        ...createInitialModuleState(),
-                        ...(persisted?.moduleState ?? {}),
-                    },
+                    moduleState: migrateLegacyModuleState(persisted?.moduleState ?? {}),
                 };
             },
         },

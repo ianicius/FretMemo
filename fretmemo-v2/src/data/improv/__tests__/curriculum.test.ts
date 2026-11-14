@@ -3,6 +3,7 @@ import {
     CURRICULUM,
     IMPROV_MODULE_COUNT,
     IMPROV_ORDER,
+    QUIZ_PASSED_ATTEMPTS,
     countCompletedModules,
     getImprovExercise,
     getImprovModule,
@@ -15,6 +16,7 @@ import {
     type FretboardQuizParams,
 } from "../curriculum";
 import { coversAllDegrees, getShapePositions, resolveChordSemitones } from "@/lib/improv/scaleShapes";
+import { tritoneSub } from "@/lib/improv/questions";
 import { Note } from "tonal";
 
 /** Canonical order transcribed 1:1 from gauntlet/improv-training/sources/video-source-map.md. */
@@ -153,12 +155,13 @@ describe("improv curriculum", () => {
         expect(isModuleUnlocked(second, {}, false)).toBe(false);
         expect(isModuleUnlocked(second, {}, true)).toBe(true);
 
-        // Passing module 1 (both quizzes 10/10) unlocks module 2.
+        // Passing module 1 (both quizzes with 2 passed attempts each) unlocks module 2.
         const firstModule = getImprovModule(first) as NonNullable<ReturnType<typeof getImprovModule>>;
         const progress = {
-            quizBest: 10,
-            drillsDone: [] as string[],
-            exerciseRuns: {} as Record<string, number>,
+            exerciseRuns: {
+                "e-string-notes.e1": QUIZ_PASSED_ATTEMPTS,
+                "e-string-notes.e2": QUIZ_PASSED_ATTEMPTS,
+            } as Record<string, number>,
             completed: false,
         };
         expect(isModuleComplete(firstModule, progress)).toBe(true);
@@ -170,28 +173,75 @@ describe("improv curriculum", () => {
         const e1 = getImprovExercise("target-chord-tones", "target-chord-tones.e1") as NonNullable<ReturnType<typeof getImprovExercise>>;
         const requiredPasses = (e1.params as BackingLoopParams).requiredPasses;
 
-        const partial = { quizBest: 0, drillsDone: [] as string[], exerciseRuns: { "target-chord-tones.e1": requiredPasses - 1 }, completed: false };
+        const partial = { exerciseRuns: { "target-chord-tones.e1": requiredPasses - 1 } as Record<string, number>, completed: false };
         expect(isExercisePassed(e1, partial)).toBe(false);
         expect(isModuleComplete(loopModule, partial)).toBe(false);
 
         const full = {
-            quizBest: 0,
-            drillsDone: ["target-chord-tones.e1", "target-chord-tones.e2"],
             exerciseRuns: {
                 "target-chord-tones.e1": requiredPasses,
                 "target-chord-tones.e2": requiredPasses,
-            },
+            } as Record<string, number>,
             completed: false,
         };
         expect(isModuleComplete(loopModule, full)).toBe(true);
         expect(countCompletedModules({ "target-chord-tones": full })).toBe(1);
     });
 
-    it("quiz modules complete on the requiredCorrect threshold", () => {
+    it("quiz exercises pass only after two passed attempts (plan 1.3)", () => {
         const module = getImprovModule("key-signatures") as NonNullable<ReturnType<typeof getImprovModule>>;
-        const failing = { quizBest: 7, drillsDone: [], exerciseRuns: {}, completed: false };
-        const passing = { quizBest: 8, drillsDone: [], exerciseRuns: {}, completed: false };
-        expect(isModuleComplete(module, failing)).toBe(false);
-        expect(isModuleComplete(module, passing)).toBe(true);
+        const e1 = getImprovExercise("key-signatures", "key-signatures.e1") as NonNullable<ReturnType<typeof getImprovExercise>>;
+        const oneAttempt = { exerciseRuns: { "key-signatures.e1": QUIZ_PASSED_ATTEMPTS - 1 } as Record<string, number>, completed: false };
+        const twoAttempts = { exerciseRuns: { "key-signatures.e1": QUIZ_PASSED_ATTEMPTS } as Record<string, number>, completed: false };
+        expect(isExercisePassed(e1, oneAttempt)).toBe(false);
+        expect(isExercisePassed(e1, twoAttempts)).toBe(true);
+        // One passed attempt alone must not complete the module.
+        expect(isModuleComplete(module, oneAttempt)).toBe(false);
+        // Both exercises, two passed attempts each → module complete.
+        const bothExercisesTwice = {
+            exerciseRuns: {
+                "key-signatures.e1": QUIZ_PASSED_ATTEMPTS,
+                "key-signatures.e2": QUIZ_PASSED_ATTEMPTS,
+            } as Record<string, number>,
+            completed: false,
+        };
+        expect(isModuleComplete(module, bothExercisesTwice)).toBe(true);
+    });
+
+    it("module 6 drills five boxes of one pentatonic: same five pitches, two notes per string (plan 0.2)", () => {
+        const module = getImprovModule("pentatonic-positions") as NonNullable<ReturnType<typeof getImprovModule>>;
+        const allowedPcs = new Set(["G", "Bb", "C", "D", "F"].map((note) => Note.chroma(note)));
+        for (const exercise of module.exercises) {
+            const params = exercise.params as DiagramDrillParams;
+            for (const shape of params.shapes) {
+                expect(shape.shapeId).toBe("min-pent");
+                expect(shape.defaultKey).toBe("G");
+                const positions = getShapePositions(shape.shapeId, shape.defaultKey, {
+                    fretFrom: params.fretFrom,
+                    fretTo: params.fretTo,
+                });
+                expect(positions.length).toBeGreaterThan(0);
+                for (const position of positions) {
+                    expect(allowedPcs.has(Note.chroma(position.note))).toBe(true);
+                }
+                const perString = new Map<number, number>();
+                for (const position of positions) {
+                    perString.set(position.stringIndex, (perString.get(position.stringIndex) ?? 0) + 1);
+                }
+                for (const count of perString.values()) {
+                    expect(count).toBe(2);
+                }
+            }
+        }
+    });
+
+    it("module 15 subV variant plays the tritone sub of G7 (plan 0.3)", () => {
+        const module = getImprovModule("tritone-subs") as NonNullable<ReturnType<typeof getImprovModule>>;
+        const e2 = module.exercises.find((exercise) => exercise.id === "tritone-subs.e2") as NonNullable<ReturnType<typeof getImprovExercise>>;
+        const params = e2.params as BackingLoopParams;
+        const subvVariant = params.variants?.find((variant) => variant.id === "subv");
+        expect(subvVariant).toBeDefined();
+        expect(subvVariant?.progression).toEqual(["Dm7", tritoneSub("G7"), "Cmaj7"]);
+        expect(tritoneSub("G7")).toBe("Db7");
     });
 });

@@ -279,11 +279,14 @@ export const CURRICULUM: ImprovModule[] = [
         order: 6,
         theoryKey: "improv.modules.pentatonic-positions.theory",
         exercises: [
+            // Five boxes of one pentatonic (G minor pent): each window is the
+            // next position, named in the video after the degree it starts on
+            // (Bb major, C dorian, D phrygian, F mixo pent).
             drillExercise("pentatonic-positions", "e1", [{ shapeId: "min-pent", defaultKey: "G" }], 3, 6, 70, 1),
-            drillExercise("pentatonic-positions", "e2", [{ shapeId: "maj-pent", defaultKey: "Bb" }], 5, 8, 70, 1),
-            drillExercise("pentatonic-positions", "e3", [{ shapeId: "dorian-pent", defaultKey: "C" }], 7, 10, 70, 1),
-            drillExercise("pentatonic-positions", "e4", [{ shapeId: "phrygian-pent", defaultKey: "D" }], 10, 13, 70, 1),
-            drillExercise("pentatonic-positions", "e5", [{ shapeId: "mixo-pent", defaultKey: "F" }], 12, 15, 70, 1),
+            drillExercise("pentatonic-positions", "e2", [{ shapeId: "min-pent", defaultKey: "G" }], 5, 8, 70, 1),
+            drillExercise("pentatonic-positions", "e3", [{ shapeId: "min-pent", defaultKey: "G" }], 7, 11, 70, 1),
+            drillExercise("pentatonic-positions", "e4", [{ shapeId: "min-pent", defaultKey: "G" }], 10, 13, 70, 1),
+            drillExercise("pentatonic-positions", "e5", [{ shapeId: "min-pent", defaultKey: "G" }], 12, 15, 70, 1),
         ],
     },
     {
@@ -449,7 +452,7 @@ export const CURRICULUM: ImprovModule[] = [
                     {
                         id: "subv",
                         labelKey: "improv.goals.variantSubV",
-                        progression: ["Dm7", "Ab7", "Cmaj7"],
+                        progression: ["Dm7", "Db7", "Cmaj7"],
                         goalKey: "improv.goals.tritoneSubV",
                     },
                 ],
@@ -591,17 +594,28 @@ export function getImprovExercise(moduleId: string, exerciseId: string): ImprovE
     return getImprovModule(moduleId)?.exercises.find((exercise) => exercise.id === exerciseId);
 }
 
+/**
+ * A quiz exercise counts as passed only after this many attempts that met
+ * `requiredCorrect` (plan 1.3: one lucky run must not lock the exercise in).
+ */
+export const QUIZ_PASSED_ATTEMPTS = 2;
+
+/** Progress shape shared by the store and the pass predicates. */
+export interface ImprovProgressShape {
+    exerciseRuns: Record<string, number>;
+}
+
 /** True when the exercise's own pass threshold is met, given module progress. */
 export function isExercisePassed(
     exercise: ImprovExercise,
-    progress: { quizBest: number; drillsDone: string[]; exerciseRuns: Record<string, number> } | undefined,
+    progress: ImprovProgressShape | undefined,
 ): boolean {
     if (!progress) return false;
     switch (exercise.engine) {
         case "fretboard-quiz":
         case "choice-quiz": {
-            const params = exercise.params as FretboardQuizParams | ChoiceQuizParams;
-            return progress.quizBest >= params.requiredCorrect;
+            // exerciseRuns holds the number of PASSED attempts (plan 1.1/1.3).
+            return (progress.exerciseRuns[exercise.id] ?? 0) >= QUIZ_PASSED_ATTEMPTS;
         }
         case "diagram-drill": {
             const params = exercise.params as DiagramDrillParams;
@@ -619,7 +633,7 @@ export function isExercisePassed(
 /** A module is completed when every one of its exercises is passed. */
 export function isModuleComplete(
     module: ImprovModule,
-    progress: { quizBest: number; drillsDone: string[]; exerciseRuns: Record<string, number> } | undefined,
+    progress: ImprovProgressShape | undefined,
 ): boolean {
     return module.exercises.every((exercise) => isExercisePassed(exercise, progress));
 }
@@ -631,7 +645,7 @@ export function isModuleComplete(
  */
 export function isModuleUnlocked(
     moduleId: string,
-    moduleState: Record<string, { quizBest: number; drillsDone: string[]; exerciseRuns: Record<string, number>; completed: boolean }> | undefined,
+    moduleState: Record<string, ImprovProgressShape & { completed: boolean }> | undefined,
     unlockAll: boolean,
 ): boolean {
     if (unlockAll) return true;
@@ -646,7 +660,7 @@ export function isModuleUnlocked(
 }
 
 export function countCompletedModules(
-    moduleState: Record<string, { quizBest: number; drillsDone: string[]; exerciseRuns: Record<string, number>; completed: boolean }> | undefined,
+    moduleState: Record<string, ImprovProgressShape & { completed: boolean }> | undefined,
 ): number {
     return CURRICULUM.filter((module) => isModuleComplete(module, moduleState?.[module.id])).length;
 }

@@ -4,8 +4,12 @@
  * `ExerciseFrame` so the module view keeps one consistent layout:
  * name + description, engine badge, pass-threshold badge and the
  * "passed" check once the threshold is met in the store.
+ *
+ * Plan 1.4: the first time an exercise flips to passed, the frame awards
+ * bonus XP through useProgressStore and surfaces it as an XP toast.
  */
 
+import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +18,12 @@ import { CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ENGINE_LABEL_KEYS } from "@/lib/improv/display";
 import type { ImprovEngineType } from "@/data/improv/curriculum";
+import { useProgressStore } from "@/stores/useProgressStore";
+import { useXPToast } from "@/hooks/useXPToast";
+import { XPToast } from "@/components/practice/XPToast";
+
+/** Bonus XP for passing one improv exercise (awarded once per flip). */
+const IMPROV_EXERCISE_BONUS_XP = 50;
 
 interface ExerciseFrameProps {
     engine: ImprovEngineType;
@@ -26,7 +36,19 @@ interface ExerciseFrameProps {
 
 export function ExerciseFrame({ engine, name, description, thresholdLabel, passed, children }: ExerciseFrameProps) {
     const { t } = useTranslation();
+    const addBonusXP = useProgressStore((state) => state.addBonusXP);
+    const { toast, showToast, hideToast } = useXPToast();
+    const previousPassed = useRef(passed);
 
+    useEffect(() => {
+        // Fire only on a false→true transition inside this mount, so opening
+        // an already-passed exercise does not re-award XP.
+        if (!previousPassed.current && passed) {
+            addBonusXP(IMPROV_EXERCISE_BONUS_XP);
+            showToast(IMPROV_EXERCISE_BONUS_XP, "achievement", 0, name);
+        }
+        previousPassed.current = passed;
+    }, [addBonusXP, name, passed, showToast]);
 
     return (
         <Card className={cn(passed && "border-emerald-500/40")}>
@@ -59,6 +81,13 @@ export function ExerciseFrame({ engine, name, description, thresholdLabel, passe
                 </div>
             </CardHeader>
             <CardContent className="space-y-3">{children}</CardContent>
+            <XPToast
+                xp={toast.xp}
+                isVisible={toast.isVisible}
+                onClose={hideToast}
+                type={toast.type}
+                message={toast.message}
+            />
         </Card>
     );
 }

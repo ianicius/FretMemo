@@ -15,6 +15,12 @@ export interface MetronomeClickerOptions {
     lookaheadMs?: number;
     scheduleAheadSec?: number;
     startOffsetSec?: number;
+    /**
+     * Fired once per scheduled click (1-based count). Scheduled up to
+     * `scheduleAheadSec` early — good enough for gating a UI button, not a
+     * sample-accurate clock.
+     */
+    onBeat?: (beat: number) => void;
 }
 
 export class MetronomeClicker {
@@ -22,6 +28,7 @@ export class MetronomeClicker {
     private readonly lookaheadMs: number;
     private readonly scheduleAheadSec: number;
     private readonly startOffsetSec: number;
+    private readonly onBeat: ((beat: number) => void) | null;
     private intervalHandle: ReturnType<typeof setInterval> | null = null;
     private nextClickTime = 0;
     private beatCounter = 0;
@@ -31,6 +38,7 @@ export class MetronomeClicker {
         this.lookaheadMs = options.lookaheadMs ?? 25;
         this.scheduleAheadSec = options.scheduleAheadSec ?? 0.12;
         this.startOffsetSec = options.startOffsetSec ?? 0.1;
+        this.onBeat = options.onBeat ?? null;
     }
 
     get running(): boolean {
@@ -69,6 +77,7 @@ export class MetronomeClicker {
                 const beatInBar = this.beatCounter % 4;
                 this.scheduleClick(ctx, this.nextClickTime, beatInBar === 0);
                 this.beatCounter += 1;
+                this.onBeat?.(this.beatCounter);
                 this.nextClickTime += beatSec;
             }
         } catch {

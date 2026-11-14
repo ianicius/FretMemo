@@ -1,1 +1,0 @@
-import{p as a,v as l}from"./index-Bu0kJj5a.js";function i({value:e,className:s}){const t=Math.min(100,Math.max(0,e));return a.jsx("div",{className:l("relative h-2 w-full overflow-hidden rounded-full bg-muted",s),children:a.jsx("div",{className:"h-full bg-primary transition-all duration-300 ease-out",style:{width:`${t}%`}})})}export{i as P};

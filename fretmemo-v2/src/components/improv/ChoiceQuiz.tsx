@@ -16,8 +16,9 @@ import {
     generateChoiceQuiz,
     type ChoiceQuestion,
 } from "@/lib/improv/questions";
-import type { ChoiceQuizParams, ImprovExercise } from "@/data/improv/curriculum";
-import { useImprovStore } from "@/stores/useImprovStore";
+import { isExercisePassed, QUIZ_PASSED_ATTEMPTS, type ChoiceQuizParams, type ImprovExercise } from "@/data/improv/curriculum";
+import { selectModuleProgress, useImprovStore } from "@/stores/useImprovStore";
+import { useProgressStore } from "@/stores/useProgressStore";
 import { cn } from "@/lib/utils";
 import { ExerciseFrame, ScoreStrip } from "./ExerciseFrame";
 import { localizePromptValues, localizeToken } from "@/lib/improv/display";
@@ -38,10 +39,13 @@ export function ChoiceQuiz({ moduleId, exercise }: ChoiceQuizProps) {
     const { t } = useTranslation();
     const params = exercise.params as ChoiceQuizParams;
     const recordQuizResult = useImprovStore((state) => state.recordQuizResult);
-    const quizBest = useImprovStore((state) => state.moduleState[moduleId]?.quizBest ?? 0);
-    const passed = quizBest >= params.requiredCorrect;
+    const recordSession = useProgressStore((state) => state.recordSession);
+    const progress = useImprovStore((state) => selectModuleProgress(state, moduleId));
+    const passed = isExercisePassed(exercise, progress);
+    const passedAttempts = progress.exerciseRuns[exercise.id] ?? 0;
 
     const attemptSeed = useRef(0);
+    const [runStart] = useState(() => Date.now());
     const [questions, setQuestions] = useState<ChoiceQuestion[]>(() =>
         generateChoiceQuiz(params, `${exercise.id}:0:${Date.now()}`));
     const [index, setIndex] = useState(0);
@@ -66,6 +70,12 @@ export function ChoiceQuiz({ moduleId, exercise }: ChoiceQuizProps) {
             setSelected(null);
             if (index + 1 >= questions.length) {
                 recordQuizResult(moduleId, exercise.id, nextCorrect);
+                recordSession({
+                    startedAt: runStart,
+                    correct: nextCorrect,
+                    incorrect: Math.max(0, questions.length - nextCorrect),
+                    durationSeconds: Math.max(1, Math.round((Date.now() - runStart) / 1000)),
+                });
                 setFinished(true);
             } else {
                 setIndex((previous) => previous + 1);
@@ -103,7 +113,7 @@ export function ChoiceQuiz({ moduleId, exercise }: ChoiceQuizProps) {
                     />
                     <p className={cn("text-sm font-medium", correct >= params.requiredCorrect ? "text-emerald-600 dark:text-emerald-300" : "text-amber-600 dark:text-amber-300")}>
                         {correct >= params.requiredCorrect
-                            ? t("improv.quiz.passed")
+                            ? t("improv.quiz.passed", { required: QUIZ_PASSED_ATTEMPTS })
                             : t("improv.quiz.failed", { required: params.requiredCorrect })}
                     </p>
                     <Button variant="outline" size="sm" onClick={restart}>
@@ -115,6 +125,10 @@ export function ChoiceQuiz({ moduleId, exercise }: ChoiceQuizProps) {
                     <ScoreStrip
                         label={t("improv.quiz.question", { current: index + 1, total: questions.length })}
                         value={t("improv.quiz.scoreValue", { correct, total: questions.length })}
+                    />
+                    <ScoreStrip
+                        label={t("improv.quiz.attempts")}
+                        value={t("improv.quiz.attemptsValue", { done: Math.min(passedAttempts, 2), required: 2 })}
                     />
                     <p className="text-sm font-medium">{t(question.promptKey, localizePromptValues(question.promptValues))}</p>
                     <div className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-2">

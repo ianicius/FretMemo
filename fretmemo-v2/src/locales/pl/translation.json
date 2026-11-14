@@ -705,9 +705,7 @@
         "earSummary_few": "{{count}} tryby",
         "earSummary_many": "{{count}} trybów",
         "earSummary_other": "{{count}} trybu",
-        "soon": "Wkrótce",
-        "improv": "Trening improwizacji",
-        "improvSummary": "Zaliczone: {{done}}/{{total}} modułów"
+        "soon": "Wkrótce"
     },
     "challenges": {
         "title": "Wyzwania",
@@ -1788,10 +1786,6 @@
     "improv": {
         "title": "Trening improwizacji",
         "description": "Nauka improwizacji w 22 modułach, od dźwięków struny E po Giant Steps. W każdym module krótko o teorii i ćwiczenia z progiem zaliczenia, który otwiera kolejny moduł.",
-        "libraryCard": {
-            "title": "Trening improwizacji (Improv Training)",
-            "description": "22 moduły: gryf, tonacje, skale, tryby, akordy, loopy akordowe."
-        },
         "roadmap": {
             "progress": "Zaliczone moduły: {{done}} z {{total}}",
             "percent": "{{percent}}% planu",
@@ -1827,8 +1821,10 @@
             "correct": "Dobrze!",
             "wrong": "Źle — poprawna odpowiedź: {{answer}}",
             "restart": "Zacznij od nowa",
-            "passed": "Ćwiczenie zaliczone!",
-            "failed": "Spróbuj jeszcze raz — potrzebujesz {{required}} poprawnych odpowiedzi."
+            "passed": "Podejście zaliczone — ćwiczenie wymaga {{required}} zaliczonych podejść.",
+            "failed": "Spróbuj jeszcze raz — potrzebujesz {{required}} poprawnych odpowiedzi.",
+            "attempts": "Zaliczone podejścia",
+            "attemptsValue": "{{done}}/{{required}}"
         },
         "fretQuiz": {
             "promptPositionToNote": "Jaka nuta jest zaznaczona na gryfie?",
@@ -1848,7 +1844,8 @@
             "runButton": "Przebieg zaliczony (góra i dół)",
             "runs": "Przebiegi: {{done}}/{{required}}",
             "shape": "Kształt",
-            "key": "Tonacja"
+            "key": "Tonacja",
+            "runNeedsMetronome": "Najpierw zagraj pełny przebieg (góra i dół) z metronomem — {{beats}} uderzeń."
         },
         "loop": {
             "threshold": "Próg: {{required}} udanych obiegów",
@@ -1920,7 +1917,8 @@
             "chordScale": {
                 "chordToMode": "Jaki tryb pasuje do {{chord}} (w tonacji C major)?",
                 "modeToChord": "Który akord obsługuje tryb {{mode}}?",
-                "hintPair": "{{chord}} → {{mode}}"
+                "hintPair": "{{chord}} → {{mode}}",
+                "chordToModeGeneric": "Jaki tryb pasuje do {{chord}}?"
             },
             "triadType": {
                 "nameToIntervals": "Interwały akordu {{label}}:",
@@ -1975,12 +1973,12 @@
             "pentatonic-scale": {
                 "name": "Skala pentatoniczna",
                 "term": "Pentatonic Scale",
-                "theory": "Pentatonika molowa (minor pentatonic: 1 b3 4 5 b7) to zwykle pierwsze „zdania” improwizatora — działa nad bluesem, rockiem i funkiem. Standardowy box (np. A w progach 5–8) leży wygodnie pod palcami i uczy frazowania w jednej pozycji zamiast biegania po całym gryfie. Przełączanie tonacji C/A/D/E/G uczy przenoszenia kształtu (transposition), a nie zapamiętywania przypadkowych progów. Zagraj pełny przebieg w górę i w dół z metronomem, żeby czas trzymał równo."
+                "theory": "Pentatonika molowa (minor pentatonic: 1 b3 4 5 b7) to zwykle pierwsze „zdania” improwizatora — działa nad bluesem, rockiem i folkiem. Standardowy box (np. A w progach 5–8) leży wygodnie pod palcami i uczy frazowania w jednej pozycji zamiast biegania po całym gryfie. Przełączanie tonacji C/A/D/E/G uczy przenoszenia kształtu (transposition), a nie zapamiętywania przypadkowych progów. Zagraj pełny przebieg w górę i w dół z metronomem, żeby czas trzymał równo."
             },
             "major-scale": {
                 "name": "Skala majorowa",
                 "term": "Major Scale",
-                "theory": "Skala majorowa (major scale: 1 2 3 4 5 6 7) jest punktem odniesienia dla wszystkiego, co dalej — tryby, budowa akordów i analiza harmonii liczy się względem niej. Box w jednej pozycji (grupy po 6 dźwięków na strunę) pokazuje skalę jako system, nie jako losowe nuty. Ćwicz w górę i w dół z metronomem, potem w skokach tercjowych i kwartowych — tak skala staje się materiałem na linie melodyczne."
+                "theory": "Skala majorowa (major scale: 1 2 3 4 5 6 7) jest punktem odniesienia dla wszystkiego, co dalej — tryby, budowa akordów i analiza harmonii liczy się względem niej. Box w jednej pozycji (po trzy dźwięki na strunę) pokazuje całą skalę jako powtarzalny wzór. Ćwicz w górę i w dół z metronomem, potem w skokach tercjowych i kwartowych — tak skala staje się materiałem na linie melodyczne."
             },
             "fretboard-notes": {
                 "name": "Dźwięki całego gryfu",
@@ -1990,7 +1988,7 @@
             "pentatonic-positions": {
                 "name": "Pozycje pentatoniki",
                 "term": "Pentatonic Scale Positions",
-                "theory": "Pentatonika ma pięć odmian (trybów pentatoniki): minor (1 b3 4 5 b7), major (1 2 3 5 6), dorian (1 2 b3 5 6), phrygian (1 b2 3 5 b6) i mixolydian (1 3 4 5 b7). Każda daje inny kolor nad tym samym akordem — dorian dodaje „chłodną” 6, phrygian b2, mixolydian b7. Każda odmiana w konkretnej pozycji to osobny kształt do opanowania: G min pent (3 fr), Bb maj pent (5 fr), C dorian pent (7 fr), D phrygian pent (10 fr), F mixo pent (12 fr)."
+                "theory": "Te pięć boksów to jedna skala: G-moll pentatoniczna (G, Bb, C, D, F) rozłożona na cały gryf. Każdy boks zaczyna się od kolejnego stopnia tej pentatoniki, a nazwa boksu pochodzi od akordu, któremu jego dźwięk startowy służy: G min pent (3 fr), Bb major pent (5 fr), C dorian pent (7 fr), D phrygian pent (10 fr), F mixo pent (12 fr). W każdym boksie te same pięć dźwięków — zmienia się tylko to, który z nich brzmi jak „dom”. Opanuj każdy boks, potem łącz je ze sobą."
             },
             "modes": {
                 "name": "Tryby kościelne",
@@ -2000,7 +1998,7 @@
             "chord-construction": {
                 "name": "Budowa akordów",
                 "term": "How Chords Are Built",
-                "theory": "Akordy buduje się z gamy: bierzesz co drugi dźwięk — 1-3-5 — od wybranego stopnia. W tonacji F: F-A-C to I stopień (major), G-Bb-D to ii (minor), a E-G-Bb to vii (diminished). Typ trójdźwięku (triad) rozpoznajesz po odległościach: tercja wielka + czysta kwinta = major, tercja mała + czysta kwinta = minor, obie zwężone = dim, obie rozszerzone = aug. To samo budowanie rozciąga się na akordy septymowe i wszystkie rozszerzenia używane w improwizacji."
+                "theory": "Akordy buduje się z gamy: bierzesz co drugi dźwięk — 1-3-5 — od wybranego stopnia. W tonacji F: F-A-C to I stopień (major), G-Bb-D to ii (minor), a E-G-Bb to vii (diminished). Typ trójdźwięku (triad) rozpoznajesz po odległościach: tercja wielka + czysta kwinta = major, tercja mała + czysta kwinta = minor, tercja mała + kwinta zmniejszona = dim, tercja wielka + kwinta zwiększona = aug. To samo budowanie rozciąga się na akordy septymowe i wszystkie rozszerzenia używane w improwizacji."
             },
             "chord-scale-major": {
                 "name": "Akordy a skala (major)",
@@ -2045,7 +2043,7 @@
             "borrowed-chords": {
                 "name": "Akordy pożyczone",
                 "term": "Borrowed Chords",
-                "theory": "Akordy pożyczone (borrowed chords) przychodzą z tonacji równoległej molowej: bVII7 (Bb7 w C), iv m (Fm), bVI (Ab), bIII (Eb). Najpopularniejszy przypadek to backdoor ii–V: Fm7–Bb7→C, gdzie Bb7 działa jak „tylne wejście” dominanta z b7 w basie rozwiązującym o ton w dół. Nad Bb7 graj dźwięki skali C mixolydian (lub bVII) i rozwiązuj krokowo do dźwięków akordu C."
+                "theory": "Akordy pożyczone (borrowed chords) przychodzą z tonacji równoległej molowej: bVII7 (Bb7 w C), iv m (Fm), bVI (Ab), bIII (Eb). Najpopularniejszy przypadek to backdoor ii–V: Fm7–Bb7→C. Nad Fm7 graj F dorian; nad Bb7 Bb lydian dominant (albo zwykły Bb mixolydian). Root Bb wchodzi o ton w górę do C — ten ruch to brzmienie backdoor."
             },
             "melodic-minor": {
                 "name": "Skala molowa melodyczna",
