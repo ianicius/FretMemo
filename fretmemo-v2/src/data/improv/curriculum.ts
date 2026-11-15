@@ -1350,3 +1350,15 @@ export function countCompletedModules(
 ): number {
     return CURRICULUM.filter((module) => isModuleComplete(module, moduleState?.[module.id])).length;
 }
+
+/**
+ * Plan F2: where the learner stands — the first unfinished module and its
+ * first required exercise that is not passed yet. Null once everything is done.
+ */
+export function nextImprovExercise(
+    moduleState: Record<string, ImprovProgressShape & { completed: boolean }> | undefined,
+): { module: ImprovModule; exercise: ImprovExercise } | null {
+    const module = CURRICULUM.find((item) => !isModuleComplete(item, moduleState?.[item.id]));
+    const exercise = module?.exercises.find((item) => !isNonGating(item) && !isExercisePassed(item, moduleState?.[module.id]));
+    return module && exercise ? { module, exercise } : null;
+}

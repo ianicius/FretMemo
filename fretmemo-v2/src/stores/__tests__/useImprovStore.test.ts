@@ -126,3 +126,16 @@ describe("useImprovStore verified loop passes (plan A2)", () => {
         expect(progress.verifiedRuns).toEqual({});
     });
 });
+
+describe("useImprovStore loop time (plan F3)", () => {
+    it("adds up whole seconds and ignores empty or negative spans", () => {
+        useImprovStore.setState({ loopSeconds: 0 });
+        const { addLoopSeconds } = useImprovStore.getState();
+        addLoopSeconds(61.4);
+        addLoopSeconds(0);
+        addLoopSeconds(-5);
+        addLoopSeconds(Number.NaN);
+        addLoopSeconds(30);
+        expect(useImprovStore.getState().loopSeconds).toBe(91);
+    });
+});

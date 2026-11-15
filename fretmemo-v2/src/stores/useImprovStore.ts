@@ -44,6 +44,9 @@ export interface ImprovStoreState {
     entranceUnlockCount: number | null;
     /** SM-2 entries per review generator (plan phase 6: review scheduling). */
     reviewSRS: Record<string, SpacedRepetitionEntry>;
+    /** Plan F3: seconds played over backing loops, all modules together. */
+    loopSeconds: number;
+    addLoopSeconds: (seconds: number) => void;
     recordQuizResult: (moduleId: string, exerciseId: string, correct: number) => void;
     recordDrillRun: (moduleId: string, exerciseId: string) => void;
     /** `variantId` counts the pass for that variant (every variant must pass);
@@ -129,6 +132,11 @@ export const useImprovStore = create<ImprovStoreState>()(
             unlockAll: false,
             entranceUnlockCount: null,
             reviewSRS: {},
+            loopSeconds: 0,
+            addLoopSeconds: (seconds) => {
+                if (!(seconds > 0)) return;
+                set((state) => ({ loopSeconds: state.loopSeconds + Math.round(seconds) }));
+            },
             recordQuizResult: (moduleId, exerciseId, correct) => {
                 set((state) => ({
                     moduleState: updateModule(state.moduleState, moduleId, (progress) => {
@@ -220,6 +228,7 @@ export const useImprovStore = create<ImprovStoreState>()(
                 unlockAll: state.unlockAll,
                 entranceUnlockCount: state.entranceUnlockCount,
                 reviewSRS: state.reviewSRS,
+                loopSeconds: state.loopSeconds,
             }),
             merge: (persistedState, currentState) => {
                 const persisted = persistedState as

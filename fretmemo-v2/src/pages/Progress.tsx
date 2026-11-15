@@ -50,6 +50,7 @@ export default function ProgressPage() {
     const tuning = useMemo(() => normalizeTuning(quickTuning), [quickTuning]);
     const enqueueFeedback = useFeedbackStore((state) => state.enqueue);
     const improvModuleState = useImprovStore((state) => state.moduleState);
+    const improvLoopSeconds = useImprovStore((state) => state.loopSeconds);
     const { t } = useTranslation();
 
     // Plan phase 6: improv progress card (completed modules).
@@ -284,6 +285,9 @@ export default function ProgressPage() {
                             {completedImprovModules.map((module) => t(`improv.modules.${module.id}.name`)).join(" · ")}
                         </p>
                     )}
+                    <p className="text-sm text-muted-foreground">
+                        {t("progress.improv.loopTime", { hours: Math.floor(improvLoopSeconds / 3600), minutes: Math.floor((improvLoopSeconds % 3600) / 60) })}
+                    </p>
                     <Button variant="outline" size="sm" onClick={() => navigate("/improv")}>
                         {t("progress.improv.open")}
                     </Button>

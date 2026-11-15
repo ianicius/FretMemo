@@ -17,6 +17,7 @@ import {
     type PracticeLinkParams,
     type DiagramDrillParams,
     BUILD_STARTS,
+    nextImprovExercise,
 } from "../curriculum";
 import {
     MODE_PENTATONIC, PENTATONIC_ADDITIONS, coversAllDegrees, getShapePositions, shapeSemitones, stackPositionKeys, stringShapes, tonicAnchorFret,
@@ -588,5 +589,41 @@ describe("plan stage D: loop variants (D4, D5, D6, D8)", () => {
             expect(chords).toHaveLength(1);
             expect(chords[0]?.startsWith("D")).toBe(true);
         }
+    });
+});
+
+describe("plan F2: the next required exercise", () => {
+    const passAll = (moduleId: string) => {
+        const module = getImprovModule(moduleId) as NonNullable<ReturnType<typeof getImprovModule>>;
+        const exerciseRuns: Record<string, number> = {};
+        for (const exercise of module.exercises) {
+            const variants = (exercise.params as BackingLoopParams).variants ?? [];
+            exerciseRuns[exercise.id] = 9;
+            for (const variant of variants) exerciseRuns[loopRunKey(exercise.id, variant.id)] = 9;
+        }
+        return { exerciseRuns, completed: false };
+    };
+
+    it("starts at the first exercise of module 1", () => {
+        const next = nextImprovExercise({});
+        expect(next?.module.id).toBe("e-string-notes");
+        expect(next?.exercise.id).toBe("e-string-notes.e1");
+    });
+
+    it("moves to the next module once the current one is complete, and skips extras", () => {
+        const next = nextImprovExercise({ "e-string-notes": passAll("e-string-notes") });
+        expect(next?.module.id).toBe("key-signatures");
+        // Inside a module: with the first required exercise passed, the next required one is offered.
+        const partial = nextImprovExercise({
+            "e-string-notes": passAll("e-string-notes"),
+            "key-signatures": { exerciseRuns: { "key-signatures.e1": QUIZ_PASSED_ATTEMPTS }, completed: false },
+        });
+        expect(partial?.exercise.id).toBe("key-signatures.e2");
+        expect((partial?.exercise.params as { nonGating?: boolean }).nonGating).toBeFalsy();
+    });
+
+    it("returns null when every module is complete", () => {
+        const all = Object.fromEntries(CURRICULUM.map((module) => [module.id, passAll(module.id)]));
+        expect(nextImprovExercise(all)).toBeNull();
     });
 });

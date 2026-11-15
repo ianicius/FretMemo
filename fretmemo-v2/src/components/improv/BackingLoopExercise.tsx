@@ -95,6 +95,16 @@ function normalizeEntries(
     });
 }
 
+/** Monotonic clock for the play-time counter; read only from the Start/Stop handlers. */
+const clockSeconds = () => performance.now() / 1000;
+
+/** Plan F3: time over the backing counts from Start to Stop, and to leaving the page mid-loop. */
+function flushPlayTime(startedAt: { current: number | null }) {
+    if (startedAt.current === null) return;
+    useImprovStore.getState().addLoopSeconds(clockSeconds() - startedAt.current);
+    startedAt.current = null;
+}
+
 export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseProps) {
     const { t } = useTranslation();
     const params = exercise.params as BackingLoopParams;
@@ -146,6 +156,7 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
     // B3: per-chord result of the last mic-checked loop.
     const [lastReport, setLastReport] = useState<ChordHitResult[] | null>(null);
     const [playing, setPlaying] = useState(false);
+    const startedAtRef = useRef<number | null>(null);
     const [currentChordIndex, setCurrentChordIndex] = useState(0);
     const [loopsCompleted, setLoopsCompleted] = useState(0);
     const [markedLoop, setMarkedLoop] = useState(0);
@@ -180,6 +191,7 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
     };
 
     useEffect(() => () => {
+        flushPlayTime(startedAtRef);
         schedulerRef.current?.stop();
         schedulerRef.current = null;
         clearTimers();
@@ -267,9 +279,11 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
         });
         schedulerRef.current = scheduler;
         scheduler.start();
+        startedAtRef.current = clockSeconds();
     };
 
     const handleStop = () => {
+        flushPlayTime(startedAtRef);
         schedulerRef.current?.stop();
         schedulerRef.current = null;
         clearTimers();

@@ -822,6 +822,12 @@
         "accuracy": "Accuracy",
         "coverage": "Coverage",
         "momentum": "Momentum",
+        "improvContinue": {
+            "title": "Improv training",
+            "desc": "Module {{order}} of {{total}}: {{module}}",
+            "continue": "Continue",
+            "start": "Start"
+        },
         "dailyQuests": "Daily Quests",
         "dailyQuestsDesc": "Complete tasks to earn bonus XP",
         "claimed": "Claimed",
@@ -1762,6 +1768,7 @@
             "title": "Improv Training",
             "desc": "Modules completed in Improv Training.",
             "completed": "{{done}} of {{total}}",
+            "loopTime": "Time played over backing: {{hours}} h {{minutes}} min",
             "open": "Open roadmap"
         }
     },

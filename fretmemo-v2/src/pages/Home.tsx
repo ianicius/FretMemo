@@ -16,6 +16,8 @@ import { StatLine } from "@/components/ui/stat-line";
 import { ArrowRight, Compass, Flame, Music2, Play, Sparkles, Star, Target, Trophy, Gift, CheckCircle2 } from "lucide-react";
 import { getLevelProgress } from "@/lib/progression";
 import { useQuestStore } from "@/stores/useQuestStore";
+import { useImprovStore } from "@/stores/useImprovStore";
+import { CURRICULUM, nextImprovExercise } from "@/data/improv/curriculum";
 
 type PracticeMode = "fretboardToNote" | "tabToNote" | "noteToTab" | "playNotes" | "playTab";
 type ExerciseDifficulty = "beginner" | "intermediate" | "advanced";
@@ -119,6 +121,10 @@ function formatRelativeTime(
 export default function Home() {
     const { t } = useTranslation();
     const navigate = useNavigate();
+    // Plan F2: the next required improv exercise, straight from the home page.
+    const improvModuleState = useImprovStore((state) => state.moduleState);
+    const improvNext = useMemo(() => nextImprovExercise(improvModuleState), [improvModuleState]);
+    const improvStarted = Object.values(improvModuleState).some((module) => Object.values(module.exerciseRuns).some((runs) => runs > 0));
     const { streakDays, totalCorrect, totalIncorrect, positionStats, totalXP } = useProgressStore();
     const { setMode, setPracticeConstraints } = useGameStore();
     const quickTuning = useSettingsStore((state) => state.quick.tuning);
@@ -398,6 +404,31 @@ export default function Home() {
                     </Button>
                 </CardContent>
             </Card>
+
+            {improvNext && (
+                <Card className="border-border/80">
+                    <CardHeader>
+                        <div className="flex items-center gap-2">
+                            <Music2 className="h-5 w-5 text-primary" />
+                            <CardTitle>{t('home.improvContinue.title')}</CardTitle>
+                        </div>
+                        <CardDescription>
+                            {t('home.improvContinue.desc', {
+                                order: improvNext.module.order,
+                                total: CURRICULUM.length,
+                                module: t(`improv.modules.${improvNext.module.id}.name`),
+                            })}
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                        <p className="text-sm font-medium">{t(improvNext.exercise.nameKey)}</p>
+                        <Button variant="outline" className="w-full justify-between" onClick={() => navigate(`/improv/${improvNext.module.id}`)}>
+                            {t(improvStarted ? 'home.improvContinue.continue' : 'home.improvContinue.start')}
+                            <ArrowRight className="h-4 w-4" />
+                        </Button>
+                    </CardContent>
+                </Card>
+            )}
 
             <Card className="border-border/80">
                 <CardHeader>

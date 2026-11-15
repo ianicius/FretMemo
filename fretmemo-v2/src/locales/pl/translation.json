@@ -836,6 +836,12 @@
         "accuracy": "Celność",
         "coverage": "Pokrycie gryfu",
         "momentum": "Motywacja",
+        "improvContinue": {
+            "title": "Trening improwizacji",
+            "desc": "Moduł {{order}} z {{total}}: {{module}}",
+            "continue": "Kontynuuj",
+            "start": "Zacznij"
+        },
         "dailyQuests": "Codzienne zadania",
         "dailyQuestsDesc": "Wykonuj zadania i zdobywaj dodatkowe XP",
         "claimed": "Odebrano",
@@ -1413,6 +1419,7 @@
             "title": "Trening improwizacji",
             "desc": "Moduły zaliczone w Treningu improwizacji.",
             "completed": "{{done}} z {{total}}",
+            "loopTime": "Czas gry nad podkładem: {{hours}} godz. {{minutes}} min",
             "open": "Otwórz mapę"
         }
     },
