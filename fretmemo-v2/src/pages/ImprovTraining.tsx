@@ -27,7 +27,7 @@ import { BuildScaleDrill } from "@/components/improv/BuildScaleDrill";
 import type { DiagramDrillParams, ImprovExercise } from "@/data/improv/curriculum";
 import { BackingLoopExercise } from "@/components/improv/BackingLoopExercise";
 import { PracticeLinkExercise } from "@/components/improv/PracticeLinkExercise";
-import { CURRICULUM, countCompletedModules, getImprovModule, isModuleUnlocked, isModuleComplete, isNonGating } from "@/data/improv/curriculum";
+import { CURRICULUM, STANDARDS, STANDARDS_ID, countCompletedModules, getImprovModule, isModuleUnlocked, isModuleComplete, isNonGating } from "@/data/improv/curriculum";
 import type { ChoiceGeneratorId } from "@/lib/improv/questions";
 import { useImprovStore } from "@/stores/useImprovStore";
 import { isDueForReview } from "@/lib/sm2";
@@ -301,6 +301,11 @@ function RoadmapView() {
                     );
                 })}
             </div>
+
+            <p className="pt-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                {t("improv.standards.title")}
+            </p>
+            <BackingLoopExercise moduleId={STANDARDS_ID} exercise={STANDARDS} />
         </div>
     );
 }

@@ -139,3 +139,14 @@ describe("useImprovStore loop time (plan F3)", () => {
         expect(useImprovStore.getState().loopSeconds).toBe(91);
     });
 });
+
+describe("useImprovStore standards loop (plan E1)", () => {
+    it("records passes of the standards loop although it is not a module", () => {
+        useImprovStore.getState().recordLoopPass("standards", "standards.e1", "stdAutumn");
+        expect(useImprovStore.getState().moduleState.standards.exerciseRuns["standards.e1#stdAutumn"]).toBe(1);
+        expect(useImprovStore.getState().moduleState.standards.completed).toBe(false);
+        // Unknown ids stay ignored.
+        useImprovStore.getState().recordLoopPass("nope", "nope.e1");
+        expect(useImprovStore.getState().moduleState.nope).toBeUndefined();
+    });
+});

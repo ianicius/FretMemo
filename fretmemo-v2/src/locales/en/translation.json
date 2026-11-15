@@ -1949,6 +1949,16 @@
             "m7b5-arp": "m7b5 arpeggio"
         },
         "goals": {
+            "stdJazzBlues": "A 12-bar blues with added ii–Vs. The blues scale of the key holds it together; at the changes aim for the thirds and sevenths of the chords.",
+            "stdJazzBluesLabel": "Jazz blues",
+            "stdMinorBlues": "The minor pentatonic of the key fits the whole form. Over the two dominants in bars 9–10 aim for chord tones.",
+            "stdMinorBluesLabel": "Minor blues",
+            "stdAutumn": "A ii–V–I in major, followed by a ii–V–i in the relative minor. One major scale is enough; only over the dominant before the minor chord play its third, which is not in the scale.",
+            "stdAutumnLabel": "Autumn Leaves (A section)",
+            "stdRhythm": "The chord changes every two beats. Start with roots only, then add thirds and join them into lines.",
+            "stdRhythmLabel": "Rhythm changes (A section)",
+            "stdCycle": "A ii–V–I in twelve keys, each a fourth above the previous one. Carry the same idea from key to key.",
+            "stdCycleLabel": "ii–V–I around the circle of fourths",
             "targetThird": "Land on the chord's third at each change — Am→C, C→E, Em→G, D→F#.",
             "targetFifth": "Land on the chord's fifth — Am→E, C→G, Em→B, D→A.",
             "voiceLeading": "Before the change, play the common tone or a step next to a note of the next chord (Gm→Bbm: shared Bb; Gm→Cm: shared G).",
@@ -2250,6 +2260,10 @@
             }
         },
         "ex": {
+            "standards.e1": {
+                "name": "Loop: progressions from standards",
+                "desc": "Five progressions from the real repertoire. Pick one, slow the tempo down and play what the modules taught you. This section blocks nothing."
+            },
             "e-string-notes.e1": {
                 "name": "Practice: position → note (E string)",
                 "desc": "Open the “fretboard → note” practice on the E string, frets 1–12. Every position needs at least 3 answers and 80% accuracy."
@@ -2623,6 +2637,9 @@
             "barQuestion2": "Question, bar 2 of 2",
             "barAnswer1": "Answer, bar 1 of 2",
             "barAnswer2": "Answer, bar 2 of 2"
+        },
+        "standards": {
+            "title": "Standards"
         },
         "stage": {
             "podstawy": "Foundations (1–6)",

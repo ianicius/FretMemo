@@ -102,7 +102,7 @@ Stan 2026-11-15: D4, D5, D6 i D8 są zrobione jako osobne pętle dodatkowe (`non
 
 | # | Co | Po co | Gdzie | Rozmiar | Odbiór |
 |---|---|---|---|---|---|
-| E1 | Progresje ze standardów po etapie III: blues jazzowy, blues molowy, Autumn Leaves, rhythm changes, ii–V–I po kole kwartowym | Sprawdzenie umiejętności na prawdziwym materiale | Sekcja „Standardy" na ścieżce nauki, poza 22 modułami; istniejący silnik pętli | M | Pięć progresji; test, że każdy akord się odtwarza |
+| E1 zrobione | Progresje ze standardów po etapie III: blues jazzowy, blues molowy, Autumn Leaves, rhythm changes, ii–V–I po kole kwartowym | Sprawdzenie umiejętności na prawdziwym materiale | Sekcja „Standardy" na ścieżce nauki, poza 22 modułami; istniejący silnik pętli | M | Pięć progresji; test, że każdy akord się odtwarza |
 | E2 | Egzamin etapu: jedna improwizacja z mikrofonem po każdym z czterech etapów | Zaliczenie etapu ma znaczyć, że uczeń gra | Ścieżka nauki; pętla z celami mikrofonu | M | Wynik: trafienia w dźwięki akordu na zmianach; próg ustalony po teście A1 |
 | E3 | Odsetek dźwięków ze skali w swobodnej improwizacji | Informacja zwrotna tam, gdzie nie ma stałego celu | `BackingLoopExercise`; próbkowanie `usePitchDetector` | M | Po obiegu: procent dźwięków ze skali i z akordu |
 | E4 | Improwizacja nad własnym utworem: prompter z podpowiedzią skali nad wczytanym plikiem Guitar Pro | Narzędzie używane po ukończeniu kursu | `ScoreViewer`, `buildChordTimeline`, pary akord–tryb z `questions.ts` | L | Dla utworu z rozpoznanymi akordami prompter pokazuje akord, następny akord i skalę; gdy akordów nie da się rozpoznać, tryb jest niedostępny z wyjaśnieniem |

@@ -107,3 +107,25 @@ describe("barCue (rest bars of the phrasing loops)", () => {
         ]);
     });
 });
+
+describe("plan E1: standards", () => {
+    it("has five progressions, every chord a real chord, every text present", async () => {
+        const { STANDARDS } = await import("@/data/improv/curriculum");
+        const { getChordMidis } = await import("../chords");
+        const pl = (await import("@/locales/pl/translation.json")).default as unknown as { improv: { goals: Record<string, string> } };
+        const variants = (STANDARDS.params as { variants: Array<{ id: string; progression: Array<string | { chord: string; beats?: number }> }> }).variants;
+        expect(variants).toHaveLength(5);
+        for (const variant of variants) {
+            expect(pl.improv.goals[variant.id], variant.id).toBeTruthy();
+            expect(pl.improv.goals[`${variant.id}Label`], variant.id).toBeTruthy();
+            let beats = 0;
+            for (const entry of variant.progression) {
+                const chord = typeof entry === "string" ? entry : entry.chord;
+                expect(getChordMidis(chord, 48).length, chord).toBeGreaterThanOrEqual(3);
+                beats += typeof entry === "string" ? 4 : entry.beats ?? 4;
+            }
+            // Whole bars only: 12-bar blues forms, 8-bar sections, 24 bars of the cycle.
+            expect([32, 48, 96], variant.id).toContain(beats);
+        }
+    });
+});

@@ -281,6 +281,12 @@ Moduł jest zaliczony (`completed`), gdy **każde** jego ćwiczenie poza `nonGat
 - **Sekcja „Więcej ćwiczeń” (2026-11-15).** Widok modułu (`ModuleView` w `src/pages/ImprovTraining.tsx`)
   pokazuje najpierw ćwiczenia wymagane, a ćwiczenia dodatkowe (`isNonGating`) w zwiniętym elemencie
   `<details>` z licznikiem (`improv.module.moreExercises`). Kolejność w `CURRICULUM` się nie zmienia.
+- **Etap E planu rozwoju (2026-11-15): E1.** `STANDARDS` w `curriculum.ts` to jedno ćwiczenie pętli
+  (`standards.e1`) z pięcioma wariantami: blues jazzowy w F, blues molowy w c, część A „Autumn Leaves”,
+  część A rhythm changes w B i ii–V–I po kole kwartowym. `RoadmapView` pokazuje je pod listą modułów
+  w sekcji „Standardy”. Nie należy do `CURRICULUM` i niczego nie blokuje; obiegi zapisują się w
+  `moduleState.standards` (`updateModule` przepuszcza `STANDARDS_ID`). `selectModuleProgress` zwraca dla
+  nieznanego identyfikatora jeden wspólny obiekt, bo nowy obiekt przy każdym wywołaniu zapętlał render.
 - **Etap F planu rozwoju (2026-11-15): F2, F3.** F2: `nextImprovExercise(moduleState)` w `curriculum.ts`
   zwraca pierwszy nieukończony moduł i jego pierwsze niezaliczone ćwiczenie wymagane (albo `null`);
   `src/pages/Home.tsx` pokazuje z tego kartę „Trening improwizacji” z przyciskiem „Zacznij” / „Kontynuuj”

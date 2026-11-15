@@ -1362,3 +1362,53 @@ export function nextImprovExercise(
     const exercise = module?.exercises.find((item) => !isNonGating(item) && !isExercisePassed(item, moduleState?.[module.id]));
     return module && exercise ? { module, exercise } : null;
 }
+
+/** Two chords in one bar. */
+const half = (chord: string): ProgressionEntry => ({ chord, beats: 2 });
+
+/** ii–V–I in every key, each tonic a fourth above the previous one (two bars per key). */
+const CYCLE_OF_FOURTHS: ProgressionEntry[] = [
+    ["Dm7", "G7", "Cmaj7"], ["Gm7", "C7", "Fmaj7"], ["Cm7", "F7", "Bbmaj7"], ["Fm7", "Bb7", "Ebmaj7"],
+    ["Bbm7", "Eb7", "Abmaj7"], ["Ebm7", "Ab7", "Dbmaj7"], ["Abm7", "Db7", "Gbmaj7"], ["C#m7", "F#7", "Bmaj7"],
+    ["F#m7", "B7", "Emaj7"], ["Bm7", "E7", "Amaj7"], ["Em7", "A7", "Dmaj7"], ["Am7", "D7", "Gmaj7"],
+].flatMap(([two, five, one]) => [half(two), half(five), { chord: one, beats: 4 }]);
+
+const STANDARD_FORMS: Array<{ id: string; key: string; progression: Array<string | ProgressionEntry> }> = [
+    { id: "stdJazzBlues", key: "F", progression: [
+        "F7", "Bb7", "F7", half("Cm7"), half("F7"),
+        "Bb7", "Bdim7", "F7", half("Am7"), half("D7"),
+        "Gm7", "C7", half("F7"), half("D7"), half("Gm7"), half("C7"),
+    ] },
+    { id: "stdMinorBlues", key: "Cm", progression: ["Cm7", "Cm7", "Cm7", "Cm7", "Fm7", "Fm7", "Cm7", "Cm7", "Ab7", "G7", "Cm7", "G7"] },
+    { id: "stdAutumn", key: "Gm", progression: ["Cm7", "F7", "Bbmaj7", "Ebmaj7", "Am7b5", "D7", "Gm6", "Gm6"] },
+    { id: "stdRhythm", key: "Bb", progression: [
+        "Bbmaj7", "G7", "Cm7", "F7", "Dm7", "G7", "Cm7", "F7",
+        "Fm7", "Bb7", "Ebmaj7", "Ebm7", "Dm7", "G7", "Cm7", "F7",
+    ].map(half) },
+    { id: "stdCycle", key: "C", progression: CYCLE_OF_FOURTHS },
+];
+
+/** Progress of the standards loop is stored under this id, next to the modules. */
+export const STANDARDS_ID = "standards";
+
+/**
+ * Plan E1: progressions from real tunes on the existing loop engine. Shown on
+ * the roadmap below the modules; it gates nothing.
+ */
+export const STANDARDS: ImprovExercise = loopExercise(STANDARDS_ID, "e1", {
+    beatsPerChord: 4,
+    defaultBpm: 80,
+    minBpm: 50,
+    maxBpm: 200,
+    requiredPasses: 2,
+    progression: STANDARD_FORMS[0].progression,
+    goalKey: `improv.goals.${STANDARD_FORMS[0].id}`,
+    key: STANDARD_FORMS[0].key,
+    variants: STANDARD_FORMS.map((form) => ({
+        id: form.id,
+        labelKey: `improv.goals.${form.id}Label`,
+        progression: form.progression,
+        goalKey: `improv.goals.${form.id}`,
+        key: form.key,
+    })),
+});

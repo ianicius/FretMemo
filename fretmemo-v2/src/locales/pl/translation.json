@@ -1963,6 +1963,16 @@
             "m7b5-arp": "Arpeggio m7b5"
         },
         "goals": {
+            "stdJazzBlues": "12 taktów bluesa z dodanymi ii–V. Skala bluesowa tonacji spina całość, a na zmianach celuj w tercje i septymy akordów.",
+            "stdJazzBluesLabel": "Blues jazzowy",
+            "stdMinorBlues": "Pentatonika molowa tonacji pasuje do całej formy. Nad dwoma dominantami w taktach 9–10 celuj w dźwięki akordu.",
+            "stdMinorBluesLabel": "Blues molowy",
+            "stdAutumn": "ii–V–I w dur, a zaraz po nim ii–V–i w tonacji paralelnej. Wystarcza jedna skala durowa, tylko nad dominantą przed akordem molowym zagraj jej tercję, której w skali nie ma.",
+            "stdAutumnLabel": "Autumn Leaves (część A)",
+            "stdRhythm": "Akord zmienia się co dwa uderzenia. Zacznij od samych prym, potem dodaj tercje i łącz je w linie.",
+            "stdRhythmLabel": "Rhythm changes (część A)",
+            "stdCycle": "ii–V–I w dwunastu tonacjach, każda o kwartę wyżej od poprzedniej. Ten sam pomysł przenoś z tonacji do tonacji.",
+            "stdCycleLabel": "ii–V–I po kole kwartowym",
             "targetThird": "Na zmianie akordu ląduj na tercji: Am→C, C→E, Em→G, D→F#.",
             "targetFifth": "Na zmianie akordu ląduj na kwincie: Am→E, C→G, Em→H, D→A.",
             "voiceLeading": "Tuż przed zmianą zagraj dźwięk wspólny obu akordów albo przejdź o pół tonu lub ton do dźwięku następnego akordu (Gm→Bm: wspólne B; Gm→Cm: wspólne G).",
@@ -2264,6 +2274,10 @@
             }
         },
         "ex": {
+            "standards.e1": {
+                "name": "Pętla: progresje ze standardów",
+                "desc": "Pięć progresji z prawdziwego repertuaru. Wybierz jedną, zwolnij tempo i graj to, czego nauczyły cię moduły. Ta sekcja niczego nie blokuje."
+            },
             "e-string-notes.e1": {
                 "name": "Trening: pozycja → dźwięk (struna E)",
                 "desc": "Otwórz trening „gryf → dźwięk” na strunie E, progi 1–12. Każda pozycja potrzebuje co najmniej 3 odpowiedzi i 80% trafności."
@@ -2637,6 +2651,9 @@
             "barQuestion2": "Pytanie, takt 2 z 2",
             "barAnswer1": "Odpowiedź, takt 1 z 2",
             "barAnswer2": "Odpowiedź, takt 2 z 2"
+        },
+        "standards": {
+            "title": "Standardy"
         },
         "stage": {
             "podstawy": "Podstawy (1–6)",

@@ -23,6 +23,7 @@ import { calculateNextReview, type SpacedRepetitionEntry } from "@/lib/sm2";
 import {
     CURRICULUM,
     getImprovModule,
+    STANDARDS_ID,
     isModuleComplete,
     loopRunKey,
     type ImprovExercise,
@@ -84,11 +85,11 @@ function updateModule(
     update: (progress: ImprovModuleProgress) => ImprovModuleProgress,
 ): Record<string, ImprovModuleProgress> {
     const module = getImprovModule(moduleId);
-    if (!module) return previous;
+    if (!module && moduleId !== STANDARDS_ID) return previous;
     const current = previous[moduleId] ?? emptyProgress();
     const next = update({ ...current });
     // Single source of truth for the pass predicate (curriculum.ts).
-    const completed = isModuleComplete(module, next);
+    const completed = module ? isModuleComplete(module, next) : false;
     return {
         ...previous,
         [moduleId]: { ...next, completed },
@@ -245,6 +246,9 @@ export const useImprovStore = create<ImprovStoreState>()(
 );
 
 /** Selector helper: progress of one module (never undefined). */
+// One shared object: a selector must return the same reference while nothing changed.
+const NO_PROGRESS = emptyProgress();
+
 export function selectModuleProgress(state: ImprovStoreState, moduleId: string): ImprovModuleProgress {
-    return state.moduleState[moduleId] ?? emptyProgress();
+    return state.moduleState[moduleId] ?? NO_PROGRESS;
 }

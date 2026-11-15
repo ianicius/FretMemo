@@ -3,7 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import en from "@/locales/en/translation.json";
 import pl from "@/locales/pl/translation.json";
-import { CURRICULUM, IMPROV_ORDER, type BackingLoopParams } from "@/data/improv/curriculum";
+import { CURRICULUM, IMPROV_ORDER, STANDARDS, type BackingLoopParams } from "@/data/improv/curriculum";
 
 /**
  * E-IMPROV-I18N: every improv key must resolve in BOTH locales.
@@ -112,7 +112,7 @@ describe("improv i18n parity (en + pl)", () => {
     });
 
     it("every curriculum exercise has name + desc entries in both locales", () => {
-        const exerciseIds = CURRICULUM.flatMap((module) => module.exercises.map((exercise) => exercise.id));
+        const exerciseIds = [...CURRICULUM.flatMap((module) => module.exercises.map((exercise) => exercise.id)), STANDARDS.id];
         for (const locale of [en, pl]) {
             const exMap = locale.improv.ex as Record<string, { name: string; desc: string }>;
             const keys = Object.keys(exMap);
