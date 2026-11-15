@@ -60,7 +60,15 @@ import { Note } from "tonal";
 import { cn } from "@/lib/utils";
 import { ExerciseFrame } from "./ExerciseFrame";
 import { LoopHitReport } from "./LoopHitReport";
-import { IMPROV_FRETBOARD_ROWS, localizeToken } from "@/lib/improv/display";
+import { barCue, IMPROV_FRETBOARD_ROWS, localizeToken, type BarCue } from "@/lib/improv/display";
+
+/** Static (not animated) label pill of a phrasing-loop bar; same size for every cue so bars do not shift the layout. */
+const BAR_CUE_PILL: Record<BarCue, string> = {
+    play: "bg-primary/15 text-primary",
+    rest: "bg-foreground text-background",
+    call: "bg-primary/15 text-primary",
+    answer: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+};
 
 interface BackingLoopExerciseProps {
     moduleId: string;
@@ -341,6 +349,9 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
     const keyOptions = keyChoices(originalKey);
     const originalPc = keyPitchClass(originalKey);
     const nextChord = progression[(currentChordIndex + 1) % progression.length] ?? "";
+    const currentHintKey = hintKeys[currentChordIndex];
+    const cue = barCue(currentHintKey);
+    const resting = cue === "rest";
     const passAvailable = loopsCompleted > markedLoop;
     const thresholdLabel = t("improv.loop.threshold", { required: params.requiredPasses });
 
@@ -411,21 +422,36 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
                 )}
             </div>
 
-            <div className="grid grid-cols-[auto_auto] items-baseline justify-center gap-x-6 rounded-lg border border-border bg-card/60 px-4 py-5">
+            <div
+                data-bar-cue={cue ?? undefined}
+                className={cn(
+                    "grid grid-cols-[auto_auto] items-baseline justify-center gap-x-6 rounded-lg border border-border bg-card/60 px-4 py-5",
+                    resting && "border-dashed border-muted-foreground bg-muted/60",
+                )}
+            >
                 <p className="text-center text-xs uppercase tracking-wide text-muted-foreground">{t("improv.loop.current")}</p>
                 <p className="text-center text-[10px] uppercase tracking-wide text-muted-foreground">{t("improv.loop.next")}</p>
                 <p
                     className={cn(
                         "mt-1 text-center text-4xl font-bold tabular-nums",
-                        micOn && targets && chordHit ? "text-emerald-500 dark:text-emerald-300" : "text-primary",
+                        // Rest bar: chord stays readable (the player listens and plans) but loses the amber "play" colour.
+                        resting ? "text-muted-foreground" : micOn && targets && chordHit ? "text-emerald-500 dark:text-emerald-300" : "text-primary",
                     )}
                 >
                     {localizeToken(currentChord)}
                 </p>
                 <p className="mt-1 text-center text-xl font-semibold text-foreground opacity-70">{localizeToken(nextChord)}</p>
-                <p className="col-span-2 mt-1 min-h-[1.25rem] text-center text-xs text-muted-foreground">
-                    {hintKeys[currentChordIndex] ? t(hintKeys[currentChordIndex] as string) : ""}
-                </p>
+                {cue ? (
+                    <p className="col-span-2 my-2 text-center">
+                        <span className={cn("inline-block rounded-full px-3 py-0.5 text-lg font-bold uppercase tracking-wide", BAR_CUE_PILL[cue])}>
+                            {t(currentHintKey as string)}
+                        </span>
+                    </p>
+                ) : (
+                    <p className="col-span-2 mt-1 min-h-[1.25rem] text-center text-xs text-muted-foreground">
+                        {currentHintKey ? t(currentHintKey) : ""}
+                    </p>
+                )}
                 <div className="col-span-2 flex justify-center gap-1" aria-hidden="true">
                     {Array.from({ length: entries[currentChordIndex]?.beats ?? params.beatsPerChord }).map((_, beat) => (
                         <span
@@ -440,7 +466,7 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
             </div>
 
             {showFretboard && (
-                <div className="space-y-1">
+                <div className={cn("space-y-1", resting && "opacity-40")}>
                     <Fretboard
                         frets={12}
                         activeNotes={chordToneNotes}

@@ -22,6 +22,24 @@ export const ENGINE_LABEL_KEYS: Record<ImprovEngineType, string> = {
     "backing-improv": "improv.engine.backingLoop",
 };
 
+/** Per-bar cue of the phrasing loops (plan B4): play/rest bars and the 2+2 question–answer bars. */
+export type BarCue = "play" | "rest" | "call" | "answer";
+
+/** Keyed by the hint keys used by phraseLoop() in src/data/improv/curriculum.ts. */
+const BAR_CUES: Record<string, BarCue> = {
+    "improv.hints.barPlay": "play",
+    "improv.hints.barRest": "rest",
+    "improv.hints.barQuestion1": "call",
+    "improv.hints.barQuestion2": "call",
+    "improv.hints.barAnswer1": "answer",
+    "improv.hints.barAnswer2": "answer",
+};
+
+/** Cue of a bar from its hint key; null for every other hint (scale/key hints) and for no hint. */
+export function barCue(hintKey: string | undefined): BarCue | null {
+    return (hintKey && BAR_CUES[hintKey]) || null;
+}
+
 /** Localizes a note/chord token for display (B→H convention in Polish). */
 export function localizeToken(value: string): string {
     return formatLocalizedNoteToken(value, i18n.resolvedLanguage ?? i18n.language);

@@ -5,7 +5,7 @@
  */
 import { afterEach, describe, expect, it } from "vitest";
 import i18n from "@/lib/i18n";
-import { localizeAnswer, localizePromptValues } from "../display";
+import { barCue, localizeAnswer, localizePromptValues } from "../display";
 
 describe("localizePromptValues", () => {
     afterEach(async () => {
@@ -72,5 +72,38 @@ describe("chord parsing used by the backing loops", () => {
                 }
             }
         }
+    });
+});
+
+describe("barCue (rest bars of the phrasing loops)", () => {
+    it("marks only the rest-bar hint as rest; other hints and no hint get no rest look", () => {
+        expect(barCue("improv.hints.barRest")).toBe("rest");
+        expect(barCue("improv.hints.barPlay")).toBe("play");
+        expect(barCue("improv.hints.barQuestion2")).toBe("call");
+        expect(barCue("improv.hints.barAnswer1")).toBe("answer");
+        expect(barCue("improv.hints.dorianDm7")).toBeNull();
+        expect(barCue(undefined)).toBeNull();
+    });
+
+    it("gives rest bars only to the play/rest variants and cues only to the two phrasing loops", async () => {
+        const { CURRICULUM } = await import("@/data/improv/curriculum");
+        const cued: string[] = [];
+        for (const module of CURRICULUM) {
+            for (const exercise of module.exercises) {
+                if (exercise.engine !== "backing-improv") continue;
+                const params = exercise.params as { progression: Array<string | { hintKey?: string }>; variants?: Array<{ id: string; progression: Array<string | { hintKey?: string }> }> };
+                const sources = [{ id: "", progression: params.progression }, ...(params.variants ?? [])];
+                for (const source of sources) {
+                    const cues = source.progression.map((entry) => barCue(typeof entry === "string" ? undefined : entry.hintKey));
+                    if (cues.every((cue) => cue === null)) continue;
+                    cued.push(`${exercise.id}:${source.id}`);
+                    expect(cues.includes("rest"), `${exercise.id}:${source.id}`).toBe(source.id !== "call-response");
+                }
+            }
+        }
+        expect(cued).toEqual([
+            "pentatonic-scale.e6:", "pentatonic-scale.e6:play-rest", "pentatonic-scale.e6:call-response",
+            "target-chord-tones.e4:", "target-chord-tones.e4:play-rest", "target-chord-tones.e4:call-response",
+        ]);
     });
 });
