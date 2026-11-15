@@ -123,7 +123,7 @@ Moduł jest zaliczony (`completed`), gdy **każde** jego ćwiczenie poza `nonGat
   `CagedVisualizer`, `TriadVisualizer`, `IntervalFretboardTrainer` i aktywny palec w `Technique` (wszystkie ze statusem
   `active`, więc pełne bursztynowe wypełnienie); `src/components/ui/slider.tsx` ma w jasnym motywie tor `bg-stone-300`
   (w ciemnym nadal `bg-secondary`) w każdym `Slider` aplikacji. `Fretboard.tsx` bez zmian.
-- **i18n**: top-level namespace `improv` w `src/locales/{en,pl}/translation.json` (509 liści każdy;
+- **i18n**: top-level namespace `improv` w `src/locales/{en,pl}/translation.json` (528 liści każdy;
   parzystość testowana w `src/lib/improv/__tests__/improvI18nParity.test.ts`). Nazwy modułów: PL +
   termin EN (`.name` / `.term`); teoria 3–6 zdań PL z terminami EN (EN pełne tłumaczenie).
   Od rundy 2 dodatkowo `nav.improv` („Improv") w obu locale; klucze `library.improv` /
@@ -237,6 +237,18 @@ Moduł jest zaliczony (`completed`), gdy **każde** jego ćwiczenie poza `nonGat
   tonacje molowe, akordy zmniejszone i ramkę siedmiu akordów tonacji. Gdy odpowiedzią jest tonacja z koła,
   wybiera się ją kliknięciem w koło. Klucze `improv.q.keySig.keyNotes`, `noteInKey`, `improv.quiz.circleTap`,
   `circleRead`, `theory.circle.keySignature`, `countLegend`.
+- **Plansze przy pytaniach quizu (2026-11-15).** `ChoiceQuestion` ma opcjonalne pole `visual`
+  (`QuestionVisual` w `src/lib/improv/questions.ts`): gryf w pozycji otwartej (progi 0–4,
+  `src/components/improv/QuestionFretboard.tsx`) albo koło kwintowe (`CircleDial`). Z `tap: true` plansza
+  zastępuje przyciski odpowiedzi: klika się kropkę na gryfie lub tonację na kole, a opcje pytania to wtedy
+  wszystkie dźwięki skali (7, bez przycinania do `answerOptions`). `reveal`, ramki (bez `open`) i `polygon`
+  pojawiają się dopiero po odpowiedzi. Nowe kierunki: `modes` → `tap-characteristic`, `triadBuild` →
+  `tap-chord-tone`, `chordScaleMajor` → `tap-characteristic`; używają ich `modes.e2`,
+  `chord-construction.e2`, `chord-scale-major.e2`. Pula mieszana `modes` nie losuje już `order-to-mode`,
+  `mode-to-order` ani `pattern-to-mode` (kierunki zostają w kodzie). Plansze bez klikania mają pytania
+  `triadBuild`, `triadType` i `chord-to-mode`; koło mają `tritone`, `secondaryDom`, `coltrane` (klikane),
+  `pivot`, `borrowed` (dwie ramki) oraz `mode-parent`. `chordScaleMelodic` i `chordScaleHarmonic` zostają
+  tekstowe. Podpowiedzi nad planszą: klucze `improv.quiz.circle*` i `improv.quiz.fret*`.
 - **A7.** Usunięty martwy `improvTotalXP` w `src/pages/Progress.tsx`. Pliki wdrożeniowe w `app/` nie są
   przebudowywane w tym runie (decyzja przy scaleniu gałęzi).
 - **B1 — gryf z dźwiękami akordu.** `getChordTonePositions(chord, { tuning, fretFrom, fretTo, targets? })`

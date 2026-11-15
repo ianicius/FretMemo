@@ -28,7 +28,7 @@ export default function CircleOfFifths({ initialKey }: { initialKey?: string } =
         <div className="space-y-5">
             {/* SVG Circle */}
             <div className="flex justify-center">
-                <CircleDial selectedKey={selectedKey} onSelect={setSelectedKey}>
+                <CircleDial selectedKey={selectedKey} frameKeys={[selectedKey]} onSelect={setSelectedKey}>
                     <text x={CIRCLE_CENTER} y={CIRCLE_CENTER - 8} textAnchor="middle" className="text-sm font-bold fill-primary">
                         {formatLocalizedNoteToken(selectedKey, language)}
                     </text>

@@ -1829,6 +1829,20 @@
             "practiceLink": "Trening na gryfie"
         },
         "quiz": {
+            "circleTapKey": "Kliknij tonację na kole.",
+            "circleTritone": "Zamiana trytonowa leży na kole dokładnie naprzeciwko dominanty.",
+            "circleSubvResolve": "Znajdź naprzeciwko pierwotną dominantę — rozwiązuje się ona o jeden krok przeciwnie do ruchu wskazówek zegara.",
+            "circleDominant": "Dominanta leży o jeden krok zgodnie z ruchem wskazówek zegara od akordu, do którego prowadzi.",
+            "circleResolve": "Dominanta rozwiązuje się o jeden krok przeciwnie do ruchu wskazówek zegara.",
+            "circleColtrane": "Cykl dzieli koło na trzy równe części: kolejne tonacje leżą co cztery kroki przeciwnie do ruchu wskazówek zegara.",
+            "circleFrame251": "W ramce tonacji: V to akord durowy o krok zgodnie z ruchem wskazówek zegara od toniki, ii to akord molowy po przeciwnej stronie ramki.",
+            "circlePivot": "Wspólne akordy leżą tam, gdzie ramki obu tonacji na siebie nachodzą.",
+            "circleBorrowed": "Akordy pożyczone leżą w drugiej, niebieskiej ramce (trzy kroki przeciwnie do ruchu wskazówek zegara) — to tonacja jednoimienna molowa.",
+            "fretCountDegrees": "Licz stopnie skali w górę od wyróżnionej prymy: pryma to 1.",
+            "fretStackThirds": "Akord buduje się z co drugiego dźwięku skali: pryma, tercja, kwinta, septyma.",
+            "fretChordInScale": "Na gryfie: skala tonacji, a wyróżnione są dźwięki akordu.",
+            "fretChordRoot": "Na gryfie: skala tonacji, a wyróżniona jest pryma akordu.",
+            "fretChordOnC": "Na gryfie: ten akord zbudowany od C.",
             "circleTap": "Kliknij tonację na kole. Licz kroki od C: w prawo krzyżyki, w lewo bemole.",
             "circleRead": "Tonacja jest zaznaczona na kole. Kroki od C w prawo to krzyżyki (kolejno F♯, C♯, G♯, D♯, A♯, E♯), w lewo bemole (kolejno B, Eb, Ab, Db, Gb, Cb).",
             "threshold": "Do zaliczenia: {{required}}/{{total}}",
@@ -1991,6 +2005,7 @@
                 "hintRelative": "Tonacja paralelna leży na VI stopniu: {{key}}-dur → {{target}}-moll. Obie mają te same znaki przykluczowe."
             },
             "modes": {
+                "tapCharacteristic": "Tryb {{mode}} od {{root}}. Kliknij na gryfie jego dźwięk charakterystyczny ({{characteristic}}).",
                 "orderToMode": "Tryb, który zaczyna się na {{order}}. stopniu skali durowej, to:",
                 "modeToOrder": "Na którym stopniu skali durowej zaczyna się tryb {{mode}}?",
                 "patternToMode": "Układ {{pattern}} (W = cały ton, H = półton) ma tryb:",
@@ -2002,6 +2017,9 @@
                 "soundToMode": "Posłuchaj skali zagranej od {{root}}. Jaki to tryb?"
             },
             "triadBuild": {
+                "tapThird": "Akord na {{degree}}. stopniu tonacji {{key}}-dur zaczyna się od {{root}}. Kliknij na gryfie jego tercję.",
+                "tapFifth": "Akord na {{degree}}. stopniu tonacji {{key}}-dur zaczyna się od {{root}}. Kliknij na gryfie jego kwintę.",
+                "tapSeventh": "Akord na {{degree}}. stopniu tonacji {{key}}-dur zaczyna się od {{root}}. Kliknij na gryfie jego septymę.",
                 "degreeToType": "W tonacji {{key}}-dur trójdźwięk na {{degree}}. stopniu to {{notes}}. Jaki to rodzaj trójdźwięku?",
                 "degreeToTriad": "W tonacji {{key}}-dur trójdźwięk na {{degree}}. stopniu to {{notes}}. Jak go zapisać?",
                 "hintType": "Rodzaj: {{type}}",
@@ -2009,6 +2027,7 @@
                 "degreeToSeventh": "W tonacji {{key}}-dur akord septymowy na {{degree}}. stopniu to {{notes}}. Jak go zapisać?"
             },
             "chordScale": {
+                "tapCharacteristic": "W tonacji {{key}}-dur do akordu {{chord}} pasuje tryb {{mode}}. Kliknij na gryfie jego dźwięk charakterystyczny ({{characteristic}}).",
                 "chordToMode": "Jaki tryb pasuje do {{chord}} w tonacji C-dur?",
                 "modeToChord": "Do którego akordu pasuje tryb {{mode}}?",
                 "hintPair": "{{chord}} → {{mode}}",
@@ -2239,27 +2258,27 @@
             },
             "modes.e1": {
                 "name": "Quiz: tryby",
-                "desc": "Kolejność trybów, ich dźwięki od danej prymy, skala macierzysta i rozpoznawanie trybu ze słuchu."
+                "desc": "Dźwięk charakterystyczny trybu na gryfie, dźwięki trybu od danej prymy, skala macierzysta na kole i rozpoznawanie trybu ze słuchu."
             },
             "modes.e2": {
-                "name": "Tryby: dźwięk charakterystyczny",
-                "desc": "Rozpoznaj tryb po jego dźwięku charakterystycznym: lidyjski po #4, miksolidyjski po b7, frygijski po b2…"
+                "name": "Dźwięk charakterystyczny na gryfie",
+                "desc": "Znajdź na gryfie dźwięk, który nadaje trybowi jego brzmienie: 6 w doryckim, #4 w lidyjskim, b7 w miksolidyjskim."
             },
             "chord-construction.e1": {
                 "name": "Quiz: akordy ze skali",
-                "desc": "Zbuduj akord na stopniu skali durowej i rozpoznaj jego rodzaj — trójdźwięki i akordy septymowe."
+                "desc": "Budujesz akord na stopniu skali durowej: klikasz jego dźwięki na gryfie i rozpoznajesz rodzaj — trójdźwięki i akordy septymowe."
             },
             "chord-construction.e2": {
-                "name": "Zapis trójdźwięku",
-                "desc": "Wybierz poprawny symbol trójdźwięku na danym stopniu skali (np. II stopień w D-dur to Em)."
+                "name": "Zbuduj akord na gryfie",
+                "desc": "Pryma akordu jest wyróżniona na gryfie. Kliknij jego tercję, kwintę albo septymę — co drugi dźwięk skali."
             },
             "chord-scale-major.e1": {
                 "name": "Akord → tryb",
                 "desc": "Dla akordu w danej tonacji durowej wybierz pasujący tryb (np. Dm7 w C-dur → dorycki)."
             },
             "chord-scale-major.e2": {
-                "name": "Tryb → akord",
-                "desc": "Odwrotnie: dla trybu wybierz akord, do którego pasuje — także z rozszerzeniami (Dm13, Fmaj7#11)."
+                "name": "Dźwięk charakterystyczny nad akordem",
+                "desc": "Dla akordu w tonacji kliknij na gryfie dźwięk charakterystyczny pasującego trybu — ten, na którym warto zatrzymać frazę."
             },
             "triads.e1": {
                 "name": "Pętla: trójdźwięki nad Am–C–Em–D",

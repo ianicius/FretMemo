@@ -22,7 +22,8 @@ describe("choice quiz generators", () => {
             expect(questions).toHaveLength(8);
             for (const question of questions) {
                 expect(question.options.length).toBeGreaterThanOrEqual(2);
-                expect(question.options.length).toBeLessThanOrEqual(4);
+                // Tapped boards offer the whole scale (7 notes) instead of 4 buttons.
+                expect(question.options.length).toBeLessThanOrEqual(question.visual?.tap ? 7 : 4);
                 expect(new Set(question.options).size).toBe(question.options.length);
                 expect(question.correctIndex).toBeGreaterThanOrEqual(0);
                 expect(question.correctIndex).toBeLessThan(question.options.length);
@@ -404,6 +405,70 @@ describe("keySig note questions (notes of the key instead of accidental counts)"
         expect(promptKeys.has("improv.q.keySig.noteInKey")).toBe(true);
         expect(promptKeys.has("improv.q.keySig.keyToCount")).toBe(false);
         expect(promptKeys.has("improv.q.keySig.countToKey")).toBe(false);
+    });
+});
+
+describe("question boards (fretboard and circle of fifths)", () => {
+    const draw = (generatorId: Parameters<typeof generateChoiceQuiz>[0]["generatorId"], direction: string, seed: string) =>
+        Array.from({ length: 30 }, (_unused, index) => generateChoiceQuiz({ generatorId, questionCount: 10, direction, answerOptions: 4 }, `${seed}:${index}`)).flat();
+
+    it("tapped fretboard questions keep every scale note as an option and the answer among the dots", () => {
+        for (const [generatorId, direction] of [["modes", "tap-characteristic"], ["triadBuild", "tap-chord-tone"], ["chordScaleMajor", "tap-characteristic"]] as const) {
+            for (const question of draw(generatorId, direction, "tap")) {
+                const visual = question.visual;
+                if (visual?.kind !== "fretboard") throw new Error(`${generatorId}: fretboard expected`);
+                expect(visual.tap).toBe(true);
+                expect(question.options).toHaveLength(7);
+                expect(visual.dots.map((dot) => dot.note)).toEqual(question.options);
+                expect(visual.reveal).toContain(question.options[question.correctIndex]);
+                expect(visual.dots.filter((dot) => dot.strong)).toHaveLength(1);
+            }
+        }
+    });
+
+    it("the tapped characteristic note is the altered degree of the mode", () => {
+        const semitones: Record<string, number> = { "6": 9, b2: 1, "#4": 6, b7: 10, b6: 8, b5: 6 };
+        for (const question of draw("modes", "tap-characteristic", "char")) {
+            const answer = question.options[question.correctIndex] as string;
+            const distance = ((Note.chroma(answer) ?? 0) - (Note.chroma(String(question.promptValues.root)) ?? 0) + 12) % 12;
+            expect(distance).toBe(semitones[String(question.promptValues.characteristic)]);
+        }
+    });
+
+    it("tapped chord tones stack thirds from the chord root", () => {
+        for (const question of draw("triadBuild", "tap-chord-tone", "stack")) {
+            const scale = Key.majorKey(String(question.promptValues.key)).scale as string[];
+            const rootIndex = scale.indexOf(String(question.promptValues.root));
+            const step = { tapThird: 2, tapFifth: 4, tapSeventh: 6 }[question.promptKey.split(".").pop() as string] as number;
+            expect(question.options[question.correctIndex]).toBe(scale[(rootIndex + step) % 7]);
+        }
+    });
+
+    it("circle questions for harmony modules carry a tip and a circle board", () => {
+        for (const generatorId of ["tritone", "secondaryDom", "borrowed", "pivot", "coltrane"] as const) {
+            const questions = Array.from({ length: 20 }, (_unused, index) => generateChoiceQuiz({ generatorId, questionCount: 10 }, `circle:${generatorId}:${index}`)).flat();
+            const withBoard = questions.filter((question) => question.visual?.kind === "circle");
+            expect(withBoard.length).toBeGreaterThan(questions.length / 2);
+            for (const question of withBoard) expect(question.visual?.tipKey).toMatch(/^improv\.quiz\.circle/);
+        }
+    });
+
+    it("a tritone substitute is tapped six steps from the marked dominant", () => {
+        for (const question of draw("tritone", "v-to-subv", "opposite")) {
+            const visual = question.visual;
+            if (visual?.kind !== "circle" || !visual.marked) throw new Error("marked circle expected");
+            const distance = ((Note.chroma(question.options[question.correctIndex] as string) ?? 0) - (Note.chroma(visual.marked) ?? 0) + 12) % 12;
+            expect(distance).toBe(6);
+        }
+    });
+
+    it("module 7 no longer draws order-number or step-pattern trivia", () => {
+        const promptKeys = new Set<string>();
+        for (let index = 0; index < 60; index += 1) {
+            for (const question of generateChoiceQuiz({ generatorId: "modes", questionCount: 10 }, `modes-pool:${index}`)) promptKeys.add(question.promptKey);
+        }
+        expect(promptKeys.has("improv.q.modes.tapCharacteristic")).toBe(true);
+        for (const dropped of ["orderToMode", "modeToOrder", "patternToMode"]) expect(promptKeys.has(`improv.q.modes.${dropped}`)).toBe(false);
     });
 });
 

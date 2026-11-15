@@ -1815,6 +1815,20 @@
             "practiceLink": "Fretboard practice"
         },
         "quiz": {
+            "circleTapKey": "Tap the key on the circle.",
+            "circleTritone": "The tritone substitute sits directly opposite the dominant on the circle.",
+            "circleSubvResolve": "Find the original dominant on the opposite side — it resolves one step counter-clockwise.",
+            "circleDominant": "The dominant sits one step clockwise from the chord it leads to.",
+            "circleResolve": "A dominant resolves one step counter-clockwise.",
+            "circleColtrane": "The cycle splits the circle into three equal parts: each next key is four steps counter-clockwise.",
+            "circleFrame251": "Inside a key's frame: V is the major chord one step clockwise from the tonic, ii is the minor chord on the opposite side of the frame.",
+            "circlePivot": "The shared chords are where the frames of both keys overlap.",
+            "circleBorrowed": "Borrowed chords sit in the second, blue frame (three steps counter-clockwise) — that is the parallel minor.",
+            "fretCountDegrees": "Count scale degrees upward from the highlighted root: the root is 1.",
+            "fretStackThirds": "A chord is built from every other note of the scale: root, third, fifth, seventh.",
+            "fretChordInScale": "On the fretboard: the key's scale, with the chord's notes highlighted.",
+            "fretChordRoot": "On the fretboard: the key's scale, with the chord's root highlighted.",
+            "fretChordOnC": "On the fretboard: this chord built from C.",
             "circleTap": "Tap the key on the circle. Count steps from C: clockwise adds sharps, counter-clockwise adds flats.",
             "circleRead": "The key is marked on the circle. Steps clockwise from C are sharps (in order F♯, C♯, G♯, D♯, A♯, E♯), counter-clockwise are flats (in order B♭, E♭, A♭, D♭, G♭, C♭).",
             "threshold": "To pass: {{required}}/{{total}}",
@@ -1977,6 +1991,7 @@
                 "hintRelative": "The relative minor sits on the 6th degree: {{key}} major → {{target}} minor. Both share the key signature."
             },
             "modes": {
+                "tapCharacteristic": "{{mode}} from {{root}}. Tap its characteristic note ({{characteristic}}) on the fretboard.",
                 "orderToMode": "Mode number {{order}} (I–VII) is:",
                 "modeToOrder": "The {{mode}} mode is number:",
                 "patternToMode": "Pattern vs major (W = whole step, H = half step): {{pattern}} — this is:",
@@ -1988,6 +2003,9 @@
                 "soundToMode": "Listen to the scale played from {{root}} — which mode is it?"
             },
             "triadBuild": {
+                "tapThird": "The chord on degree {{degree}} of {{key}} major starts on {{root}}. Tap its third on the fretboard.",
+                "tapFifth": "The chord on degree {{degree}} of {{key}} major starts on {{root}}. Tap its fifth on the fretboard.",
+                "tapSeventh": "The chord on degree {{degree}} of {{key}} major starts on {{root}}. Tap its seventh on the fretboard.",
                 "degreeToType": "In {{key}} major, build the triad on degree {{degree}} ({{notes}}). What type is it?",
                 "degreeToTriad": "In {{key}} major, degree {{degree}} spells {{notes}}. Which symbol is correct?",
                 "hintType": "Type: {{type}}",
@@ -1995,6 +2013,7 @@
                 "degreeToSeventh": "Build 1-3-5-7 from the {{key}} major scale on degree {{degree}} — which seventh chord?"
             },
             "chordScale": {
+                "tapCharacteristic": "In {{key}} major, {{mode}} fits {{chord}}. Tap its characteristic note ({{characteristic}}) on the fretboard.",
                 "chordToMode": "Which mode fits {{chord}} (in C major)?",
                 "modeToChord": "Which chord does the {{mode}} mode serve?",
                 "hintPair": "{{chord}} → {{mode}}",
@@ -2225,27 +2244,27 @@
             },
             "modes.e1": {
                 "name": "Quiz: modes",
-                "desc": "Mode order, the notes of a mode from a given root, the parent scale and recognizing a mode by ear."
+                "desc": "The characteristic note of a mode on the fretboard, a mode's notes from a given root, the parent scale on the circle, and recognizing modes by ear."
             },
             "modes.e2": {
-                "name": "Characteristic notes",
-                "desc": "Lydian has #4, Mixolydian b7, Phrygian b2 — name the mode from its characteristic note."
+                "name": "Characteristic note on the fretboard",
+                "desc": "Find the note that gives a mode its sound: 6 in Dorian, #4 in Lydian, b7 in Mixolydian."
             },
             "chord-construction.e1": {
                 "name": "Quiz: chords from the scale",
-                "desc": "Build a chord on a degree of the major scale and name its type — triads and seventh chords."
+                "desc": "Build a chord on a degree of the major scale: tap its notes on the fretboard and name its type — triads and seventh chords."
             },
             "chord-construction.e2": {
-                "name": "Degree's chord symbol",
-                "desc": "Pick the correct chord symbol for a scale degree (e.g. ii in D)."
+                "name": "Build the chord on the fretboard",
+                "desc": "The chord's root is highlighted. Tap its third, fifth or seventh — every other note of the scale."
             },
             "chord-scale-major.e1": {
                 "name": "Chord → mode (major)",
                 "desc": "Dm7 → Dorian, Fmaj7 → Lydian, G7 → Mixolydian…"
             },
             "chord-scale-major.e2": {
-                "name": "Mode → chord (major)",
-                "desc": "The reverse pairing plus characteristic tensions (Dm13, Fmaj7#11)."
+                "name": "Characteristic note over the chord",
+                "desc": "For a chord in a key, tap the characteristic note of the matching mode — the one worth resting a phrase on."
             },
             "triads.e1": {
                 "name": "Loop: triads over Am–C–Em–D",

@@ -26,7 +26,8 @@ import { cn } from "@/lib/utils";
 import { ExerciseFrame, ScoreStrip } from "./ExerciseFrame";
 import { localizeAnswer, localizePromptValues } from "@/lib/improv/display";
 import { CircleDial } from "@/components/theory/CircleDial";
-import { CIRCLE_KEYS } from "@/components/theory/circleGeometry";
+import { circleKeyOf } from "@/components/theory/circleGeometry";
+import { QuestionFretboard } from "./QuestionFretboard";
 
 interface ChoiceQuizProps {
     moduleId: string;
@@ -39,9 +40,8 @@ interface ChoiceQuizProps {
 }
 
 const ANSWER_ADVANCE_MS = 1300;
-/** Longer pause when the circle reveals its counts, so there is time to read them. */
-const CIRCLE_ADVANCE_MS = 2400;
-const CIRCLE_KEY_SET: ReadonlySet<string> = new Set(CIRCLE_KEYS);
+/** Longer pause when a board reveals the solution, so there is time to read it. */
+const BOARD_ADVANCE_MS = 2400;
 
 
 
@@ -69,14 +69,9 @@ export function ChoiceQuiz({ moduleId, exercise, onQuestionAnswered, onRunFinish
     }, []);
 
     const question = questions[index];
-    // Key-signature questions are answered on the circle of fifths: either the
-    // asked key is marked on it, or the circle itself is the answer board.
-    const isKeySig = question?.id.split(":")[0] === "keySig";
-    const promptKey = question?.promptValues?.key;
-    const askedKey = isKeySig && typeof promptKey === "string" && CIRCLE_KEY_SET.has(promptKey) ? promptKey : undefined;
+    const visual = question?.visual;
     const correctOption = question?.options[question.correctIndex] ?? "";
-    const pickOnCircle = isKeySig && !askedKey && CIRCLE_KEY_SET.has(correctOption);
-    const showsCircle = Boolean(askedKey) || pickOnCircle;
+    const tapBoard = Boolean(visual?.tap);
 
     const choose = (option: string) => {
         if (selected || !question) return;
@@ -100,7 +95,7 @@ export function ChoiceQuiz({ moduleId, exercise, onQuestionAnswered, onRunFinish
             } else {
                 setIndex((previous) => previous + 1);
             }
-        }, showsCircle ? CIRCLE_ADVANCE_MS : ANSWER_ADVANCE_MS);
+        }, visual ? BOARD_ADVANCE_MS : ANSWER_ADVANCE_MS);
     };
 
     const audioTimersRef = useRef<number[]>([]);
@@ -177,25 +172,36 @@ export function ChoiceQuiz({ moduleId, exercise, onQuestionAnswered, onRunFinish
                             {t("improv.quiz.play")}
                         </Button>
                     )}
-                    {showsCircle && (
-                        <>
-                            <p className="text-xs text-muted-foreground">
-                                {t(pickOnCircle ? "improv.quiz.circleTap" : "improv.quiz.circleRead")}
-                            </p>
-                            <div className="flex justify-center">
-                                <CircleDial
-                                    selectedKey={askedKey ?? (selected ? correctOption : undefined)}
-                                    onSelect={pickOnCircle && !selected ? choose : undefined}
-                                    showCounts={Boolean(selected)}
-                                    showMinors={Boolean(selected)}
-                                    statusByKey={pickOnCircle && selected
-                                        ? { [selected]: "incorrect", [correctOption]: "correct" }
-                                        : undefined}
-                                />
-                            </div>
-                        </>
+                    {visual?.tipKey && <p className="text-xs text-muted-foreground">{t(visual.tipKey)}</p>}
+                    {visual?.kind === "circle" && (
+                        <div className="flex justify-center">
+                            <CircleDial
+                                selectedKey={circleKeyOf(visual.marked ?? (selected && tapBoard ? correctOption : undefined))}
+                                onSelect={tapBoard && !selected
+                                    // A key that is not among the options is still a (wrong) answer.
+                                    ? (key) => choose(question.options.find((option) => circleKeyOf(option) === key) ?? `circle:${key}`)
+                                    : undefined}
+                                showCounts={Boolean(visual.counts) && Boolean(selected)}
+                                showMinors={Boolean(visual.open) || Boolean(selected)}
+                                frameKeys={visual.open || selected
+                                    ? (visual.frames ?? []).map(circleKeyOf).filter((key): key is string => Boolean(key))
+                                    : undefined}
+                                polygon={selected
+                                    ? visual.polygon?.map(circleKeyOf).filter((key): key is string => Boolean(key))
+                                    : undefined}
+                                statusByKey={tapBoard && selected
+                                    ? { [circleKeyOf(selected) ?? ""]: "incorrect", [circleKeyOf(correctOption) ?? ""]: "correct" }
+                                    : undefined}
+                            />
+                        </div>
                     )}
-                    {!pickOnCircle && <div className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-2">
+                    {visual?.kind === "fretboard" && (
+                        // Five frets do not need the full card width on a desktop.
+                        <div className="mx-auto w-full max-w-xl">
+                            <QuestionFretboard visual={visual} selected={selected} onPick={tapBoard && !selected ? choose : undefined} />
+                        </div>
+                    )}
+                    {!tapBoard && <div className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-2">
                         {question.options.map((option) => {
                             const isCorrectOption = option === question.options[question.correctIndex];
                             const isSelected = selected === option;

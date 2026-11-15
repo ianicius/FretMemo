@@ -54,6 +54,10 @@ interface CircleDialProps {
     onSelect?: (key: string) => void;
     showCounts?: boolean;
     showMinors?: boolean;
+    /** Keys whose seven chords get an outline; the first one slides when it changes. */
+    frameKeys?: string[];
+    /** Keys joined by a line (the Coltrane cycle). */
+    polygon?: string[];
     /** Answer feedback per key; wins over the selection highlight. */
     statusByKey?: Record<string, "correct" | "incorrect">;
     /** SVG content for the middle of the circle. */
@@ -61,16 +65,22 @@ interface CircleDialProps {
 }
 
 /** The circle of fifths drawing, shared by the theory tool and the key-signature quiz. */
-export function CircleDial({ selectedKey, onSelect, showCounts = true, showMinors = true, statusByKey, children }: CircleDialProps) {
+export function CircleDial({ selectedKey, onSelect, showCounts = true, showMinors = true, frameKeys, polygon, statusByKey, children }: CircleDialProps) {
     const { t, i18n } = useTranslation();
     const language = i18n.resolvedLanguage ?? i18n.language;
 
     // The frame turns the short way round: `turn` accumulates degrees instead of snapping to 0–330.
-    const selectedIndex = selectedKey ? (CIRCLE_KEYS as readonly string[]).indexOf(selectedKey) : -1;
-    const [turn, setTurn] = useState(Math.max(selectedIndex, 0) * 30);
-    const delta = selectedIndex < 0 ? 0 : ((selectedIndex * 30 - turn) % 360 + 540) % 360 - 180;
+    const indexOf = (key: string) => (CIRCLE_KEYS as readonly string[]).indexOf(key);
+    const frames = (frameKeys ?? []).filter((key) => indexOf(key) >= 0);
+    const firstIndex = frames[0] ? indexOf(frames[0]) : -1;
+    const [turn, setTurn] = useState(Math.max(firstIndex, 0) * 30);
+    const delta = firstIndex < 0 ? 0 : ((firstIndex * 30 - turn) % 360 + 540) % 360 - 180;
     if (delta !== 0) setTurn(turn + delta);
-    const showFrame = showMinors && selectedIndex >= 0;
+    const polygonPoints = (polygon ?? [])
+        .map((key) => SEGMENTS[indexOf(key)]?.outerPos)
+        .filter((pos): pos is { x: number; y: number } => Boolean(pos))
+        .map((pos) => `${pos.x.toFixed(1)},${pos.y.toFixed(1)}`)
+        .join(" ");
 
     return (
         <svg
@@ -82,15 +92,22 @@ export function CircleDial({ selectedKey, onSelect, showCounts = true, showMinor
             <circle cx={CIRCLE_CENTER} cy={CIRCLE_CENTER} r={RADIUS + 20} fill="none" stroke="currentColor" strokeOpacity={0.1} strokeWidth={1} />
             <circle cx={CIRCLE_CENTER} cy={CIRCLE_CENTER} r={FRAME_INNER} fill="none" stroke="currentColor" strokeOpacity={0.1} strokeWidth={1} />
 
-            {showFrame && (
+            {frames.map((key, position) => (
                 <path
+                    key={position}
                     d={FRAME_PATH}
-                    className="pointer-events-none fill-primary/10 stroke-primary transition-transform duration-500 ease-out motion-reduce:transition-none"
+                    className={cn(
+                        "pointer-events-none transition-transform duration-500 ease-out motion-reduce:transition-none",
+                        position === 0 ? "fill-primary/10 stroke-primary" : "fill-sky-500/10 stroke-sky-500",
+                    )}
                     strokeWidth={2}
                     strokeLinejoin="round"
-                    style={{ transform: `rotate(${turn}deg)`, transformOrigin: `${CIRCLE_CENTER}px ${CIRCLE_CENTER}px` }}
-                    data-circle-frame={selectedKey}
+                    style={{ transform: `rotate(${position === 0 ? turn : indexOf(key) * 30}deg)`, transformOrigin: `${CIRCLE_CENTER}px ${CIRCLE_CENTER}px` }}
+                    data-circle-frame={key}
                 />
+            ))}
+            {polygonPoints && (
+                <polygon points={polygonPoints} className="pointer-events-none fill-emerald-500/10 stroke-emerald-500" strokeWidth={2} strokeLinejoin="round" data-circle-polygon />
             )}
 
             {SEGMENTS.map((seg) => {

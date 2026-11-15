@@ -76,7 +76,19 @@ export interface ChoiceQuestion {
     hintValues?: Record<string, string | number>;
     /** Optional audio prompt (plan phase 5: mode recognition by ear). */
     audio?: { root: string; order: number };
+    /** Optional board drawn with the question; with `tap` it replaces the answer buttons. */
+    visual?: QuestionVisual;
 }
+
+/**
+ * A fretboard (open position) or the circle of fifths shown with a question.
+ * Notes and keys are raw tokens; the component maps them to positions.
+ * `tap`: the answer is given by tapping a dot / a key. `reveal`, `frames`
+ * (unless `open`) and `polygon` appear only after the answer.
+ */
+export type QuestionVisual =
+    | { kind: "fretboard"; dots: Array<{ note: string; strong?: boolean }>; tap?: boolean; reveal?: string[]; tipKey?: string }
+    | { kind: "circle"; marked?: string; tap?: boolean; frames?: string[]; open?: boolean; counts?: boolean; polygon?: string[]; tipKey?: string };
 
 export type FretboardQuestionDirection = "position-to-note" | "note-to-position";
 
@@ -296,6 +308,31 @@ function numericOptions(correct: number, rng: Rng, min: number, max: number): { 
     return { options, correctIndex: options.indexOf(String(correct)) };
 }
 
+/** Major keys drawn on the circle of fifths (C# and Gb major are not). */
+const CIRCLE_MAJOR_KEYS: ReadonlySet<string> = new Set(["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"]);
+
+const rootOf = (chord: string): string => /^[A-G][#b]?/.exec(chord)?.[0] ?? chord;
+
+function scaleDots(scale: readonly string[], strong: string[]): Array<{ note: string; strong?: boolean }> {
+    return scale.map((note) => ({ note, strong: strong.includes(note) }));
+}
+
+/** Scale-degree index (0-based) of each mode's characteristic note. */
+const CHARACTERISTIC_INDEX: Record<string, number> = { "6": 5, b2: 1, "#4": 3, b7: 6, b6: 5, b5: 4 };
+
+/** Key-signature questions are read from, or answered on, the circle of fifths. */
+function withKeySigVisual(question: ChoiceQuestion): ChoiceQuestion {
+    const key = question.promptValues.key;
+    if (typeof key === "string" && CIRCLE_MAJOR_KEYS.has(key)) {
+        return { ...question, visual: { kind: "circle", marked: key, frames: [key], counts: true, tipKey: "improv.quiz.circleRead" } };
+    }
+    const correct = question.options[question.correctIndex] as string;
+    if (typeof key !== "string" && CIRCLE_MAJOR_KEYS.has(correct)) {
+        return { ...question, visual: { kind: "circle", tap: true, frames: [correct], counts: true, tipKey: "improv.quiz.circleTap" } };
+    }
+    return question;
+}
+
 /** The order in which accidentals join a key signature. */
 const SHARP_ORDER = ["F#", "C#", "G#", "D#", "A#", "E#", "B#"];
 const FLAT_ORDER = ["Bb", "Eb", "Ab", "Db", "Gb", "Cb", "Fb"];
@@ -475,6 +512,22 @@ function generateKeySig(rng: Rng, direction: string): ChoiceQuestion {
 function generateModes(rng: Rng, direction: string): ChoiceQuestion {
     const modeNames = MODES.map((mode) => mode.name);
     const entry = rng.pick(MODES);
+    if (direction === "tap-characteristic") {
+        const picked = rng.pick(MODES.filter((mode) => mode.characteristic !== "—"));
+        const root = rng.pick(["C", "D", "E", "G", "A"]);
+        const notes = modeNotesFromRoot(root, picked.order);
+        const correct = notes[CHARACTERISTIC_INDEX[picked.characteristic] ?? 0] as string;
+        return {
+            id: "modes",
+            promptKey: "improv.q.modes.tapCharacteristic",
+            promptValues: { mode: picked.name, root, characteristic: picked.characteristic },
+            options: notes,
+            correctIndex: notes.indexOf(correct),
+            hintKey: "improv.q.modes.hintCharacteristic",
+            hintValues: { mode: picked.name, characteristic: picked.characteristic },
+            visual: { kind: "fretboard", dots: scaleDots(notes, [root]), tap: true, reveal: [correct], tipKey: "improv.quiz.fretCountDegrees" },
+        };
+    }
     if (direction === "mode-to-order") {
         const { options, correctIndex } = numericOptions(entry.order, rng, 1, 7);
         return {
@@ -529,6 +582,9 @@ function generateModes(rng: Rng, direction: string): ChoiceQuestion {
             correctIndex,
             hintKey: "improv.q.modes.hintCharacteristic",
             hintValues: { mode: entry.name, characteristic: entry.characteristic },
+            ...(CIRCLE_MAJOR_KEYS.has(parent)
+                ? { visual: { kind: "circle" as const, tap: true, frames: [parent], tipKey: "improv.quiz.circleTapKey" } }
+                : {}),
         };
     }
     if (direction === "sound-to-mode") {
@@ -618,6 +674,24 @@ function generateTriadBuild(rng: Rng, direction: string): ChoiceQuestion {
     const fifth = scale[(degree + 3) % 7] as string;
     const suffix = triadTypeOf(root, third, fifth);
     const typeLabel = TRIAD_TYPE_LABELS[suffix] ?? "major";
+    // The key's scale in open position; the chord's own notes stand out.
+    const chordVisual = (tones: string[]): QuestionVisual => ({ kind: "fretboard", dots: scaleDots(scale, tones), tipKey: "improv.quiz.fretChordInScale" });
+    if (direction === "tap-chord-tone") {
+        const seventh = scale[(degree + 5) % 7] as string;
+        const tone = rng.pick(["Third", "Fifth", "Seventh"] as const);
+        const correct = tone === "Third" ? third : tone === "Fifth" ? fifth : seventh;
+        const stack = tone === "Seventh" ? [root, third, fifth, seventh] : [root, third, fifth];
+        return {
+            id: "triadBuild",
+            promptKey: `improv.q.triadBuild.tap${tone}`,
+            promptValues: { key: keyName, degree, root },
+            options: [...scale],
+            correctIndex: scale.indexOf(correct),
+            hintKey: "improv.q.triadBuild.hintSpelling",
+            hintValues: { notes: stack.join("-") },
+            visual: { kind: "fretboard", dots: scaleDots(scale, [root]), tap: true, reveal: stack, tipKey: "improv.quiz.fretStackThirds" },
+        };
+    }
     if (direction === "degree-to-seventh") {
         const seventh = scale[(degree + 5) % 7] as string;
         const seventhSuffix = triadSeventhSuffix(root, third, fifth, seventh);
@@ -633,6 +707,7 @@ function generateTriadBuild(rng: Rng, direction: string): ChoiceQuestion {
             correctIndex,
             hintKey: "improv.q.triadBuild.hintType",
             hintValues: { type: typeLabelSeventh },
+            visual: chordVisual([root, third, fifth, seventh]),
         };
     }
     if (direction === "degree-to-triad") {
@@ -646,6 +721,7 @@ function generateTriadBuild(rng: Rng, direction: string): ChoiceQuestion {
             correctIndex,
             hintKey: "improv.q.triadBuild.hintType",
             hintValues: { type: typeLabel },
+            visual: chordVisual([root, third, fifth]),
         };
     }
     const { options, correctIndex } = chordOptions(typeLabel, ["minor", "major", "diminished", "augmented"].filter((item) => item !== typeLabel), rng);
@@ -657,8 +733,32 @@ function generateTriadBuild(rng: Rng, direction: string): ChoiceQuestion {
         correctIndex,
         hintKey: "improv.q.triadBuild.hintSpelling",
         hintValues: { notes: `${root}-${third}-${fifth}` },
+        visual: chordVisual([root, third, fifth]),
     };
 }
+
+/** Module 9 on the fretboard: the chord's mode in a key and its characteristic note. */
+function generateChordScaleTap(rng: Rng, key: string): ChoiceQuestion {
+    const scale = [...Key.majorKey(key).scale];
+    const qualities = ["maj7", "m7", "m7", "maj7", "7", "m7", "m7b5"];
+    const mode = rng.pick(MODES.filter((item) => item.characteristic !== "—"));
+    const rotated = [...scale.slice(mode.order - 1), ...scale.slice(0, mode.order - 1)];
+    const chord = `${rotated[0]}${qualities[mode.order - 1]}`;
+    const correct = rotated[CHARACTERISTIC_INDEX[mode.characteristic] ?? 0] as string;
+    return {
+        id: "chordScaleMajor",
+        promptKey: "improv.q.chordScale.tapCharacteristic",
+        promptValues: { key, chord, mode: mode.name, characteristic: mode.characteristic },
+        options: scale,
+        correctIndex: scale.indexOf(correct),
+        hintKey: "improv.q.chordScale.hintPair",
+        hintValues: { chord, mode: mode.name },
+        visual: { kind: "fretboard", dots: scaleDots(scale, [rotated[0] as string]), tap: true, reveal: [correct], tipKey: "improv.quiz.fretCountDegrees" },
+    };
+}
+
+/** Chord types drawn from C, so the notes on the fretboard show the intervals. */
+const C_INTERVAL_NOTES: Record<string, string> = { "1": "C", b3: "Eb", "3": "E", b5: "Gb", "5": "G", "#5": "G#", b7: "Bb", "7": "B", bb7: "A" };
 
 function chordScaleQuestion(rng: Rng, direction: string, pairs: Array<{ chord: string; mode: string }>, modeOptions: string[], idPrefix: string, chordToModePromptKey = "improv.q.chordScale.chordToMode", modeToChordPromptKey = "improv.q.chordScale.modeToChord", keyName?: string): ChoiceQuestion {
     const entry = rng.pick(pairs);
@@ -691,6 +791,11 @@ function chordScaleQuestion(rng: Rng, direction: string, pairs: Array<{ chord: s
 
 function generateTriadType(rng: Rng, direction: string): ChoiceQuestion {
     const entry = rng.pick(CHORD_TYPE_INTERVALS);
+    const visual: QuestionVisual = {
+        kind: "fretboard",
+        dots: scaleDots(entry.intervals.split(" ").map((interval) => C_INTERVAL_NOTES[interval] ?? "C"), ["C"]),
+        tipKey: "improv.quiz.fretChordOnC",
+    };
     if (direction === "intervals-to-name") {
         const distractors = CHORD_TYPE_INTERVALS.filter((item) => item.intervals !== entry.intervals).map((item) => item.label);
         const { options, correctIndex } = chordOptions(entry.label, rng.shuffle(distractors).slice(0, 3), rng);
@@ -702,6 +807,7 @@ function generateTriadType(rng: Rng, direction: string): ChoiceQuestion {
             correctIndex,
             hintKey: "improv.q.triadType.hintIntervals",
             hintValues: { intervals: entry.intervals },
+            visual,
         };
     }
     const distractors = CHORD_TYPE_INTERVALS.filter((item) => item.label !== entry.label).map((item) => item.intervals);
@@ -714,6 +820,7 @@ function generateTriadType(rng: Rng, direction: string): ChoiceQuestion {
         correctIndex,
         hintKey: "improv.q.triadType.hintIntervals",
         hintValues: { intervals: entry.intervals },
+        visual,
     };
 }
 
@@ -733,6 +840,7 @@ function generateTritone(rng: Rng, direction: string): ChoiceQuestion {
             correctIndex,
             hintKey: "improv.q.tritone.hintResolution",
             hintValues: { sub, target: subVResolutionTarget(dominant) },
+            visual: { kind: "circle", marked: rootOf(sub), tap: true, tipKey: "improv.quiz.circleTritone" },
         };
     }
     if (direction === "subv-resolution") {
@@ -747,6 +855,7 @@ function generateTritone(rng: Rng, direction: string): ChoiceQuestion {
             correctIndex,
             hintKey: "improv.q.tritone.hintSubV",
             hintValues: { sub, v: dominant, target },
+            visual: { kind: "circle", marked: rootOf(sub), tap: true, tipKey: "improv.quiz.circleSubvResolve" },
         };
     }
     const distractors = ["C7", "Db7", "D7", "Eb7", "Gb7", "A7", "B7", "F7"].filter((item) => item !== sub);
@@ -759,6 +868,7 @@ function generateTritone(rng: Rng, direction: string): ChoiceQuestion {
         correctIndex,
         hintKey: "improv.q.tritone.hintResolution",
         hintValues: { sub, target: subVResolutionTarget(dominant) },
+        visual: { kind: "circle", marked: rootOf(dominant), tap: true, tipKey: "improv.quiz.circleTritone" },
     };
 }
 
@@ -830,6 +940,7 @@ function generateSecondaryDom(rng: Rng, direction: string): ChoiceQuestion {
             correctIndex,
             hintKey: "improv.q.secondaryDom.hintPair",
             hintValues: { dominant: entry.dominant, target: entry.target },
+            visual: { kind: "circle", marked: rootOf(entry.dominant), tap: true, tipKey: "improv.quiz.circleResolve" },
         };
     }
     const pairs = secondaryDomPairs(key);
@@ -843,6 +954,7 @@ function generateSecondaryDom(rng: Rng, direction: string): ChoiceQuestion {
         correctIndex,
         hintKey: "improv.q.secondaryDom.hintPair",
         hintValues: { dominant: entry.dominant, target: entry.target },
+        visual: { kind: "circle", marked: rootOf(entry.target), tap: true, tipKey: "improv.quiz.circleDominant" },
     };
 }
 
@@ -851,6 +963,8 @@ function generateBorrowed(rng: Rng, direction: string): ChoiceQuestion {
     const key = rng.pick(["C", "G", "D", "A", "E", "B", "F", "Bb", "Eb", "Ab", "Db", "Gb"]);
     const pairs = borrowedPairs(key);
     const entry = rng.pick(pairs.filter((item) => item.degree !== "backdoor ii-V"));
+    // The parallel minor shares its chords with the major key three steps counter-clockwise (C minor = Eb major).
+    const visual: QuestionVisual = { kind: "circle", marked: key, frames: [key, flatName(pcOf(key) + 3)], open: true, tipKey: "improv.quiz.circleBorrowed" };
     if (direction === "backdoor") {
         // Always the full backdoor sequence for the drawn key: iv m7 – bVII7 – I
         // (Fm7–Bb7–C in C, matching the video).
@@ -870,6 +984,7 @@ function generateBorrowed(rng: Rng, direction: string): ChoiceQuestion {
             correctIndex,
             hintKey: "improv.q.borrowed.hintBackdoor",
             hintValues: { source: `${key}m` },
+            visual,
         };
     }
     const { options, correctIndex } = chordOptions(entry.degree, rng.shuffle(degrees.filter((degree) => degree !== entry.degree)).slice(0, 3), rng);
@@ -881,6 +996,7 @@ function generateBorrowed(rng: Rng, direction: string): ChoiceQuestion {
         correctIndex,
         hintKey: "improv.q.borrowed.hintSource",
         hintValues: { chord: entry.chord, source: `${key}m` },
+        visual,
     };
 }
 
@@ -913,6 +1029,7 @@ function generatePivot(rng: Rng, direction: string): ChoiceQuestion {
             correctIndex,
             hintKey: "improv.q.pivot.hintTarget",
             hintValues: { ii, v, key: targetKey },
+            visual: { kind: "circle", marked: targetKey, frames: [targetKey], open: true, tipKey: "improv.quiz.circleFrame251" },
         };
     }
     const triadsFirst = diatonicTriads(first);
@@ -933,6 +1050,7 @@ function generatePivot(rng: Rng, direction: string): ChoiceQuestion {
         correctIndex,
         hintKey: "improv.q.pivot.hintCommon",
         hintValues: { chord: correct, first, second },
+        visual: { kind: "circle", frames: [first, second], open: true, tipKey: "improv.quiz.circlePivot" },
     };
 }
 
@@ -949,6 +1067,7 @@ function generateColtrane(rng: Rng, direction: string): ChoiceQuestion {
             correctIndex,
             hintKey: "improv.q.coltrane.hintCycle",
             hintValues: { cycle: GIANT_STEPS_CYCLE.join("–") },
+            visual: { kind: "circle", marked: rootOf(entry.dominant), tap: true, polygon: GIANT_STEPS_CYCLE, tipKey: "improv.quiz.circleResolve" },
         };
     }
     if (direction === "ii-v-of") {
@@ -970,6 +1089,7 @@ function generateColtrane(rng: Rng, direction: string): ChoiceQuestion {
             correctIndex,
             hintKey: "improv.q.coltrane.hintCycle",
             hintValues: { cycle: GIANT_STEPS_CYCLE.join("–") },
+            visual: { kind: "circle", marked: target, frames: [target], open: true, polygon: GIANT_STEPS_CYCLE, tipKey: "improv.quiz.circleFrame251" },
         };
     }
     // Transpose the cycle so it starts on the drawn root (B by default).
@@ -991,6 +1111,7 @@ function generateColtrane(rng: Rng, direction: string): ChoiceQuestion {
         correctIndex,
         hintKey: "improv.q.coltrane.hintCycle",
         hintValues: { cycle: correct },
+        visual: { kind: "circle", marked: firstRoot, polygon: shifted, tipKey: "improv.quiz.circleColtrane" },
     };
 }
 
@@ -1001,9 +1122,10 @@ function generateQuestion(generatorId: ChoiceGeneratorId, rng: Rng, direction: s
         switch (generatorId) {
             // Notes first: bare accidental counts are only a memory aid, so they are not asked on their own.
             case "keySig": return rng.pick(["key-notes", "key-notes", "note-in-key", "key-to-accidentals", "key-type", "key-accidentals", "parallel-minor", "relative-minor"]);
-            case "modes": return rng.pick(["order-to-mode", "mode-to-order", "pattern-to-mode", "characteristic-to-mode", "mode-notes", "mode-parent", "sound-to-mode"]);
-            case "triadBuild": return rng.pick(["degree-to-type", "degree-to-triad", "degree-to-seventh", "degree-to-seventh"]);
-            case "chordScaleMajor": return rng.pick(["chord-to-mode", "mode-to-chord", "chord-to-mode"]);
+            // Order numbers and W/H patterns are trivia; the pool asks what is heard and played.
+            case "modes": return rng.pick(["tap-characteristic", "tap-characteristic", "characteristic-to-mode", "mode-notes", "mode-parent", "sound-to-mode"]);
+            case "triadBuild": return rng.pick(["tap-chord-tone", "tap-chord-tone", "degree-to-type", "degree-to-triad", "degree-to-seventh", "degree-to-seventh"]);
+            case "chordScaleMajor": return rng.pick(["chord-to-mode", "mode-to-chord", "tap-characteristic"]);
             case "triadType": return rng.pick(["name-to-intervals", "intervals-to-name"]);
             case "chordScaleMelodic":
             case "chordScaleHarmonic": return rng.pick(["chord-to-mode", "mode-to-chord", "in-context"]);
@@ -1017,14 +1139,16 @@ function generateQuestion(generatorId: ChoiceGeneratorId, rng: Rng, direction: s
     };
 
     switch (generatorId) {
-        case "keySig": return generateKeySig(rng, pickDirection());
+        case "keySig": return withKeySigVisual(generateKeySig(rng, pickDirection()));
         case "modes": return generateModes(rng, pickDirection());
         case "triadBuild": return generateTriadBuild(rng, pickDirection());
         case "chordScaleMajor": {
             const key = rng.pick(KEY_POOL);
-            return chordScaleQuestion(
+            const picked = pickDirection();
+            if (picked === "tap-characteristic") return generateChordScaleTap(rng, key);
+            const question = chordScaleQuestion(
                 rng,
-                pickDirection() === "mode-to-chord" ? "mode-to-chord" : "chord-to-mode",
+                picked === "mode-to-chord" ? "mode-to-chord" : "chord-to-mode",
                 chordScaleMajorPairs(key),
                 MODES.map((mode) => mode.name),
                 "chordScaleMajor",
@@ -1032,6 +1156,10 @@ function generateQuestion(generatorId: ChoiceGeneratorId, rng: Rng, direction: s
                 "improv.q.chordScale.modeToChordKey",
                 key,
             );
+            const chord = question.promptValues.chord;
+            return typeof chord === "string"
+                ? { ...question, visual: { kind: "fretboard", dots: scaleDots(Key.majorKey(key).scale, [rootOf(chord)]), tipKey: "improv.quiz.fretChordRoot" } }
+                : question;
         }
         case "triadType": return generateTriadType(rng, pickDirection());
         case "chordScaleMelodic":
@@ -1053,7 +1181,7 @@ function generateQuestion(generatorId: ChoiceGeneratorId, rng: Rng, direction: s
         case "borrowed": return generateBorrowed(rng, pickDirection());
         case "pivot": return generatePivot(rng, pickDirection());
         case "coltrane": return generateColtrane(rng, pickDirection());
-        default: return generateKeySig(rng, "key-to-count");
+        default: return withKeySigVisual(generateKeySig(rng, "key-notes"));
     }
 }
 
@@ -1091,7 +1219,8 @@ export function generateChoiceQuiz(params: ChoiceQuizGenerationParams, seed: str
             : params.direction;
         const question = generateQuestion(effectiveGenerator, rng, direction);
         const { options, correctIndex, ...rest } = question;
-        const trimmed = options.slice(0, params.answerOptions ?? 4);
+        // Tapped boards list every note of the scale as an option: nothing to trim.
+        const trimmed = question.visual?.tap ? options : options.slice(0, params.answerOptions ?? 4);
         questions.push({
             ...rest,
             // The effective generator leads the id: review/entrance callbacks

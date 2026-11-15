@@ -459,7 +459,7 @@ export const CURRICULUM: ImprovModule[] = [
         ],
         exercises: [
             choiceExercise("modes", "e1", "modes", 10),
-            choiceExercise("modes", "e2", "modes", 10, "characteristic-to-mode"),
+            choiceExercise("modes", "e2", "modes", 10, "tap-characteristic"),
             loopExercise("modes", "e3", {
                 progression: ["Dm7", "G7"],
                 goalKey: "improv.goals.modeCharacteristic",
@@ -492,7 +492,7 @@ export const CURRICULUM: ImprovModule[] = [
         embed: { tool: "chord-library" },
         exercises: [
             choiceExercise("chord-construction", "e1", "triadBuild", 10),
-            choiceExercise("chord-construction", "e2", "triadBuild", 10, "degree-to-triad"),
+            choiceExercise("chord-construction", "e2", "triadBuild", 10, "tap-chord-tone"),
         ],
     },
     {
@@ -501,7 +501,7 @@ export const CURRICULUM: ImprovModule[] = [
         theoryKey: "improv.modules.chord-scale-major.theory",
         exercises: [
             choiceExercise("chord-scale-major", "e1", "chordScaleMajor", 10, "chord-to-mode"),
-            choiceExercise("chord-scale-major", "e2", "chordScaleMajor", 10, "mode-to-chord"),
+            choiceExercise("chord-scale-major", "e2", "chordScaleMajor", 10, "tap-characteristic"),
             loopExercise("chord-scale-major", "e3", {
                 progression: [
                     { chord: "Dm7", hintKey: "improv.hints.csDorian" },
