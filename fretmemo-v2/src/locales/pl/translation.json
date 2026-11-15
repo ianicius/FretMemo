@@ -272,6 +272,10 @@
         }
     },
     "quests": {
+        "sessionOfTheDay": {
+            "title": "Sesja dnia",
+            "description": "Ukończ sesję dnia w treningu improwizacji"
+        },
         "dailyDedication": {
             "title": "Codzienna regularność",
             "description": "Zdobądź dziś 300 XP"

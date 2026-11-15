@@ -34,6 +34,9 @@ interface QuestProgressMetadata {
     mode?: string;
 }
 
+/** `play_mode` value reported when the improv session of the day is finished. */
+export const IMPROV_SESSION_MODE = 'improv-session';
+
 const generateDailyQuests = (): Quest[] => {
     // A simple pool of quests to draw from. In a real app, this could be more dynamic.
     const pool = [
@@ -85,7 +88,15 @@ const generateDailyQuests = (): Quest[] => {
 
     // Shuffle and pick 3 quests
     const shuffled = pool.sort(() => 0.5 - Math.random());
-    const selected = shuffled.slice(0, 3);
+    // Plan F1: the improv session of the day is offered every day, on top of the three drawn ones.
+    const selected = [...shuffled.slice(0, 3), {
+        type: 'play_mode' as QuestType,
+        title: 'Session Of The Day',
+        description: 'Finish the improv session of the day',
+        target: 1,
+        xpReward: 150,
+        metadata: { targetMode: IMPROV_SESSION_MODE },
+    }];
 
     return selected.map((q, index) => ({
         id: `quest-${Date.now()}-${index}`,

@@ -272,6 +272,10 @@
         }
     },
     "quests": {
+        "sessionOfTheDay": {
+            "title": "Session of the day",
+            "description": "Finish the improv session of the day"
+        },
         "dailyDedication": {
             "title": "Daily Dedication",
             "description": "Earn 300 XP today"

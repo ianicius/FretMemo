@@ -287,8 +287,8 @@ Moduł jest zaliczony (`completed`), gdy **każde** jego ćwiczenie poza `nonGat
   bieżącego modułu albo z najbliższego, który je ma (najpierw wcześniejsze). Trasa `/improv/session`
   (`SessionView` w `ImprovTraining.tsx`, wpis w `app-route-entrypoints.json`) pokazuje kroki po kolei z
   przyciskiem „Następny krok”; wejście to przycisk „Sesja dnia (15 min)” w karcie improwizacji na stronie
-  głównej. Kroki są wybierane raz przy wejściu. Sesja nie ma zegara, nie zapisuje, że została odbyta, i nie
-  jest zadaniem w `useQuestStore`.
+  głównej. Kroki są wybierane raz przy wejściu. Sesja nie ma zegara. Przycisk „Zakończ sesję” zalicza
+  stałe, czwarte zadanie dzienne „Sesja dnia” (`IMPROV_SESSION_MODE` w `useQuestStore`, 150 XP).
 - **Etap E planu rozwoju (2026-11-15): E1.** `STANDARDS` w `curriculum.ts` to jedno ćwiczenie pętli
   (`standards.e1`) z pięcioma wariantami: blues jazzowy w F, blues molowy w c, część A „Autumn Leaves”,
   część A rhythm changes w B i ii–V–I po kole kwartowym. `RoadmapView` pokazuje je pod listą modułów

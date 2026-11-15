@@ -30,6 +30,7 @@ import { PracticeLinkExercise } from "@/components/improv/PracticeLinkExercise";
 import { CURRICULUM, REVIEW_ID, STANDARDS, STANDARDS_ID, countCompletedModules, dailySession, passedQuizGenerators, reviewQuiz, getImprovModule, isModuleUnlocked, isModuleComplete, isNonGating } from "@/data/improv/curriculum";
 import type { ChoiceGeneratorId } from "@/lib/improv/questions";
 import { useImprovStore } from "@/stores/useImprovStore";
+import { IMPROV_SESSION_MODE, useQuestStore } from "@/stores/useQuestStore";
 import { isDueForReview } from "@/lib/sm2";
 import { cn } from "@/lib/utils";
 import { trackFeatureOpened } from "@/lib/analytics";
@@ -349,6 +350,7 @@ function SessionView() {
                 className="w-full"
                 onClick={() => {
                     if (last) {
+                        useQuestStore.getState().updateProgress("play_mode", 1, { mode: IMPROV_SESSION_MODE });
                         navigate("/");
                         return;
                     }
