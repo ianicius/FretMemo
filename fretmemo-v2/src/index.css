@@ -358,21 +358,26 @@
       inset 0 0 14px rgba(251, 191, 36, 0.2);
   }
 
-  /* Root (emphasis "strong"): static cue = solid fill + dark inner ring; the pulse is extra and off under reduced motion. */
+  /* Root (emphasis "strong"), static cues only (the pulse is extra and off under reduced motion). No inner ring: on ~18 px
+     phone dots it crosses the label. Amber root = solid fill; green root = 1px ring outside the dot (adjacent-fret markers
+     are ~1.4 px apart at 390). No border: the fill shows under it anyway, and it would eat the label's room. */
   .note-dot--active-strong,
   .dark .note-dot--active-strong {
-    border-width: 3px;
+    border-width: 0;
     background-color: #f59e0b;
     color: #451a03;
     text-shadow: none;
-    outline: 2px solid var(--graphite-900);
-    outline-offset: -5px;
     animation: note-active-pulse 1.35s ease-in-out infinite;
   }
 
   .note-dot--correct-strong {
-    outline: 2px solid var(--graphite-900);
-    outline-offset: -3px;
+    border-width: 0;
+    outline: 1px solid var(--graphite-900);
+    outline-offset: 0;
+  }
+
+  .dark .note-dot--correct-strong {
+    outline-color: #FAFAF9;
   }
 
   .note-dot--correct {
