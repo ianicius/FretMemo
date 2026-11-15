@@ -1866,7 +1866,7 @@
             "keyOriginal": "{{key}} (original)",
             "transposedNotice": "The goal and chord hints refer to the original key ({{key}}). Chords, fretboard and mic targets are transposed.",
             "fretboardToggle": "Chord tones on the fretboard",
-            "fretboardLegend": "Numbers are chord degrees; the root (1) is highlighted.",
+            "fretboardLegend": "Numbers are chord degrees; the root (1) is a solid marker with a dark inner ring.",
             "fretboardLegendTargets": "Green: mic target notes.",
             "rampToggle": "+5 BPM every 2 successful loops",
             "reportTitle": "Last loop: {{done}}/{{total}} chords hit",

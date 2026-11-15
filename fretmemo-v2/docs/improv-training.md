@@ -106,6 +106,9 @@ Moduł jest zaliczony (`completed`), gdy **każde** jego ćwiczenie osiągnie w�
 - **Fretboard**: reuse `src/components/fretboard/Fretboard.tsx` (props `activeNotes: NoteStatus[]`,
   `onNoteClick`, `fitContainer`) — plik niezmieniony. Diagramy skal oznaczają dźwięki przez
   `status: "active"` + `label` (stopień 1/b3/…) + `emphasis: "strong"` dla roota.
+  Root jest wyróżniony statycznie (bez polegania na pulsie): `NoteDot` dodaje `note-dot--active-strong` (pełne
+  bursztynowe wypełnienie + ciemny wewnętrzny pierścień `outline`) albo `note-dot--correct-strong` (cel mikrofonu:
+  zielony + ten sam pierścień); rozmiar kropki bez zmian.
   Wysokość rzędów strun: każdy gryf improvu (`BackingLoopExercise`, `DiagramDrill`, `PracticeLinkExercise`,
   osadzenie w `TheoryCard`) dostaje klasę `IMPROV_FRETBOARD_ROWS` (`src/lib/improv/display.ts`):
   `.fret-cell` ma `min-height: clamp(1.75rem, 5.6vw, 2.75rem)`, czyli rząd rośnie razem z kropką

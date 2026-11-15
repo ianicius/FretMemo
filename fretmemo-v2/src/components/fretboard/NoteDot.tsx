@@ -18,7 +18,7 @@ export function NoteDot({ noteStatus, position, onClick, showLabel, leftHanded }
 
     const status = noteStatus?.status || "idle";
     const isActive = status !== "idle";
-    const isStrongActive = status === "active" && noteStatus?.emphasis === "strong";
+    const isStrong = noteStatus?.emphasis === "strong";
     const heatOpacity = typeof noteStatus?.opacity === "number" ? Math.max(0.08, noteStatus.opacity) : null;
     let labelText = noteStatus?.label ?? (showLabel ? position.note : null);
 
@@ -101,7 +101,8 @@ export function NoteDot({ noteStatus, position, onClick, showLabel, leftHanded }
                 className={cn(
                     "note-dot",
                     getStatusClasses(),
-                    isStrongActive && "note-dot--active-strong",
+                    isStrong && status === "active" && "note-dot--active-strong",
+                    isStrong && status === "correct" && "note-dot--correct-strong",
                     leftHanded && "transform scale-x-[-1]"
                 )}
                 style={customStyle}

@@ -358,9 +358,21 @@
       inset 0 0 14px rgba(251, 191, 36, 0.2);
   }
 
-  .note-dot--active-strong {
+  /* Root (emphasis "strong"): static cue = solid fill + dark inner ring; the pulse is extra and off under reduced motion. */
+  .note-dot--active-strong,
+  .dark .note-dot--active-strong {
     border-width: 3px;
+    background-color: #f59e0b;
+    color: #451a03;
+    text-shadow: none;
+    outline: 2px solid var(--graphite-900);
+    outline-offset: -5px;
     animation: note-active-pulse 1.35s ease-in-out infinite;
+  }
+
+  .note-dot--correct-strong {
+    outline: 2px solid var(--graphite-900);
+    outline-offset: -3px;
   }
 
   .note-dot--correct {

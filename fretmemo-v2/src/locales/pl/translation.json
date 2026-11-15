@@ -1880,7 +1880,7 @@
             "keyOriginal": "{{key}} (oryginalna)",
             "transposedNotice": "Cel i podpowiedzi przy akordach dotyczą oryginalnej tonacji ({{key}}). Akordy, gryf i dźwięki docelowe mikrofonu są przetransponowane.",
             "fretboardToggle": "Dźwięki akordu na gryfie",
-            "fretboardLegend": "Liczby to stopnie akordu, pryma (1) jest wyróżniona.",
+            "fretboardLegend": "Liczby to stopnie akordu; pryma (1) ma pełne wypełnienie i ciemny pierścień w środku.",
             "fretboardLegendTargets": "Zielone: dźwięki docelowe mikrofonu.",
             "rampToggle": "+5 BPM co 2 udane obiegi",
             "reportTitle": "Ostatni obieg: trafione akordy {{done}}/{{total}}",
