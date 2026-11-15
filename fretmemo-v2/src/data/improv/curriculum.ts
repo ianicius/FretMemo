@@ -1412,3 +1412,58 @@ export const STANDARDS: ImprovExercise = loopExercise(STANDARDS_ID, "e1", {
         key: form.key,
     })),
 });
+
+type ModuleStateShape = Record<string, ImprovProgressShape & { completed: boolean }> | undefined;
+
+/** Quiz generators of the completed modules: the pool of the mixed review quiz. */
+export function passedQuizGenerators(moduleState: ModuleStateShape): ChoiceGeneratorId[] {
+    const generators = new Set<ChoiceGeneratorId>();
+    for (const module of CURRICULUM) {
+        if (!isModuleComplete(module, moduleState?.[module.id])) continue;
+        for (const exercise of module.exercises) {
+            if (exercise.engine !== "choice-quiz") continue;
+            const { generatorId } = exercise.params as ChoiceQuizParams;
+            if (generatorId !== "mixed") generators.add(generatorId);
+        }
+    }
+    return [...generators];
+}
+
+/** The mixed review quiz over the given generators (roadmap and session of the day). */
+export function reviewQuiz(generators: ChoiceGeneratorId[]): ImprovExercise {
+    return {
+        id: "review.quiz",
+        engine: "choice-quiz",
+        nameKey: "improv.review.name",
+        descKey: "improv.review.desc",
+        params: { generatorId: "mixed", allowedGenerators: generators, questionCount: 10, requiredCorrect: 7, answerOptions: 4 },
+    };
+}
+
+/** Review runs are recorded under this id (it is not a module, so nothing is stored). */
+export const REVIEW_ID = "review";
+
+/**
+ * Plan F1: the session of the day — a review quiz, one diagram and one loop.
+ * Diagram and loop come from the current module, or from the nearest module
+ * that has one (earlier modules first). Before any module is complete the
+ * quiz is the nearest module quiz instead of a review.
+ */
+export function dailySession(moduleState: ModuleStateShape): Array<{ moduleId: string; exercise: ImprovExercise }> {
+    const current = nextImprovExercise(moduleState)?.module ?? CURRICULUM[CURRICULUM.length - 1];
+    const distance = (module: ImprovModule) => (module.order <= current.order ? current.order - module.order : CURRICULUM.length + module.order);
+    const nearest = [...CURRICULUM].sort((a, b) => distance(a) - distance(b));
+    const pick = (engine: ImprovEngineType) => {
+        for (const module of nearest) {
+            const exercise = module.exercises.find((item) => item.engine === engine);
+            if (exercise) return [{ moduleId: module.id, exercise }];
+        }
+        return [];
+    };
+    const passed = passedQuizGenerators(moduleState);
+    return [
+        ...(passed.length > 0 ? [{ moduleId: REVIEW_ID, exercise: reviewQuiz(passed) }] : pick("choice-quiz")),
+        ...pick("diagram-drill"),
+        ...pick("backing-improv"),
+    ];
+}

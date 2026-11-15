@@ -837,6 +837,7 @@
         "coverage": "Pokrycie gryfu",
         "momentum": "Motywacja",
         "improvContinue": {
+            "session": "Sesja dnia (15 min)",
             "title": "Trening improwizacji",
             "desc": "Moduł {{order}} z {{total}}: {{module}}",
             "continue": "Kontynuuj",
@@ -2651,6 +2652,18 @@
             "barQuestion2": "Pytanie, takt 2 z 2",
             "barAnswer1": "Odpowiedź, takt 1 z 2",
             "barAnswer2": "Odpowiedź, takt 2 z 2"
+        },
+        "session": {
+            "title": "Sesja dnia",
+            "step": "Krok {{step}} z {{total}}: {{name}} (ok. {{minutes}} min)",
+            "next": "Następny krok",
+            "finish": "Zakończ sesję",
+            "back": "Wróć na stronę główną",
+            "engine": {
+                "choice-quiz": "quiz",
+                "diagram-drill": "diagram",
+                "backing-improv": "pętla"
+            }
         },
         "standards": {
             "title": "Standardy"

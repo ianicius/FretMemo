@@ -426,6 +426,10 @@ export default function Home() {
                             {t(improvStarted ? 'home.improvContinue.continue' : 'home.improvContinue.start')}
                             <ArrowRight className="h-4 w-4" />
                         </Button>
+                        <Button className="w-full justify-between" onClick={() => navigate('/improv/session')}>
+                            {t('home.improvContinue.session')}
+                            <ArrowRight className="h-4 w-4" />
+                        </Button>
                     </CardContent>
                 </Card>
             )}

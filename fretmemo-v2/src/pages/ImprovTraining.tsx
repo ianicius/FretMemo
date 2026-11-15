@@ -27,7 +27,7 @@ import { BuildScaleDrill } from "@/components/improv/BuildScaleDrill";
 import type { DiagramDrillParams, ImprovExercise } from "@/data/improv/curriculum";
 import { BackingLoopExercise } from "@/components/improv/BackingLoopExercise";
 import { PracticeLinkExercise } from "@/components/improv/PracticeLinkExercise";
-import { CURRICULUM, STANDARDS, STANDARDS_ID, countCompletedModules, getImprovModule, isModuleUnlocked, isModuleComplete, isNonGating } from "@/data/improv/curriculum";
+import { CURRICULUM, REVIEW_ID, STANDARDS, STANDARDS_ID, countCompletedModules, dailySession, passedQuizGenerators, reviewQuiz, getImprovModule, isModuleUnlocked, isModuleComplete, isNonGating } from "@/data/improv/curriculum";
 import type { ChoiceGeneratorId } from "@/lib/improv/questions";
 import { useImprovStore } from "@/stores/useImprovStore";
 import { isDueForReview } from "@/lib/sm2";
@@ -38,6 +38,9 @@ import { ArrowLeft as ArrowLeftIcon } from "lucide-react";
 export default function ImprovTraining() {
     const { moduleId } = useParams<{ moduleId: string }>();
 
+    if (moduleId === "session") {
+        return <SessionView />;
+    }
     if (!moduleId) {
         return <RoadmapView />;
     }
@@ -68,20 +71,7 @@ function RoadmapView() {
 
     // Plan phase 6: mixed review quiz from the choice-quiz generators of
     // passed modules; SM-2 entries per generator schedule the review.
-    const passedGenerators = useMemo(() => {
-        const passedIds = new Set(
-            CURRICULUM.filter((module) => isModuleComplete(module, moduleState[module.id])).map((module) => module.id),
-        );
-        const generators = new Set<string>();
-        for (const module of CURRICULUM) {
-            if (!passedIds.has(module.id)) continue;
-            for (const exercise of module.exercises) {
-                if (exercise.engine !== "choice-quiz") continue;
-                generators.add((exercise.params as { generatorId: string }).generatorId);
-            }
-        }
-        return [...generators];
-    }, [moduleState]);
+    const passedGenerators = useMemo(() => passedQuizGenerators(moduleState), [moduleState]);
     // SM-2 schedule: review the generators that are due (never reviewed or
     // past their date); when nothing is due, review everything passed.
     const reviewGenerators = useMemo(() => {
@@ -92,19 +82,7 @@ function RoadmapView() {
         return due.length > 0 ? due : passedGenerators;
     }, [passedGenerators, reviewSRS]);
     const [reviewOpen, setReviewOpen] = useState(false);
-    const reviewExercise = useMemo(() => ({
-        id: "review.quiz",
-        engine: "choice-quiz" as const,
-        nameKey: "improv.review.name",
-        descKey: "improv.review.desc",
-        params: {
-            generatorId: "mixed" as const,
-            allowedGenerators: reviewGenerators as ChoiceGeneratorId[],
-            questionCount: 10,
-            requiredCorrect: 7,
-            answerOptions: 4,
-        },
-    }), [reviewGenerators]);
+    const reviewExercise = useMemo(() => reviewQuiz(reviewGenerators), [reviewGenerators]);
     const handleReviewAnswered = useCallback((generatorId: string, correct: boolean) => {
         updateReviewSR(generatorId, correct ? 5 : 2);
     }, [updateReviewSR]);
@@ -218,7 +196,7 @@ function RoadmapView() {
             {reviewOpen && completed > 0 && (
                 <ChoiceQuiz
                     key={`review-${reviewGenerators.join(",")}`}
-                    moduleId="review"
+                    moduleId={REVIEW_ID}
                     exercise={reviewExercise}
                     onQuestionAnswered={handleReviewAnswered}
                 />
@@ -310,6 +288,80 @@ function RoadmapView() {
     );
 }
 
+function renderImprovExercise(moduleId: string, exercise: ImprovExercise) {
+    switch (exercise.engine) {
+        case "choice-quiz":
+            return <ChoiceQuiz key={exercise.id} moduleId={moduleId} exercise={exercise} />;
+        case "diagram-drill":
+            return (exercise.params as DiagramDrillParams).buildStarts
+                ? <BuildScaleDrill key={exercise.id} moduleId={moduleId} exercise={exercise} />
+                : <DiagramDrill key={exercise.id} moduleId={moduleId} exercise={exercise} />;
+        case "backing-improv":
+            return <BackingLoopExercise key={exercise.id} moduleId={moduleId} exercise={exercise} />;
+        case "practice-link":
+            return <PracticeLinkExercise key={exercise.id} moduleId={moduleId} exercise={exercise} />;
+        default:
+            return null;
+    }
+}
+
+/** Suggested minutes per step of the session of the day: 15 in total. */
+const SESSION_MINUTES = [3, 5, 7];
+
+/** Plan F1: three exercises in a row, one click away from the home page. */
+function SessionView() {
+    const { t } = useTranslation();
+    const navigate = useNavigate();
+    const updateReviewSR = useImprovStore((state) => state.updateReviewSR);
+    // Chosen once on entry: passing a step must not swap the steps that follow.
+    const [steps] = useState(() => dailySession(useImprovStore.getState().moduleState));
+    const [index, setIndex] = useState(0);
+    const step = steps[index];
+    const last = index === steps.length - 1;
+
+    return (
+        <div className="space-y-4 pb-8">
+            <div className="flex items-center gap-3">
+                <Button variant="ghost" size="icon" onClick={() => navigate("/")} aria-label={t("improv.session.back")} className="shrink-0">
+                    <ArrowLeft className="h-5 w-5" />
+                </Button>
+                <div className="min-w-0">
+                    <h1 className="type-h1 truncate">{t("improv.session.title")}</h1>
+                    <p className="text-xs text-muted-foreground">
+                        {t("improv.session.step", {
+                            step: index + 1,
+                            total: steps.length,
+                            name: t(`improv.session.engine.${step.exercise.engine}`),
+                            minutes: SESSION_MINUTES[index],
+                        })}
+                    </p>
+                </div>
+            </div>
+            {step.moduleId === REVIEW_ID ? (
+                <ChoiceQuiz
+                    key={step.exercise.id}
+                    moduleId={REVIEW_ID}
+                    exercise={step.exercise}
+                    onQuestionAnswered={(generatorId, correct) => updateReviewSR(generatorId, correct ? 5 : 2)}
+                />
+            ) : renderImprovExercise(step.moduleId, step.exercise)}
+            <Button
+                className="w-full"
+                onClick={() => {
+                    if (last) {
+                        navigate("/");
+                        return;
+                    }
+                    setIndex(index + 1);
+                    window.scrollTo(0, 0);
+                }}
+            >
+                {t(last ? "improv.session.finish" : "improv.session.next")}
+            </Button>
+        </div>
+    );
+}
+
 function ModuleView({ moduleId }: { moduleId: string }) {
     const { t } = useTranslation();
     const navigate = useNavigate();
@@ -336,22 +388,7 @@ function ModuleView({ moduleId }: { moduleId: string }) {
         );
     }
 
-    const renderExercise = (exercise: ImprovExercise) => {
-        switch (exercise.engine) {
-            case "choice-quiz":
-                return <ChoiceQuiz key={exercise.id} moduleId={module.id} exercise={exercise} />;
-            case "diagram-drill":
-                return (exercise.params as DiagramDrillParams).buildStarts
-                    ? <BuildScaleDrill key={exercise.id} moduleId={module.id} exercise={exercise} />
-                    : <DiagramDrill key={exercise.id} moduleId={module.id} exercise={exercise} />;
-            case "backing-improv":
-                return <BackingLoopExercise key={exercise.id} moduleId={module.id} exercise={exercise} />;
-            case "practice-link":
-                return <PracticeLinkExercise key={exercise.id} moduleId={module.id} exercise={exercise} />;
-            default:
-                return null;
-        }
-    };
+    const renderExercise = (exercise: ImprovExercise) => renderImprovExercise(module.id, exercise);
     const extraExercises = module.exercises.filter(isNonGating);
 
     const unlocked = isModuleUnlocked(module.id, moduleState, unlockAll, entranceUnlockCount);

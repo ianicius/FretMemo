@@ -18,6 +18,7 @@ import {
     type DiagramDrillParams,
     BUILD_STARTS,
     nextImprovExercise,
+    dailySession,
 } from "../curriculum";
 import {
     MODE_PENTATONIC, PENTATONIC_ADDITIONS, coversAllDegrees, getShapePositions, shapeSemitones, stackPositionKeys, stringShapes, tonicAnchorFret,
@@ -592,8 +593,7 @@ describe("plan stage D: loop variants (D4, D5, D6, D8)", () => {
     });
 });
 
-describe("plan F2: the next required exercise", () => {
-    const passAll = (moduleId: string) => {
+const passAll = (moduleId: string) => {
         const module = getImprovModule(moduleId) as NonNullable<ReturnType<typeof getImprovModule>>;
         const exerciseRuns: Record<string, number> = {};
         for (const exercise of module.exercises) {
@@ -602,8 +602,9 @@ describe("plan F2: the next required exercise", () => {
             for (const variant of variants) exerciseRuns[loopRunKey(exercise.id, variant.id)] = 9;
         }
         return { exerciseRuns, completed: false };
-    };
+};
 
+describe("plan F2: the next required exercise", () => {
     it("starts at the first exercise of module 1", () => {
         const next = nextImprovExercise({});
         expect(next?.module.id).toBe("e-string-notes");
@@ -625,5 +626,32 @@ describe("plan F2: the next required exercise", () => {
     it("returns null when every module is complete", () => {
         const all = Object.fromEntries(CURRICULUM.map((module) => [module.id, passAll(module.id)]));
         expect(nextImprovExercise(all)).toBeNull();
+    });
+});
+
+describe("plan F1: the session of the day", () => {
+    const engines = (state: Parameters<typeof dailySession>[0]) => dailySession(state).map((step) => step.exercise.engine);
+
+    it("always has a quiz, a diagram and a loop, in that order", () => {
+        expect(engines({})).toEqual(["choice-quiz", "diagram-drill", "backing-improv"]);
+        const all = Object.fromEntries(CURRICULUM.map((module) => [module.id, { exerciseRuns: {}, completed: true }]));
+        expect(engines(all)).toEqual(["choice-quiz", "diagram-drill", "backing-improv"]);
+    });
+
+    it("starts with a module quiz before anything is complete, with a review afterwards", () => {
+        expect(dailySession({})[0].moduleId).not.toBe("review");
+        // Module 1 has no quiz, so the review starts once module 2 is complete.
+        const state = { "e-string-notes": passAll("e-string-notes"), "key-signatures": passAll("key-signatures") };
+        const session = dailySession(state);
+        expect(session[0].moduleId).toBe("review");
+        expect((session[0].exercise.params as { allowedGenerators: string[] }).allowedGenerators.length).toBeGreaterThan(0);
+    });
+
+    it("takes the diagram and the loop from the current module when it has them", () => {
+        const current = nextImprovExercise({})?.module.id;
+        for (const step of dailySession({}).slice(1)) {
+            const own = getImprovModule(current)?.exercises.some((exercise) => exercise.engine === step.exercise.engine);
+            if (own) expect(step.moduleId).toBe(current);
+        }
     });
 });

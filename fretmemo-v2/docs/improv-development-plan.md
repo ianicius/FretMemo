@@ -112,7 +112,7 @@ Stan 2026-11-15: D4, D5, D6 i D8 są zrobione jako osobne pętle dodatkowe (`non
 
 | # | Co | Gdzie | Rozmiar | Odbiór |
 |---|---|---|---|---|
-| F1 | Sesja dnia, 15 minut: powtórka, jeden diagram, jedna pętla z bieżącego modułu | Strona główna; nowy typ zadania w `useQuestStore` | M | Jedno kliknięcie ze strony głównej prowadzi przez trzy ćwiczenia po kolei |
+| F1 zrobione (bez zadania w `useQuestStore`) | Sesja dnia, 15 minut: powtórka, jeden diagram, jedna pętla z bieżącego modułu | Strona główna; nowy typ zadania w `useQuestStore` | M | Jedno kliknięcie ze strony głównej prowadzi przez trzy ćwiczenia po kolei |
 | F2 zrobione | Karta „Kontynuuj" na stronie głównej z następnym niezaliczonym ćwiczeniem | `Home.tsx` | S | — |
 | F3 zrobione | Czas gry nad podkładem w statystykach | `Progress.tsx`, `recordSession` | S | — |
 | F4 | Perkusja i style podkładu (swing, shuffle, bossa) | Wymaga zmian w `src/audio`; wcześniej odłożone | L | Osobna decyzja po ocenie kosztu; nie blokuje niczego powyżej |

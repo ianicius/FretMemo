@@ -823,6 +823,7 @@
         "coverage": "Coverage",
         "momentum": "Momentum",
         "improvContinue": {
+            "session": "Session of the day (15 min)",
             "title": "Improv training",
             "desc": "Module {{order}} of {{total}}: {{module}}",
             "continue": "Continue",
@@ -2637,6 +2638,18 @@
             "barQuestion2": "Question, bar 2 of 2",
             "barAnswer1": "Answer, bar 1 of 2",
             "barAnswer2": "Answer, bar 2 of 2"
+        },
+        "session": {
+            "title": "Session of the day",
+            "step": "Step {{step}} of {{total}}: {{name}} (about {{minutes}} min)",
+            "next": "Next step",
+            "finish": "Finish the session",
+            "back": "Back to the home page",
+            "engine": {
+                "choice-quiz": "quiz",
+                "diagram-drill": "diagram",
+                "backing-improv": "loop"
+            }
         },
         "standards": {
             "title": "Standards"
