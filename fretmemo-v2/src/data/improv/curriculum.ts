@@ -319,7 +319,7 @@ export const CURRICULUM: ImprovModule[] = [
         embed: { tool: "circle-of-fifths" },
         exercises: [
             choiceExercise("key-signatures", "e1", "keySig", 10),
-            choiceExercise("key-signatures", "e2", "keySig", 10, "count-to-key"),
+            choiceExercise("key-signatures", "e2", "keySig", 10, "note-in-key"),
         ],
     },
     {

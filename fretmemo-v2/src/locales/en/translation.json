@@ -336,6 +336,8 @@
             "major": "major",
             "minor": "minor",
             "relativeMinor": "Relative minor",
+            "keySignature": "Key signature",
+            "countLegend": "The number outside the circle is how many accidentals the key has. Each step clockwise from C adds a sharp (♯), each step counter-clockwise adds a flat (♭). The frame covers the key's seven chords; their roots are the seven notes of the key.",
             "scaleNotes": "Scale notes",
             "diatonicChords": "Diatonic chords"
         },
@@ -1813,6 +1815,8 @@
             "practiceLink": "Fretboard practice"
         },
         "quiz": {
+            "circleTap": "Tap the key on the circle. Count steps from C: clockwise adds sharps, counter-clockwise adds flats.",
+            "circleRead": "The key is marked on the circle. Steps clockwise from C are sharps (in order F♯, C♯, G♯, D♯, A♯, E♯), counter-clockwise are flats (in order B♭, E♭, A♭, D♭, G♭, C♭).",
             "threshold": "To pass: {{required}}/{{total}}",
             "question": "Question {{current}}/{{total}}",
             "scoreValue": "{{correct}}/{{total}}",
@@ -1943,6 +1947,8 @@
         },
         "q": {
             "keySig": {
+                "keyNotes": "Which notes are in {{key}} major?",
+                "noteInKey": "You are playing in {{key}} major. Which note belongs to the key?",
                 "keyToCount": "How many accidentals does {{key}} major have?",
                 "countToKey_one": "Which major key has {{count}} accidental?",
                 "countToKey_few": "Which major key has {{count}} accidentals?",
@@ -2053,7 +2059,7 @@
             "key-signatures": {
                 "name": "Key Signatures",
                 "term": "Key Signatures",
-                "theory": "A key tells you which notes “live at home”. The circle of fifths orders the keys: moving clockwise adds sharps (C→G→D→A→E→B), counter-clockwise adds flats (C→F→Bb→Eb→Ab). The number of accidentals in the key signature is the fastest way to recognize a key on paper. When a bandmate says “play in D”, the key signature is what makes that unambiguous."
+                "theory": "A key tells you which notes “live at home”. The circle of fifths orders the keys: moving clockwise adds sharps (C→G→D→A→E→B), counter-clockwise adds flats (C→F→Bb→Eb→Ab). Accidentals always join in the same order (sharps: F#, C#, G#, D#…; flats: Bb, Eb, Ab, Db…), so a key's position on the circle tells you at once which notes are altered. When a bandmate says “play in D”, the key signature is what makes that unambiguous. In improvisation this is step one: the key signature tells you which seven notes you can build a solo from in a given tune."
             },
             "pentatonic-scale": {
                 "name": "Pentatonic Scale",
@@ -2166,12 +2172,12 @@
                 "desc": "The reverse direction: read a note name and point to it in the tab. It uses the same position stats as the previous exercise. Extra practice — not required to pass the module."
             },
             "key-signatures.e1": {
-                "name": "Quiz: keys and key signatures",
-                "desc": "Number and type of accidentals, the parallel minor — questions from different sides of the same topic."
+                "name": "Quiz: notes of the key",
+                "desc": "Which notes make up a key and which of them are raised or lowered. The key is marked on the circle of fifths, and after you answer the circle shows its chords."
             },
             "key-signatures.e2": {
-                "name": "Accidentals → key",
-                "desc": "Recognize the major key from its accidentals (circle of fifths)."
+                "name": "Note in the key",
+                "desc": "The decision you make in a solo: you play in the given key and pick the note that belongs to it, for example G or G#."
             },
             "pentatonic-scale.e1": {
                 "name": "Diagram: minor pentatonic, box 1",

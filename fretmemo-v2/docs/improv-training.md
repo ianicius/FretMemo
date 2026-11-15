@@ -123,7 +123,7 @@ Moduł jest zaliczony (`completed`), gdy **każde** jego ćwiczenie poza `nonGat
   `CagedVisualizer`, `TriadVisualizer`, `IntervalFretboardTrainer` i aktywny palec w `Technique` (wszystkie ze statusem
   `active`, więc pełne bursztynowe wypełnienie); `src/components/ui/slider.tsx` ma w jasnym motywie tor `bg-stone-300`
   (w ciemnym nadal `bg-secondary`) w każdym `Slider` aplikacji. `Fretboard.tsx` bez zmian.
-- **i18n**: top-level namespace `improv` w `src/locales/{en,pl}/translation.json` (505 liści każdy;
+- **i18n**: top-level namespace `improv` w `src/locales/{en,pl}/translation.json` (509 liści każdy;
   parzystość testowana w `src/lib/improv/__tests__/improvI18nParity.test.ts`). Nazwy modułów: PL +
   termin EN (`.name` / `.term`); teoria 3–6 zdań PL z terminami EN (EN pełne tłumaczenie).
   Od rundy 2 dodatkowo `nav.improv` („Improv") w obu locale; klucze `library.improv` /
@@ -228,6 +228,15 @@ Moduł jest zaliczony (`completed`), gdy **każde** jego ćwiczenie poza `nonGat
 - **A6.** `keySig` ma kierunek `relative-minor` (tonacja paralelna = VI stopień, odpowiedź
   `Key.majorKey(k).minorRelative + "m"`, dystraktor: tonacja jednoimienna), losowany w mieszanym quizie
   `key-signatures.e1`. Klucze `improv.q.keySig.relativeMinor`, `hintRelative`.
+- **Moduł 2 po uwagach użytkownika (2026-11-15).** Pytania `keySig` dotyczą dźwięków tonacji, nie samej
+  liczby znaków: nowe kierunki `key-notes` (zapis skali; dystraktory to te same litery ze znakami sąsiedniej
+  tonacji) i `note-in-key` (dźwięk tonacji kontra ta sama litera spoza niej). `key-signatures.e2` używa
+  `note-in-key`; pula mieszana nie losuje już `key-to-count` ani `count-to-key` (kierunki zostają w kodzie).
+  `ChoiceQuiz` rysuje dla pytań `keySig` koło kwintowe (`src/components/theory/CircleDial.tsx`, wspólne
+  z narzędziem `CircleOfFifths`): pytana tonacja jest zaznaczona, a po odpowiedzi koło odsłania liczby znaków,
+  tonacje molowe, akordy zmniejszone i ramkę siedmiu akordów tonacji. Gdy odpowiedzią jest tonacja z koła,
+  wybiera się ją kliknięciem w koło. Klucze `improv.q.keySig.keyNotes`, `noteInKey`, `improv.quiz.circleTap`,
+  `circleRead`, `theory.circle.keySignature`, `countLegend`.
 - **A7.** Usunięty martwy `improvTotalXP` w `src/pages/Progress.tsx`. Pliki wdrożeniowe w `app/` nie są
   przebudowywane w tym runie (decyzja przy scaleniu gałęzi).
 - **B1 — gryf z dźwiękami akordu.** `getChordTonePositions(chord, { tuning, fretFrom, fretTo, targets? })`

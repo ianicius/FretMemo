@@ -364,6 +364,49 @@ describe("musical correctness (plan phase 0)", () => {
     });
 });
 
+describe("keySig note questions (notes of the key instead of accidental counts)", () => {
+    it("key-notes answers spell the major scale; distractors differ and start on the same tonic", () => {
+        for (let draw = 0; draw < 40; draw += 1) {
+            for (const question of generateChoiceQuiz({ generatorId: "keySig", questionCount: 10, direction: "key-notes" }, `key-notes:${draw}`)) {
+                const key = String(question.promptValues.key);
+                expect(question.options[question.correctIndex]).toBe((Key.majorKey(key).scale as string[]).join(" "));
+                expect(question.options.length).toBeGreaterThanOrEqual(2);
+                expect(new Set(question.options).size).toBe(question.options.length);
+                for (const option of question.options) expect(option.startsWith(`${key} `)).toBe(true);
+            }
+        }
+    });
+
+    it("note-in-key offers one note of the key against the same letter outside it", () => {
+        for (let draw = 0; draw < 40; draw += 1) {
+            for (const question of generateChoiceQuiz({ generatorId: "keySig", questionCount: 10, direction: "note-in-key" }, `note-in-key:${draw}`)) {
+                const scale = Key.majorKey(String(question.promptValues.key)).scale as string[];
+                expect(question.options).toHaveLength(2);
+                const correct = question.options[question.correctIndex] as string;
+                const wrong = question.options[1 - question.correctIndex] as string;
+                expect(scale).toContain(correct);
+                expect(scale).not.toContain(wrong);
+                expect(wrong[0]).toBe(correct[0]);
+            }
+        }
+    });
+
+    it("module 2 asks about notes, not bare accidental counts", async () => {
+        const { getImprovExercise } = await import("@/data/improv/curriculum");
+        const promptKeys = new Set<string>();
+        for (const id of ["key-signatures.e1", "key-signatures.e2"]) {
+            const params = getImprovExercise("key-signatures", id)?.params as { generatorId: "keySig"; questionCount: number };
+            for (let draw = 0; draw < 30; draw += 1) {
+                for (const question of generateChoiceQuiz({ ...params }, `module2-notes:${id}:${draw}`)) promptKeys.add(question.promptKey);
+            }
+        }
+        expect(promptKeys.has("improv.q.keySig.keyNotes")).toBe(true);
+        expect(promptKeys.has("improv.q.keySig.noteInKey")).toBe(true);
+        expect(promptKeys.has("improv.q.keySig.keyToCount")).toBe(false);
+        expect(promptKeys.has("improv.q.keySig.countToKey")).toBe(false);
+    });
+});
+
 describe("keySig relative minor (plan A6: tonacja paralelna)", () => {
     it("every relative-minor answer is the tonal minorRelative (VI degree) of the asked major key", () => {
         const askedKeys = new Set<string>();

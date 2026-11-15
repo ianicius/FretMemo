@@ -296,6 +296,10 @@ function numericOptions(correct: number, rng: Rng, min: number, max: number): { 
     return { options, correctIndex: options.indexOf(String(correct)) };
 }
 
+/** The order in which accidentals join a key signature. */
+const SHARP_ORDER = ["F#", "C#", "G#", "D#", "A#", "E#", "B#"];
+const FLAT_ORDER = ["Bb", "Eb", "Ab", "Db", "Gb", "Cb", "Fb"];
+
 /* ─────────── E2 generators ─────────── */
 
 export type ChoiceGeneratorId =
@@ -380,6 +384,50 @@ function generateKeySig(rng: Rng, direction: string): ChoiceQuestion {
             correctIndex,
             hintKey: "improv.q.keySig.hintRelative",
             hintValues: { key: picked.key, target: relative },
+        };
+    }
+    if (direction === "key-notes") {
+        // Distractors keep the same seven letters but borrow a neighbouring
+        // key's signature (D major vs "D E F# G A B C"), so the accidentals decide.
+        const letters = (Key.majorKey(entry.key).scale as string[]).map((note) => note[0] as string);
+        const spell = (list: string[]) => letters.map((letter) => list.find((note) => note[0] === letter) ?? letter).join(" ");
+        const fifths = (item: { count: number; type: string }) => (item.type === "flats" ? -item.count : item.count);
+        const distractors = [-1, 1, -2, 2]
+            .map((step) => MAJOR_KEY_SIGNATURES.find((item) => fifths(item) === fifths(entry) + step))
+            .filter((item): item is (typeof MAJOR_KEY_SIGNATURES)[number] => Boolean(item))
+            .map((item) => spell(item.list))
+            .filter((spelling) => spelling.startsWith(`${entry.key} `));
+        const { options, correctIndex } = chordOptions(spell(entry.list), distractors.slice(0, 3), rng);
+        return {
+            id: "keySig",
+            promptKey: "improv.q.keySig.keyNotes",
+            promptValues: { key: entry.key },
+            options,
+            correctIndex,
+            hintKey: "improv.q.keySig.hintAccidentals",
+            hintValues: { key: entry.key, list: entry.list.join(", ") || "—" },
+        };
+    }
+    if (direction === "note-in-key") {
+        // The solo decision: G or G#? Asked about the key's own accidentals
+        // (altered note is right) and about the next one in line (natural is right).
+        const order = entry.type === "flats" ? FLAT_ORDER : SHARP_ORDER;
+        const next = order[entry.count];
+        const candidates = [
+            ...entry.list.map((note) => ({ correct: note, wrong: note[0] as string })),
+            ...(next ? [{ correct: next[0] as string, wrong: next }] : []),
+            ...(entry.count === 0 ? [{ correct: "B", wrong: "Bb" }] : []),
+        ];
+        const picked = rng.pick(candidates);
+        const { options, correctIndex } = chordOptions(picked.correct, [picked.wrong], rng);
+        return {
+            id: "keySig",
+            promptKey: "improv.q.keySig.noteInKey",
+            promptValues: { key: entry.key },
+            options,
+            correctIndex,
+            hintKey: "improv.q.keySig.hintAccidentals",
+            hintValues: { key: entry.key, list: entry.list.join(", ") || "—" },
         };
     }
     if (direction === "count-to-key") {
@@ -951,7 +999,8 @@ function generateQuestion(generatorId: ChoiceGeneratorId, rng: Rng, direction: s
     const pickDirection = (): string => {
         if (resolvedDirection !== "mixed") return resolvedDirection;
         switch (generatorId) {
-            case "keySig": return rng.pick(["key-to-count", "count-to-key", "key-to-accidentals", "key-type", "key-accidentals", "parallel-minor", "relative-minor"]);
+            // Notes first: bare accidental counts are only a memory aid, so they are not asked on their own.
+            case "keySig": return rng.pick(["key-notes", "key-notes", "note-in-key", "key-to-accidentals", "key-type", "key-accidentals", "parallel-minor", "relative-minor"]);
             case "modes": return rng.pick(["order-to-mode", "mode-to-order", "pattern-to-mode", "characteristic-to-mode", "mode-notes", "mode-parent", "sound-to-mode"]);
             case "triadBuild": return rng.pick(["degree-to-type", "degree-to-triad", "degree-to-seventh", "degree-to-seventh"]);
             case "chordScaleMajor": return rng.pick(["chord-to-mode", "mode-to-chord", "chord-to-mode"]);

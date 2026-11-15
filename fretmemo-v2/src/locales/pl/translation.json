@@ -336,6 +336,8 @@
             "major": "dur",
             "minor": "moll",
             "relativeMinor": "Równoległa molowa",
+            "keySignature": "Znaki przykluczowe",
+            "countLegend": "Liczba na zewnątrz koła to liczba znaków przykluczowych. Każdy krok w prawo od C dodaje krzyżyk (♯), każdy krok w lewo — bemol (♭). Ramka obejmuje siedem akordów tonacji; ich prymy to siedem dźwięków tej tonacji.",
             "scaleNotes": "Nuty skali",
             "diatonicChords": "Akordy diatoniczne"
         },
@@ -1827,6 +1829,8 @@
             "practiceLink": "Trening na gryfie"
         },
         "quiz": {
+            "circleTap": "Kliknij tonację na kole. Licz kroki od C: w prawo krzyżyki, w lewo bemole.",
+            "circleRead": "Tonacja jest zaznaczona na kole. Kroki od C w prawo to krzyżyki (kolejno F♯, C♯, G♯, D♯, A♯, E♯), w lewo bemole (kolejno B, Eb, Ab, Db, Gb, Cb).",
             "threshold": "Do zaliczenia: {{required}}/{{total}}",
             "question": "Pytanie {{current}}/{{total}}",
             "scoreValue": "{{correct}}/{{total}}",
@@ -1957,6 +1961,8 @@
         },
         "q": {
             "keySig": {
+                "keyNotes": "Jakie dźwięki ma tonacja {{key}}-dur?",
+                "noteInKey": "Grasz w tonacji {{key}}-dur. Który dźwięk do niej należy?",
                 "keyToCount": "Ile znaków przykluczowych ma tonacja {{key}}-dur?",
                 "countToKey_one": "Która tonacja durowa ma {{count}} znak przykluczowy?",
                 "countToKey_few": "Która tonacja durowa ma {{count}} znaki przykluczowe?",
@@ -2067,7 +2073,7 @@
             "key-signatures": {
                 "name": "Tonacje i znaki przykluczowe",
                 "term": "Key Signatures",
-                "theory": "Tonacja mówi, które dźwięki są „u siebie”. Porządkuje je koło kwintowe: w prawo od C każda kolejna tonacja ma o jeden krzyżyk więcej (C→G→D→A→E→H), w lewo — o jeden bemol więcej (C→F→B→Eb→Ab). Liczba znaków przykluczowych to najszybszy sposób, by rozpoznać tonację. Gdy ktoś w zespole mówi „gramy w D”, wiesz od razu, że w skali są F# i C#."
+                "theory": "Tonacja mówi, które dźwięki są „u siebie”. Porządkuje je koło kwintowe: w prawo od C każda kolejna tonacja ma o jeden krzyżyk więcej (C→G→D→A→E→H), w lewo — o jeden bemol więcej (C→F→B→Eb→Ab). Znaki dochodzą zawsze w tej samej kolejności (krzyżyki: F#, C#, G#, D#…; bemole: B, Eb, Ab, Db…), więc położenie tonacji na kole mówi od razu, które dźwięki są zmienione. Gdy ktoś w zespole mówi „gramy w D”, wiesz od razu, że w skali są F# i C#. W improwizacji to pierwszy krok: znaki przykluczowe mówią, z których siedmiu dźwięków możesz budować solo w danym utworze."
             },
             "pentatonic-scale": {
                 "name": "Skala pentatoniczna",
@@ -2180,12 +2186,12 @@
                 "desc": "Odwrotny kierunek: widzisz nazwę dźwięku i wskazujesz go w tabulaturze. Korzysta z tych samych wyników pozycji co poprzednie ćwiczenie. Ćwiczenie dodatkowe — nie jest wymagane do zaliczenia modułu."
             },
             "key-signatures.e1": {
-                "name": "Quiz: tonacje i znaki",
-                "desc": "Liczba i rodzaj znaków przykluczowych, tonacja jednoimienna molowa — pytania o różne strony tego samego tematu."
+                "name": "Quiz: dźwięki tonacji",
+                "desc": "Z jakich dźwięków składa się tonacja i które z nich są podwyższone lub obniżone. Tonacja jest zaznaczona na kole kwintowym, a po odpowiedzi koło pokazuje jej akordy."
             },
             "key-signatures.e2": {
-                "name": "Znaki → tonacja",
-                "desc": "Rozpoznaj tonację durową po liczbie krzyżyków lub bemoli."
+                "name": "Dźwięk w tonacji",
+                "desc": "Decyzja z solówki: grasz w podanej tonacji i wybierasz dźwięk, który do niej należy, na przykład G czy G#."
             },
             "pentatonic-scale.e1": {
                 "name": "Diagram: pentatonika molowa, boks 1",
