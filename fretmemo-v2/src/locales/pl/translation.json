@@ -1974,6 +1974,27 @@
             "modePhrygian": "Frygijski (Em7–Fmaj7)",
             "modeLydian": "Lidyjski (Fmaj7–G6)",
             "pentThenMode": "Cztery takty graj samą pentatoniką molową, przez kolejne cztery dodaj dwa dźwięki, które robią z niej tryb dorycki. Posłuchaj, co się zmienia.",
+            "approachBelow": "Tuż przed zmianą akordu zagraj dźwięk pół tonu poniżej prymy nowego akordu i wyląduj na prymie na „raz”: G#→A, H→C, D#→E, C#→D.",
+            "approachBelowLabel": "Poziom 5: pół tonu z dołu",
+            "approachEnclosure": "Otocz cel z dwóch stron: pół tonu z góry, pół tonu z dołu, pryma na „raz”: B–G#→A, Db–H→C, F–D#→E, Eb–C#→D.",
+            "approachEnclosureLabel": "Poziom 6: z góry i z dołu",
+            "approachThirdBelow": "Dojdź do tercji każdego akordu pół tonu z dołu i wyląduj na niej na „raz”: E→F (Dm7), A#→H (G7), D#→E (Cmaj7).",
+            "approachThirdBelowLabel": "Pół tonu z dołu",
+            "approachThirdEnclosure": "Otocz tercję z dwóch stron: Gb–E→F (Dm7), C–A#→H (G7), F–D#→E (Cmaj7).",
+            "approachThirdEnclosureLabel": "Z góry i z dołu",
+            "limitThreeNotes": "Graj tylko trzema dźwiękami pierwszego boksu: A, C i D. Cała uwaga idzie na rytm i długość fraz.",
+            "limitThreeNotesLabel": "Tylko 3 dźwięki",
+            "limitOneString": "Graj tylko na strunie G: pentatonika a-moll leży tam na progach 0, 2, 5, 7, 9 i 12. Fraza powstaje z ruchu wzdłuż gryfu.",
+            "limitOneStringLabel": "Tylko jedna struna",
+            "limitRhythm": "Każdą frazę zagraj tym samym rytmem: ćwierćnuta, dwie ósemki, półnuta. Zmieniaj dźwięki, rytm zostaje.",
+            "limitRhythmLabel": "Zadany rytm",
+            "bluesMinorPent": "Cały blues graj pentatoniką molową od prymy tonacji. Brzmi surowo, bo jej tercja mała ściera się z akordem dominantowym.",
+            "bluesMinorPentLabel": "Pentatonika molowa",
+            "bluesMajorPent": "Cały blues graj pentatoniką durową: to ten sam kształt boksu trzy progi niżej. Brzmi jaśniej, bo ma tercję wielką akordu.",
+            "bluesMajorPentLabel": "Pentatonika durowa",
+            "bluesMixedPent": "Zmieniaj kolor razem z akordem: pentatonika durowa nad akordem I, molowa nad IV i V.",
+            "bluesMixedPentLabel": "Durowa i molowa na zmianę",
+            "pedalModes": "Pryma zostaje w basie, a wariant zmienia tryb. Graj powoli i zatrzymuj się na dźwiękach, które odróżniają ten tryb od pozostałych.",
             "modeMixolydian": "Miksolidyjski (G7–F)",
             "chordScaleCharacteristic": "Na każdym akordzie zagraj jego dźwięk charakterystyczny ze skali z podpowiedzi.",
             "arpeggiosOnly": "Graj wyłącznie dźwięki akordów (arpeggia) — bez innych dźwięków skali.",
@@ -2471,6 +2492,30 @@
                 "name": "Pętla: pentatonika, potem tryb",
                 "desc": "Jeden akord Dm7 przez osiem taktów: najpierw sama pentatonika, potem tryb dorycki. Dodatkowe ćwiczenie."
             },
+            "pentatonic-scale.e7": {
+                "name": "Pętla: ograniczenia",
+                "desc": "Ćwiczenie dodatkowe. Trzy warianty: tylko trzy dźwięki, tylko jedna struna, zadany rytm. Mniej dźwięków do wyboru, więcej uwagi na rytm i frazę."
+            },
+            "pentatonic-scale.e8": {
+                "name": "Pętla: blues molowo i durowo",
+                "desc": "Ćwiczenie dodatkowe. Blues w A na trzy sposoby: pentatonika molowa, durowa i obie na zmianę."
+            },
+            "pentatonic-positions.e10": {
+                "name": "Pętla: blues molowo i durowo w G",
+                "desc": "Ćwiczenie dodatkowe. Blues w G: pentatonika molowa, durowa i obie na zmianę. Przechodź przy tym między boksami."
+            },
+            "target-chord-tones.e5": {
+                "name": "Pętla: dźwięki dojścia",
+                "desc": "Ćwiczenie dodatkowe. Dojdź do prymy akordu pół tonu z dołu, a potem otocz ją z góry i z dołu. Mikrofon sprawdza lądowanie na „raz”."
+            },
+            "voice-leading.e4": {
+                "name": "Pętla: dojście do tercji",
+                "desc": "Ćwiczenie dodatkowe. Dm7–G7–Cmaj7: do tercji każdego akordu dochodzisz chromatycznie. Mikrofon sprawdza tercję na „raz”."
+            },
+            "modes.e6": {
+                "name": "Pętla: tryby od jednej prymy",
+                "desc": "Ćwiczenie dodatkowe. Akord od D gra bez zmian, a wariant zmienia tryb: dorycki, eolski, frygijski, miksolidyjski, lidyjski."
+            },
             "modes.e3": {
                 "name": "Pętla: kolory trybów",
                 "desc": "Cztery warianty: dorycki, frygijski, lidyjski i miksolidyjski. W każdym podkreślaj dźwięk charakterystyczny trybu."
@@ -2543,12 +2588,20 @@
         },
         "supplementary": {
             "caged": "Otwórz system CAGED",
+            "rhythm": "Otwórz trening rytmu",
             "earTraining": "Otwórz trening słuchu",
             "chordQuality": "Otwórz rozpoznawanie akordów"
         },
         "hints": {
             "pentOnly": "Tylko pentatonika molowa",
             "dorianFill": "Tryb dorycki: dodaj 2. i 6. stopień",
+            "bluesMajorPent": "Pentatonika durowa",
+            "bluesMinorPent": "Pentatonika molowa",
+            "pedalDorian": "Dorycki: b3 i 6",
+            "pedalAeolian": "Eolski: b3 i b6",
+            "pedalPhrygian": "Frygijski: b2 i b6",
+            "pedalMixolydian": "Miksolidyjski: 3 i b7",
+            "pedalLydian": "Lidyjski: 3 i #4",
             "dorianDm7": "Skala D dorycka — celuj w H",
             "phrygianEm": "Skala E frygijska — celuj w F",
             "lydianF": "Skala F lidyjska — celuj w H",

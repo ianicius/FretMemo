@@ -285,6 +285,41 @@ export const BUILD_STARTS: BuildStart[] = [
     { stringIndex: 0, fret: 15, finger: "pinky", offsetsFrom: 9, offsetsTo: 12 },
 ];
 
+/** Shared tempo settings of the stage D extra loops. */
+const EXTRA_LOOP = { beatsPerChord: 4, defaultBpm: 80, minBpm: 50, maxBpm: 160, requiredPasses: 2, nonGating: true } as const;
+
+/** One goal per variant over the same progression. */
+function goalVariants(progression: Array<string | ProgressionEntry>, ids: string[], targets?: ChordMicTargets[]): BackingLoopVariant[] {
+    return ids.map((id) => ({ id, labelKey: `improv.goals.${id}Label`, progression, goalKey: `improv.goals.${id}`, targets }));
+}
+
+/**
+ * Plan D6: a 12-bar blues played with the minor pentatonic, the major one,
+ * and both in turn (major over the I chord, minor over IV and V).
+ */
+function bluesPentatonicLoop(one: string, four: string, five: string): BackingLoopParams {
+    const form = [one, one, one, one, four, four, one, one, five, four, one, one];
+    const mixed = form.map((chord) => ({ chord, hintKey: chord === one ? "improv.hints.bluesMajorPent" : "improv.hints.bluesMinorPent" }));
+    return {
+        ...EXTRA_LOOP,
+        progression: form,
+        goalKey: "improv.goals.bluesMinorPent",
+        variants: [
+            ...goalVariants(form, ["bluesMinorPent", "bluesMajorPent"]),
+            ...goalVariants(mixed, ["bluesMixedPent"]),
+        ],
+    };
+}
+
+/** Plan D8: one root in the bass, a different mode per variant. */
+const PEDAL_MODES: Array<{ id: string; chord: string; key: string }> = [
+    { id: "Dorian", chord: "Dm7", key: "Dm" },
+    { id: "Aeolian", chord: "Dm7", key: "Dm" },
+    { id: "Phrygian", chord: "Dm7", key: "Dm" },
+    { id: "Mixolydian", chord: "D7", key: "D" },
+    { id: "Lydian", chord: "Dmaj7", key: "D" },
+];
+
 /** Per-bar hints of the phrasing variants (plan B4), one bar per chord. */
 const PLAY_REST_HINTS = ["improv.hints.barPlay", "improv.hints.barRest", "improv.hints.barPlay", "improv.hints.barRest"];
 const CALL_RESPONSE_HINTS = ["improv.hints.barQuestion1", "improv.hints.barQuestion2", "improv.hints.barAnswer1", "improv.hints.barAnswer2"];
@@ -365,7 +400,11 @@ export const CURRICULUM: ImprovModule[] = [
         order: 3,
         theoryKey: "improv.modules.pentatonic-scale.theory",
         embed: { tool: "scale-explorer", root: "A", scaleType: "minor pentatonic" },
-        supplementary: [{ labelKey: "improv.supplementary.earTraining", href: "/ear-training/intervals" }],
+        supplementary: [
+            { labelKey: "improv.supplementary.earTraining", href: "/ear-training/intervals" },
+            // Plan D5: the rhythm constraint points at the rhythm trainer.
+            { labelKey: "improv.supplementary.rhythm", href: "/rhythm/tap-beat" },
+        ],
         exercises: [
             drillExercise(
                 "pentatonic-scale",
@@ -411,6 +450,15 @@ export const CURRICULUM: ImprovModule[] = [
                 requiredPasses: 2,
             }),
             loopExercise("pentatonic-scale", "e6", phraseLoop(["Am7", "Am7", "Dm7", "Em7"])),
+            // Plan D5: constraints move the attention from note choice to rhythm and phrasing.
+            loopExercise("pentatonic-scale", "e7", {
+                ...EXTRA_LOOP,
+                progression: ["Am7", "Am7", "Dm7", "Em7"],
+                goalKey: "improv.goals.limitThreeNotes",
+                variants: goalVariants(["Am7", "Am7", "Dm7", "Em7"], ["limitThreeNotes", "limitOneString", "limitRhythm"]),
+            }),
+            // Plan D6.
+            loopExercise("pentatonic-scale", "e8", bluesPentatonicLoop("A7", "D7", "E7")),
         ],
     },
     {
@@ -486,6 +534,8 @@ export const CURRICULUM: ImprovModule[] = [
                 maxBpm: 160,
                 requiredPasses: 2,
             }),
+            // Plan D6: the same blues in G, to be played across the boxes.
+            loopExercise("pentatonic-positions", "e10", bluesPentatonicLoop("G7", "C7", "D7")),
             // Plan C4–C6: extras (non-gating), so a module passed before them stays passed.
             drillExercise("pentatonic-positions", "e9", [{ shapeId: "min-pent", defaultKey: "G" }], 0, 12, 70, 6, { buildStarts: BUILD_STARTS, nonGating: true }),
             drillExercise("pentatonic-positions", "e7", [{ shapeId: "min-pent", defaultKey: "G" }], 0, 8, 70, 1, { diagonal: true, nonGating: true }),
@@ -546,6 +596,19 @@ export const CURRICULUM: ImprovModule[] = [
                 1,
                 { pentatonicFill: true, nonGating: true },
             ),
+            // Plan D8: a mode is heard only against a fixed root.
+            loopExercise("modes", "e6", {
+                ...EXTRA_LOOP,
+                progression: [{ chord: "Dm7", beats: 16, hintKey: "improv.hints.pedalDorian" }],
+                goalKey: "improv.goals.pedalModes",
+                variants: PEDAL_MODES.map((mode) => ({
+                    id: mode.id.toLowerCase(),
+                    labelKey: `improv.term.${mode.id}`,
+                    progression: [{ chord: mode.chord, beats: 16, hintKey: `improv.hints.pedal${mode.id}` }],
+                    goalKey: "improv.goals.pedalModes",
+                    key: mode.key,
+                })),
+            }),
             // Plan C8: the same chord first with the pentatonic, then with the mode.
             loopExercise("modes", "e5", {
                 progression: [
@@ -747,6 +810,18 @@ export const CURRICULUM: ImprovModule[] = [
                 ],
             }),
             loopExercise("target-chord-tones", "e4", phraseLoop(["Am", "C", "Em", "D"])),
+            // Plan D4: two more rungs of the ladder — approach notes; the mic still checks the landing.
+            loopExercise("target-chord-tones", "e5", {
+                ...EXTRA_LOOP,
+                progression: ["Am", "C", "Em", "D"],
+                goalKey: "improv.goals.approachBelow",
+                variants: goalVariants(["Am", "C", "Em", "D"], ["approachBelow", "approachEnclosure"], [
+                    { chord: "Am", pitchClasses: ["A"] },
+                    { chord: "C", pitchClasses: ["C"] },
+                    { chord: "Em", pitchClasses: ["E"] },
+                    { chord: "D", pitchClasses: ["D"] },
+                ]),
+            }),
         ],
     },
     {
@@ -786,6 +861,18 @@ export const CURRICULUM: ImprovModule[] = [
                     { chord: "G7", pitchClasses: ["B", "F"] },
                     { chord: "Cmaj7", pitchClasses: ["E", "B"] },
                 ],
+            }),
+            // Plan D4: approach notes into the thirds of ii–V–I.
+            loopExercise("voice-leading", "e4", {
+                ...EXTRA_LOOP,
+                progression: ["Dm7", "G7", "Cmaj7"],
+                goalKey: "improv.goals.approachThirdBelow",
+                key: "C",
+                variants: goalVariants(["Dm7", "G7", "Cmaj7"], ["approachThirdBelow", "approachThirdEnclosure"], [
+                    { chord: "Dm7", pitchClasses: ["F"] },
+                    { chord: "G7", pitchClasses: ["B"] },
+                    { chord: "Cmaj7", pitchClasses: ["E"] },
+                ]).map((variant) => ({ ...variant, key: "C" })),
             }),
         ],
     },

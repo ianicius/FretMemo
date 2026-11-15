@@ -123,7 +123,7 @@ Moduł jest zaliczony (`completed`), gdy **każde** jego ćwiczenie poza `nonGat
   `CagedVisualizer`, `TriadVisualizer`, `IntervalFretboardTrainer` i aktywny palec w `Technique` (wszystkie ze statusem
   `active`, więc pełne bursztynowe wypełnienie); `src/components/ui/slider.tsx` ma w jasnym motywie tor `bg-stone-300`
   (w ciemnym nadal `bg-secondary`) w każdym `Slider` aplikacji. `Fretboard.tsx` bez zmian.
-- **i18n**: top-level namespace `improv` w `src/locales/{en,pl}/translation.json` (576 liści każdy;
+- **i18n**: top-level namespace `improv` w `src/locales/{en,pl}/translation.json` (617 liści każdy;
   parzystość testowana w `src/lib/improv/__tests__/improvI18nParity.test.ts`). Nazwy modułów: PL +
   termin EN (`.name` / `.term`); teoria 3–6 zdań PL z terminami EN (EN pełne tłumaczenie).
   Od rundy 2 dodatkowo `nav.improv` („Improv") w obu locale; klucze `library.improv` /
@@ -268,6 +268,16 @@ Moduł jest zaliczony (`completed`), gdy **każde** jego ćwiczenie poza `nonGat
   mikrofonu nie ma. `pentatonic-positions.e7` (C5) — `diagonal: true`, okno trzech boksów, `stackPositionKeys()`
   wyróżnia powtarzający się stos. `pentatonic-positions.e8` (C6) — `onlyString: 2`, pentatonika na strunie G.
   `ExerciseFrame` przyjmuje opcjonalny `engineLabel` (plakietka „Klikany gryf”).
+- **Etap D planu rozwoju (2026-11-15): D4, D5, D6, D8.** Sześć pętli dodatkowych (`nonGating`), każda z
+  wariantami; pomocniki w `curriculum.ts`: `EXTRA_LOOP`, `goalVariants()` (wariant = cel tekstowy
+  `improv.goals.<id>` + etykieta `improv.goals.<id>Label`), `bluesPentatonicLoop()`, `PEDAL_MODES`.
+  D4: `target-chord-tones.e5` (dojście do prymy, cele mikrofonu = prymy) i `voice-leading.e4` (dojście do
+  tercji w ii–V–I, cele mikrofonu = tercje), po dwa warianty: pół tonu z dołu oraz z góry i z dołu.
+  D5: `pentatonic-scale.e7` (trzy dźwięki / jedna struna / zadany rytm) i odnośnik
+  `improv.supplementary.rhythm` do `/rhythm/tap-beat`. D6: `pentatonic-scale.e8` (blues w A) i
+  `pentatonic-positions.e10` (blues w G): pentatonika molowa, durowa, obie na zmianę z podpowiedzią przy
+  akordzie. D8: `modes.e6`, jeden akord od D przez cztery takty, pięć wariantów trybu (etykiety z
+  `improv.term.<Tryb>`, podpowiedzi `improv.hints.pedal<Tryb>` zapisane stopniami, bez nazw dźwięków).
 - **A7.** Usunięty martwy `improvTotalXP` w `src/pages/Progress.tsx`. Pliki wdrożeniowe w `app/` nie są
   przebudowywane w tym runie (decyzja przy scaleniu gałęzi).
 - **B1 — gryf z dźwiękami akordu.** `getChordTonePositions(chord, { tuning, fretFrom, fretTo, targets? })`

@@ -90,11 +90,13 @@ Pięć diagramów boksów w module 6 zostaje: boksy pokazują wynik, prostokąt 
 | D1 | Zagraj to, co słyszysz: aplikacja gra frazę 3–5 dźwięków z ćwiczonego boksu, uczeń odgrywa ją z mikrofonem | Improwizacja to granie tego, co się słyszy | Nowy silnik `call-response`; `playTone`, `usePitchDetector`; moduły 3, 6, 12 | L | Trzy poziomy: 3 dźwięki ze wskazaną pierwszą nutą, 4 dźwięki, 5 dźwięków bez podpowiedzi; fraza zaliczona, gdy kolejność klas dźwięków się zgadza |
 | D2 | Zagrywki: 2–3 frazy na moduł pokazane na gryfie z numerami kolejności, z odsłuchem i transpozycją | Skale to alfabet, zagrywki to słowa | Nowy typ ćwiczenia `lick`; dane w `src/data/improv/licks.ts`; moduły 3, 6, 11, 12 na początek | L | 10 zagrywek; każda ma test, że jej dźwięki należą do skali lub akordu modułu |
 | D3 | Zagrywka nad pętlą: prompter przypomina, w którym takcie ją zagrać | Przeniesienie zagrywki do muzyki | Wariant pętli z podpowiedzią | S | — |
-| D4 | Dźwięki dojścia: pół tonu z dołu, potem z góry i z dołu | Brakujący krok między celowaniem a językiem jazzowym | Warianty pętli w modułach 12 i 13; mikrofon sprawdza lądowanie jak dziś | S | Dwa nowe poziomy w drabince modułu 12 |
-| D5 | Ćwiczenia z ograniczeniem: tylko 3 dźwięki, tylko jedna struna, zadany rytm | Wymusza pracę nad rytmem i frazą zamiast nad doborem dźwięków | Warianty pętli z celem tekstowym; odnośnik do Rhythm Dojo | S | Trzy warianty w module 3 |
-| D6 | Blues: pentatonika durowa i molowa nad tym samym akordem dominantowym | Najczęstszy realny kontekst na gitarze | Warianty pętli bluesowej w modułach 3 i 6 | S | — |
+| D4 zrobione | Dźwięki dojścia: pół tonu z dołu, potem z góry i z dołu | Brakujący krok między celowaniem a językiem jazzowym | Warianty pętli w modułach 12 i 13; mikrofon sprawdza lądowanie jak dziś | S | Dwa nowe poziomy w drabince modułu 12 |
+| D5 zrobione | Ćwiczenia z ograniczeniem: tylko 3 dźwięki, tylko jedna struna, zadany rytm | Wymusza pracę nad rytmem i frazą zamiast nad doborem dźwięków | Warianty pętli z celem tekstowym; odnośnik do Rhythm Dojo | S | Trzy warianty w module 3 |
+| D6 zrobione | Blues: pentatonika durowa i molowa nad tym samym akordem dominantowym | Najczęstszy realny kontekst na gitarze | Warianty pętli bluesowej w modułach 3 i 6 | S | — |
 | D7 | Podciągnięcia sprawdzane mikrofonem: z b3 w stronę tercji, z kwarty do kwinty, z b7 do prymy | Artykulacja decyduje o brzmieniu bardziej niż dobór dźwięków | Nowe ćwiczenie w module 3 albo na stronie Technique; częstotliwość z `usePitchDetector` | M | Podciągnięcie zaliczone, gdy częstotliwość dojdzie do celu z tolerancją 30 centów; próg do ustalenia w teście na gitarze |
-| D8 | Tryby od tej samej prymy nad jednym dźwiękiem basu | Tryb słychać dopiero na tle stałej prymy | Nowa pętla w module 7 (jeden akord lub sam bas) | S | — |
+| D8 zrobione | Tryby od tej samej prymy nad jednym dźwiękiem basu | Tryb słychać dopiero na tle stałej prymy | Nowa pętla w module 7 (jeden akord lub sam bas) | S | — |
+
+Stan 2026-11-15: D4, D5, D6 i D8 są zrobione jako osobne pętle dodatkowe (`nonGating`), nie jako warianty istniejących pętli: każdy wariant pętli wymaganej jest potrzebny do jej zaliczenia, więc dopisanie wariantu cofnęłoby zaliczenie modułu. „Dwa nowe poziomy w drabince modułu 12” (D4) to warianty „Poziom 5” i „Poziom 6” pętli `target-chord-tones.e5`. Zostają D1, D2, D3 i D7.
 
 ### Etap E — zastosowanie
 

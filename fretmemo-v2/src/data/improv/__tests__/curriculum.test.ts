@@ -530,6 +530,63 @@ describe("plan stage C: building, diagonal and one-string views (C4–C6)", () =
 
     it("the C4–C6 exercises are extras", () => {
         for (const suffix of ["e7", "e8", "e9"]) expect(drillParams(`pentatonic-positions.${suffix}`).nonGating, suffix).toBe(true);
-        expect(module6().exercises).toHaveLength(9);
+        expect(module6().exercises).toHaveLength(10);
+    });
+});
+
+describe("plan stage D: loop variants (D4, D5, D6, D8)", () => {
+    const loop = (moduleId: string, suffix: string) => getImprovExercise(moduleId, `${moduleId}.${suffix}`)?.params as BackingLoopParams;
+    const chordsOf = (progression: BackingLoopParams["progression"]) => progression.map((entry) => (typeof entry === "string" ? entry : entry.chord));
+
+    it("every stage D loop is an extra, so modules passed before it stay passed", () => {
+        for (const [moduleId, suffix] of [["pentatonic-scale", "e7"], ["pentatonic-scale", "e8"], ["pentatonic-positions", "e10"],
+            ["modes", "e6"], ["target-chord-tones", "e5"], ["voice-leading", "e4"]] as const) {
+            expect(loop(moduleId, suffix).nonGating, `${moduleId}.${suffix}`).toBe(true);
+        }
+    });
+
+    it("D4: two approach-note levels in module 12, the mic checks the landing note", () => {
+        const roots = loop("target-chord-tones", "e5");
+        expect(roots.variants?.map((variant) => variant.id)).toEqual(["approachBelow", "approachEnclosure"]);
+        for (const variant of roots.variants ?? []) {
+            // The landing note is the chord's root, as on level 1 of the ladder.
+            expect(variant.targets?.map((target) => target.pitchClasses)).toEqual([["A"], ["C"], ["E"], ["D"]]);
+        }
+        const thirds = loop("voice-leading", "e4");
+        for (const variant of thirds.variants ?? []) {
+            for (const target of variant.targets ?? []) {
+                const third = (Note.chroma(target.pitchClasses[0] as string) ?? 0) - (Note.chroma(target.chord.replace(/(maj7|m7|7)$/, "")) ?? 0);
+                expect([3, 4]).toContain((third + 12) % 12);
+            }
+        }
+    });
+
+    it("D5: three constraint variants in module 3", () => {
+        expect(loop("pentatonic-scale", "e7").variants?.map((variant) => variant.id)).toEqual(["limitThreeNotes", "limitOneString", "limitRhythm"]);
+        const links = getImprovModule("pentatonic-scale")?.supplementary?.map((link) => link.href);
+        expect(links).toContain("/rhythm/tap-beat");
+    });
+
+    it("D6: the mixed blues plays major over the I chord and minor over IV and V, in A and in G", () => {
+        for (const [moduleId, suffix, one] of [["pentatonic-scale", "e8", "A7"], ["pentatonic-positions", "e10", "G7"]] as const) {
+            const params = loop(moduleId, suffix);
+            expect(params.variants?.map((variant) => variant.id)).toEqual(["bluesMinorPent", "bluesMajorPent", "bluesMixedPent"]);
+            const mixed = params.variants?.[2]?.progression ?? [];
+            expect(mixed).toHaveLength(12);
+            for (const entry of mixed) {
+                if (typeof entry === "string") throw new Error("hinted entry expected");
+                expect(entry.hintKey).toBe(entry.chord === one ? "improv.hints.bluesMajorPent" : "improv.hints.bluesMinorPent");
+            }
+        }
+    });
+
+    it("D8: five modes over one root", () => {
+        const variants = loop("modes", "e6").variants ?? [];
+        expect(variants.map((variant) => variant.id)).toEqual(["dorian", "aeolian", "phrygian", "mixolydian", "lydian"]);
+        for (const variant of variants) {
+            const chords = chordsOf(variant.progression);
+            expect(chords).toHaveLength(1);
+            expect(chords[0]?.startsWith("D")).toBe(true);
+        }
     });
 });

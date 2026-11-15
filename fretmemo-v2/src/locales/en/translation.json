@@ -1960,6 +1960,27 @@
             "modePhrygian": "Phrygian (Em7–Fmaj7)",
             "modeLydian": "Lydian (Fmaj7–G6)",
             "pentThenMode": "Play four bars with the minor pentatonic only, then for the next four add the two notes that turn it into Dorian. Listen to what changes.",
+            "approachBelow": "Just before the chord changes, play the note a half step below the new chord's root and land on the root on beat one: G#→A, B→C, D#→E, C#→D.",
+            "approachBelowLabel": "Level 5: a half step from below",
+            "approachEnclosure": "Surround the target: a half step above, a half step below, the root on beat one: Bb–G#→A, Db–B→C, F–D#→E, Eb–C#→D.",
+            "approachEnclosureLabel": "Level 6: from above and below",
+            "approachThirdBelow": "Approach the third of each chord from a half step below and land on it on beat one: E→F (Dm7), A#→B (G7), D#→E (Cmaj7).",
+            "approachThirdBelowLabel": "A half step from below",
+            "approachThirdEnclosure": "Surround the third: Gb–E→F (Dm7), C–A#→B (G7), F–D#→E (Cmaj7).",
+            "approachThirdEnclosureLabel": "From above and below",
+            "limitThreeNotes": "Play with only three notes of box 1: A, C and D. All your attention goes to rhythm and phrase length.",
+            "limitThreeNotesLabel": "3 notes only",
+            "limitOneString": "Play on the G string only: A minor pentatonic sits there on frets 0, 2, 5, 7, 9 and 12. The phrase comes from moving along the neck.",
+            "limitOneStringLabel": "One string only",
+            "limitRhythm": "Play every phrase with the same rhythm: a quarter note, two eighths, a half note. Change the notes, keep the rhythm.",
+            "limitRhythmLabel": "Set rhythm",
+            "bluesMinorPent": "Play the whole blues with the minor pentatonic from the key's root. It sounds raw because its minor third rubs against the dominant chord.",
+            "bluesMinorPentLabel": "Minor pentatonic",
+            "bluesMajorPent": "Play the whole blues with the major pentatonic: the same box shape three frets lower. It sounds brighter because it has the chord's major third.",
+            "bluesMajorPentLabel": "Major pentatonic",
+            "bluesMixedPent": "Change colour with the chord: major pentatonic over the I chord, minor over IV and V.",
+            "bluesMixedPentLabel": "Major and minor in turn",
+            "pedalModes": "The root stays in the bass and the variant changes the mode. Play slowly and rest on the notes that set this mode apart from the others.",
             "modeMixolydian": "Mixolydian (G7–F)",
             "chordScaleCharacteristic": "On every chord, play its characteristic tone from the hinted scale.",
             "arpeggiosOnly": "Play chord arpeggios only — outline the harmony.",
@@ -2457,6 +2478,30 @@
                 "name": "Loop: pentatonic, then the mode",
                 "desc": "One Dm7 chord for eight bars: first the pentatonic alone, then Dorian. Extra practice."
             },
+            "pentatonic-scale.e7": {
+                "name": "Loop: constraints",
+                "desc": "Extra practice. Three variants: three notes only, one string only, a set rhythm. Fewer notes to choose from, more attention on rhythm and phrasing."
+            },
+            "pentatonic-scale.e8": {
+                "name": "Loop: blues, minor and major",
+                "desc": "Extra practice. Blues in A three ways: minor pentatonic, major pentatonic, and both in turn."
+            },
+            "pentatonic-positions.e10": {
+                "name": "Loop: blues in G, minor and major",
+                "desc": "Extra practice. Blues in G: minor pentatonic, major pentatonic, and both in turn. Move between the boxes as you play."
+            },
+            "target-chord-tones.e5": {
+                "name": "Loop: approach notes",
+                "desc": "Extra practice. Approach the chord's root from a half step below, then surround it from above and below. The microphone checks the landing on beat one."
+            },
+            "voice-leading.e4": {
+                "name": "Loop: approaching the thirds",
+                "desc": "Extra practice. Dm7–G7–Cmaj7: reach the third of each chord chromatically. The microphone checks the third on beat one."
+            },
+            "modes.e6": {
+                "name": "Loop: modes from one root",
+                "desc": "Extra practice. A chord on D keeps playing while the variant changes the mode: Dorian, Aeolian, Phrygian, Mixolydian, Lydian."
+            },
             "modes.e3": {
                 "name": "Loop: modal colors",
                 "desc": "Four variants (Dorian, Phrygian, Lydian, Mixolydian). Emphasize the mode's characteristic note over each backing. 2 successful loops per variant."
@@ -2529,12 +2574,20 @@
         },
         "supplementary": {
             "caged": "Open the CAGED system",
+            "rhythm": "Open the rhythm trainer",
             "earTraining": "Open ear training",
             "chordQuality": "Open chord-quality trainer"
         },
         "hints": {
             "pentOnly": "Minor pentatonic only",
             "dorianFill": "Dorian: add the 2nd and the 6th",
+            "bluesMajorPent": "Major pentatonic",
+            "bluesMinorPent": "Minor pentatonic",
+            "pedalDorian": "Dorian: b3 and 6",
+            "pedalAeolian": "Aeolian: b3 and b6",
+            "pedalPhrygian": "Phrygian: b2 and b6",
+            "pedalMixolydian": "Mixolydian: 3 and b7",
+            "pedalLydian": "Lydian: 3 and #4",
             "dorianDm7": "D dorian — aim for B",
             "phrygianEm": "E phrygian — aim for F",
             "lydianF": "F lydian — aim for B",
