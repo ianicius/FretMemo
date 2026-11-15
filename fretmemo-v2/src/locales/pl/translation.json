@@ -1813,6 +1813,7 @@
         },
         "module": {
             "theoryTitle": "Teoria",
+            "moreExercises": "Więcej ćwiczeń ({{count}})",
             "exercisesTitle": "Ćwiczenia",
             "notFoundTitle": "Nie ma takiego modułu",
             "notFoundDesc": "Moduł „{{moduleId}}” nie istnieje.",

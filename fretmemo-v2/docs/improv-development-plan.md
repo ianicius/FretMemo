@@ -155,7 +155,7 @@ Stan 2026-11-15: D4, D5, D6 i D8 są zrobione jako osobne pętle dodatkowe (`non
 | Próg dla podciągnięć (D7) i odsetka dźwięków (E3) dobrany na oko | Ćwiczenie za łatwe albo niemożliwe | Progi ustalane w teście na gitarze, przed tym ćwiczenia są dodatkowe |
 | Zagrywki (D2) wymagają dobrej treści muzycznej | Słabe frazy uczą złych nawyków | Zacząć od 10 zagrywek w dwóch modułach; każdą odsłuchać przed wydaniem |
 | Akordy z pliku Guitar Pro bywają nierozpoznane (E4) | Tryb działa tylko dla części utworów | Jasny komunikat i możliwość ręcznego wpisania progresji |
-| Moduł 3 dostaje dziewięć nowych pozycji | Przeładowany pierwszy moduł grany | Nowe ćwiczenia zwinięte w sekcji „Więcej ćwiczeń", wymagane zostają obecne |
+| Moduł 3 dostaje dziewięć nowych pozycji | Przeładowany pierwszy moduł grany | Nowe ćwiczenia zwinięte w sekcji „Więcej ćwiczeń", wymagane zostają obecne (zrobione 2026-11-15, we wszystkich modułach) |
 
 ## Czego ten plan nie obejmuje
 

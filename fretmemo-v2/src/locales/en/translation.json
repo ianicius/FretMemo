@@ -1799,6 +1799,7 @@
         },
         "module": {
             "theoryTitle": "Theory",
+            "moreExercises": "More exercises ({{count}})",
             "exercisesTitle": "Exercises",
             "notFoundTitle": "Module not found",
             "notFoundDesc": "There is no “{{moduleId}}” module.",

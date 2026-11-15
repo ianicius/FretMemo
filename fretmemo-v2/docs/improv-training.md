@@ -123,7 +123,7 @@ Moduł jest zaliczony (`completed`), gdy **każde** jego ćwiczenie poza `nonGat
   `CagedVisualizer`, `TriadVisualizer`, `IntervalFretboardTrainer` i aktywny palec w `Technique` (wszystkie ze statusem
   `active`, więc pełne bursztynowe wypełnienie); `src/components/ui/slider.tsx` ma w jasnym motywie tor `bg-stone-300`
   (w ciemnym nadal `bg-secondary`) w każdym `Slider` aplikacji. `Fretboard.tsx` bez zmian.
-- **i18n**: top-level namespace `improv` w `src/locales/{en,pl}/translation.json` (617 liści każdy;
+- **i18n**: top-level namespace `improv` w `src/locales/{en,pl}/translation.json` (618 liści każdy;
   parzystość testowana w `src/lib/improv/__tests__/improvI18nParity.test.ts`). Nazwy modułów: PL +
   termin EN (`.name` / `.term`); teoria 3–6 zdań PL z terminami EN (EN pełne tłumaczenie).
   Od rundy 2 dodatkowo `nav.improv` („Improv") w obu locale; klucze `library.improv` /
@@ -278,6 +278,9 @@ Moduł jest zaliczony (`completed`), gdy **każde** jego ćwiczenie poza `nonGat
   `pentatonic-positions.e10` (blues w G): pentatonika molowa, durowa, obie na zmianę z podpowiedzią przy
   akordzie. D8: `modes.e6`, jeden akord od D przez cztery takty, pięć wariantów trybu (etykiety z
   `improv.term.<Tryb>`, podpowiedzi `improv.hints.pedal<Tryb>` zapisane stopniami, bez nazw dźwięków).
+- **Sekcja „Więcej ćwiczeń” (2026-11-15).** Widok modułu (`ModuleView` w `src/pages/ImprovTraining.tsx`)
+  pokazuje najpierw ćwiczenia wymagane, a ćwiczenia dodatkowe (`isNonGating`) w zwiniętym elemencie
+  `<details>` z licznikiem (`improv.module.moreExercises`). Kolejność w `CURRICULUM` się nie zmienia.
 - **A7.** Usunięty martwy `improvTotalXP` w `src/pages/Progress.tsx`. Pliki wdrożeniowe w `app/` nie są
   przebudowywane w tym runie (decyzja przy scaleniu gałęzi).
 - **B1 — gryf z dźwiękami akordu.** `getChordTonePositions(chord, { tuning, fretFrom, fretTo, targets? })`

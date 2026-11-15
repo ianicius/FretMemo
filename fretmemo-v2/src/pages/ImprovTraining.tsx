@@ -24,10 +24,10 @@ import { TheoryCard } from "@/components/improv/TheoryCard";
 import { ChoiceQuiz } from "@/components/improv/ChoiceQuiz";
 import { DiagramDrill } from "@/components/improv/DiagramDrill";
 import { BuildScaleDrill } from "@/components/improv/BuildScaleDrill";
-import type { DiagramDrillParams } from "@/data/improv/curriculum";
+import type { DiagramDrillParams, ImprovExercise } from "@/data/improv/curriculum";
 import { BackingLoopExercise } from "@/components/improv/BackingLoopExercise";
 import { PracticeLinkExercise } from "@/components/improv/PracticeLinkExercise";
-import { CURRICULUM, countCompletedModules, getImprovModule, isModuleUnlocked, isModuleComplete } from "@/data/improv/curriculum";
+import { CURRICULUM, countCompletedModules, getImprovModule, isModuleUnlocked, isModuleComplete, isNonGating } from "@/data/improv/curriculum";
 import type { ChoiceGeneratorId } from "@/lib/improv/questions";
 import { useImprovStore } from "@/stores/useImprovStore";
 import { isDueForReview } from "@/lib/sm2";
@@ -331,6 +331,24 @@ function ModuleView({ moduleId }: { moduleId: string }) {
         );
     }
 
+    const renderExercise = (exercise: ImprovExercise) => {
+        switch (exercise.engine) {
+            case "choice-quiz":
+                return <ChoiceQuiz key={exercise.id} moduleId={module.id} exercise={exercise} />;
+            case "diagram-drill":
+                return (exercise.params as DiagramDrillParams).buildStarts
+                    ? <BuildScaleDrill key={exercise.id} moduleId={module.id} exercise={exercise} />
+                    : <DiagramDrill key={exercise.id} moduleId={module.id} exercise={exercise} />;
+            case "backing-improv":
+                return <BackingLoopExercise key={exercise.id} moduleId={module.id} exercise={exercise} />;
+            case "practice-link":
+                return <PracticeLinkExercise key={exercise.id} moduleId={module.id} exercise={exercise} />;
+            default:
+                return null;
+        }
+    };
+    const extraExercises = module.exercises.filter(isNonGating);
+
     const unlocked = isModuleUnlocked(module.id, moduleState, unlockAll, entranceUnlockCount);
     const isComplete = isModuleComplete(module, moduleState[module.id]);
     const moduleName = t(`improv.modules.${module.id}.name`);
@@ -372,22 +390,20 @@ function ModuleView({ moduleId }: { moduleId: string }) {
                     <TheoryCard theoryKey={module.theoryKey} embed={module.embed} />
                     <div className="space-y-3">
                         <h2 className="text-sm font-semibold text-foreground">{t("improv.module.exercisesTitle")}</h2>
-                        {module.exercises.map((exercise) => {
-                            switch (exercise.engine) {
-                                case "choice-quiz":
-                                    return <ChoiceQuiz key={exercise.id} moduleId={module.id} exercise={exercise} />;
-                                case "diagram-drill":
-                                    return (exercise.params as DiagramDrillParams).buildStarts
-                                        ? <BuildScaleDrill key={exercise.id} moduleId={module.id} exercise={exercise} />
-                                        : <DiagramDrill key={exercise.id} moduleId={module.id} exercise={exercise} />;
-                                case "backing-improv":
-                                    return <BackingLoopExercise key={exercise.id} moduleId={module.id} exercise={exercise} />;
-                                case "practice-link":
-                                    return <PracticeLinkExercise key={exercise.id} moduleId={module.id} exercise={exercise} />;
-                                default:
-                                    return null;
-                            }
-                        })}
+                        {module.exercises.filter((exercise) => !isNonGating(exercise)).map(renderExercise)}
+                        {extraExercises.length > 0 && (
+                            // Extras never gate the module, so they stay folded until asked for.
+                            <details className="group rounded-xl border border-border bg-card/40">
+                                <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-3 text-sm font-semibold [&::-webkit-details-marker]:hidden">
+                                    <span>{t("improv.module.moreExercises", { count: extraExercises.length })}</span>
+                                    <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-90 motion-reduce:transition-none" />
+                                </summary>
+                                <div className="space-y-3 px-2 pb-2">
+                                    <p className="px-2 text-xs text-muted-foreground">{t("improv.module.supplementaryHint")}</p>
+                                    {extraExercises.map(renderExercise)}
+                                </div>
+                            </details>
+                        )}
                     </div>
                     {module.supplementary && module.supplementary.length > 0 && (
                         <div className="space-y-2">
