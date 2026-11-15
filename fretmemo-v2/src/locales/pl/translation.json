@@ -1858,6 +1858,27 @@
             "attemptsValue": "{{done}}/{{required}}",
             "play": "Odtwórz"
         },
+        "build": {
+                "badge": "Klikany gryf",
+            "threshold_one": "Do zaliczenia: {{count}} boks",
+            "threshold_few": "Do zaliczenia: {{count}} boksy",
+            "threshold_many": "Do zaliczenia: {{count}} boksów",
+            "threshold_other": "Do zaliczenia: {{count}} boksów",
+            "prompt": "Pryma {{note}}: struna {{string}}, próg {{fret}}, {{finger}}. Kliknij na gryfie pozostałe dźwięki boksu.",
+            "finger": {
+                "index": "palec wskazujący",
+                "ring": "palec serdeczny",
+                "pinky": "palec mały"
+            },
+            "tip": "Palec wskazujący na prymie: boks leży w stronę wyższych progów. Palec serdeczny lub mały: w stronę niższych. Na każdej strunie są dwa dźwięki, co 2 albo co 3 progi.",
+            "progress": "Znalezione: {{found}}/{{total}}. Pomyłki: {{mistakes}}.",
+            "doneClean": "Boks gotowy — liczby to stopnie skali.",
+            "doneMessy": "Boks znaleziony, ale z więcej niż {{max}} pomyłkami, więc ta pozycja się nie liczy.",
+            "runs": "Zbudowane boksy: {{done}}/{{required}}",
+            "retry": "Od nowa",
+            "next": "Następna pozycja",
+            "standardTuning": "To ćwiczenie pokazuje gryf w stroju standardowym, niezależnie od ustawionego stroju."
+        },
         "drill": {
             "threshold_one": "Do zaliczenia: {{count}} przebieg",
             "threshold_few": "Do zaliczenia: {{count}} przebiegi",
@@ -1873,6 +1894,8 @@
             "legendStack": "stos: dźwięki co 2 progi",
             "legendAdded": "dźwięk dodany",
             "legendBend": "↑ dźwięk do podciągania: b3 w stronę tercji, kwarta do kwinty, b7 do prymy",
+            "legendOther": "pozostałe dźwięki pentatoniki",
+            "diagonalHint": "Ten sam stos wraca oktawę wyżej: dwie struny wyżej i dwa progi dalej (trzy progi przy przejściu na strunę H).",
             "bpm": "Tempo: {{bpm}} BPM",
             "start": "Start",
             "stop": "Stop",
@@ -2423,6 +2446,18 @@
             "major-scale.e4": {
                 "name": "Pętla: frazy w C-dur",
                 "desc": "Buduj frazy ze skali C-dur nad Cmaj7–Am7–Fmaj7–G7 i kończ je na C."
+            },
+            "pentatonic-positions.e9": {
+                "name": "Zbuduj boks od prymy",
+                "desc": "Dostajesz jedną prymę G i palec, którym ją trzymasz. Kliknij resztę boksu — sześć pozycji startowych odtwarza wszystkie pięć boksów. Dodatkowe ćwiczenie."
+            },
+            "pentatonic-positions.e7": {
+                "name": "Diagram: ruch po przekątnej",
+                "desc": "Trzy sąsiednie boksy naraz. Wyróżniony stos powtarza się oktawę wyżej, więc tą samą zagrywką przechodzisz po przekątnej gryfu. Dodatkowe ćwiczenie."
+            },
+            "pentatonic-positions.e8": {
+                "name": "Diagram: pentatonika na jednej strunie",
+                "desc": "Cała pentatonika g-moll na strunie G, od pustej struny do 12. progu. Uczy odległości między dźwiękami zamiast kształtu boksu. Dodatkowe ćwiczenie."
             },
             "pentatonic-positions.e6": {
                 "name": "Pętla: sąsiednie boksy",

@@ -1844,6 +1844,27 @@
             "attemptsValue": "{{done}}/{{required}}",
             "play": "Play"
         },
+        "build": {
+                "badge": "Tap the fretboard",
+            "threshold_one": "To pass: {{count}} box",
+            "threshold_few": "To pass: {{count}} boxes",
+            "threshold_many": "To pass: {{count}} boxes",
+            "threshold_other": "To pass: {{count}} boxes",
+            "prompt": "Root {{note}}: string {{string}}, fret {{fret}}, {{finger}}. Tap the remaining notes of the box on the fretboard.",
+            "finger": {
+                "index": "index finger",
+                "ring": "ring finger",
+                "pinky": "pinky"
+            },
+            "tip": "Index finger on the root: the box runs towards the higher frets. Ring finger or pinky: towards the lower ones. Every string has two notes, 2 or 3 frets apart.",
+            "progress": "Found: {{found}}/{{total}}. Mistakes: {{mistakes}}.",
+            "doneClean": "Box complete — the numbers are scale degrees.",
+            "doneMessy": "Box found, but with more than {{max}} mistakes, so this position does not count.",
+            "runs": "Boxes built: {{done}}/{{required}}",
+            "retry": "Start over",
+            "next": "Next position",
+            "standardTuning": "This exercise shows the fretboard in standard tuning, whatever tuning is set."
+        },
         "drill": {
             "threshold_one": "To pass: {{count}} run",
             "threshold_few": "To pass: {{count}} runs",
@@ -1859,6 +1880,8 @@
             "legendStack": "stack: notes 2 frets apart",
             "legendAdded": "added note",
             "legendBend": "↑ note to bend: b3 towards the third, the fourth to the fifth, b7 to the root",
+            "legendOther": "other pentatonic notes",
+            "diagonalHint": "The same stack returns an octave higher: two strings up and two frets further (three frets when crossing to the B string).",
             "bpm": "Tempo: {{bpm}} BPM",
             "start": "Start",
             "stop": "Stop",
@@ -2409,6 +2432,18 @@
             "major-scale.e4": {
                 "name": "Loop: C major phrases",
                 "desc": "Phrase with the C major scale over Cmaj7–Am7–Fmaj7–G7 and end your lines on C. 2 successful loops."
+            },
+            "pentatonic-positions.e9": {
+                "name": "Build the box from a root",
+                "desc": "You get one root G and the finger that holds it. Tap the rest of the box — six starting positions rebuild all five boxes. Extra practice."
+            },
+            "pentatonic-positions.e7": {
+                "name": "Diagram: moving diagonally",
+                "desc": "Three neighbouring boxes at once. The highlighted stack repeats an octave higher, so the same lick takes you diagonally across the neck. Extra practice."
+            },
+            "pentatonic-positions.e8": {
+                "name": "Diagram: the pentatonic on one string",
+                "desc": "The whole G minor pentatonic on the G string, from the open string to fret 12. It teaches the distances between notes instead of a box shape. Extra practice."
             },
             "pentatonic-positions.e6": {
                 "name": "Loop: box to box",

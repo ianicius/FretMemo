@@ -123,7 +123,7 @@ Moduł jest zaliczony (`completed`), gdy **każde** jego ćwiczenie poza `nonGat
   `CagedVisualizer`, `TriadVisualizer`, `IntervalFretboardTrainer` i aktywny palec w `Technique` (wszystkie ze statusem
   `active`, więc pełne bursztynowe wypełnienie); `src/components/ui/slider.tsx` ma w jasnym motywie tor `bg-stone-300`
   (w ciemnym nadal `bg-secondary`) w każdym `Slider` aplikacji. `Fretboard.tsx` bez zmian.
-- **i18n**: top-level namespace `improv` w `src/locales/{en,pl}/translation.json` (551 liści każdy;
+- **i18n**: top-level namespace `improv` w `src/locales/{en,pl}/translation.json` (576 liści każdy;
   parzystość testowana w `src/lib/improv/__tests__/improvI18nParity.test.ts`). Nazwy modułów: PL +
   termin EN (`.name` / `.term`); teoria 3–6 zdań PL z terminami EN (EN pełne tłumaczenie).
   Od rundy 2 dodatkowo `nav.improv` („Improv") w obu locale; klucze `library.improv` /
@@ -260,6 +260,14 @@ Moduł jest zaliczony (`completed`), gdy **każde** jego ćwiczenie poza `nonGat
   Nowe ćwiczenia dodatkowe w module 7: diagram `modes.e4` (sześć trybów) i pętla `modes.e5` (Dm7: cztery
   takty pentatoniki, cztery takty trybu doryckiego). `TheoryEmbed.tool` ma wartość `caged`
   (`CagedVisualizer` w module 11); moduł 10 ma odnośnik `improv.supplementary.caged` do `/theory/caged`.
+- **Etap C, C4–C6 (2026-11-15).** Trzy ćwiczenia dodatkowe w module 6, wszystkie na silniku `diagram-drill`:
+  `pentatonic-positions.e9` (C4, „Zbuduj boks od prymy”) — parametr `buildStarts` (`BUILD_STARTS` w
+  `curriculum.ts`: sześć prym G z palcem i oknem boksu) przełącza renderowanie na
+  `src/components/improv/BuildScaleDrill.tsx`; uczeń klika pozostałe dźwięki boksu, a boks znaleziony z
+  najwyżej dwiema pomyłkami zapisuje przebieg (`recordDrillRun`); gryf jest zawsze w stroju standardowym,
+  mikrofonu nie ma. `pentatonic-positions.e7` (C5) — `diagonal: true`, okno trzech boksów, `stackPositionKeys()`
+  wyróżnia powtarzający się stos. `pentatonic-positions.e8` (C6) — `onlyString: 2`, pentatonika na strunie G.
+  `ExerciseFrame` przyjmuje opcjonalny `engineLabel` (plakietka „Klikany gryf”).
 - **A7.** Usunięty martwy `improvTotalXP` w `src/pages/Progress.tsx`. Pliki wdrożeniowe w `app/` nie są
   przebudowywane w tym runie (decyzja przy scaleniu gałęzi).
 - **B1 — gryf z dźwiękami akordu.** `getChordTonePositions(chord, { tuning, fretFrom, fretTo, targets? })`

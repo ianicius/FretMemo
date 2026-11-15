@@ -27,6 +27,8 @@ const IMPROV_EXERCISE_BONUS_XP = 50;
 
 interface ExerciseFrameProps {
     engine: ImprovEngineType;
+    /** Badge text when the engine's own label does not fit the exercise. */
+    engineLabel?: string;
     name: string;
     description: string;
     thresholdLabel: string;
@@ -36,7 +38,7 @@ interface ExerciseFrameProps {
     children: ReactNode;
 }
 
-export function ExerciseFrame({ engine, name, description, thresholdLabel, passed, unverified = false, children }: ExerciseFrameProps) {
+export function ExerciseFrame({ engine, engineLabel, name, description, thresholdLabel, passed, unverified = false, children }: ExerciseFrameProps) {
     const { t } = useTranslation();
     const addBonusXP = useProgressStore((state) => state.addBonusXP);
     const { toast, showToast, hideToast } = useXPToast();
@@ -57,7 +59,7 @@ export function ExerciseFrame({ engine, name, description, thresholdLabel, passe
             <CardHeader className="gap-2">
                 <div className="flex flex-wrap items-center gap-2">
                     <Badge variant="secondary" className="text-[10px] uppercase tracking-wide">
-                        {t(ENGINE_LABEL_KEYS[engine])}
+                        {engineLabel ?? t(ENGINE_LABEL_KEYS[engine])}
                     </Badge>
                     <Badge
                         variant="outline"

@@ -172,6 +172,37 @@ export function stringShapes(positions: ShapePosition[]): Map<number, StringShap
     return shapes;
 }
 
+/**
+ * Plan C5: the minor-pentatonic "stack" — 4–5, b7–1 and b3–4 on three
+ * adjacent strings at the same frets (one fret higher past the G–B step).
+ * Returns the "string:fret" keys of every complete stack in `positions`.
+ */
+export function stackPositionKeys(positions: ShapePosition[]): Set<string> {
+    const degrees = SCALE_SHAPES["min-pent"].degrees;
+    const find = (stringIndex: number, degree: string, near: number, tolerance: number) =>
+        positions.find((position) => position.stringIndex === stringIndex
+            && degrees[position.degreeIndex] === degree
+            && Math.abs(position.fret - near) <= tolerance);
+    const rows = [["4", "5"], ["b7", "1"], ["b3", "4"]] as const;
+    const keys = new Set<string>();
+    for (const start of positions) {
+        if (degrees[start.degreeIndex] !== "4") continue;
+        const stack: ShapePosition[] = [];
+        let fret = start.fret;
+        for (const [row, [lowDegree, highDegree]] of rows.entries()) {
+            // Index 0 is the high E string, so the next higher string is one index down.
+            const stringIndex = start.stringIndex - row;
+            const low = find(stringIndex, lowDegree, fret, row === 0 ? 0 : 1);
+            const high = low && find(stringIndex, highDegree, low.fret + 2, 0);
+            if (!low || !high) break;
+            stack.push(low, high);
+            fret = low.fret;
+        }
+        if (stack.length === 6) for (const position of stack) keys.add(`${position.stringIndex}:${position.fret}`);
+    }
+    return keys;
+}
+
 /** Positions of one pitch (semitones above the tonic) inside the fret window. */
 export function getPitchPositions(
     key: string,

@@ -23,6 +23,8 @@ import { Switch } from "@/components/ui/switch";
 import { TheoryCard } from "@/components/improv/TheoryCard";
 import { ChoiceQuiz } from "@/components/improv/ChoiceQuiz";
 import { DiagramDrill } from "@/components/improv/DiagramDrill";
+import { BuildScaleDrill } from "@/components/improv/BuildScaleDrill";
+import type { DiagramDrillParams } from "@/data/improv/curriculum";
 import { BackingLoopExercise } from "@/components/improv/BackingLoopExercise";
 import { PracticeLinkExercise } from "@/components/improv/PracticeLinkExercise";
 import { CURRICULUM, countCompletedModules, getImprovModule, isModuleUnlocked, isModuleComplete } from "@/data/improv/curriculum";
@@ -375,7 +377,9 @@ function ModuleView({ moduleId }: { moduleId: string }) {
                                 case "choice-quiz":
                                     return <ChoiceQuiz key={exercise.id} moduleId={module.id} exercise={exercise} />;
                                 case "diagram-drill":
-                                    return <DiagramDrill key={exercise.id} moduleId={module.id} exercise={exercise} />;
+                                    return (exercise.params as DiagramDrillParams).buildStarts
+                                        ? <BuildScaleDrill key={exercise.id} moduleId={module.id} exercise={exercise} />
+                                        : <DiagramDrill key={exercise.id} moduleId={module.id} exercise={exercise} />;
                                 case "backing-improv":
                                     return <BackingLoopExercise key={exercise.id} moduleId={module.id} exercise={exercise} />;
                                 case "practice-link":

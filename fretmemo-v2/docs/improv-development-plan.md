@@ -72,14 +72,14 @@ Zasada metody: w pentatonice każda struna ma dwa dźwięki, odległe o 3 progi 
 | C1 zrobione | Diagramy pentatoniki w dwóch kolorach: prostokąt i stos, pryma zaznaczona w obu | `DiagramDrill`; kolor liczony z odstępu progów na strunie, moduły 3 i 6 | S | Test: w każdym boksie każda struna należy do dokładnie jednego kształtu; kształty występują na zmianę |
 | C2 zrobione | Przełącznik na diagramie: pentatonika → bluesowa (z b5) → heksatoniczna (z sekundą) | `scaleShapes.ts` (dwie definicje), moduł 3 | S | Dodany dźwięk ma osobny kolor |
 | C3 zrobione | Dźwięki do podciągania oznaczone na diagramie: b3, kwarta, b7 | `DiagramDrill`, moduł 3 | S | — |
-| C4 | „Zbuduj skalę od prymy": aplikacja wskazuje jedno A na strunach G, H lub E i palec; uczeń klika albo gra pozostałe dźwięki | Nowe ćwiczenie w module 6; klikalny gryf i mikrofon | M | Sześć pozycji startowych z lekcji odtwarza pięć boksów; test porównuje wynik z `getShapePositions` |
-| C5 | Ruch po przekątnej: diagram trzech sąsiednich boksów, podświetlone stosy połączone o oktawę | `DiagramDrill` z szerszym oknem, moduł 6 | S | — |
-| C6 | Pentatonika na jednej strunie | `DiagramDrill`, moduł 6 | S | — |
+| C4 zrobione | „Zbuduj skalę od prymy": aplikacja wskazuje jedno A na strunach G, H lub E i palec; uczeń klika albo gra pozostałe dźwięki | Nowe ćwiczenie w module 6; klikalny gryf i mikrofon | M | Sześć pozycji startowych z lekcji odtwarza pięć boksów; test porównuje wynik z `getShapePositions` |
+| C5 zrobione | Ruch po przekątnej: diagram trzech sąsiednich boksów, podświetlone stosy połączone o oktawę | `DiagramDrill` z szerszym oknem, moduł 6 | S | — |
+| C6 zrobione | Pentatonika na jednej strunie | `DiagramDrill`, moduł 6 | S | — |
 | C7 zrobione | „Pentatonika + 2 dźwięki = tryb": dźwięki pentatoniki w jednym kolorze, dwa dopisane w drugim; trzy wypełnienia (dorycki/lidyjski, eolski/joński, frygijski/miksolidyjski) | Nowe definicje trybów w `scaleShapes.ts`, moduł 7 | M | Test: każdy tryb to pentatonika molowa lub durowa od tej samej prymy plus dokładnie dwa dźwięki |
 | C8 zrobione | Pętla z przełączaniem: dwa obiegi pentatoniką, dwa obiegi trybem nad tym samym akordem | Warianty pętli w module 7 | S | — |
 | C9 zrobione | Kształty CAGED przy triadach i arpeggiach | Osadzenie `CagedVisualizer` w modułach 10 i 11 | S | — |
 
-Stan 2026-11-15: C1–C3, C7, C8 i C9 są wdrożone. C8 jest osobną, dodatkową pętlą (`modes.e5`), a nie wariantem pętli `modes.e3`, bo każdy wariant pętli jest wymagany do zaliczenia i nowy cofnąłby zaliczenie modułu. C9: `CagedVisualizer` jest osadzony w module 11, a moduł 10 (który ma już osadzony `TriadVisualizer`) dostał odnośnik do narzędzia CAGED. Zostają C4, C5 i C6.
+Stan 2026-11-15: C1–C3, C7, C8 i C9 są wdrożone. C8 jest osobną, dodatkową pętlą (`modes.e5`), a nie wariantem pętli `modes.e3`, bo każdy wariant pętli jest wymagany do zaliczenia i nowy cofnąłby zaliczenie modułu. C9: `CagedVisualizer` jest osadzony w module 11, a moduł 10 (który ma już osadzony `TriadVisualizer`) dostał odnośnik do narzędzia CAGED. C4–C6 doszły tego samego dnia jako ćwiczenia dodatkowe modułu 6 (`pentatonic-positions.e9`, `.e7`, `.e8`); w C4 odpowiedzi są tylko klikane, bez mikrofonu.
 
 Pięć diagramów boksów w module 6 zostaje: boksy pokazują wynik, prostokąt i stos tłumaczą, skąd się bierze. Tryb lokryjski nie powstaje z wypełnienia prostokąta i zostaje tylko w quizie.
 

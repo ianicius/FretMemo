@@ -16,9 +16,10 @@ import {
     type ChoiceQuizParams,
     type PracticeLinkParams,
     type DiagramDrillParams,
+    BUILD_STARTS,
 } from "../curriculum";
 import {
-    MODE_PENTATONIC, PENTATONIC_ADDITIONS, coversAllDegrees, getShapePositions, shapeSemitones, stringShapes, tonicAnchorFret,
+    MODE_PENTATONIC, PENTATONIC_ADDITIONS, coversAllDegrees, getShapePositions, shapeSemitones, stackPositionKeys, stringShapes, tonicAnchorFret,
     type ScaleShapeId,
 } from "@/lib/improv/scaleShapes";
 import { loopRunKey, micLoopPass } from "../curriculum";
@@ -239,6 +240,8 @@ describe("improv curriculum", () => {
         for (const exercise of module.exercises) {
             if (exercise.engine !== "diagram-drill") continue;
             const params = exercise.params as DiagramDrillParams;
+            // Plan C4–C6 extras are not single boxes.
+            if (params.buildStarts || params.diagonal || params.onlyString !== undefined) continue;
             for (const shape of params.shapes) {
                 expect(shape.shapeId).toBe("min-pent");
                 expect(shape.defaultKey).toBe("G");
@@ -430,7 +433,11 @@ describe("micLoopPass", () => {
 describe("plan stage C: rectangle and stack, modes from the pentatonic", () => {
     it("C1: in every pentatonic box each string is a rectangle or a stack, two strings and three strings in turn", () => {
         const boxes = [...(getImprovModule("pentatonic-scale")?.exercises ?? []), ...(getImprovModule("pentatonic-positions")?.exercises ?? [])]
-            .filter((exercise) => exercise.engine === "diagram-drill");
+            .filter((exercise) => exercise.engine === "diagram-drill")
+            .filter((exercise) => {
+                const params = exercise.params as DiagramDrillParams;
+                return !params.buildStarts && !params.diagonal && params.onlyString === undefined;
+            });
         expect(boxes).toHaveLength(7);
         for (const exercise of boxes) {
             const params = exercise.params as DiagramDrillParams;
@@ -476,5 +483,53 @@ describe("plan stage C: rectangle and stack, modes from the pentatonic", () => {
             const exercise = getImprovExercise("modes", id) as NonNullable<ReturnType<typeof getImprovExercise>>;
             expect((exercise.params as { nonGating?: boolean }).nonGating, id).toBe(true);
         }
+    });
+});
+
+describe("plan stage C: building, diagonal and one-string views (C4–C6)", () => {
+    const module6 = () => getImprovModule("pentatonic-positions") as NonNullable<ReturnType<typeof getImprovModule>>;
+    const drillParams = (id: string) => getImprovExercise("pentatonic-positions", id)?.params as DiagramDrillParams;
+
+    it("C4: six start roots rebuild the five boxes of module 6, each root inside its own box", () => {
+        const windows = (exerciseIds: string[]) => exerciseIds.map((id) => `${drillParams(id).offsetsFrom}:${drillParams(id).offsetsTo}`);
+        const boxWindows = windows(["e1", "e2", "e3", "e4", "e5"].map((suffix) => `pentatonic-positions.${suffix}`));
+        expect(BUILD_STARTS).toHaveLength(6);
+        expect(new Set(BUILD_STARTS.map((start) => `${start.offsetsFrom}:${start.offsetsTo}`))).toEqual(new Set(boxWindows));
+        const anchor = tonicAnchorFret("G");
+        for (const start of BUILD_STARTS) {
+            const box = getShapePositions("min-pent", "G", { fretFrom: anchor + start.offsetsFrom, fretTo: anchor + start.offsetsTo });
+            const root = box.find((position) => position.stringIndex === start.stringIndex && position.fret === start.fret);
+            expect(root?.isRoot, `${start.stringIndex}:${start.fret}`).toBe(true);
+            expect(box).toHaveLength(12);
+            // The finger tells the direction: index = the box runs up the neck from the root.
+            const below = box.filter((position) => position.fret < start.fret).length;
+            const above = box.filter((position) => position.fret > start.fret).length;
+            expect(start.finger === "index" ? above > below : below > above, `${start.finger} ${start.fret}`).toBe(true);
+        }
+        expect(drillParams("pentatonic-positions.e9").buildStarts).toBe(BUILD_STARTS);
+    });
+
+    it("C5: the diagonal window holds three complete stacks", () => {
+        const params = drillParams("pentatonic-positions.e7");
+        const anchor = tonicAnchorFret("G");
+        const keys = stackPositionKeys(getShapePositions("min-pent", "G", { fretFrom: anchor + params.offsetsFrom, fretTo: anchor + params.offsetsTo }));
+        // Stacks start on the fourth (C): low E fret 8, A fret 3, G fret 5.
+        for (const start of ["5:8", "4:3", "2:5"]) expect(keys.has(start), start).toBe(true);
+        // 3 × 6 notes; the G-string C at fret 5 belongs to two stacks.
+        expect(keys.size).toBe(17);
+    });
+
+    it("C6: the one-string view carries every degree of the pentatonic", () => {
+        const params = drillParams("pentatonic-positions.e8");
+        const anchor = tonicAnchorFret("G");
+        const onString = getShapePositions("min-pent", "G", { fretFrom: anchor + params.offsetsFrom, fretTo: anchor + params.offsetsTo })
+            .filter((position) => position.stringIndex === params.onlyString);
+        expect(new Set(onString.map((position) => position.degreeIndex)).size).toBe(5);
+        expect(onString.map((position) => position.fret)).toEqual([0, 3, 5, 7, 10, 12]);
+    });
+
+    it("the C4–C6 exercises are extras", () => {
+        for (const suffix of ["e7", "e8", "e9"]) expect(drillParams(`pentatonic-positions.${suffix}`).nonGating, suffix).toBe(true);
+        expect(module6().exercises).toHaveLength(9);
     });
 });

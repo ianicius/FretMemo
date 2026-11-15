@@ -20,7 +20,7 @@ import { normalizeTuning } from "@/lib/tuning";
 import type { NoteStatus } from "@/types/fretboard";
 import {
     BEND_DEGREES, MODE_PENTATONIC, PENTATONIC_ADDITIONS, SCALE_SHAPES,
-    getPitchPositions, getShapePositions, isStandardTuning, stringShapes, tonicAnchorFret,
+    getPitchPositions, getShapePositions, isStandardTuning, stackPositionKeys, stringShapes, tonicAnchorFret,
 } from "@/lib/improv/scaleShapes";
 import { tonicMidi } from "@/lib/improv/chords";
 import { MetronomeClicker } from "@/lib/improv/click";
@@ -78,8 +78,8 @@ export function DiagramDrill({ moduleId, exercise }: DiagramDrillProps) {
             tuning,
             fretFrom: windowFrom,
             fretTo: windowTo,
-        }),
-        [key, windowFrom, windowTo, shape.shapeId, tuning],
+        }).filter((position) => params.onlyString === undefined || position.stringIndex === params.onlyString),
+        [key, windowFrom, windowTo, shape.shapeId, tuning, params.onlyString],
     );
 
     // Plan C2: the blues / hexatonic view adds one note to the pentatonic.
@@ -100,10 +100,13 @@ export function DiagramDrill({ moduleId, exercise }: DiagramDrillProps) {
         const definition = SCALE_SHAPES[shape.shapeId];
         // Plan C1: rectangle and stack strings of a pentatonic box.
         const shapes = isPentatonic ? stringShapes(positions) : null;
+        // Plan C5: across three boxes only the repeating stack is picked out.
+        const stackKeys = params.diagonal ? stackPositionKeys(positions) : null;
         const pentatonicOffsets = basePentatonic ? SCALE_SHAPES[basePentatonic].semitones : null;
         const colorOf = (position: (typeof positions)[number]): string | undefined => {
             if (position.isRoot) return undefined;
             if (pentatonicOffsets) return pentatonicOffsets.includes(definition.semitones[position.degreeIndex] ?? -1) ? COLOR.pent : COLOR.added;
+            if (stackKeys) return stackKeys.has(`${position.stringIndex}:${position.fret}`) ? COLOR.stack : COLOR.pent;
             const kind = shapes?.get(position.stringIndex);
             return kind ? COLOR[kind] : undefined;
         };
@@ -130,11 +133,13 @@ export function DiagramDrill({ moduleId, exercise }: DiagramDrillProps) {
             label: addition?.degree,
         }));
         return [...base, ...added];
-    }, [positions, addedPositions, addition, basePentatonic, isPentatonic, shape.shapeId, tuning, view]);
+    }, [positions, addedPositions, addition, basePentatonic, isPentatonic, params.diagonal, shape.shapeId, tuning, view]);
 
     const legend: Array<{ color: string; label: string }> = basePentatonic
         ? [{ color: COLOR.pent, label: t(`improv.shapes.${basePentatonic}`) }, { color: COLOR.added, label: t("improv.drill.legendAdded") }]
-        : isPentatonic
+        : params.diagonal
+            ? [{ color: COLOR.stack, label: t("improv.drill.legendStack") }, { color: COLOR.pent, label: t("improv.drill.legendOther") }]
+        : isPentatonic && params.onlyString === undefined
             ? [
                 { color: COLOR.rect, label: t("improv.drill.legendRect") },
                 { color: COLOR.stack, label: t("improv.drill.legendStack") },
@@ -266,6 +271,7 @@ export function DiagramDrill({ moduleId, exercise }: DiagramDrillProps) {
                         </span>
                     ))}
                     {view === "bends" && <span>{t("improv.drill.legendBend")}</span>}
+                    {params.diagonal && <span>{t("improv.drill.diagonalHint")}</span>}
                 </p>
             )}
             {!isStandardTuning(tuning) && (

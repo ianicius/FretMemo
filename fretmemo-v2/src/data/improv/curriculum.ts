@@ -65,6 +65,23 @@ export interface DiagramDrillParams {
     pentatonicFill?: boolean;
     /** Extra practice that never gates module completion. */
     nonGating?: boolean;
+    /** Plan C6: show the shape on this string only (0 = high E). */
+    onlyString?: number;
+    /** Plan C5: wide window with the repeating stack highlighted. */
+    diagonal?: boolean;
+    /** Plan C4: "build the box from a root" — rendered by BuildScaleDrill. */
+    buildStarts?: BuildStart[];
+}
+
+/** One starting point of the build drill: a root, the finger on it and the box it leads to. */
+export interface BuildStart {
+    /** 0 = high E … 5 = low E. */
+    stringIndex: number;
+    fret: number;
+    finger: "index" | "ring" | "pinky";
+    /** Box window relative to the tonic anchor, as in `DiagramDrillParams`. */
+    offsetsFrom: number;
+    offsetsTo: number;
 }
 
 export interface PracticeLinkParams {
@@ -229,7 +246,7 @@ function drillExercise(
     offsetsTo: number,
     defaultBpm: number,
     requiredRuns: number,
-    extra?: Pick<DiagramDrillParams, "pentatonicViews" | "pentatonicFill" | "nonGating">,
+    extra?: Partial<DiagramDrillParams>,
 ): ImprovExercise {
     return {
         id: `${moduleId}.${suffix}`,
@@ -253,6 +270,20 @@ function loopExercise(
         params,
     };
 }
+
+/**
+ * Plan C4: six roots G on the G, B and high E strings. The finger placed on
+ * the root decides the box: index finger = the box runs up the neck, ring
+ * finger or pinky = down. Together they rebuild the five boxes of module 6.
+ */
+export const BUILD_STARTS: BuildStart[] = [
+    { stringIndex: 0, fret: 3, finger: "index", offsetsFrom: 0, offsetsTo: 3 },
+    { stringIndex: 1, fret: 8, finger: "pinky", offsetsFrom: 2, offsetsTo: 5 },
+    { stringIndex: 1, fret: 8, finger: "index", offsetsFrom: 4, offsetsTo: 8 },
+    { stringIndex: 2, fret: 12, finger: "ring", offsetsFrom: 7, offsetsTo: 10 },
+    { stringIndex: 2, fret: 12, finger: "index", offsetsFrom: 9, offsetsTo: 12 },
+    { stringIndex: 0, fret: 15, finger: "pinky", offsetsFrom: 9, offsetsTo: 12 },
+];
 
 /** Per-bar hints of the phrasing variants (plan B4), one bar per chord. */
 const PLAY_REST_HINTS = ["improv.hints.barPlay", "improv.hints.barRest", "improv.hints.barPlay", "improv.hints.barRest"];
@@ -455,6 +486,10 @@ export const CURRICULUM: ImprovModule[] = [
                 maxBpm: 160,
                 requiredPasses: 2,
             }),
+            // Plan C4–C6: extras (non-gating), so a module passed before them stays passed.
+            drillExercise("pentatonic-positions", "e9", [{ shapeId: "min-pent", defaultKey: "G" }], 0, 12, 70, 6, { buildStarts: BUILD_STARTS, nonGating: true }),
+            drillExercise("pentatonic-positions", "e7", [{ shapeId: "min-pent", defaultKey: "G" }], 0, 8, 70, 1, { diagonal: true, nonGating: true }),
+            drillExercise("pentatonic-positions", "e8", [{ shapeId: "min-pent", defaultKey: "G" }], -3, 9, 70, 1, { onlyString: 2, nonGating: true }),
         ],
     },
     {
