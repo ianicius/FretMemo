@@ -1849,6 +1849,16 @@
             "threshold_few": "To pass: {{count}} runs",
             "threshold_many": "To pass: {{count}} runs",
             "threshold_other": "To pass: {{count}} runs",
+            "view": "View",
+            "viewPent": "Pentatonic",
+            "viewBlues": "Blues (+ b5)",
+            "viewHex": "Hexatonic (+ 2)",
+            "viewBends": "Bends",
+            "legendRoot": "root",
+            "legendRect": "rectangle: notes 3 frets apart",
+            "legendStack": "stack: notes 2 frets apart",
+            "legendAdded": "added note",
+            "legendBend": "↑ note to bend: b3 towards the third, the fourth to the fifth, b7 to the root",
             "bpm": "Tempo: {{bpm}} BPM",
             "start": "Start",
             "stop": "Stop",
@@ -1892,6 +1902,11 @@
             "reportMiss": "missed"
         },
         "shapes": {
+            "dorian": "Dorian scale",
+            "aeolian": "Aeolian scale (natural minor)",
+            "phrygian": "Phrygian scale",
+            "lydian": "Lydian scale",
+            "mixolydian": "Mixolydian scale",
             "min-pent": "Minor pentatonic",
             "maj-pent": "Major pentatonic",
             "major": "Major scale",
@@ -1921,6 +1936,7 @@
             "modeDorian": "Dorian (Dm7–G7)",
             "modePhrygian": "Phrygian (Em7–Fmaj7)",
             "modeLydian": "Lydian (Fmaj7–G6)",
+            "pentThenMode": "Play four bars with the minor pentatonic only, then for the next four add the two notes that turn it into Dorian. Listen to what changes.",
             "modeMixolydian": "Mixolydian (G7–F)",
             "chordScaleCharacteristic": "On every chord, play its characteristic tone from the hinted scale.",
             "arpeggiosOnly": "Play chord arpeggios only — outline the harmony.",
@@ -2083,7 +2099,7 @@
             "pentatonic-scale": {
                 "name": "Pentatonic Scale",
                 "term": "Pentatonic Scale",
-                "theory": "The minor pentatonic (1 b3 4 5 b7) is most players’ first improvising language: it sounds right in blues, rock and folk. Box 1 (e.g. A minor at frets 5–8) sits comfortably under the fingers, so you can focus on phrasing instead of finding notes. Box 2 starts on the minor third and extends the scale up the neck. Switch keys with the selector: the shape stays the same and just slides along the neck. Play with a metronome, up and down, evenly in time."
+                "theory": "The minor pentatonic (1 b3 4 5 b7) is most players’ first improvising language: it sounds right in blues, rock and folk. Box 1 (e.g. A minor at frets 5–8) sits comfortably under the fingers, so you can focus on phrasing instead of finding notes. Box 2 starts on the minor third and extends the scale up the neck. Switch keys with the selector: the shape stays the same and just slides along the neck. Play with a metronome, up and down, evenly in time. Every box is made of two shapes that alternate: a rectangle (two adjacent strings, notes 3 frets apart) and a stack (three adjacent strings, 2 frets apart); between the G and B strings everything shifts by one fret. The idea comes from the Fret Science lesson “Two Simple Shapes UNLOCK the Pentatonic Scale”."
             },
             "major-scale": {
                 "name": "Major Scale",
@@ -2103,7 +2119,7 @@
             "modes": {
                 "name": "Modes",
                 "term": "Modes",
-                "theory": "Modes are the seven scales you get by starting the major scale on each degree: I Ionian, II Dorian, III Phrygian, IV Lydian, V Mixolydian, VI Aeolian, VII Locrian. Compared with the major scale on the same root, Dorian has b3 and b7, Phrygian b2 b3 b6 b7, Lydian #4, Mixolydian b7, Aeolian b3 b6 b7 and Locrian b2 b3 b5 b6 b7. Each mode has a characteristic note that sets it apart from plain major or minor: the major sixth in Dorian, b2 in Phrygian, #4 in Lydian, b7 in Mixolydian. Emphasize those notes when you want the mode to be heard."
+                "theory": "Modes are the seven scales you get by starting the major scale on each degree: I Ionian, II Dorian, III Phrygian, IV Lydian, V Mixolydian, VI Aeolian, VII Locrian. Compared with the major scale on the same root, Dorian has b3 and b7, Phrygian b2 b3 b6 b7, Lydian #4, Mixolydian b7, Aeolian b3 b6 b7 and Locrian b2 b3 b5 b6 b7. Each mode has a characteristic note that sets it apart from plain major or minor: the major sixth in Dorian, b2 in Phrygian, #4 in Lydian, b7 in Mixolydian. Emphasize those notes when you want the mode to be heard. A practical shortcut: a mode is a pentatonic from the same root plus two notes (Fret Science lesson “Stop Memorizing Modes”)."
             },
             "chord-construction": {
                 "name": "How Chords Are Built",
@@ -2200,7 +2216,7 @@
             },
             "pentatonic-scale.e1": {
                 "name": "Diagram: minor pentatonic, box 1",
-                "desc": "Box 1 of the minor pentatonic (A minor by default, frets 5–8). The selector changes the key and the shape slides along the neck. A run is the whole scale up and down."
+                "desc": "Box 1 of the minor pentatonic (A minor by default, frets 5–8). The selector changes the key and the shape slides along the neck. A run is the whole scale up and down. The colours show how the box is built: a rectangle (two strings, notes 3 frets apart) and a stack (three strings, 2 frets apart). The “View” switch adds the blue note, the second, or marks the notes to bend."
             },
             "pentatonic-scale.e2": {
                 "name": "Diagram: minor pentatonic, box 2",
@@ -2398,6 +2414,14 @@
                 "name": "Loop: box to box",
                 "desc": "Gm7–Cm7: move to a neighbouring pentatonic box with each loop. 2 successful loops."
             },
+            "modes.e4": {
+                "name": "Diagram: pentatonic + 2 notes = mode",
+                "desc": "Every mode is a pentatonic from the same root with two notes added. The minor one gives Dorian, Aeolian and Phrygian; the major one gives Lydian, Ionian and Mixolydian. Extra practice."
+            },
+            "modes.e5": {
+                "name": "Loop: pentatonic, then the mode",
+                "desc": "One Dm7 chord for eight bars: first the pentatonic alone, then Dorian. Extra practice."
+            },
             "modes.e3": {
                 "name": "Loop: modal colors",
                 "desc": "Four variants (Dorian, Phrygian, Lydian, Mixolydian). Emphasize the mode's characteristic note over each backing. 2 successful loops per variant."
@@ -2469,10 +2493,13 @@
             "extra": "Extra practice"
         },
         "supplementary": {
+            "caged": "Open the CAGED system",
             "earTraining": "Open ear training",
             "chordQuality": "Open chord-quality trainer"
         },
         "hints": {
+            "pentOnly": "Minor pentatonic only",
+            "dorianFill": "Dorian: add the 2nd and the 6th",
             "dorianDm7": "D dorian — aim for B",
             "phrygianEm": "E phrygian — aim for F",
             "lydianF": "F lydian — aim for B",

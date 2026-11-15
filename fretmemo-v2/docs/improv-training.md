@@ -123,7 +123,7 @@ Moduł jest zaliczony (`completed`), gdy **każde** jego ćwiczenie poza `nonGat
   `CagedVisualizer`, `TriadVisualizer`, `IntervalFretboardTrainer` i aktywny palec w `Technique` (wszystkie ze statusem
   `active`, więc pełne bursztynowe wypełnienie); `src/components/ui/slider.tsx` ma w jasnym motywie tor `bg-stone-300`
   (w ciemnym nadal `bg-secondary`) w każdym `Slider` aplikacji. `Fretboard.tsx` bez zmian.
-- **i18n**: top-level namespace `improv` w `src/locales/{en,pl}/translation.json` (528 liści każdy;
+- **i18n**: top-level namespace `improv` w `src/locales/{en,pl}/translation.json` (551 liści każdy;
   parzystość testowana w `src/lib/improv/__tests__/improvI18nParity.test.ts`). Nazwy modułów: PL +
   termin EN (`.name` / `.term`); teoria 3–6 zdań PL z terminami EN (EN pełne tłumaczenie).
   Od rundy 2 dodatkowo `nav.improv` („Improv") w obu locale; klucze `library.improv` /
@@ -249,6 +249,17 @@ Moduł jest zaliczony (`completed`), gdy **każde** jego ćwiczenie poza `nonGat
   `triadBuild`, `triadType` i `chord-to-mode`; koło mają `tritone`, `secondaryDom`, `coltrane` (klikane),
   `pivot`, `borrowed` (dwie ramki) oraz `mode-parent`. `chordScaleMelodic` i `chordScaleHarmonic` zostają
   tekstowe. Podpowiedzi nad planszą: klucze `improv.quiz.circle*` i `improv.quiz.fret*`.
+- **Etap C planu rozwoju (2026-11-15): C1–C3, C7–C9.** `scaleShapes.ts`: `stringShapes()` dzieli struny
+  boksu pentatoniki na prostokąt (dźwięki co 3 progi) i stos (co 2 progi); `PENTATONIC_ADDITIONS` (b5,
+  sekunda), `BEND_DEGREES` (b3, 4, b7), `getPitchPositions()`; nowe kształty `dorian`, `aeolian`,
+  `phrygian`, `lydian`, `mixolydian` i mapa `MODE_PENTATONIC` (tryb = pentatonika od tej samej prymy + 2
+  dźwięki; joński to kształt `major`). `DiagramDrill` koloruje każdy diagram `min-pent` / `maj-pent`
+  (pryma bursztynowa, prostokąt niebieski, stos fioletowy) i pokazuje legendę. Parametry `DiagramDrillParams`:
+  `pentatonicViews` (przełącznik „Widok”: pentatonika / bluesowa / heksatoniczna / podciągnięcia; diagramy
+  `pentatonic-scale.e1` i `.e2`), `pentatonicFill` (kolory „pentatonika + dźwięki dodane”), `nonGating`.
+  Nowe ćwiczenia dodatkowe w module 7: diagram `modes.e4` (sześć trybów) i pętla `modes.e5` (Dm7: cztery
+  takty pentatoniki, cztery takty trybu doryckiego). `TheoryEmbed.tool` ma wartość `caged`
+  (`CagedVisualizer` w module 11); moduł 10 ma odnośnik `improv.supplementary.caged` do `/theory/caged`.
 - **A7.** Usunięty martwy `improvTotalXP` w `src/pages/Progress.tsx`. Pliki wdrożeniowe w `app/` nie są
   przebudowywane w tym runie (decyzja przy scaleniu gałęzi).
 - **B1 — gryf z dźwiękami akordu.** `getChordTonePositions(chord, { tuning, fretFrom, fretTo, targets? })`

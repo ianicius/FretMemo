@@ -17,7 +17,10 @@ import {
     type PracticeLinkParams,
     type DiagramDrillParams,
 } from "../curriculum";
-import { coversAllDegrees, getShapePositions, shapeSemitones, tonicAnchorFret } from "@/lib/improv/scaleShapes";
+import {
+    MODE_PENTATONIC, PENTATONIC_ADDITIONS, coversAllDegrees, getShapePositions, shapeSemitones, stringShapes, tonicAnchorFret,
+    type ScaleShapeId,
+} from "@/lib/improv/scaleShapes";
 import { loopRunKey, micLoopPass } from "../curriculum";
 import { tritoneSub } from "@/lib/improv/questions";
 import { Note } from "tonal";
@@ -423,3 +426,55 @@ describe("micLoopPass", () => {
             expect((exercise.params as PracticeLinkParams).nonGating).toBe(true);
         }
     });
+
+describe("plan stage C: rectangle and stack, modes from the pentatonic", () => {
+    it("C1: in every pentatonic box each string is a rectangle or a stack, two strings and three strings in turn", () => {
+        const boxes = [...(getImprovModule("pentatonic-scale")?.exercises ?? []), ...(getImprovModule("pentatonic-positions")?.exercises ?? [])]
+            .filter((exercise) => exercise.engine === "diagram-drill");
+        expect(boxes).toHaveLength(7);
+        for (const exercise of boxes) {
+            const params = exercise.params as DiagramDrillParams;
+            const shape = params.shapes[0] as NonNullable<typeof params.shapes[number]>;
+            const anchor = tonicAnchorFret(shape.defaultKey);
+            const shapes = stringShapes(getShapePositions(shape.shapeId, shape.defaultKey, {
+                fretFrom: anchor + params.offsetsFrom,
+                fretTo: anchor + params.offsetsTo,
+            }));
+            // Low E → high E; the high E string repeats the low E string.
+            const sequence = [5, 4, 3, 2, 1, 0].map((stringIndex) => shapes.get(stringIndex));
+            expect(sequence.every(Boolean), exercise.id).toBe(true);
+            expect(sequence[0]).toBe(sequence[5]);
+            const fiveStrings = sequence.slice(0, 5).join(",");
+            expect(`${fiveStrings},${fiveStrings}`, exercise.id).toContain("rect,rect,stack,stack,stack");
+        }
+    });
+
+    it("C2: the blues and hexatonic views add a note the minor pentatonic does not have", () => {
+        for (const addition of Object.values(PENTATONIC_ADDITIONS)) {
+            expect(shapeSemitones("min-pent")).not.toContain(addition.semitone);
+        }
+        const e1 = getImprovExercise("pentatonic-scale", "pentatonic-scale.e1");
+        expect((e1?.params as DiagramDrillParams).pentatonicViews).toBe(true);
+    });
+
+    it("C7: each mode is the pentatonic from the same root plus exactly two notes", () => {
+        const modes = Object.entries(MODE_PENTATONIC) as Array<[ScaleShapeId, "min-pent" | "maj-pent"]>;
+        expect(modes).toHaveLength(6);
+        for (const [mode, pentatonic] of modes) {
+            const modeNotes = shapeSemitones(mode);
+            const base = shapeSemitones(pentatonic);
+            expect(base.every((semitone) => modeNotes.includes(semitone)), mode).toBe(true);
+            expect(modeNotes.filter((semitone) => !base.includes(semitone)), mode).toHaveLength(2);
+        }
+        const drill = getImprovExercise("modes", "modes.e4");
+        const shapes = (drill?.params as DiagramDrillParams).shapes.map((shape) => shape.shapeId);
+        expect([...shapes].sort()).toEqual(modes.map(([mode]) => mode).sort());
+    });
+
+    it("the stage C additions to module 7 are extras: a module passed before them stays passed", () => {
+        for (const id of ["modes.e4", "modes.e5"]) {
+            const exercise = getImprovExercise("modes", id) as NonNullable<ReturnType<typeof getImprovExercise>>;
+            expect((exercise.params as { nonGating?: boolean }).nonGating, id).toBe(true);
+        }
+    });
+});

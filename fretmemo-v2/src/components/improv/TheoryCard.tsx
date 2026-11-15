@@ -12,6 +12,7 @@ import CircleOfFifths from "@/components/theory/CircleOfFifths";
 import ScaleExplorer from "@/components/theory/ScaleExplorer";
 import ChordLibrary from "@/components/theory/ChordLibrary";
 import TriadVisualizer from "@/components/theory/TriadVisualizer";
+import CagedVisualizer from "@/components/theory/CagedVisualizer";
 import type { TheoryEmbed } from "@/data/improv/curriculum";
 import { IMPROV_FRETBOARD_ROWS } from "@/lib/improv/display";
 
@@ -30,6 +31,8 @@ function TheoryEmbedView({ embed }: { embed: TheoryEmbed }) {
             return <ChordLibrary initialRoot={embed.root} />;
         case "triad-visualizer":
             return <TriadVisualizer initialRoot={embed.root as never} />;
+        case "caged":
+            return <CagedVisualizer />;
         default:
             return null;
     }

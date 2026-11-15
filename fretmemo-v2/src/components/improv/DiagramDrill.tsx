@@ -18,7 +18,10 @@ import { Fretboard } from "@/components/fretboard/Fretboard";
 import { getNoteAt } from "@/lib/constants";
 import { normalizeTuning } from "@/lib/tuning";
 import type { NoteStatus } from "@/types/fretboard";
-import { SCALE_SHAPES, getShapePositions, isStandardTuning, tonicAnchorFret } from "@/lib/improv/scaleShapes";
+import {
+    BEND_DEGREES, MODE_PENTATONIC, PENTATONIC_ADDITIONS, SCALE_SHAPES,
+    getPitchPositions, getShapePositions, isStandardTuning, stringShapes, tonicAnchorFret,
+} from "@/lib/improv/scaleShapes";
 import { tonicMidi } from "@/lib/improv/chords";
 import { MetronomeClicker } from "@/lib/improv/click";
 import { playTone } from "@/lib/audio";
@@ -27,6 +30,10 @@ import { selectModuleProgress, useImprovStore } from "@/stores/useImprovStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { ExerciseFrame } from "./ExerciseFrame";
 import { IMPROV_FRETBOARD_ROWS, localizeToken } from "@/lib/improv/display";
+
+/** Dot colours of the diagram views (the root keeps the app's amber). */
+const COLOR = { rect: "#38bdf8", stack: "#a78bfa", added: "#fb7185", pent: "#38bdf8" } as const;
+type PentatonicView = "pent" | "blues" | "hex" | "bends";
 
 interface DiagramDrillProps {
     moduleId: string;
@@ -49,6 +56,7 @@ export function DiagramDrill({ moduleId, exercise }: DiagramDrillProps) {
     const shape = params.shapes[Math.min(shapeIndex, params.shapes.length - 1)] as NonNullable<typeof params.shapes[number]>;
     const [key, setKey] = useState<string>(shape.defaultKey);
     const [bpm, setBpm] = useState(params.defaultBpm);
+    const [view, setView] = useState<PentatonicView>("pent");
     const [playing, setPlaying] = useState(false);
     const [metronomeBeats, setMetronomeBeats] = useState(0);
     const clickerRef = useRef<MetronomeClicker | null>(null);
@@ -74,24 +82,65 @@ export function DiagramDrill({ moduleId, exercise }: DiagramDrillProps) {
         [key, windowFrom, windowTo, shape.shapeId, tuning],
     );
 
+    // Plan C2: the blues / hexatonic view adds one note to the pentatonic.
+    const addition = params.pentatonicViews && (view === "blues" || view === "hex") ? PENTATONIC_ADDITIONS[view] : null;
+    const addedPositions = useMemo(
+        () => (addition ? getPitchPositions(key, addition.semitone, { tuning, fretFrom: windowFrom, fretTo: windowTo }) : []),
+        [addition, key, tuning, windowFrom, windowTo],
+    );
+    const isPentatonic = shape.shapeId === "min-pent" || shape.shapeId === "maj-pent";
+    const basePentatonic = params.pentatonicFill ? MODE_PENTATONIC[shape.shapeId] : undefined;
+
     // Plan 1.2: a run counts only after the metronome has clicked through the
     // full up+down path — as many beats as the shape has notes, times two.
-    const runBeats = positions.length * 2;
+    const runBeats = (positions.length + addedPositions.length) * 2;
     const runEarned = playing && metronomeBeats >= runBeats;
 
     const activeNotes = useMemo((): NoteStatus[] => {
-        const degrees = SCALE_SHAPES[shape.shapeId].degrees;
-        return positions.map((position) => ({
-            position: {
-                stringIndex: position.stringIndex,
-                fret: position.fret,
-                note: getNoteAt(tuning[position.stringIndex] ?? "C", position.fret),
-            },
-            status: "active" as const,
-            label: degrees[position.degreeIndex] ?? undefined,
-            emphasis: position.isRoot ? ("strong" as const) : ("normal" as const),
+        const definition = SCALE_SHAPES[shape.shapeId];
+        // Plan C1: rectangle and stack strings of a pentatonic box.
+        const shapes = isPentatonic ? stringShapes(positions) : null;
+        const pentatonicOffsets = basePentatonic ? SCALE_SHAPES[basePentatonic].semitones : null;
+        const colorOf = (position: (typeof positions)[number]): string | undefined => {
+            if (position.isRoot) return undefined;
+            if (pentatonicOffsets) return pentatonicOffsets.includes(definition.semitones[position.degreeIndex] ?? -1) ? COLOR.pent : COLOR.added;
+            const kind = shapes?.get(position.stringIndex);
+            return kind ? COLOR[kind] : undefined;
+        };
+        const base = positions.map((position): NoteStatus => {
+            const degree = definition.degrees[position.degreeIndex];
+            const color = colorOf(position);
+            return {
+                position: {
+                    stringIndex: position.stringIndex,
+                    fret: position.fret,
+                    note: getNoteAt(tuning[position.stringIndex] ?? "C", position.fret),
+                },
+                // A coloured dot is drawn through the idle style; the root stays amber.
+                status: color ? "idle" : "active",
+                color,
+                label: degree && view === "bends" && BEND_DEGREES.includes(degree) ? `${degree}↑` : degree,
+                emphasis: position.isRoot ? "strong" : "normal",
+            };
+        });
+        const added = addedPositions.map((position): NoteStatus => ({
+            position,
+            status: "idle",
+            color: COLOR.added,
+            label: addition?.degree,
         }));
-    }, [positions, shape.shapeId, tuning]);
+        return [...base, ...added];
+    }, [positions, addedPositions, addition, basePentatonic, isPentatonic, shape.shapeId, tuning, view]);
+
+    const legend: Array<{ color: string; label: string }> = basePentatonic
+        ? [{ color: COLOR.pent, label: t(`improv.shapes.${basePentatonic}`) }, { color: COLOR.added, label: t("improv.drill.legendAdded") }]
+        : isPentatonic
+            ? [
+                { color: COLOR.rect, label: t("improv.drill.legendRect") },
+                { color: COLOR.stack, label: t("improv.drill.legendStack") },
+                ...(addition ? [{ color: COLOR.added, label: t("improv.drill.legendAdded") }] : []),
+            ]
+            : [];
 
     const handleStart = () => {
         clickerRef.current = new MetronomeClicker(bpm, {
@@ -167,6 +216,17 @@ export function DiagramDrill({ moduleId, exercise }: DiagramDrillProps) {
                         </Select>
                     </div>
                 )}
+                {params.pentatonicViews && (
+                    <div className="space-y-1">
+                        <Label className="text-xs text-muted-foreground">{t("improv.drill.view")}</Label>
+                        <Select value={view} onChange={(event) => setView(event.target.value as PentatonicView)} className="h-9 w-44 text-xs">
+                            <option value="pent">{t("improv.drill.viewPent")}</option>
+                            <option value="blues">{t("improv.drill.viewBlues")}</option>
+                            <option value="hex">{t("improv.drill.viewHex")}</option>
+                            <option value="bends">{t("improv.drill.viewBends")}</option>
+                        </Select>
+                    </div>
+                )}
                 <div className="min-w-40 flex-1 space-y-1">
                     <Label className="text-xs text-muted-foreground">{t("improv.drill.bpm", { bpm })}</Label>
                     <Slider
@@ -193,6 +253,21 @@ export function DiagramDrill({ moduleId, exercise }: DiagramDrillProps) {
                 fitContainer
                 className={`rounded-lg border border-border bg-card/60 ${IMPROV_FRETBOARD_ROWS}`}
             />
+            {legend.length > 0 && (
+                <p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1.5">
+                        <span className="h-3 w-3 rounded-full" style={{ backgroundColor: "#f59e0b" }} />
+                        {t("improv.drill.legendRoot")}
+                    </span>
+                    {legend.map((item) => (
+                        <span key={item.label} className="flex items-center gap-1.5">
+                            <span className="h-3 w-3 rounded-full" style={{ backgroundColor: item.color }} />
+                            {item.label}
+                        </span>
+                    ))}
+                    {view === "bends" && <span>{t("improv.drill.legendBend")}</span>}
+                </p>
+            )}
             {!isStandardTuning(tuning) && (
                 <p className="text-xs text-muted-foreground">{t("improv.drill.tuningNotice")}</p>
             )}

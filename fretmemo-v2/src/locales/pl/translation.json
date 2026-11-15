@@ -1863,6 +1863,16 @@
             "threshold_few": "Do zaliczenia: {{count}} przebiegi",
             "threshold_many": "Do zaliczenia: {{count}} przebiegów",
             "threshold_other": "Do zaliczenia: {{count}} przebiegów",
+            "view": "Widok",
+            "viewPent": "Pentatonika",
+            "viewBlues": "Bluesowa (+ b5)",
+            "viewHex": "Heksatoniczna (+ 2)",
+            "viewBends": "Podciągnięcia",
+            "legendRoot": "pryma",
+            "legendRect": "prostokąt: dźwięki co 3 progi",
+            "legendStack": "stos: dźwięki co 2 progi",
+            "legendAdded": "dźwięk dodany",
+            "legendBend": "↑ dźwięk do podciągania: b3 w stronę tercji, kwarta do kwinty, b7 do prymy",
             "bpm": "Tempo: {{bpm}} BPM",
             "start": "Start",
             "stop": "Stop",
@@ -1906,6 +1916,11 @@
             "reportMiss": "nietrafiony"
         },
         "shapes": {
+            "dorian": "Skala dorycka",
+            "aeolian": "Skala eolska (moll naturalny)",
+            "phrygian": "Skala frygijska",
+            "lydian": "Skala lidyjska",
+            "mixolydian": "Skala miksolidyjska",
             "min-pent": "Pentatonika molowa",
             "maj-pent": "Pentatonika durowa",
             "major": "Skala durowa",
@@ -1935,6 +1950,7 @@
             "modeDorian": "Dorycki (Dm7–G7)",
             "modePhrygian": "Frygijski (Em7–Fmaj7)",
             "modeLydian": "Lidyjski (Fmaj7–G6)",
+            "pentThenMode": "Cztery takty graj samą pentatoniką molową, przez kolejne cztery dodaj dwa dźwięki, które robią z niej tryb dorycki. Posłuchaj, co się zmienia.",
             "modeMixolydian": "Miksolidyjski (G7–F)",
             "chordScaleCharacteristic": "Na każdym akordzie zagraj jego dźwięk charakterystyczny ze skali z podpowiedzi.",
             "arpeggiosOnly": "Graj wyłącznie dźwięki akordów (arpeggia) — bez innych dźwięków skali.",
@@ -2097,7 +2113,7 @@
             "pentatonic-scale": {
                 "name": "Skala pentatoniczna",
                 "term": "Pentatonic Scale",
-                "theory": "Pentatonika molowa (1 b3 4 5 b7) to dla większości gitarzystów pierwszy język improwizacji: dobrze brzmi w bluesie, rocku i folku. Pierwszy boks (np. a-moll na progach 5–8) leży wygodnie pod palcami, więc możesz skupić się na frazowaniu, a nie na szukaniu dźwięków. Drugi boks zaczyna się od tercji małej i przedłuża skalę w górę gryfu. Zmieniaj tonację przełącznikiem: kształt zostaje ten sam, przesuwa się tylko po gryfie. Graj z metronomem, w górę i w dół, równo w czasie."
+                "theory": "Pentatonika molowa (1 b3 4 5 b7) to dla większości gitarzystów pierwszy język improwizacji: dobrze brzmi w bluesie, rocku i folku. Pierwszy boks (np. a-moll na progach 5–8) leży wygodnie pod palcami, więc możesz skupić się na frazowaniu, a nie na szukaniu dźwięków. Drugi boks zaczyna się od tercji małej i przedłuża skalę w górę gryfu. Zmieniaj tonację przełącznikiem: kształt zostaje ten sam, przesuwa się tylko po gryfie. Graj z metronomem, w górę i w dół, równo w czasie. Każdy boks składa się z dwóch kształtów, które występują na zmianę: prostokąta (dwie sąsiednie struny, dźwięki co 3 progi) i stosu (trzy sąsiednie struny, co 2 progi); między strunami G i H wszystko przesuwa się o próg. Sposób myślenia pochodzi z lekcji Fret Science „Two Simple Shapes UNLOCK the Pentatonic Scale”."
             },
             "major-scale": {
                 "name": "Skala durowa",
@@ -2117,7 +2133,7 @@
             "modes": {
                 "name": "Tryby",
                 "term": "Modes",
-                "theory": "Tryby to siedem skal, które powstają ze skali durowej, gdy zaczynasz ją od kolejnych stopni: I joński, II dorycki, III frygijski, IV lidyjski, V miksolidyjski, VI eolski, VII lokryjski. W porównaniu ze skalą durową od tego samego dźwięku dorycki ma b3 i b7, frygijski b2 b3 b6 b7, lidyjski #4, miksolidyjski b7, eolski b3 b6 b7, a lokryjski b2 b3 b5 b6 b7. Każdy tryb ma dźwięk charakterystyczny, który odróżnia go od zwykłej skali durowej lub molowej: w doryckim to seksta wielka, we frygijskim b2, w lidyjskim #4, w miksolidyjskim b7. Te dźwięki podkreślasz, gdy chcesz, żeby tryb było słychać."
+                "theory": "Tryby to siedem skal, które powstają ze skali durowej, gdy zaczynasz ją od kolejnych stopni: I joński, II dorycki, III frygijski, IV lidyjski, V miksolidyjski, VI eolski, VII lokryjski. W porównaniu ze skalą durową od tego samego dźwięku dorycki ma b3 i b7, frygijski b2 b3 b6 b7, lidyjski #4, miksolidyjski b7, eolski b3 b6 b7, a lokryjski b2 b3 b5 b6 b7. Każdy tryb ma dźwięk charakterystyczny, który odróżnia go od zwykłej skali durowej lub molowej: w doryckim to seksta wielka, we frygijskim b2, w lidyjskim #4, w miksolidyjskim b7. Te dźwięki podkreślasz, gdy chcesz, żeby tryb było słychać. Praktyczny skrót: tryb to pentatonika od tej samej prymy plus dwa dźwięki (lekcja Fret Science „Stop Memorizing Modes”)."
             },
             "chord-construction": {
                 "name": "Budowa akordów",
@@ -2214,7 +2230,7 @@
             },
             "pentatonic-scale.e1": {
                 "name": "Diagram: pentatonika molowa, boks 1",
-                "desc": "Pierwszy boks pentatoniki molowej (domyślnie a-moll, progi 5–8). Przełącznik zmienia tonację, a kształt przesuwa się po gryfie. Przebieg to cała skala w górę i w dół."
+                "desc": "Pierwszy boks pentatoniki molowej (domyślnie a-moll, progi 5–8). Przełącznik zmienia tonację, a kształt przesuwa się po gryfie. Przebieg to cała skala w górę i w dół. Kolory pokazują budowę boksu: prostokąt (dwie struny, dźwięki co 3 progi) i stos (trzy struny, co 2 progi). Przełącznik „Widok” dodaje dźwięk bluesowy, sekundę albo zaznacza dźwięki do podciągania."
             },
             "pentatonic-scale.e2": {
                 "name": "Diagram: pentatonika molowa, boks 2",
@@ -2412,6 +2428,14 @@
                 "name": "Pętla: sąsiednie boksy",
                 "desc": "Gm7–Cm7: z każdym obiegiem przejdź do sąsiedniego boksu."
             },
+            "modes.e4": {
+                "name": "Diagram: pentatonika + 2 dźwięki = tryb",
+                "desc": "Każdy tryb to pentatonika od tej samej prymy z dwoma dopisanymi dźwiękami. Molowa daje dorycki, eolski i frygijski, durowa — lidyjski, joński i miksolidyjski. Dodatkowe ćwiczenie."
+            },
+            "modes.e5": {
+                "name": "Pętla: pentatonika, potem tryb",
+                "desc": "Jeden akord Dm7 przez osiem taktów: najpierw sama pentatonika, potem tryb dorycki. Dodatkowe ćwiczenie."
+            },
             "modes.e3": {
                 "name": "Pętla: kolory trybów",
                 "desc": "Cztery warianty: dorycki, frygijski, lidyjski i miksolidyjski. W każdym podkreślaj dźwięk charakterystyczny trybu."
@@ -2483,10 +2507,13 @@
             "extra": "Ćwiczenie dodatkowe"
         },
         "supplementary": {
+            "caged": "Otwórz system CAGED",
             "earTraining": "Otwórz trening słuchu",
             "chordQuality": "Otwórz rozpoznawanie akordów"
         },
         "hints": {
+            "pentOnly": "Tylko pentatonika molowa",
+            "dorianFill": "Tryb dorycki: dodaj 2. i 6. stopień",
             "dorianDm7": "Skala D dorycka — celuj w H",
             "phrygianEm": "Skala E frygijska — celuj w F",
             "lydianF": "Skala F lidyjska — celuj w H",

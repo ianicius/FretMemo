@@ -19,6 +19,11 @@ export type ScaleShapeId =
     | "major"
     | "melodic-minor"
     | "harmonic-minor"
+    | "dorian"
+    | "aeolian"
+    | "phrygian"
+    | "lydian"
+    | "mixolydian"
     | "m7-arp"
     | "dom7-arp"
     | "maj7-arp"
@@ -43,11 +48,38 @@ export const SCALE_SHAPES: Record<ScaleShapeId, ScaleShapeDefinition> = {
     major: { id: "major", semitones: [0, 2, 4, 5, 7, 9, 11], degrees: ["1", "2", "3", "4", "5", "6", "7"] },
     "melodic-minor": { id: "melodic-minor", semitones: [0, 2, 3, 5, 7, 9, 11], degrees: ["1", "2", "b3", "4", "5", "6", "7"] },
     "harmonic-minor": { id: "harmonic-minor", semitones: [0, 2, 3, 5, 7, 8, 11], degrees: ["1", "2", "b3", "4", "5", "b6", "7"] },
+    dorian: { id: "dorian", semitones: [0, 2, 3, 5, 7, 9, 10], degrees: ["1", "2", "b3", "4", "5", "6", "b7"] },
+    aeolian: { id: "aeolian", semitones: [0, 2, 3, 5, 7, 8, 10], degrees: ["1", "2", "b3", "4", "5", "b6", "b7"] },
+    phrygian: { id: "phrygian", semitones: [0, 1, 3, 5, 7, 8, 10], degrees: ["1", "b2", "b3", "4", "5", "b6", "b7"] },
+    lydian: { id: "lydian", semitones: [0, 2, 4, 6, 7, 9, 11], degrees: ["1", "2", "3", "#4", "5", "6", "7"] },
+    mixolydian: { id: "mixolydian", semitones: [0, 2, 4, 5, 7, 9, 10], degrees: ["1", "2", "3", "4", "5", "6", "b7"] },
     "m7-arp": { id: "m7-arp", semitones: [0, 3, 7, 10], degrees: ["1", "b3", "5", "b7"] },
     "dom7-arp": { id: "dom7-arp", semitones: [0, 4, 7, 10], degrees: ["1", "3", "5", "b7"] },
     "maj7-arp": { id: "maj7-arp", semitones: [0, 4, 7, 11], degrees: ["1", "3", "5", "7"] },
     "m7b5-arp": { id: "m7b5-arp", semitones: [0, 3, 6, 10], degrees: ["1", "b3", "b5", "b7"] },
 };
+
+/**
+ * Plan C7: every mode except Locrian is a pentatonic from the same root plus
+ * two notes ("major" is Ionian).
+ */
+export const MODE_PENTATONIC: Partial<Record<ScaleShapeId, "min-pent" | "maj-pent">> = {
+    dorian: "min-pent",
+    aeolian: "min-pent",
+    phrygian: "min-pent",
+    lydian: "maj-pent",
+    major: "maj-pent",
+    mixolydian: "maj-pent",
+};
+
+/** Plan C2: the note each diagram view adds to the minor pentatonic. */
+export const PENTATONIC_ADDITIONS = {
+    blues: { semitone: 6, degree: "b5" },
+    hex: { semitone: 2, degree: "2" },
+} as const;
+
+/** Plan C3: minor-pentatonic degrees that are usually bent (towards 3, 5 and 1). */
+export const BEND_DEGREES: readonly string[] = ["b3", "4", "b7"];
 
 /** Semitone offsets of a shape (kept as a named export for tests). */
 export function shapeSemitones(shapeId: ScaleShapeId): number[] {
@@ -113,6 +145,46 @@ export function getScaleShapePositions(
             const degreeIndex = semitones.indexOf(offset);
             if (degreeIndex < 0) continue;
             positions.push({ stringIndex, fret, degreeIndex, isRoot: offset === 0, note });
+        }
+    });
+    return positions;
+}
+
+export type StringShape = "rect" | "stack";
+
+/**
+ * Plan C1: in a pentatonic box every string carries two notes, three frets
+ * apart (rectangle) or two frets apart (stack). Strings with any other
+ * content are left out.
+ */
+export function stringShapes(positions: ShapePosition[]): Map<number, StringShape> {
+    const fretsByString = new Map<number, number[]>();
+    for (const position of positions) {
+        fretsByString.set(position.stringIndex, [...(fretsByString.get(position.stringIndex) ?? []), position.fret]);
+    }
+    const shapes = new Map<number, StringShape>();
+    for (const [stringIndex, frets] of fretsByString) {
+        if (frets.length !== 2) continue;
+        const gap = Math.abs((frets[0] as number) - (frets[1] as number));
+        if (gap === 3) shapes.set(stringIndex, "rect");
+        if (gap === 2) shapes.set(stringIndex, "stack");
+    }
+    return shapes;
+}
+
+/** Positions of one pitch (semitones above the tonic) inside the fret window. */
+export function getPitchPositions(
+    key: string,
+    semitone: number,
+    options: ShapeRenderOptions,
+): Array<{ stringIndex: number; fret: number; note: NoteName }> {
+    const tuning = options.tuning ?? STANDARD_TUNING;
+    const target = (notePitchClass(key) + semitone) % 12;
+    const positions: Array<{ stringIndex: number; fret: number; note: NoteName }> = [];
+    tuning.forEach((openNote, stringIndex) => {
+        for (let fret = Math.max(0, options.fretFrom); fret <= options.fretTo; fret += 1) {
+            const note = getNoteAt(openNote, fret);
+            if (notePitchClass(note) === target) positions.push({ stringIndex, fret, note });
         }
     });
     return positions;

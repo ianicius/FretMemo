@@ -59,6 +59,12 @@ export interface DiagramDrillParams {
     defaultBpm: number;
     /** Full up+down runs required to pass the drill. */
     requiredRuns: number;
+    /** Plan C2/C3: view switch on a minor-pentatonic diagram (blues, hexatonic, bend notes). */
+    pentatonicViews?: boolean;
+    /** Plan C7: colour a mode as "pentatonic + two added notes". */
+    pentatonicFill?: boolean;
+    /** Extra practice that never gates module completion. */
+    nonGating?: boolean;
 }
 
 export interface PracticeLinkParams {
@@ -128,7 +134,7 @@ export interface BackingLoopParams {
 
 /** Theory tool embedded in the module's theory card (plan phase 2). */
 export interface TheoryEmbed {
-    tool: "circle-of-fifths" | "scale-explorer" | "chord-library" | "triad-visualizer";
+    tool: "circle-of-fifths" | "scale-explorer" | "chord-library" | "triad-visualizer" | "caged";
     root?: string;
     scaleType?: string;
 }
@@ -223,13 +229,14 @@ function drillExercise(
     offsetsTo: number,
     defaultBpm: number,
     requiredRuns: number,
+    extra?: Pick<DiagramDrillParams, "pentatonicViews" | "pentatonicFill" | "nonGating">,
 ): ImprovExercise {
     return {
         id: `${moduleId}.${suffix}`,
         engine: "diagram-drill",
         nameKey: `improv.ex.${moduleId}.${suffix}.name`,
         descKey: `improv.ex.${moduleId}.${suffix}.desc`,
-        params: { shapes, offsetsFrom, offsetsTo, defaultBpm, requiredRuns },
+        params: { shapes, offsetsFrom, offsetsTo, defaultBpm, requiredRuns, ...extra },
     };
 }
 
@@ -337,6 +344,7 @@ export const CURRICULUM: ImprovModule[] = [
                 3,
                 70,
                 2,
+                { pentatonicViews: true },
             ),
             drillExercise(
                 "pentatonic-scale",
@@ -346,6 +354,7 @@ export const CURRICULUM: ImprovModule[] = [
                 5,
                 70,
                 2,
+                { pentatonicViews: true },
             ),
             practiceLinkExercise("pentatonic-scale", "e3", "playNotes", [0, 1, 2, 3, 4, 5], 5, 8, {
                 rootNote: "A",
@@ -483,6 +492,39 @@ export const CURRICULUM: ImprovModule[] = [
                       goalKey: "improv.goals.modeCharacteristic" },
                 ],
             }),
+            // Plan C7: each mode as a pentatonic from the same root plus two notes.
+            // Extra (non-gating), so modules completed before it stay completed.
+            drillExercise(
+                "modes",
+                "e4",
+                [
+                    { shapeId: "dorian", defaultKey: "A" },
+                    { shapeId: "aeolian", defaultKey: "A" },
+                    { shapeId: "phrygian", defaultKey: "A" },
+                    { shapeId: "lydian", defaultKey: "C" },
+                    { shapeId: "major", defaultKey: "C" },
+                    { shapeId: "mixolydian", defaultKey: "C" },
+                ],
+                -1,
+                3,
+                70,
+                1,
+                { pentatonicFill: true, nonGating: true },
+            ),
+            // Plan C8: the same chord first with the pentatonic, then with the mode.
+            loopExercise("modes", "e5", {
+                progression: [
+                    { chord: "Dm7", beats: 16, hintKey: "improv.hints.pentOnly" },
+                    { chord: "Dm7", beats: 16, hintKey: "improv.hints.dorianFill" },
+                ],
+                goalKey: "improv.goals.pentThenMode",
+                beatsPerChord: 4,
+                defaultBpm: 80,
+                minBpm: 50,
+                maxBpm: 160,
+                requiredPasses: 2,
+                nonGating: true,
+            }),
         ],
     },
     {
@@ -523,7 +565,10 @@ export const CURRICULUM: ImprovModule[] = [
         order: 10,
         theoryKey: "improv.modules.triads.theory",
         embed: { tool: "triad-visualizer" },
-        supplementary: [{ labelKey: "improv.supplementary.earTraining", href: "/ear-training/chord-quality" }],
+        supplementary: [
+            { labelKey: "improv.supplementary.earTraining", href: "/ear-training/chord-quality" },
+            { labelKey: "improv.supplementary.caged", href: "/theory/caged" },
+        ],
         exercises: [
             loopExercise("triads", "e1", {
                 progression: ["Am", "C", "Em", "D"],
@@ -541,6 +586,8 @@ export const CURRICULUM: ImprovModule[] = [
         id: "arpeggios",
         order: 11,
         theoryKey: "improv.modules.arpeggios.theory",
+        // Plan C9: arpeggios sit inside the CAGED chord shapes.
+        embed: { tool: "caged" },
         supplementary: [{ labelKey: "improv.supplementary.earTraining", href: "/ear-training/chord-quality" }],
         exercises: [
             drillExercise(
