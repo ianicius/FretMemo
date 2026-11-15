@@ -26,7 +26,7 @@ moduł N jest dostępny po zaliczeniu modułu N-1 (albo globalny przełącznik �
 | --- | --- |
 | `src/data/improv/curriculum.ts` | KANONICZNA lista 22 modułów (`CURRICULUM`, `IMPROV_ORDER`): id, order, klucze i18n, ćwiczenia z parametrami silników i progami. Czyste funkcje pomocnicze: `isModuleUnlocked` (też `entranceUnlockCount`), `isModuleComplete` (pomija ćwiczenia `nonGating` — `isNonGating`), `isExercisePassed`, `isExerciseVerified` (próg na samych `verifiedRuns`, A2), `countCompletedModules`, `loopRunKey` (klucz obiegu per wariant), `micLoopPass` (≥3/4 trafień), `practiceLinkPositions`, `QUIZ_PASSED_ATTEMPTS`. |
 | `src/lib/improv/scaleShapes.ts` | Geometria kształtów na gryfie: definicje (`SCALE_SHAPES`: pentatonika molowa i durowa, major, mol melodyczny/harmoniczny, arpeggia `m7-arp`/`dom7-arp`/`maj7-arp`/`m7b5-arp`), `getScaleShapePositions` (wszystkie dźwięki kształtu w oknie progów na każdej strunie; alias `getShapePositions`), `getShapePitchClasses`, `tonicAnchorFret` (próg toniki na niskiej strunie E, poniżej 3. progu +12), `coversAllDegrees`, `isStandardTuning` (sześć strun w stroju standardowym; dodatkowe niskie struny 7/8-strunowej gitary się nie liczą). Czyste funkcje; strój z opcji `tuning` (`ShapeRenderOptions`, domyślnie `STANDARD_TUNING`; `DiagramDrill` podaje strój z ustawień) + `getNoteAt` (bez tonal — arytmetyka chromatyczna). `notePitchClass` (wewnętrzna) obsługuje oba spellingi: ostre przez `NOTES` i bemolowe klucze `ImprovKey` (`Bb/Db/Eb/Gb/Ab` przez `FLAT_NAMES` — pattern z `questions.ts`). |
-| `src/lib/improv/questions.ts` | Generatory pytań E2: seeded mulberry32 (`createRng`), `generateChoiceQuiz` z 12 generatorami (`listChoiceGeneratorIds`: `keySig`, `modes`, `triadBuild`, `chordScaleMajor`, `triadType`, `chordScaleMelodic`, `chordScaleHarmonic`, `tritone`, `secondaryDom`, `borrowed`, `pivot`, `coltrane`). Deterministyczne względem seeda; odpowiedź porównywana na surowych (niezlokalizowanych) stringach. Faza 0 planu: triady stackują 1-3-5 (`degree+3`, test tonal-oracle dla C-dur M m m M M m dim), subV rozwiązuje się do toniki kwintę w dół od dominanty (`subVResolutionTarget`), backdoor zawsze pyta o sekwencję Fm7–Bb7–C, Cmaj7→Ionian w danych, charakterystyki trybów bez prozy. Tryby od własnej prymy (`modeNotesFromRoot`), `tritoneSub`. |
+| `src/lib/improv/questions.ts` | Generatory pytań E2: seeded mulberry32 (`createRng`), `generateChoiceQuiz` z 12 generatorami (`listChoiceGeneratorIds`: `keySig`, `modes`, `triadBuild`, `chordScaleMajor`, `triadType`, `chordScaleMelodic`, `chordScaleHarmonic`, `tritone`, `secondaryDom`, `borrowed`, `pivot`, `coltrane`). Deterministyczne względem seeda; odpowiedź porównywana na surowych (niezlokalizowanych) stringach. Faza 0 planu: triady stackują 1-3-5 (`degree+3`, test tonal-oracle dla C-dur M m m M M m dim), subV rozwiązuje się do toniki kwintę w dół od dominanty (`subVResolutionTarget`), backdoor zawsze pyta o pełną sekwencję iv m7–bVII7–I wylosowanej tonacji (w C: Fm7–Bb7–C), Cmaj7→Ionian w danych, charakterystyki trybów bez prozy. Tryby od własnej prymy (`modeNotesFromRoot`), `tritoneSub`. |
 | `src/lib/improv/chords.ts` | Dane akordowe do E4: `getChordInfo` (tonal `Chord.get`), `getChordMidis` (rosnące MIDI od `baseMidi`), `getChordPitchClasses`, `tonicMidi`; `getChordTonePositions` (B1: pozycje dźwięków akordu w oknie progów ze stopniem `label`, `isRoot`, `isTarget` dla celów mikrofonu). |
 | `src/lib/improv/backingLoop.ts` | `BackingLoopScheduler` — lookahead scheduler pętli akordowej (wstrzykiwany `LoopClock` → testowalny z fake clockiem; warstwy callbacków: `onBeatSchedule` z dokładnym czasem audio, `onChordChange`/`onBeat`/`onLoopEnd` z `delayMs` dla UI i `playTone`). |
 | `src/lib/improv/click.ts` | `MetronomeClicker` — minimalny lookahead scheduler klików (triangle, akcent na 1) prosto do `ctx.destination` (ta sama polityka co `playCountInClicks`); degraduje się do no-op bez AudioContext. |
@@ -37,7 +37,7 @@ moduł N jest dostępny po zaliczeniu modułu N-1 (albo globalny przełącznik �
 | `src/pages/ImprovTraining.tsx` | Dwa widoki na jednym komponencie strony: roadmapa (postęp, switch unlockAll, powtórki — quiz mieszany z generatorów zaliczonych modułów należnych wg `reviewSRS`, test na wejście → `setEntranceUnlockCount`, lista 22 ze statusami) i szczegół modułu (TheoryCard + ćwiczenia wg silnika: `ChoiceQuiz`, `DiagramDrill`, `BackingLoopExercise`, `PracticeLinkExercise`; blokada/404 jak w `EarTraining`). |
 | `src/components/improv/TheoryCard.tsx` | Karta teorii (tekst z `improv.modules.<id>.theory`) + opcjonalne osadzenie narzędzia teorii (`TheoryEmbed`: `CircleOfFifths` / `ScaleExplorer` / `ChordLibrary` / `TriadVisualizer`, gryf z `IMPROV_FRETBOARD_ROWS`). |
 | `src/components/improv/ExerciseFrame.tsx` | Wspólna rama ćwiczenia: badge silnika, badge progu, badge „Zaliczone”, a przy zaliczonym ćwiczeniu z propem `unverified` (przekazuje go tylko `BackingLoopExercise`) bursztynowa odznaka „Niezweryfikowane” z ikoną `MicOff` (`improv.status.unverified`, podpowiedź `improv.status.unverifiedHint`); tytuł + opis; +50 XP z toastem przy przejściu niezaliczone→zaliczone; `ScoreStrip`. |
-| `src/components/improv/ChoiceQuiz.tsx` | E2 `choice-quiz` (1 z 4, feedback + podpowiedź, auto-advance, podsumowanie). |
+| `src/components/improv/ChoiceQuiz.tsx` | E2 `choice-quiz` (1 poprawna z 2–4 opcji, feedback + podpowiedź, auto-advance, podsumowanie). |
 | `src/components/improv/DiagramDrill.tsx` | E3 `diagram-drill`: diagram kształtu z etykietami stopni (pryma `emphasis: "strong"`), wybór kształtu/tonacji, okno progów od `tonicAnchorFret`, BPM slider, metronom (`MetronomeClicker`), root przy starcie i przyciskiem; przycisk przebiegu aktywny dopiero po tylu uderzeniach metronomu, ile nut ma przebieg góra–dół. A3: `leftHanded` (`full.instrument.leftHanded`) i `tuning` (`quick.tuning` przez `normalizeTuning`) z `useSettingsStore` idą do `Fretboard` i `getShapePositions`; gdy `isStandardTuning` zwraca false, pod gryfem `improv.drill.tuningNotice`. |
 | `src/components/improv/PracticeLinkExercise.tsx` | Silnik `practice-link` (moduły 1 i 5): otwiera `/practice` ze stanem trasy (mode + constraints), pokazuje pokrycie okna z `useProgressStore.positionStats` (`practiceLinkPositions`; pozycje spełniające kryterium na zielono), po spełnieniu kryteriów przycisk zapisu (`recordPracticePass`); przy `nonGating` zamiast niego odznaka `improv.practiceLink.extra`. A3: `leftHanded`/`tuning` z `useSettingsStore` idą do `Fretboard`; komunikatu o stroju nie ma (`tuningNotice` pokazuje tylko `DiagramDrill`). |
 | `src/components/improv/BackingLoopExercise.tsx` | E4 `backing-improv`: pętla progresji blokami akordowymi (`BackingLoopScheduler`, `playChord`), opcjonalny bas (`improv.loop.bass`), prompter „teraz/następny” z podpowiedzią taktu (`hintKey` — tak działają warianty B4 „takt gry, takt pauzy” i „pytanie–odpowiedź”; takty z `barCue` dostają etykietę-pigułkę, takt pauzy dodatkowo wygaszony prompter i gryf, sekcja 8 B4) i kropkami uderzeń, cel ćwiczenia, odznaka „dodatkowe” przy `nonGating`. Selektor wariantu (obiegi liczone osobno per wariant przez `loopRunKey`; zaliczenie wymaga każdego wariantu). B2: selektor tonacji `improv.loop.key` (12 tonacji z `keyChoices`; akordy i cele mikrofonu przesuwane przez `transposeProgression`/`transposeTargets`, po zmianie tonacji `improv.loop.transposedNotice` — cel i podpowiedzi dotyczą oryginalnej tonacji); zmiana wariantu lub tonacji zatrzymuje pętlę. B1: gryf z dźwiękami bieżącego akordu (`getChordTonePositions`, progi 1–12, pryma `emphasis: "strong"`, cele mikrofonu `status: "correct"`, `leftHanded`/`tuning` z `useSettingsStore`), przełącznik `improv.loop.fretboardToggle` (domyślnie włączony), legenda `improv.loop.fretboardLegend`. Weryfikacja mikrofonem (`usePitchDetector`; obieg z `micLoopPass` → `recordLoopPass(…, true)`) i B3 `LoopHitReport` po każdym obiegu z mikrofonem; ręczne oznaczenie obiegu → `recordLoopPass(…, false)` (niezweryfikowany). A2: `unverified` do `ExerciseFrame` (zaliczone, ale nie `isExerciseVerified`). B5: przełącznik `improv.loop.rampToggle` (`rampBpmAfterPass`), BPM slider. |
@@ -62,11 +62,12 @@ Silniki i parametry:
   dźwięki akordu w oknie na 6 strunach) — `m7/dom7/maj7/m7b5-arp`. Próg: liczba pełnych przebiegów (góra+dół).
 - **E4 `backing-improv`** — `BackingLoopParams { progression (symbole akordów), goalKey,
   beatsPerChord, defaultBpm/minBpm/maxBpm, requiredPasses, variants? }`. `variants` (id, labelKey,
-  progression, goalKey) obsługuje przełączniki typu „normal vs subV" (moduł 15) i „tercja vs kwinta"
-  (moduł 12 — jako dwa osobne ćwiczenia). Próg: liczba udanych obiegów.
+  progression, goalKey) obsługuje przełączniki typu „normal vs subV" (moduł 15) i „pryma / tercja / kwinta / septyma"
+  (moduł 12 — warianty `root`/`third`/`fifth`/`seventh` ćwiczenia `target-chord-tones.e1`). Próg: liczba udanych obiegów.
 
-Moduł jest zaliczony (`completed`), gdy **każde** jego ćwiczenie osiągnie własny próg
-(quiz: `exerciseRuns[exerciseId] ≥ QUIZ_PASSED_ATTEMPTS` — 2 zaliczone podejścia; drill/loop: `exerciseRuns[exerciseId] ≥ requiredRuns/requiredPasses`;
+Moduł jest zaliczony (`completed`), gdy **każde** jego ćwiczenie poza `nonGating` osiągnie własny próg
+(quiz: `exerciseRuns[exerciseId] ≥ QUIZ_PASSED_ATTEMPTS` — 2 zaliczone podejścia; drill/loop: `exerciseRuns[exerciseId] ≥ requiredRuns/requiredPasses`,
+  pętla z wariantami — każdy wariant pod kluczem `loopRunKey`;
   practice-link: `≥ 1` po spełnieniu kryteriów z `useProgressStore.positionStats`). Obiegi z włączoną weryfikacją mikrofonem
   zapisują się automatycznie przy ≥3/4 trafień (`micLoopPass`). Moduł 6 (faza 0.2): pięć boksów JEDNEJ pentatoniki (min-pent w G, okna 3–6/5–8/7–11/10–13/12–15); nazwy boksov (major/dorian/phrygian/mixo pent) pochodzą od stopnia, od którego boks się zaczyna.
 
@@ -88,13 +89,12 @@ Moduł jest zaliczony (`completed`), gdy **każde** jego ćwiczenie osiągnie w�
 - **Biblioteka `/train`**: brak karty — `Library.tsx` nie zawiera sekcji `improv` (`TrainSectionKey`,
   `DEFAULT_SECTIONS_OPEN`, `openImprov` i importy `useImprovStore`/`countCompletedModules` usunięte
   w rundzie 2); moduł jest osiągalny wyłącznie z nawigacji głównej. Klucze locale
-  `library.improv`, `library.improvSummary`, `improv.libraryCard.*` pozostały w plikach tłumaczeń
-  (nierozwiązane, bez wpływu na UI).
+  `library.improv`, `library.improvSummary`, `improv.libraryCard.*` zostały usunięte w rundzie 7 (patrz i18n).
 - **E4 pętle** (faza 3 planu): pętle w modułach 3, 4, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22
   (spoza pętli pozostają 1, 2, 5, 8 — moduły wiedzy); wpisy progresji niosą opcjonalny `hintKey` (podpowiedź
-  pod akordem w prompterze, np. „D dorian — celuj w B”) i `beats` (Am7 trzymane 4 takty w module 3); moduł 12
+  pod akordem w prompterze, np. „Skala D dorycka — celuj w H”) i `beats` (Am7 trzymane 4 takty w module 3); moduł 12
   ma drabinkę pryma→tercja→kwinta→septyma + wolną improwizację, moduł 22 pełną 16-taktową formę Giant Steps
-  (2 uderzenia/akord, od 60 BPM) z trzema poziomami trudności.
+  (2 lub 4 uderzenia na akord, od 60 BPM) z trzema poziomami trudności.
 - **Audio**: E3 gra root przez `playTone` (sampler/synteza → voice bus silnika dźwięku);
   kliki metronomu (`MetronomeClicker`) w E3 idą bezpośrednio do `ctx.destination`; E4 gra
   bloki akordowe przez `playChord` (strum 55 ms, bez klika) — zgodnie z polityką z
@@ -102,7 +102,7 @@ Moduł jest zaliczony (`completed`), gdy **każde** jego ćwiczenie osiągnie w�
 - **Theory embed** (faza 2 planu): `TheoryEmbed { tool, root?, scaleType? }` w module — `TheoryCard` renderuje
   `CircleOfFifths` / `ScaleExplorer` / `ChordLibrary` / `TriadVisualizer` z propsami początkowymi (dodane opcjonalne
   `initialRoot`/`initialScaleType`/`initialKey`; rejestr `TheoryTool` przyjmuje komponenty z opcjonalnymi propsami).
-  Moduły 7/10/11 mają dodatkowo linki do `/ear-training` (`supplementary`, bez wpływu na zaliczenie).
+  Moduły 3/4/7/10/11/18/20 mają dodatkowo linki do `/ear-training` (`supplementary`, bez wpływu na zaliczenie).
 - **Fretboard**: reuse `src/components/fretboard/Fretboard.tsx` (props `activeNotes: NoteStatus[]`,
   `onNoteClick`, `fitContainer`) — plik niezmieniony. Diagramy skal oznaczają dźwięki przez
   `status: "active"` + `label` (stopień 1/b3/…) + `emphasis: "strong"` dla roota.
@@ -115,17 +115,24 @@ Moduł jest zaliczony (`completed`), gdy **każde** jego ćwiczenie osiągnie w�
   osadzenie w `TheoryCard`) dostaje klasę `IMPROV_FRETBOARD_ROWS` (`src/lib/improv/display.ts`):
   `.fret-cell` ma `min-height: clamp(1.75rem, 5.6vw, 2.75rem)`, czyli rząd rośnie razem z kropką
   (`clamp(16px, 4.6vw, 34px)`, ×1.12 aktywna) — przy 1280 px rząd 44 px na kropkę 38 px, bez nachodzenia
-  znaczników na sąsiednich strunach; na telefonie rząd zostaje 28 px. `src/components/fretboard/**` bez zmian.
+  znaczników na sąsiednich strunach; na telefonie rząd zostaje 28 px.
+  Zmiany współdzielone (run improv-dev-run1, działają w całej aplikacji, nie tylko w improvie):
+  `src/components/fretboard/NoteDot.tsx` (klasy `note-dot--active-strong`/`note-dot--correct-strong` dla
+  `emphasis: "strong"` przy statusie `active`/`correct`) i reguły `.note-dot--active-strong`/`.note-dot--correct-strong`
+  w `src/index.css` zmieniają wygląd każdej kropki z `emphasis: "strong"` — poza improvem pryma w `ScaleExplorer`,
+  `CagedVisualizer`, `TriadVisualizer`, `IntervalFretboardTrainer` i aktywny palec w `Technique` (wszystkie ze statusem
+  `active`, więc pełne bursztynowe wypełnienie); `src/components/ui/slider.tsx` ma w jasnym motywie tor `bg-stone-300`
+  (w ciemnym nadal `bg-secondary`) w każdym `Slider` aplikacji. `Fretboard.tsx` bez zmian.
 - **i18n**: top-level namespace `improv` w `src/locales/{en,pl}/translation.json` (505 liści każdy;
   parzystość testowana w `src/lib/improv/__tests__/improvI18nParity.test.ts`). Nazwy modułów: PL +
   termin EN (`.name` / `.term`); teoria 3–6 zdań PL z terminami EN (EN pełne tłumaczenie).
   Od rundy 2 dodatkowo `nav.improv` („Improv") w obu locale; klucze `library.improv` /
-  `library.improvSummary` / `improv.libraryCard.*` pozostały w plikach (nieużywane po usunięciu
-  karty z biblioteki). Runda 2 poprawiła też literówkę „przyuya" → „przykluczowe" (8 wystąpień
+  `library.improvSummary` / `improv.libraryCard.*` pozostały wtedy w plikach (nieużywane po usunięciu
+  karty z biblioteki; usunięte w rundzie 7). Runda 2 poprawiła też literówkę „przyuya" → „przykluczowe" (8 wystąpień
   PL: quiz keySig, nazwa i teoria modułu `key-signatures`, opisy ćwiczeń). Runda 3: klucze
   `improv.drill.threshold`, `improv.q.keySig.countToKey` i `improv.q.keySig.hintCount` używają
-  form liczby mnogiej i18next zamiast „(s)" (EN `_one`/`_other`, PL `_one`/`_few`/`_many`/`_other`
-  — `drill.threshold` interpoluje `{{count}}`, wywołanie w `DiagramDrill.tsx` przekazuje
+  form liczby mnogiej i18next zamiast „(s)" (w obu locale `_one`/`_few`/`_many`/`_other` — parzystość liści;
+  EN korzysta tylko z `_one`/`_other` — `drill.threshold` interpoluje `{{count}}`, wywołanie w `DiagramDrill.tsx` przekazuje
   `{ count }`), a nagłówek widoku modułu renderuje termin EN (`.term`) tylko wtedy, gdy różni
   się od nazwy (w EN ukryty dla wszystkich 22 modułów, w PL dla `giant-steps`); od rundy 6 ta
   sama reguła obowiązuje wiersze roadmapy. Runda 6: treść pytań/podpowiedzi E2 interpoluje
@@ -157,7 +164,7 @@ Moduł jest zaliczony (`completed`), gdy **każde** jego ćwiczenie osiągnie w�
 | `src/lib/improv/__tests__/backingLoop.test.ts` | kolejność akordów/beatów na fake clocku (`vi.useFakeTimers` + kontrolowany `now()`), `onLoopEnd` po pełnej progresji z zawijaniem pętli, `setBpm`, `stop()`. |
 | `src/stores/__tests__/useImprovStore.test.ts` | plan fazy 1: quiz attempt liczony tylko przy `correct ≥ requiredCorrect`, próg 2 podejść, migracja legacy `quizBest`; A2: obieg z przycisku tylko w `exerciseRuns`, z mikrofonem w obu licznikach, ćwiczenie zaliczone samymi samoocenianymi obiegami jest niezweryfikowane, stan bez `verifiedRuns` migruje jako niezweryfikowany. |
 | `src/lib/improv/__tests__/improvI18nParity.test.ts` | parzystość liści `improv` PL/EN, `improv.modules` ≡ `IMPROV_ORDER`, `improv.ex` ≡ id ćwiczeń, skan statycznych `t("improv…")` w źródłach modułu, klucze celów/etykiet/podpowiedzi wszystkich pętli w obu językach. |
-| `src/lib/improv/__tests__/display.test.ts` | `localizePromptValues` (EN bez zmian, PL notacja na polach notowych i w listach, pola nienotowe i liczby bez zmian), `localizeAnswer` (tryby, skale macierzyste, nuty w odpowiedziach), każdy akord pętli kursu gra ≥3 dźwięki (`getChordMidis`); `barCue` (tylko `improv.hints.barRest` → `rest`, inne podpowiedzi i brak podpowiedzi → `null`; w kursie takty pauzy mają tylko warianty play/rest, a znaczniki taktów tylko `pentatonic-scale.e6` i `target-chord-tones.e4`). |
+| `src/lib/improv/__tests__/display.test.ts` | `localizePromptValues` (EN: nuty i etykieta spoza `improv.term` niezmienione, PL notacja na polach notowych i w listach, pola nienotowe i liczby bez zmian), `localizeAnswer` (tryby, skale macierzyste, nuty w odpowiedziach), każdy akord pętli kursu gra ≥3 dźwięki (`getChordMidis`); `barCue` (mapowanie z `display.ts`: `improv.hints.barPlay` → `play`, `barRest` → `rest`, `barQuestion1`/`barQuestion2` → `call`, `barAnswer1`/`barAnswer2` → `answer`, inne podpowiedzi i brak podpowiedzi → `null`; test sprawdza wprost `barRest`, `barPlay`, `barQuestion2`, `barAnswer1`, `dorianDm7` → `null` i brak podpowiedzi; w kursie takty pauzy są w progresji bazowej i wariancie `play-rest`, nie w `call-response`, a znaczniki taktów mają tylko `pentatonic-scale.e6` i `target-chord-tones.e4`). |
 | `src/lib/improv/__tests__/loopTools.test.ts` | B2: wszystkie pętle kursu × 11 przesunięć zachowują interwały między prymami akordów, rodzaj akordu i interwał cel–pryma; B3 raport; B5 rampa. |
 | `src/lib/improv/__tests__/chords.test.ts` | B1: pozycje dźwięków akordu = dźwięki akordu z `tonal`, pryma i cele oznaczone, stopnie (1, b3, b5 …). |
 | `src/components/improv/__tests__/LoopHitReport.test.tsx` | B3: render listy trafień (EN i PL, zapis H/B). |
