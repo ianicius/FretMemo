@@ -281,6 +281,12 @@ Moduł jest zaliczony (`completed`), gdy **każde** jego ćwiczenie poza `nonGat
 - **Sekcja „Więcej ćwiczeń” (2026-11-15).** Widok modułu (`ModuleView` w `src/pages/ImprovTraining.tsx`)
   pokazuje najpierw ćwiczenia wymagane, a ćwiczenia dodatkowe (`isNonGating`) w zwiniętym elemencie
   `<details>` z licznikiem (`improv.module.moreExercises`). Kolejność w `CURRICULUM` się nie zmienia.
+- **Etap E planu rozwoju (2026-11-16): E4.** `src/lib/improv/chordScales.ts` (`songScales`) szacuje tonację
+  durową utworu z akordów osi czasu (`buildChordTimeline`) i dla każdego akordu podaje skalę: akord z tonacji
+  dostaje tryb swojego stopnia, pozostałe domyślny tryb dla swojego rodzaju (m7 dorycki, 7 miksolidyjski,
+  m7b5 lokryjski, dim zmniejszona, aug całotonowa, m(maj7) mol melodyczny). `ChordPrompter` w `ScoreViewer`
+  pokazuje oszacowaną tonację i skalę pod bieżącym akordem, a gdy akordów nie da się odczytać, wyjaśnienie
+  zamiast promptera. Utwory molowe są czytane jako tonacja równoległa durowa (i = eolski).
 - **Etap D planu rozwoju (2026-11-16): D2, D3.** `src/data/improv/licks.ts` ma 10 zagrywek (moduły 3, 6, 11,
   12) zapisanych jako struna, próg i długość w ósemkach, w stroju standardowym. Każda podaje skalę albo akord,
   z którego pochodzą jej dźwięki, i opcjonalnie akord, na którym ląduje (`licks.test.ts` to sprawdza).

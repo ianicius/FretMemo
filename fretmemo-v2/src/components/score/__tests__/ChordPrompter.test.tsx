@@ -14,11 +14,15 @@ const TIMELINE = [
 afterEach(() => cleanup());
 
 describe("ChordPrompter", () => {
-    it("hides itself when the timeline has no chords", () => {
-        const { container } = render(
-            <ChordPrompter timeline={null} currentBar={null} />,
-        );
-        expect(container).toBeEmptyDOMElement();
+    it("explains that it is unavailable when the timeline has no chords", () => {
+        render(<ChordPrompter timeline={null} currentBar={null} />);
+        expect(screen.getByText(/no chords could be read/)).toBeInTheDocument();
+    });
+
+    it("shows the estimated key and a scale for the current chord (plan E4)", () => {
+        render(<ChordPrompter timeline={TIMELINE} currentBar={2} />);
+        expect(screen.getByText("Song key (estimated): C major")).toBeInTheDocument();
+        expect(screen.getByText("Scale: A Aeolian")).toBeInTheDocument();
     });
 
     it("hides itself when the cursor has not entered the song yet", () => {

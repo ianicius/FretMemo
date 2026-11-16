@@ -490,6 +490,9 @@
             "micScore": "Score with mic"
         },
         "prompter": {
+            "scale": "Scale: {{root}} {{mode}}",
+            "key": "Song key (estimated): {{key}} major",
+            "unavailable": "The chord and scale prompter is unavailable: no chords could be read from this song. It works when the file has chord symbols or when the first track plays chords in its bars.",
             "current": "Current",
             "next": "Next",
             "currentChordAria": "Current chord"
@@ -2764,6 +2767,8 @@
             "disabledHint": "Available after you pass your first module."
         },
         "term": {
+            "Diminished": "diminished (whole–half)",
+            "Whole Tone": "whole tone",
             "major": "major",
             "minor": "minor",
             "diminished": "diminished",

@@ -445,6 +445,9 @@
             "micScore": "Oceniaj z mikrofonu"
         },
         "prompter": {
+            "scale": "Skala: {{root}} {{mode}}",
+            "key": "Tonacja utworu (oszacowana): {{key}}-dur",
+            "unavailable": "Prompter akordów i skal jest niedostępny: w tym utworze nie udało się odczytać akordów. Działa, gdy plik ma oznaczenia akordów albo gdy w taktach pierwszej ścieżki grane są akordy.",
             "current": "Teraz",
             "next": "Potem",
             "currentChordAria": "Bieżący akord"
@@ -2778,6 +2781,8 @@
             "disabledHint": "Dostępna po zaliczeniu pierwszego modułu."
         },
         "term": {
+            "Diminished": "zmniejszona (cały ton–półton)",
+            "Whole Tone": "całotonowa",
             "major": "durowy",
             "minor": "molowy",
             "diminished": "zmniejszony",

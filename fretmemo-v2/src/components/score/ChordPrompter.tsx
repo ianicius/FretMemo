@@ -1,6 +1,8 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import type { ChordTimelineEntry } from "@/lib/chords";
+import { songScales } from "@/lib/improv/chordScales";
+import { localizeAnswer, localizeToken } from "@/lib/improv/display";
 
 const UPCOMING_COUNT = 3;
 
@@ -13,10 +15,16 @@ interface ChordPrompterProps {
 
 /**
  * Chord prompter strip: the chord under the playback cursor (large, announced
- * politely) plus the next few chords. Renders nothing for chord-less songs.
+ * politely) with a scale to improvise over it (plan E4), plus the next few
+ * chords. For chord-less songs it explains why there is no prompter.
  */
 export function ChordPrompter({ timeline, currentBar }: ChordPrompterProps) {
     const { t } = useTranslation();
+
+    const scales = useMemo(
+        () => (timeline ? songScales(timeline.flatMap((entry) => (entry ? [entry.name] : []))) : null),
+        [timeline],
+    );
 
     const view = useMemo(() => {
         if (!timeline || currentBar === null || currentBar < 0) {
@@ -36,12 +44,19 @@ export function ChordPrompter({ timeline, currentBar }: ChordPrompterProps) {
         return { current, upcoming };
     }, [timeline, currentBar]);
 
+    if (timeline === null) {
+        return <p className="text-xs text-muted-foreground">{t("scores.prompter.unavailable")}</p>;
+    }
     if (view === null) {
         return null;
     }
+    const scale = view.current ? scales?.scaleFor(view.current.name) : null;
 
     return (
         <div className="space-y-2 rounded-lg border border-border/50 p-3">
+            {scales?.key && (
+                <p className="text-xs text-muted-foreground">{t("scores.prompter.key", { key: localizeToken(scales.key) })}</p>
+            )}
             <div className="flex items-end gap-3">
                 <div className="min-w-20">
                     <p className="text-[10px] font-bold tracking-[0.2em] text-muted-foreground uppercase">
@@ -54,6 +69,11 @@ export function ChordPrompter({ timeline, currentBar }: ChordPrompterProps) {
                     >
                         {view.current ? view.current.name : "—"}
                     </p>
+                    {scale && (
+                        <p className="text-xs text-muted-foreground">
+                            {t("scores.prompter.scale", { root: localizeToken(scale.root), mode: localizeAnswer(scale.mode) })}
+                        </p>
+                    )}
                 </div>
                 {view.upcoming.length > 0 && (
                     <div className="ml-auto flex items-end gap-2">
