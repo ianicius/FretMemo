@@ -160,7 +160,7 @@ describe("improv curriculum", () => {
 
     it("covers all four engine types across the curriculum", () => {
         const engines = new Set(CURRICULUM.flatMap((module) => module.exercises.map((exercise) => exercise.engine)));
-        expect([...engines].sort()).toEqual(["backing-improv", "choice-quiz", "diagram-drill", "practice-link"].sort());
+        expect([...engines].sort()).toEqual(["backing-improv", "choice-quiz", "diagram-drill", "lick", "practice-link"].sort());
     });
 
     it("unlocks modules sequentially and honors unlockAll", () => {
@@ -532,7 +532,8 @@ describe("plan stage C: building, diagonal and one-string views (C4–C6)", () =
 
     it("the C4–C6 exercises are extras", () => {
         for (const suffix of ["e7", "e8", "e9"]) expect(drillParams(`pentatonic-positions.${suffix}`).nonGating, suffix).toBe(true);
-        expect(module6().exercises).toHaveLength(10);
+        // 10 drills and loops, plus the D2 licks.
+        expect(module6().exercises).toHaveLength(11);
     });
 });
 

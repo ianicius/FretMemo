@@ -20,6 +20,7 @@ export const ENGINE_LABEL_KEYS: Record<ImprovEngineType, string> = {
     "choice-quiz": "improv.engine.choiceQuiz",
     "diagram-drill": "improv.engine.diagramDrill",
     "backing-improv": "improv.engine.backingLoop",
+    lick: "improv.engine.lick",
 };
 
 /** Per-bar cue of the phrasing loops (plan B4): play/rest bars and the 2+2 question–answer bars. */

@@ -27,6 +27,7 @@ import { BuildScaleDrill } from "@/components/improv/BuildScaleDrill";
 import type { DiagramDrillParams, ImprovExercise } from "@/data/improv/curriculum";
 import { BackingLoopExercise } from "@/components/improv/BackingLoopExercise";
 import { PracticeLinkExercise } from "@/components/improv/PracticeLinkExercise";
+import { LickExercise } from "@/components/improv/LickExercise";
 import { CURRICULUM, REVIEW_ID, STANDARDS, STANDARDS_ID, countCompletedModules, dailySession, passedQuizGenerators, reviewQuiz, getImprovModule, isModuleUnlocked, isModuleComplete, isNonGating } from "@/data/improv/curriculum";
 import type { ChoiceGeneratorId } from "@/lib/improv/questions";
 import { useImprovStore } from "@/stores/useImprovStore";
@@ -301,6 +302,8 @@ function renderImprovExercise(moduleId: string, exercise: ImprovExercise) {
             return <BackingLoopExercise key={exercise.id} moduleId={moduleId} exercise={exercise} />;
         case "practice-link":
             return <PracticeLinkExercise key={exercise.id} moduleId={moduleId} exercise={exercise} />;
+        case "lick":
+            return <LickExercise key={exercise.id} moduleId={moduleId} exercise={exercise} />;
         default:
             return null;
     }

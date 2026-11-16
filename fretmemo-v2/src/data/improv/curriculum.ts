@@ -20,7 +20,7 @@ import type { PracticeMode, ScaleType } from "@/stores/useGameStore";
 
 /* ─────────── Engine parameter types ─────────── */
 
-export type ImprovEngineType = "choice-quiz" | "diagram-drill" | "backing-improv" | "practice-link";
+export type ImprovEngineType = "choice-quiz" | "diagram-drill" | "backing-improv" | "practice-link" | "lick";
 
 /** Tonic for shapes/keys: sharp spellings plus the flat keys the curriculum needs. */
 export type ImprovKey = NoteName | "Bb" | "Db" | "Eb" | "Gb" | "Ab";
@@ -160,7 +160,15 @@ export type ImprovExerciseParams =
     | ChoiceQuizParams
     | DiagramDrillParams
     | BackingLoopParams
-    | PracticeLinkParams;
+    | PracticeLinkParams
+    | LickParams;
+
+/** Plan D2: licks from `licks.ts`; each one needs `requiredRuns` "played it" marks. Extra practice. */
+export interface LickParams {
+    lickIds: string[];
+    requiredRuns: number;
+    nonGating: true;
+}
 
 export interface ImprovExercise {
     /** Stable id: "<moduleId>.<eN>" (used as the persist key). */
@@ -187,6 +195,21 @@ export interface ImprovModule {
 
 const PENTATONIC_KEYS: ImprovKey[] = ["C", "A", "D", "E", "G"];
 const SCALE_KEYS: ImprovKey[] = ["A", "C", "D", "E", "G"];
+
+/** Plan D3: a loop whose prompter says in which bar to play a lick and where to answer it. */
+function lickLoop(goal: string, progression: ProgressionEntry[]): BackingLoopParams {
+    return { ...EXTRA_LOOP, progression, goalKey: `improv.goals.${goal}` };
+}
+
+function lickExercise(moduleId: string, lickIds: string[]): ImprovExercise {
+    return {
+        id: `${moduleId}.licks`,
+        engine: "lick",
+        nameKey: `improv.ex.${moduleId}.licks.name`,
+        descKey: `improv.ex.${moduleId}.licks.desc`,
+        params: { lickIds, requiredRuns: 3, nonGating: true },
+    };
+}
 
 function practiceLinkExercise(
     moduleId: string,
@@ -459,6 +482,13 @@ export const CURRICULUM: ImprovModule[] = [
             }),
             // Plan D6.
             loopExercise("pentatonic-scale", "e8", bluesPentatonicLoop("A7", "D7", "E7")),
+            lickExercise("pentatonic-scale", ["pent3Descent", "pent3Answer", "pent3Blue"]),
+            loopExercise("pentatonic-scale", "e9", lickLoop("lickLoop3", [
+                { chord: "Am7", hintKey: "improv.hints.lickPent3Descent" },
+                { chord: "Am7", hintKey: "improv.hints.lickOwn" },
+                { chord: "Dm7", hintKey: "improv.hints.lickPent3Blue" },
+                { chord: "Em7", hintKey: "improv.hints.lickOwn" },
+            ])),
         ],
     },
     {
@@ -540,6 +570,7 @@ export const CURRICULUM: ImprovModule[] = [
             drillExercise("pentatonic-positions", "e9", [{ shapeId: "min-pent", defaultKey: "G" }], 0, 12, 70, 6, { buildStarts: BUILD_STARTS, nonGating: true }),
             drillExercise("pentatonic-positions", "e7", [{ shapeId: "min-pent", defaultKey: "G" }], 0, 8, 70, 1, { diagonal: true, nonGating: true }),
             drillExercise("pentatonic-positions", "e8", [{ shapeId: "min-pent", defaultKey: "G" }], -3, 9, 70, 1, { onlyString: 2, nonGating: true }),
+            lickExercise("pentatonic-positions", ["pos6Climb", "pos6Slide"]),
         ],
     },
     {
@@ -736,6 +767,7 @@ export const CURRICULUM: ImprovModule[] = [
                 maxBpm: 160,
                 requiredPasses: 2,
             }),
+            lickExercise("arpeggios", ["arp11Am7", "arp11Cmaj7", "arp11TwoFiveOne"]),
         ],
     },
     {
@@ -822,6 +854,13 @@ export const CURRICULUM: ImprovModule[] = [
                     { chord: "D", pitchClasses: ["D"] },
                 ]),
             }),
+            lickExercise("target-chord-tones", ["tgt12Am", "tgt12C"]),
+            loopExercise("target-chord-tones", "e6", lickLoop("lickLoop12", [
+                { chord: "Am", hintKey: "improv.hints.lickTgt12Am" },
+                { chord: "C", hintKey: "improv.hints.lickTgt12C" },
+                { chord: "Em", hintKey: "improv.hints.lickOwn" },
+                { chord: "D", hintKey: "improv.hints.lickOwn" },
+            ])),
         ],
     },
     {
@@ -1287,6 +1326,10 @@ export function isExercisePassed(
         case "practice-link": {
             // Recorded once the useProgressStore criteria are met (plan phase 2).
             return (progress.exerciseRuns[exercise.id] ?? 0) >= 1;
+        }
+        case "lick": {
+            const params = exercise.params as LickParams;
+            return params.lickIds.every((id) => (progress.exerciseRuns[loopRunKey(exercise.id, id)] ?? 0) >= params.requiredRuns);
         }
         default:
             return false;

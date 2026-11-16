@@ -1822,6 +1822,7 @@
             "supplementaryHint": "Extra tools that do not affect module completion."
         },
         "engine": {
+            "lick": "Lick",
             "choiceQuiz": "Quiz",
             "diagramDrill": "Diagram with metronome",
             "backingLoop": "Backing loop",
@@ -1962,6 +1963,8 @@
             "m7b5-arp": "m7b5 arpeggio"
         },
         "goals": {
+            "lickLoop3": "In bars 1 and 3 play the box 1 licks, in bars 2 and 4 answer with your own phrase.",
+            "lickLoop12": "Over Am and C play the licks that land on the third; over Em and D land on the third with your own phrase.",
             "stdJazzBlues": "A 12-bar blues with added ii–Vs. The blues scale of the key holds it together; at the changes aim for the thirds and sevenths of the chords.",
             "stdJazzBluesLabel": "Jazz blues",
             "stdMinorBlues": "The minor pentatonic of the key fits the whole form. Over the two dominants in bars 9–10 aim for chord tones.",
@@ -2273,6 +2276,30 @@
             }
         },
         "ex": {
+            "pentatonic-scale.licks": {
+                "name": "Licks in box 1",
+                "desc": "Three short phrases from the first pentatonic box. Listen, play them a few times, then use them over the loop."
+            },
+            "pentatonic-positions.licks": {
+                "name": "Licks across boxes",
+                "desc": "Two phrases that move from box to box and along one string."
+            },
+            "arpeggios.licks": {
+                "name": "Arpeggio licks",
+                "desc": "Phrases built from chord tones only, including a whole ii–V–I."
+            },
+            "target-chord-tones.licks": {
+                "name": "Licks landing on the third",
+                "desc": "Two pentatonic phrases that end on the third of the chord."
+            },
+            "pentatonic-scale.e9": {
+                "name": "Loop: licks in their bars",
+                "desc": "The prompter says in which bar to play a lick and in which to answer your own way."
+            },
+            "target-chord-tones.e6": {
+                "name": "Loop: licks on the third",
+                "desc": "Two licks from this module in their bars, then two bars for your own landings."
+            },
             "standards.e1": {
                 "name": "Loop: progressions from standards",
                 "desc": "Five progressions from the real repertoire. Pick one, slow the tempo down and play what the modules taught you. This section blocks nothing."
@@ -2614,6 +2641,11 @@
             "chordQuality": "Open chord-quality trainer"
         },
         "hints": {
+            "lickPent3Descent": "Lick: down through the box",
+            "lickPent3Blue": "Lick: with the blue note",
+            "lickTgt12Am": "Lick: landing on C",
+            "lickTgt12C": "Lick: landing on E",
+            "lickOwn": "Your answer",
             "pentOnly": "Minor pentatonic only",
             "dorianFill": "Dorian: add the 2nd and the 6th",
             "bluesMajorPent": "Major pentatonic",
@@ -2661,6 +2693,59 @@
                 "choice-quiz": "quiz",
                 "diagram-drill": "diagram",
                 "backing-improv": "loop"
+            }
+        },
+        "lick": {
+            "transposed": "The lick description refers to the original key ({{key}}).",
+            "choose": "Lick",
+            "threshold": "To pass: each lick 3 times",
+            "listen": "Listen",
+            "stop": "Stop",
+            "played": "I played this lick",
+            "runs": "Played: {{done}}/{{total}}",
+            "notes": "Notes of the lick in order",
+            "legend": "Numbers are the order of the notes. A position with several numbers is played several times. Standard tuning."
+        },
+        "licks": {
+            "pent3Descent": {
+                "name": "Down through the box",
+                "tip": "Down the box from the top note to the root A. End calmly, on a longer note."
+            },
+            "pent3Answer": {
+                "name": "Question and answer",
+                "tip": "The first half climbs and hangs on G, the second returns to A. Leave a short pause between them."
+            },
+            "pent3Blue": {
+                "name": "With the blue note",
+                "tip": "Adds Eb (fret 8 on the G string) between D and E. Pass through it quickly, do not stop on it."
+            },
+            "pos6Climb": {
+                "name": "From box 1 to box 2",
+                "tip": "Climbs from the first box into the second and ends on G."
+            },
+            "pos6Slide": {
+                "name": "Along the B string",
+                "tip": "The whole phrase on the B string: D, F, G and back. It shows the scale horizontally."
+            },
+            "arp11Am7": {
+                "name": "Am7 arpeggio up and down",
+                "tip": "A, C, E, G and back. Chord tones only, so every note sounds sure."
+            },
+            "arp11Cmaj7": {
+                "name": "Cmaj7 arpeggio",
+                "tip": "C, E, G, B and C an octave up. The major seventh (B) gives the colour."
+            },
+            "arp11TwoFiveOne": {
+                "name": "ii–V–I in arpeggios",
+                "tip": "Four notes each from Dm7, G7 and Cmaj7. The phrase ends on B, the seventh of Cmaj7."
+            },
+            "tgt12Am": {
+                "name": "Landing on C over Am",
+                "tip": "The phrase circles E and D and ends on C, the third of Am."
+            },
+            "tgt12C": {
+                "name": "Landing on E over C",
+                "tip": "The same idea over C: it ends on E, the third of C."
             }
         },
         "standards": {

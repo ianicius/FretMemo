@@ -281,6 +281,14 @@ Moduł jest zaliczony (`completed`), gdy **każde** jego ćwiczenie poza `nonGat
 - **Sekcja „Więcej ćwiczeń” (2026-11-15).** Widok modułu (`ModuleView` w `src/pages/ImprovTraining.tsx`)
   pokazuje najpierw ćwiczenia wymagane, a ćwiczenia dodatkowe (`isNonGating`) w zwiniętym elemencie
   `<details>` z licznikiem (`improv.module.moreExercises`). Kolejność w `CURRICULUM` się nie zmienia.
+- **Etap D planu rozwoju (2026-11-16): D2, D3.** `src/data/improv/licks.ts` ma 10 zagrywek (moduły 3, 6, 11,
+  12) zapisanych jako struna, próg i długość w ósemkach, w stroju standardowym. Każda podaje skalę albo akord,
+  z którego pochodzą jej dźwięki, i opcjonalnie akord, na którym ląduje (`licks.test.ts` to sprawdza).
+  Nowy silnik `lick` (`LickExercise.tsx`): gryf z numerami kolejności, odsłuch przez `playTone` ze stałym
+  tempem z podświetleniem granej nuty, transpozycja (`lickShift`, progi 0–17) i przycisk „Zagrałem tę
+  zagrywkę”; każda zagrywka 3 razy, ćwiczenie jest dodatkowe. D3: pętle `pentatonic-scale.e9` i
+  `target-chord-tones.e6` mają podpowiedzi przy akordach, w którym takcie zagrać zagrywkę, a w którym
+  odpowiedzieć własną frazą.
 - **Etap F planu rozwoju (2026-11-16): F4.** Brzmienia stopy, werbla i hi-hatu przeniesione z
   `GrooveLabMode.tsx` do `src/rhythm/engine/drumVoices.ts`. `src/lib/improv/drumStyles.ts` opisuje style
   (rock, swing, shuffle, bossa nova) jako uderzenia w jednym takcie 4/4; `BackingLoopExercise` planuje je w
