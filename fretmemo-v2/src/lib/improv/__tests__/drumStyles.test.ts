@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BASS_STYLES, COMP_STYLES, DRUM_STYLE_IDS, DRUM_STYLES, bassHitsForBeat, bassSemitones, compHitsForBeat, drumHitsForBeat } from "../drumStyles";
+import { BASS_STYLES, COMP_STYLES, DRUM_STYLE_IDS, DRUM_STYLES, bassHitsForBeat, bassSemitones, compHitsForBeat, compNotes, drumHitsForBeat } from "../drumStyles";
 
 describe("plan F4: drum styles", () => {
     it("keeps every hit inside one 4/4 bar and returns each hit exactly once over the bar", () => {
@@ -42,5 +42,13 @@ describe("plan F4: drum styles", () => {
         expect(bassSemitones("sixth", "A7")).toBe(9);
         expect(bassSemitones("sixth", "Am7")).toBe(10);
         expect(bassSemitones("fifth", "Am7")).toBe(7);
+        expect(bassSemitones("octave", "Am7")).toBe(12);
+    });
+
+    it("lets the ballad arpeggio pick single chord tones, an octave up past the chord", () => {
+        const am = [57, 60, 64];
+        expect(compNotes(am)).toEqual(am);
+        expect(COMP_STYLES.ballad.map((hit) => compNotes(am, hit.pick)[0])).toEqual([57, 60, 64, 69, 72, 69, 64, 60]);
+        expect(DRUM_STYLES.reggae.some((hit) => hit.at === 0 && hit.voice !== "hat")).toBe(false); // one drop: no kick or snare on 1
     });
 });

@@ -1949,7 +1949,10 @@
                 "rock": "Rock",
                 "swing": "Swing",
                 "shuffle": "Shuffle",
-                "bossa": "Bossa nova"
+                "bossa": "Bossa nova",
+                "funk": "Funk",
+                "reggae": "Reggae",
+                "ballad": "Ballada (arpeggio)"
             },
             "allVariants": "Do zaliczenia ćwiczenia potrzebne są udane obiegi w każdym wariancie.",
             "key": "Tonacja",

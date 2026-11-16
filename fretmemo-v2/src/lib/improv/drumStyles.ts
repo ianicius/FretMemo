@@ -7,7 +7,7 @@ import { playChord } from "@/lib/audio";
 import { getChordMidis, getChordPitchClasses, tonicMidi } from "@/lib/improv/chords";
 import { scheduleBass, scheduleHat, scheduleKick, scheduleSnare } from "@/rhythm/engine/drumVoices";
 
-export type DrumStyleId = "off" | "rock" | "swing" | "shuffle" | "bossa";
+export type DrumStyleId = "off" | "rock" | "swing" | "shuffle" | "bossa" | "funk" | "reggae" | "ballad";
 type Voice = "kick" | "snare" | "hat";
 interface DrumHit { at: number; voice: Voice; accent?: boolean }
 
@@ -38,13 +38,26 @@ export const DRUM_STYLES: Record<DrumStyleId, DrumHit[]> = {
         { at: 0, voice: "kick", accent: true }, { at: 1.5, voice: "kick" }, { at: 2, voice: "kick", accent: true }, { at: 3.5, voice: "kick" },
         { at: 0, voice: "snare" }, { at: 1.5, voice: "snare" }, { at: 3, voice: "snare" },
     ],
+    // Sixteenth hats, syncopated kick, backbeat plus a ghost note before beat 4.
+    funk: [
+        ...Array.from({ length: 16 }, (_, index) => ({ at: index / 4, voice: "hat" as const, accent: index % 2 === 0 })),
+        { at: 0, voice: "kick", accent: true }, { at: 0.75, voice: "kick" }, { at: 2.5, voice: "kick" },
+        { at: 1, voice: "snare", accent: true }, { at: 2.75, voice: "snare" }, { at: 3, voice: "snare", accent: true },
+    ],
+    // One drop: nothing on 1, kick and rim together on 3.
+    reggae: [...eighths(false), { at: 2, voice: "kick", accent: true }, { at: 2, voice: "snare" }],
+    // Half-time: kick on 1 and the "and" of 3, one backbeat on 3.
+    ballad: [...eighths(false), { at: 0, voice: "kick", accent: true }, { at: 2.5, voice: "kick" }, { at: 2, voice: "snare", accent: true }],
 };
 
 export const DRUM_STYLE_IDS = Object.keys(DRUM_STYLES) as DrumStyleId[];
 
-/** Rhythm-guitar strums: length in beats, loudness 0..1, `up` for an upstroke. */
-interface CompHit { at: number; len: number; vel: number; up?: boolean }
-type BassDegree = "root" | "fifth" | "sixth";
+/**
+ * Rhythm-guitar strums: length in beats, loudness 0..1, `up` for an upstroke.
+ * `pick` plays one chord tone instead (index into the chord, past its end = an octave up).
+ */
+interface CompHit { at: number; len: number; vel: number; up?: boolean; pick?: number }
+type BassDegree = "root" | "fifth" | "sixth" | "octave";
 interface BassHit { at: number; len: number; degree: BassDegree }
 
 export const COMP_STYLES: Record<DrumStyleId, CompHit[]> = {
@@ -61,6 +74,16 @@ export const COMP_STYLES: Record<DrumStyleId, CompHit[]> = {
     ]),
     // First bar of the classic bossa figure: 1, the "and" of 2, 4.
     bossa: [{ at: 0, len: 0.45, vel: 0.8 }, { at: 1.5, len: 0.45, vel: 0.75 }, { at: 3, len: 0.45, vel: 0.8 }],
+    // Sixteenth-note chops, the upstrokes lighter.
+    funk: [
+        { at: 0, len: 0.2, vel: 0.9 }, { at: 0.75, len: 0.15, vel: 0.6, up: true }, { at: 1.5, len: 0.2, vel: 0.8 },
+        { at: 2.25, len: 0.15, vel: 0.6, up: true }, { at: 2.5, len: 0.2, vel: 0.8 }, { at: 3.5, len: 0.2, vel: 0.85 },
+        { at: 3.75, len: 0.15, vel: 0.6, up: true },
+    ],
+    // Skank: short upstrokes on 2 and 4.
+    reggae: [{ at: 1, len: 0.3, vel: 0.85, up: true }, { at: 3, len: 0.3, vel: 0.85, up: true }],
+    // Eighth-note arpeggio that lets every tone ring.
+    ballad: [0, 1, 2, 3, 4, 3, 2, 1].map((pick, index) => ({ at: index / 2, len: Math.min(1, 4 - index / 2), vel: index % 4 === 0 ? 0.8 : 0.65, pick })),
 };
 
 export const BASS_STYLES: Record<DrumStyleId, BassHit[]> = {
@@ -70,6 +93,9 @@ export const BASS_STYLES: Record<DrumStyleId, BassHit[]> = {
     // Boogie figure: root, fifth, sixth (minor seventh over minor chords), fifth.
     shuffle: [{ at: 0, len: 0.9, degree: "root" }, { at: 1, len: 0.9, degree: "fifth" }, { at: 2, len: 0.9, degree: "sixth" }, { at: 3, len: 0.9, degree: "fifth" }],
     bossa: [{ at: 0, len: 1.4, degree: "root" }, { at: 1.5, len: 0.45, degree: "root" }, { at: 2, len: 1.4, degree: "fifth" }, { at: 3.5, len: 0.45, degree: "fifth" }],
+    funk: [{ at: 0, len: 0.4, degree: "root" }, { at: 0.75, len: 0.2, degree: "root" }, { at: 1.5, len: 0.2, degree: "octave" }, { at: 2.5, len: 0.4, degree: "root" }, { at: 3.25, len: 0.2, degree: "fifth" }, { at: 3.5, len: 0.4, degree: "octave" }],
+    reggae: [{ at: 0, len: 0.9, degree: "root" }, { at: 1.5, len: 0.45, degree: "fifth" }, { at: 2, len: 0.9, degree: "root" }],
+    ballad: [{ at: 0, len: 1.9, degree: "root" }, { at: 2, len: 1.9, degree: "fifth" }],
 };
 
 /** Hits of one beat of the bar, `offset` in beats from that beat. */
@@ -94,6 +120,7 @@ export function bassHitsForBeat(style: DrumStyleId, beatInBar: number, chordStar
 export function bassSemitones(degree: BassDegree, chord: string): number {
     if (degree === "root") return 0;
     if (degree === "fifth") return 7;
+    if (degree === "octave") return 12;
     const root = tonicMidi(chord, 0) % 12;
     const tones = getChordPitchClasses(chord);
     return tones.includes((root + 3) % 12) && !tones.includes((root + 4) % 12) ? 10 : 9;
@@ -114,6 +141,12 @@ const spread = (amount: number) => 1 - amount + Math.random() * 2 * amount;
 
 export interface BackingBeat { chord: string; beatInBar: number; beatInChord: number; time: number }
 
+/** The notes a comping hit plays: the whole chord, or one picked tone. */
+export function compNotes(chordMidis: number[], pick?: number): number[] {
+    if (pick === undefined) return chordMidis;
+    return [chordMidis[pick % chordMidis.length] + 12 * Math.floor(pick / chordMidis.length)];
+}
+
 /** Schedules one beat of the backing band (drums, comping, optional bass) at its audio time. */
 export function scheduleBackingBeat(context: AudioContext, style: DrumStyleId, beat: BackingBeat, beatSec: number, withBass: boolean): void {
     scheduleDrumBeat(context, style, beat.beatInBar, beat.time, beatSec);
@@ -125,7 +158,7 @@ export function scheduleBackingBeat(context: AudioContext, style: DrumStyleId, b
         return;
     }
     for (const hit of compHitsForBeat(style, beat.beatInBar)) {
-        void playChord(chordMidis, hit.len * beatSec, {
+        void playChord(compNotes(chordMidis, hit.pick), hit.len * beatSec, {
             when: beat.time + hit.offset * beatSec + (Math.random() - 0.5) * 0.012,
             velocity: hit.vel * spread(0.1),
             up: hit.up,
