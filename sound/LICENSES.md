@@ -42,7 +42,8 @@ within ±45 cents and is pitch-corrected at playback via
 
 ### `samples/electric/` — clean electric guitar (Karoryfer, CC0)
 
-Files: `<midi>.mp3` — 28 mono MP3 notes (E3–D7 naturals, mf dynamic, round-robin 1),
+Files: `<midi>.mp3` — 28 mono MP3 notes (named E3–D7 after the upstream files, but they sound one octave
+lower, E2–D6, measured 2026-11-16; the sampler maps them with `ELECTRIC_FILE_OFFSET`; mf dynamic, round-robin 1),
 transcoded from the source WAVs with ffmpeg (44.1 kHz mono, VBR q≈4).
 
 - Source library: **Karoryfer „Black and Green Guitars"** — green Gretsch
