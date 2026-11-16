@@ -297,22 +297,32 @@ export function buildClassicAmpStage(ctx: BaseAudioContext): ClassicAmpStage {
 /**
  * Speaker-cabinet stand-in after a bundled NAM amp: those captures are
  * amp-only (`gear_type: "amp"`), and an amp heard without a cabinet sounds
- * fizzy. Rolls off the rumble below 80 Hz and the fizz above ~5 kHz.
+ * fizzy. Rolls off the rumble below 80 Hz, adds speaker body around 200 Hz,
+ * tames the 1.5–4 kHz edge (measured 2026-11-17: the JC capture put 81% of a
+ * lick's energy there) and cuts the fizz above ~5 kHz.
  *
  * shortcut: a fixed filter curve, not a cabinet IR; convolve a licensed IR
  * once one is bundled.
  */
+const CABINET_CURVE: ReadonlyArray<readonly [BiquadFilterType, number, number, number]> = [
+    ['highpass', 80, 0.7, 0],
+    ['peaking', 200, 1, 3],
+    ['highshelf', 1500, 0.7, -6],
+    ['lowpass', 4800, 0.9, 0],
+    ['lowpass', 6500, 0.7, 0],
+];
+
 export function buildCabinetStage(ctx: BaseAudioContext): { input: BiquadFilterNode; output: BiquadFilterNode; nodes: BiquadFilterNode[] } {
-    const nodes = ([['highpass', 80, 0.7], ['lowpass', 4800, 0.9], ['lowpass', 6500, 0.7]] as const).map(([type, frequency, q]) => {
+    const nodes = CABINET_CURVE.map(([type, frequency, q, gainDb]) => {
         const filter = ctx.createBiquadFilter();
         filter.type = type;
         filter.frequency.value = frequency;
         filter.Q.value = q;
+        filter.gain.value = gainDb;
         return filter;
     });
-    nodes[0].connect(nodes[1]);
-    nodes[1].connect(nodes[2]);
-    return { input: nodes[0], output: nodes[2], nodes };
+    nodes.slice(1).forEach((node, index) => nodes[index].connect(node));
+    return { input: nodes[0], output: nodes[nodes.length - 1], nodes };
 }
 
 interface AssembleChainOptions {

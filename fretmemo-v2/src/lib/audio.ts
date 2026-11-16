@@ -20,6 +20,7 @@ import {
     soundEngine,
 } from '@/audio/engine';
 import { getPresetById } from '@/audio/presets';
+import { useSettingsStore } from '@/stores/useSettingsStore';
 import {
     ensureSamplerLoaded,
     isSamplerReady,
@@ -52,10 +53,10 @@ function createNoiseBurst(ctx: AudioContext, duration: number): AudioBufferSourc
  * plays the nylon samples, every NAM amp preset plays the electric (Gretsch)
  * ones. Defaults to nylon (the default preset's voice).
  */
-function resolveSampleSetId(): SampleSetId {
+function resolveSampleSetId(presetId?: string): SampleSetId {
     try {
-        const { presetId } = soundEngine.getState();
-        const preset = presetId ? getPresetById(presetId) : null;
+        const id = presetId ?? soundEngine.getState().presetId;
+        const preset = id ? getPresetById(id) : null;
         return preset && preset.amp !== 'classic' ? 'electric' : 'nylon';
     } catch {
         return 'nylon';
@@ -321,12 +322,16 @@ export async function playFunctionalPrompt(options: FunctionalPromptOptions): Pr
 
 /**
  * Start fetching the guitar samples of the active preset ahead of the first
- * note, so a page's first playback is not the additive-synth fallback. The
- * context may stay suspended until a gesture; decoding works regardless.
+ * note, so a page's first playback is not the additive-synth fallback.
+ * Decodes in a throwaway offline context: the real AudioContext is still
+ * created by the first gesture (mobile browsers can lock a context opened
+ * earlier to the wrong output), and AudioBuffers play in any context.
  */
 export function preloadGuitarSamples(): void {
     try {
-        ensureSamplerLoaded(getSoundEngineContext(), resolveSampleSetId());
+        // The engine reports its preset only once it runs; read the saved one.
+        const saved = useSettingsStore.getState().full.audio.soundPreset;
+        ensureSamplerLoaded(new OfflineAudioContext(1, 1, 44100), resolveSampleSetId(saved || undefined));
     } catch {
         // No Web Audio (tests, old browsers): playback falls back as before.
     }

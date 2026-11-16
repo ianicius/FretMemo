@@ -226,8 +226,8 @@ describe('assembleChain', () => {
         });
         const nodes = ctx.createdNodes as FakeAudioNode[];
         const types = nodes.map((n) => (n as { type?: string }).type);
-        // The only peaking filter is the EQ mid band — no classic amp pair.
-        expect(types.filter((t) => t === 'peaking')).toHaveLength(1);
+        // Peaking filters: the EQ mid band and the cabinet body — no classic amp pair.
+        expect(types.filter((t) => t === 'peaking')).toHaveLength(2);
         // The amp node feeds the cabinet stand-in, whose last filter feeds the EQ bass band.
         const bass = nodes.filter((n) => (n as { type?: string }).type === 'lowshelf')[0];
         const highpass = nodes.find((n) => (n as { type?: string }).type === 'highpass');
