@@ -8,7 +8,9 @@
  *                guitar, chromatic E2–B5 (42 verified notes, mf). Used by the
  *                classic guitar preset (`amp: 'classic'`).
  * - `electric` — Karoryfer "Black and Green Guitars" Gretsch, naturals
- *                E3–D7 (28 notes). Used by every NAM amp preset.
+ *                E2–D6 (28 notes). Used by every NAM amp preset. The files
+ *                are named one octave above their pitch (`52.mp3` sounds
+ *                E2, measured 2026-11-16), see `ELECTRIC_FILE_OFFSET`.
  *
  * Loading is lazy per set and idempotent: the first playback call that needs
  * a set starts its fetch (always a user gesture, so autoplay policy is
@@ -29,8 +31,11 @@ import { NYLON_DETECTED_F0 } from './nylonTuning';
 export type SampleSetId = 'electric' | 'nylon';
 
 /** Lowest/highest sampled notes of the electric (Karoryfer) set. */
-export const SAMPLE_LOW_MIDI = 52; // E3
-export const SAMPLE_HIGH_MIDI = 98; // D7
+export const SAMPLE_LOW_MIDI = 40; // E2
+export const SAMPLE_HIGH_MIDI = 86; // D6
+
+/** Electric file names are their pitch + 12 (upstream octave naming); kept so cached URLs stay valid. */
+export const ELECTRIC_FILE_OFFSET = 12;
 
 /** Sampled naturals of the electric set (upstream recorded no accidentals). */
 export const SAMPLED_MIDIS: readonly number[] = (() => {
@@ -82,7 +87,8 @@ export function isSamplerReady(setId: SampleSetId): boolean {
 }
 
 function sampleUrl(setId: SampleSetId, midi: number): string {
-    return `${import.meta.env.BASE_URL}sound/${SET_DIRS[setId]}/${midi}.mp3`;
+    const file = setId === 'electric' ? midi + ELECTRIC_FILE_OFFSET : midi;
+    return `${import.meta.env.BASE_URL}sound/${SET_DIRS[setId]}/${file}.mp3`;
 }
 
 function getSampledMidis(setId: SampleSetId): readonly number[] {

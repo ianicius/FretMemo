@@ -34,11 +34,14 @@ import { useImprovStore } from "@/stores/useImprovStore";
 import { IMPROV_SESSION_MODE, useQuestStore } from "@/stores/useQuestStore";
 import { isDueForReview } from "@/lib/sm2";
 import { cn } from "@/lib/utils";
+import { preloadGuitarSamples } from "@/lib/audio";
 import { trackFeatureOpened } from "@/lib/analytics";
 import { ArrowLeft as ArrowLeftIcon } from "lucide-react";
 
 export default function ImprovTraining() {
     const { moduleId } = useParams<{ moduleId: string }>();
+    // Fetch the guitar samples now, so the first chord or lick is not the synth fallback.
+    useEffect(() => preloadGuitarSamples(), []);
 
     if (moduleId === "session") {
         return <SessionView />;

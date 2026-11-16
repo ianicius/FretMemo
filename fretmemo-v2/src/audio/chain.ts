@@ -294,6 +294,27 @@ export function buildClassicAmpStage(ctx: BaseAudioContext): ClassicAmpStage {
     return { bodyFilter, brightnessFilter, input: bodyFilter, output: brightnessFilter };
 }
 
+/**
+ * Speaker-cabinet stand-in after a bundled NAM amp: those captures are
+ * amp-only (`gear_type: "amp"`), and an amp heard without a cabinet sounds
+ * fizzy. Rolls off the rumble below 80 Hz and the fizz above ~5 kHz.
+ *
+ * shortcut: a fixed filter curve, not a cabinet IR; convolve a licensed IR
+ * once one is bundled.
+ */
+export function buildCabinetStage(ctx: BaseAudioContext): { input: BiquadFilterNode; output: BiquadFilterNode; nodes: BiquadFilterNode[] } {
+    const nodes = ([['highpass', 80, 0.7], ['lowpass', 4800, 0.9], ['lowpass', 6500, 0.7]] as const).map(([type, frequency, q]) => {
+        const filter = ctx.createBiquadFilter();
+        filter.type = type;
+        filter.frequency.value = frequency;
+        filter.Q.value = q;
+        return filter;
+    });
+    nodes[0].connect(nodes[1]);
+    nodes[1].connect(nodes[2]);
+    return { input: nodes[0], output: nodes[2], nodes };
+}
+
 interface AssembleChainOptions {
     /**
      * Externally owned amp node (a NAM AudioWorkletNode). When provided it
@@ -324,9 +345,18 @@ export function assembleChain(ctx: BaseAudioContext, preset: SoundPreset, option
     let ampInput: ChainAudioNode;
     let ampOutput: ChainAudioNode;
     let classicStage: ClassicAmpStage | null = null;
+    let ampLink: ChainAudioNode | null = null; // where the shared NAM node feeds this chain
     if (options.ampNode) {
         ampInput = options.ampNode;
         ampOutput = options.ampNode;
+        // User-imported captures may already contain a cabinet: leave them as recorded.
+        if (!preset.amp.startsWith('user-')) {
+            const cabinet = buildCabinetStage(ctx);
+            cabinet.nodes.forEach(track);
+            options.ampNode.connect(cabinet.input);
+            ampLink = cabinet.input;
+            ampOutput = cabinet.output;
+        }
     } else {
         classicStage = buildClassicAmpStage(ctx);
         track(classicStage.bodyFilter);
@@ -398,7 +428,7 @@ export function assembleChain(ctx: BaseAudioContext, preset: SoundPreset, option
                 // Detach only this chain's incoming link from the shared amp
                 // node (the node itself stays usable via the NAM node pool).
                 try {
-                    disconnectNodes(options.ampNode, bassNode);
+                    disconnectNodes(options.ampNode, ampLink ?? bassNode);
                 } catch {
                     // Targeted disconnect may be unsupported by stubs: ignore.
                 }

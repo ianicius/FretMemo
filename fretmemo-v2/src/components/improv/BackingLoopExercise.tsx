@@ -1,8 +1,8 @@
 /**
  * E4 backing-improv engine (run improv-training-2026-11-13).
  *
- * Loops a chord progression as block chords (chord tones strummed a few
- * dozen ms apart through `playChord`), driven by the lookahead scheduler in
+ * Loops a chord progression with the backing band of the chosen style
+ * (drums, comping and bass from src/lib/improv/drumStyles.ts), driven by the lookahead scheduler in
  * src/lib/improv/backingLoop.ts. The prompter shows the CURRENT chord big
  * and the NEXT chord small, the exercise goal is always visible, and after
  * each full pass of the progression the user marks the loop as successful.
@@ -26,10 +26,9 @@ import { Switch } from "@/components/ui/switch";
 import { Fretboard } from "@/components/fretboard/Fretboard";
 import { AudioLines, Mic, MicOff } from "lucide-react";
 import { getSoundEngineContext } from "@/audio/engine";
-import { playChord, playTone } from "@/lib/audio";
-import { getChordMidis, getChordTonePositions, tonicMidi } from "@/lib/improv/chords";
+import { getChordTonePositions } from "@/lib/improv/chords";
 import { BackingLoopScheduler, type BackingLoopEntry } from "@/lib/improv/backingLoop";
-import { DRUM_STYLE_IDS, scheduleDrumBeat, type DrumStyleId } from "@/lib/improv/drumStyles";
+import { DRUM_STYLE_IDS, scheduleBackingBeat, type DrumStyleId } from "@/lib/improv/drumStyles";
 import {
     keyChoices,
     keyPitchClass,
@@ -75,9 +74,6 @@ interface BackingLoopExerciseProps {
     moduleId: string;
     exercise: ImprovExercise;
 }
-
-const CHORD_DURATION_SEC = 1.1;
-const CHORD_TONE_STAGGER_SEC = 0.055;
 
 interface NormalizedEntry {
     chord: string;
@@ -226,9 +222,14 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
             progression: loopEntries,
             bpm,
             onBeatSchedule: (info) => {
-                if (drumStyleRef.current === "off") return;
                 try {
-                    scheduleDrumBeat(getSoundEngineContext(), drumStyleRef.current, info.beatInLoop % 4, info.time, 60 / bpmRef.current);
+                    scheduleBackingBeat(
+                        getSoundEngineContext(),
+                        drumStyleRef.current,
+                        { chord: info.chord, beatInBar: info.beatInLoop % 4, beatInChord: info.beatInChord, time: info.time },
+                        60 / bpmRef.current,
+                        bassOnRef.current,
+                    );
                 } catch {
                     // Audio unavailable — the visual prompter still runs.
                 }
@@ -239,15 +240,6 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
                     setBeatsIntoChord(0);
                     hitThisChordRef.current = false;
                     setChordHit(false);
-                    try {
-                        void playChord(getChordMidis(info.chord, 48), CHORD_DURATION_SEC, {
-                            strumDelaySec: CHORD_TONE_STAGGER_SEC,
-                        });
-                        // Plan phase 6: optional bass root on the chord start.
-                        if (bassOnRef.current) void playTone(tonicMidi(info.chord, 36), 1.6);
-                    } catch {
-                        // Audio unavailable — the visual prompter still runs.
-                    }
                 }, info.delayMs);
                 timersRef.current.push(timer);
             },
@@ -259,14 +251,6 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
                         // shifted by the measured input latency (plan phase 4).
                         const evalTimer = window.setTimeout(() => evaluateMicHit(info.chordIndex), Math.max(0, inputLatencyMs));
                         timersRef.current.push(evalTimer);
-                    }
-                    // Plan phase 6: bass root on the back half of the chord.
-                    if (bassOnRef.current && info.beatInChord === 2) {
-                        try {
-                            void playTone(tonicMidi(info.chord, 36), 1.2);
-                        } catch {
-                            // Audio unavailable.
-                        }
                     }
                 }, info.delayMs);
                 timersRef.current.push(timer);

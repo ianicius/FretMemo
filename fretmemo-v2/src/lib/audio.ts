@@ -157,22 +157,31 @@ export function playTone(midi: number, durationSec = 1.2): Promise<void> {
  */
 export interface PlayChordOptions {
     strumDelaySec?: number;
+    /** Audio-clock start time (default: now), for lookahead-scheduled comping. */
+    when?: number;
+    /** Loudness multiplier (default 1). */
+    velocity?: number;
+    /** Upstroke: strum from the highest note down. */
+    up?: boolean;
 }
 
 export function playChord(midis: number[], durationSec = 1.5, options: PlayChordOptions = {}): Promise<void> {
     const ctx = getSoundEngineContext();
-    const now = ctx.currentTime;
+    const now = Math.max(ctx.currentTime, options.when ?? 0);
+    const waitSec = now - ctx.currentTime;
     const strumDelay = Math.max(0, options.strumDelaySec ?? 0.025);
+    const velocity = options.velocity ?? 1;
     const voiceBus = getSoundEngineVoiceBus();
+    const ordered = options.up ? [...midis].reverse() : midis;
 
-    const promises = midis.map((midi, i) => {
+    const promises = ordered.map((midi, i) => {
         const freq = midiToFrequency(midi);
         const offset = i * strumDelay;
         const startAt = now + offset;
 
         // Master per-voice
         const voiceGain = ctx.createGain();
-        const vol = 0.28 / Math.sqrt(midis.length);
+        const vol = (0.28 * velocity) / Math.sqrt(midis.length);
         voiceGain.connect(voiceBus);
 
         const sampleSet = resolveSampleSetId();
@@ -181,9 +190,9 @@ export function playChord(midis: number[], durationSec = 1.5, options: PlayChord
         if (isSamplerReady(sampleSet)) {
             // Sampled voice with the chord's per-note balance on top of the
             // sampler's per-note loudness normalization (SET_TARGET_PEAK).
-            playSampleVoice(ctx, voiceGain, midi, startAt, 1 / Math.sqrt(midis.length), durationSec, sampleSet);
+            playSampleVoice(ctx, voiceGain, midi, startAt, velocity / Math.sqrt(midis.length), durationSec, sampleSet);
             return new Promise<void>((resolve) => {
-                setTimeout(resolve, (offset + durationSec) * 1000);
+                setTimeout(resolve, (waitSec + offset + durationSec) * 1000);
             });
         }
 
@@ -217,7 +226,7 @@ export function playChord(midis: number[], durationSec = 1.5, options: PlayChord
         }
 
         return new Promise<void>((resolve) => {
-            setTimeout(resolve, (offset + durationSec) * 1000);
+            setTimeout(resolve, (waitSec + offset + durationSec) * 1000);
         });
     });
 
@@ -308,6 +317,19 @@ export async function playFunctionalPrompt(options: FunctionalPromptOptions): Pr
         await sleepMs(targetGapSec * 1000);
     }
     await playTone(options.targetMidi, targetDurationSec);
+}
+
+/**
+ * Start fetching the guitar samples of the active preset ahead of the first
+ * note, so a page's first playback is not the additive-synth fallback. The
+ * context may stay suspended until a gesture; decoding works regardless.
+ */
+export function preloadGuitarSamples(): void {
+    try {
+        ensureSamplerLoaded(getSoundEngineContext(), resolveSampleSetId());
+    } catch {
+        // No Web Audio (tests, old browsers): playback falls back as before.
+    }
 }
 
 /**

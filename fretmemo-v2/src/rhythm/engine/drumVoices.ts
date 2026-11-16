@@ -81,3 +81,41 @@ export function scheduleSnare(context: AudioContext, time: number, accent = fals
     noise.start(time);
     noise.stop(time + 0.055);
 }
+
+/**
+ * Fingered electric-bass stand-in for the improv loops: a sawtooth through a
+ * closing low-pass plus a sine on the fundamental for weight. Goes straight to
+ * the destination like the drums, so the guitar amp chain never colours it.
+ */
+export function scheduleBass(context: AudioContext, midi: number, time: number, durationSec: number, velocity = 1): void {
+    const frequency = 440 * 2 ** ((midi - 69) / 12);
+    const end = time + Math.max(0.12, durationSec);
+    const peak = 0.2 * velocity;
+
+    const filter = context.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.Q.setValueAtTime(0.8, time);
+    filter.frequency.setValueAtTime(1400, time);
+    filter.frequency.exponentialRampToValueAtTime(380, time + 0.25);
+
+    const gain = context.createGain();
+    gain.gain.setValueAtTime(0.0001, time);
+    gain.gain.exponentialRampToValueAtTime(peak, time + 0.006);
+    gain.gain.exponentialRampToValueAtTime(peak * 0.55, time + 0.18);
+    gain.gain.setValueAtTime(peak * 0.55, end - 0.06);
+    gain.gain.exponentialRampToValueAtTime(0.0001, end);
+
+    filter.connect(gain);
+    gain.connect(context.destination);
+    for (const [type, level] of [["sawtooth", 0.6], ["sine", 0.9]] as const) {
+        const osc = context.createOscillator();
+        const oscGain = context.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(frequency, time);
+        oscGain.gain.setValueAtTime(level, time);
+        osc.connect(oscGain);
+        oscGain.connect(filter);
+        osc.start(time);
+        osc.stop(end + 0.01);
+    }
+}

@@ -60,7 +60,7 @@ Suchym sygnałem zasilającym łańcuch (i NAM) nie jest już syntezator, tylko
 | Zestaw | Preset | Instrument | Zakres | Pliki |
 | --- | --- | --- | --- | --- |
 | `nylon` | classic („Klasyczna gitara") | Raimundo 118 (nylon, UIowa) | **chromatycznie E2–B5** (42 nuty) | `samples/nylon/<midi>.mp3` |
-| `electric` | wszystkie NAM | Gretsch Anniversary (Karoryfer, CC0) | naturals E3–D7 (28 nut) | `samples/electric/<midi>.mp3` |
+| `electric` | wszystkie NAM | Gretsch Anniversary (Karoryfer, CC0) | naturals E2–D6 (28 nut) | `samples/electric/<midi+12>.mp3` (pliki nazwane oktawę wyżej niż brzmią — `ELECTRIC_FILE_OFFSET`, pomiar 2026-11-16) |
 
 - **Wybór zestawu**: preset z `amp: 'classic'` → nylon; każdy preset NAM →
   electric (patrz `resolveSampleSetId` w `lib/audio.ts`).

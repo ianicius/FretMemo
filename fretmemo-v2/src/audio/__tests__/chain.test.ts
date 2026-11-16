@@ -228,9 +228,13 @@ describe('assembleChain', () => {
         const types = nodes.map((n) => (n as { type?: string }).type);
         // The only peaking filter is the EQ mid band — no classic amp pair.
         expect(types.filter((t) => t === 'peaking')).toHaveLength(1);
-        // The amp node feeds the EQ bass band.
+        // The amp node feeds the cabinet stand-in, whose last filter feeds the EQ bass band.
         const bass = nodes.filter((n) => (n as { type?: string }).type === 'lowshelf')[0];
-        expect(connectedDestinations(ampNode)).toContain(bass);
+        const highpass = nodes.find((n) => (n as { type?: string }).type === 'highpass');
+        const lowpasses = nodes.filter((n) => (n as { type?: string }).type === 'lowpass');
+        expect(connectedDestinations(ampNode)).toContain(highpass);
+        expect(lowpasses).toHaveLength(2);
+        expect(connectedDestinations(lowpasses[1])).toContain(bass);
         chain.dispose();
     });
 

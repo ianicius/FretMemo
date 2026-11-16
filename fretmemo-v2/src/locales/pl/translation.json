@@ -1943,13 +1943,13 @@
             "micError": "Mikrofon niedostępny — oznaczaj udane obiegi przyciskiem.",
             "micDetected": "Słyszę: {{note}}",
             "bass": "Bas",
-            "drums": "Perkusja",
+            "drums": "Styl",
             "drumStyle": {
-                "off": "Bez perkusji",
-                "rock": "Perkusja: rock",
-                "swing": "Perkusja: swing",
-                "shuffle": "Perkusja: shuffle",
-                "bossa": "Perkusja: bossa nova"
+                "off": "Swobodnie (bez perkusji)",
+                "rock": "Rock",
+                "swing": "Swing",
+                "shuffle": "Shuffle",
+                "bossa": "Bossa nova"
             },
             "allVariants": "Do zaliczenia ćwiczenia potrzebne są udane obiegi w każdym wariancie.",
             "key": "Tonacja",

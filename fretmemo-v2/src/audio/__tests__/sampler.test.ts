@@ -52,9 +52,9 @@ afterEach(() => {
 });
 
 describe('electric set constants', () => {
-    it('covers every natural note from E3 to D7', () => {
-        expect(SAMPLE_LOW_MIDI).toBe(52);
-        expect(SAMPLE_HIGH_MIDI).toBe(98);
+    it('covers every natural note from E2 to D6', () => {
+        expect(SAMPLE_LOW_MIDI).toBe(40);
+        expect(SAMPLE_HIGH_MIDI).toBe(86);
         expect(SAMPLED_MIDIS).toHaveLength(28);
         expect(SAMPLED_MIDIS).not.toContain(61); // C#4 not sampled upstream
         expect(SAMPLED_MIDIS).toContain(60);
@@ -128,11 +128,20 @@ describe('playSampleVoice (electric)', () => {
         expect(automations.at(-1)!.args[1]).toBeCloseTo(11.38);
     });
 
-    it('pitches E2 by shifting the E3 sample down an octave', async () => {
+    it('plays E2 from its own sample and C#4 one semitone above C4', async () => {
         const ctx = await makeLoadedContext(['electric']);
-        const handle = playSampleVoice(ctx, ctx.createGain() as unknown as AudioNode, 40, 0, 1, 1.2, 'electric');
-        const source = handle!.source as unknown as FakeAudioBufferSourceNode;
-        expect(source.playbackRate.value).toBeCloseTo(2 ** (-12 / 12));
+        const rate = (midi: number) => (playSampleVoice(ctx, ctx.createGain() as unknown as AudioNode, midi, 0, 1, 1.2, 'electric')!.source as unknown as FakeAudioBufferSourceNode).playbackRate.value;
+        expect(rate(40)).toBe(1);
+        expect(rate(61)).toBeCloseTo(2 ** (1 / 12));
+    });
+
+    it('fetches each electric note from the file named an octave above it', async () => {
+        stubFetchSucceeding();
+        const { ctx } = makeContext(new FakeAudioBuffer(1, 4410, 44100));
+        await loadSampler(ctx, 'electric');
+        const urls = (fetch as unknown as { mock: { calls: string[][] } }).mock.calls.map((call) => call[0]);
+        expect(urls.some((url) => url.endsWith('samples/electric/52.mp3'))).toBe(true); // E2
+        expect(urls.some((url) => url.endsWith('samples/electric/40.mp3'))).toBe(false);
     });
 
     it('returns null when the electric set is not ready (synth fallback)', () => {
