@@ -17,6 +17,7 @@
  * completion rules are unchanged and the UI can flag unverified passes.
  */
 
+import type { DrumStyleId } from "@/lib/improv/drumStyles";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { calculateNextReview, type SpacedRepetitionEntry } from "@/lib/sm2";
@@ -47,6 +48,9 @@ export interface ImprovStoreState {
     reviewSRS: Record<string, SpacedRepetitionEntry>;
     /** Plan F3: seconds played over backing loops, all modules together. */
     loopSeconds: number;
+    /** Plan F4: drums under the backing loops, shared by all loops. */
+    drumStyle: DrumStyleId;
+    setDrumStyle: (style: DrumStyleId) => void;
     addLoopSeconds: (seconds: number) => void;
     recordQuizResult: (moduleId: string, exerciseId: string, correct: number) => void;
     recordDrillRun: (moduleId: string, exerciseId: string) => void;
@@ -134,6 +138,8 @@ export const useImprovStore = create<ImprovStoreState>()(
             entranceUnlockCount: null,
             reviewSRS: {},
             loopSeconds: 0,
+            drumStyle: "off",
+            setDrumStyle: (drumStyle) => set({ drumStyle }),
             addLoopSeconds: (seconds) => {
                 if (!(seconds > 0)) return;
                 set((state) => ({ loopSeconds: state.loopSeconds + Math.round(seconds) }));
@@ -230,6 +236,7 @@ export const useImprovStore = create<ImprovStoreState>()(
                 entranceUnlockCount: state.entranceUnlockCount,
                 reviewSRS: state.reviewSRS,
                 loopSeconds: state.loopSeconds,
+                drumStyle: state.drumStyle,
             }),
             merge: (persistedState, currentState) => {
                 const persisted = persistedState as

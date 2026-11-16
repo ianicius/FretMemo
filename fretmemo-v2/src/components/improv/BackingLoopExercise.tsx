@@ -29,6 +29,7 @@ import { getSoundEngineContext } from "@/audio/engine";
 import { playChord, playTone } from "@/lib/audio";
 import { getChordMidis, getChordTonePositions, tonicMidi } from "@/lib/improv/chords";
 import { BackingLoopScheduler, type BackingLoopEntry } from "@/lib/improv/backingLoop";
+import { DRUM_STYLE_IDS, scheduleDrumBeat, type DrumStyleId } from "@/lib/improv/drumStyles";
 import {
     keyChoices,
     keyPitchClass,
@@ -175,6 +176,10 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
     // take effect mid-loop instead of after a restart.
     const micOnRef = useRef(micOn);
     const bassOnRef = useRef(bassOn);
+    const drumStyle = useImprovStore((state) => state.drumStyle);
+    const setDrumStyle = useImprovStore((state) => state.setDrumStyle);
+    const drumStyleRef = useRef(drumStyle);
+    useEffect(() => { drumStyleRef.current = drumStyle; }, [drumStyle]);
     useEffect(() => { micOnRef.current = micOn; }, [micOn]);
     useEffect(() => { bassOnRef.current = bassOn; }, [bassOn]);
     const [loopHits, setLoopHits] = useState(0);
@@ -220,6 +225,14 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
             clock: { now: () => getSoundEngineContext().currentTime },
             progression: loopEntries,
             bpm,
+            onBeatSchedule: (info) => {
+                if (drumStyleRef.current === "off") return;
+                try {
+                    scheduleDrumBeat(getSoundEngineContext(), drumStyleRef.current, info.beatInLoop % 4, info.time, 60 / bpmRef.current);
+                } catch {
+                    // Audio unavailable — the visual prompter still runs.
+                }
+            },
             onChordChange: (info) => {
                 const timer = window.setTimeout(() => {
                     setCurrentChordIndex(info.chordIndex);
@@ -506,6 +519,16 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
                     <AudioLines className="mr-2 h-4 w-4" />
                     {t("improv.loop.bass")}
                 </Button>
+                <Select
+                    value={drumStyle}
+                    onChange={(event) => setDrumStyle(event.target.value as DrumStyleId)}
+                    className="h-9 w-40 text-xs"
+                    aria-label={t("improv.loop.drums")}
+                >
+                    {DRUM_STYLE_IDS.map((style) => (
+                        <option key={style} value={style}>{t(`improv.loop.drumStyle.${style}`)}</option>
+                    ))}
+                </Select>
                 <div className="flex items-center gap-2">
                     <Switch
                         id={`${exercise.id}-fretboard`}

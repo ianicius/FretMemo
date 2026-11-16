@@ -281,6 +281,12 @@ Moduł jest zaliczony (`completed`), gdy **każde** jego ćwiczenie poza `nonGat
 - **Sekcja „Więcej ćwiczeń” (2026-11-15).** Widok modułu (`ModuleView` w `src/pages/ImprovTraining.tsx`)
   pokazuje najpierw ćwiczenia wymagane, a ćwiczenia dodatkowe (`isNonGating`) w zwiniętym elemencie
   `<details>` z licznikiem (`improv.module.moreExercises`). Kolejność w `CURRICULUM` się nie zmienia.
+- **Etap F planu rozwoju (2026-11-16): F4.** Brzmienia stopy, werbla i hi-hatu przeniesione z
+  `GrooveLabMode.tsx` do `src/rhythm/engine/drumVoices.ts`. `src/lib/improv/drumStyles.ts` opisuje style
+  (rock, swing, shuffle, bossa nova) jako uderzenia w jednym takcie 4/4; `BackingLoopExercise` planuje je w
+  `onBeatSchedule` z dokładnym czasem audio (pozycja w takcie = `beatInLoop % 4`). Wybór („Perkusja”) jest
+  wspólny dla wszystkich pętli i zapisany w `useImprovStore.drumStyle`, domyślnie bez perkusji. Akordy nadal
+  brzmią raz na zmianę akordu, bez rytmu stylu.
 - **Etap F planu rozwoju (2026-11-15): F1.** `dailySession(moduleState)` w `curriculum.ts` zwraca trzy kroki:
   quiz, diagram i pętlę. Quiz to powtórka mieszana z zaliczonych modułów (`passedQuizGenerators`, `reviewQuiz`),
   a zanim jakikolwiek moduł z quizem jest zaliczony, quiz najbliższego modułu. Diagram i pętla pochodzą z

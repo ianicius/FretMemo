@@ -1925,6 +1925,14 @@
             "micError": "Microphone unavailable — use the self-mark button.",
             "micDetected": "Hearing: {{note}}",
             "bass": "Bass",
+            "drums": "Drums",
+            "drumStyle": {
+                "off": "No drums",
+                "rock": "Drums: rock",
+                "swing": "Drums: swing",
+                "shuffle": "Drums: shuffle",
+                "bossa": "Drums: bossa nova"
+            },
             "allVariants": "To pass the exercise, every variant needs its own successful loops.",
             "key": "Key",
             "keyOriginal": "{{key}} (original)",
