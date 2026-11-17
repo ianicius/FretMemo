@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { Outlet, useLocation, useNavigate, useNavigationType } from "react-router-dom";
-import { Home, Target, Trophy, ChartBar, AudioWaveform, Guitar, Settings, CircleHelp, Coffee, Mail } from "lucide-react";
+import { Home, Target, Trophy, ChartBar, AudioWaveform, GraduationCap, Settings, CircleHelp, Coffee, Mail } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { GlobalFeedbackToast } from "@/components/ui/global-feedback-toast";
@@ -27,7 +27,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
     { id: "home", label: "Home", icon: Home, path: "/" },
     { id: "practice", label: "Train", icon: Target, path: "/train" },
-    { id: "improv", label: "Improv", icon: Guitar, path: "/improv" },
+    { id: "improv", label: "Learn", icon: GraduationCap, path: "/learn" },
     { id: "sound", label: "Sound", icon: AudioWaveform, path: "/sound" },
     { id: "challenges", label: "Challenges", icon: Trophy, path: "/challenges" },
     { id: "progress", label: "Me", icon: ChartBar, path: "/me" },
@@ -128,6 +128,8 @@ export function AppShell() {
                         {NAV_ITEMS.map((item) => {
                             const isActive = item.id === "practice"
                                 ? isTrainRoute || isPracticeSessionRoute
+                                : item.id === "improv"
+                                    ? activePath.startsWith("/learn") || activePath.startsWith("/improv")
                                 : item.id === "progress"
                                     ? activePath.startsWith("/me") || activePath.startsWith("/progress") || activePath.startsWith("/settings")
                                     : activePath === item.path || (item.path !== "/" && activePath.startsWith(item.path));

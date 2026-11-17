@@ -399,7 +399,7 @@
         "challenges": "Challenges",
         "progress": "Me",
         "sound": "Sound",
-        "improv": "Improv",
+        "improv": "Learn",
         "help": "Help",
         "settings": "Settings"
     },
@@ -1773,11 +1773,11 @@
             "confidenceLegend": "Confidence zone"
         },
         "improv": {
-            "title": "Improv Training",
-            "desc": "Modules completed in Improv Training.",
+            "title": "Learning paths",
+            "desc": "Modules completed on each path.",
             "completed": "{{done}} of {{total}}",
             "loopTime": "Time played over backing: {{hours}} h {{minutes}} min",
-            "open": "Open roadmap"
+            "open": "Open learning paths"
         }
     },
     "me": {
@@ -3436,8 +3436,10 @@
             "switchLabel": "Learning tracks",
             "improv": {
                 "tab": "Improvisation",
-                "title": "Improv Training",
-                "description": "Learn guitar improvisation in 22 graded modules, from the E-string notes to Giant Steps. Each module pairs a short theory recap with exercises; passing them unlocks the next module."
+                "title": "Improvisation",
+                "description": "Learn guitar improvisation in 22 graded modules, from the E-string notes to Giant Steps. Each module pairs a short theory recap with exercises; passing them unlocks the next module.",
+                "promise": "Freedom to improvise: from the notes on the neck through scales and arpeggios to playing over chord changes.",
+                "duration": "About 4–6 months at 20 minutes a day"
             },
             "blues": {
                 "tab": "Blues",
@@ -3449,7 +3451,9 @@
                     "language": "The language of the solo (4–7)",
                     "colours": "Colours (8–10)",
                     "changes": "Playing the changes (11–14)"
-                }
+                },
+                "promise": "Play your first solo over a 12-bar blues: shuffle, bends, phrasing and playing the changes.",
+                "duration": "About 2–3 months at 15 minutes a day"
             },
             "voicings": {
                 "tab": "Triads",
@@ -3460,7 +3464,9 @@
                     "map": "Fretboard map (4–7)",
                     "leading": "Voice leading (8–10)",
                     "melody": "In the solo (11–12)"
-                }
+                },
+                "promise": "Play any chord anywhere on the neck and move between chords without jumping around.",
+                "duration": "About 6–8 weeks at 15 minutes a day"
             }
         },
         "bend": {
@@ -3502,5 +3508,15 @@
             "runButton": "Run done",
             "runNeedsMetronome": "First go through every voicing with the metronome ({{steps}})."
         }
+    },
+    "learn": {
+        "title": "Learning paths",
+        "description": "Pick a goal and go step by step. Each path leads through short modules with theory, exercises and backing tracks, and the app remembers where you stopped.",
+        "progress": "{{done}} of {{total}} modules",
+        "next": "Next: module {{order}}, {{module}}",
+        "done": "Path completed",
+        "continue": "Continue",
+        "start": "Start",
+        "map": "Path map"
     }
 }

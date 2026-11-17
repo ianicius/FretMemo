@@ -36,6 +36,14 @@ function getRouteMeta(pathname: string): SeoRouteMeta {
         };
     }
 
+    if (pathname === "/learn") {
+        return {
+            title: "Guitar Learning Paths | FretMemo",
+            description: "Step-by-step guitar learning paths: improvisation, blues, and triads with voice leading. Each path has graded exercises, backing tracks and progress you can pick up any day.",
+            path: "/learn",
+        };
+    }
+
     const track = TRACK_META_LIST.find((item) => item.path === pathname);
     if (track) {
         return { ...track.seo, path: track.path };

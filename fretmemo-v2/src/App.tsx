@@ -17,6 +17,7 @@ const TheoryTool = lazy(() => import("./pages/TheoryTool"));
 const EarTraining = lazy(() => import("./pages/EarTraining"));
 const RhythmDojo = lazy(() => import("./pages/RhythmDojo"));
 const ImprovTraining = lazy(() => import("./pages/ImprovTraining"));
+const Learn = lazy(() => import("./pages/Learn"));
 
 const basename = import.meta.env.BASE_URL.replace(/\/+$/, "") || "/";
 
@@ -36,6 +37,7 @@ function AppRoutes() {
           <Route path="/theory/:toolId" element={<TheoryTool />} />
           <Route path="/ear-training/:mode" element={<EarTraining />} />
           <Route path="/rhythm/:mode" element={<RhythmDojo />} />
+          <Route path="/learn" element={<Learn />} />
           <Route path="/improv" element={<ImprovTraining />} />
           <Route path="/improv/:moduleId" element={<ImprovTraining />} />
           <Route path="/challenges" element={<Challenges />} />

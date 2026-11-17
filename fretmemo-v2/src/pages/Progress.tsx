@@ -298,7 +298,7 @@ export default function ProgressPage() {
                     <p className="text-sm text-muted-foreground">
                         {t("progress.improv.loopTime", { hours: Math.floor(improvLoopSeconds / 3600), minutes: Math.floor((improvLoopSeconds % 3600) / 60) })}
                     </p>
-                    <Button variant="outline" size="sm" onClick={() => navigate("/improv")}>
+                    <Button variant="outline" size="sm" onClick={() => navigate("/learn")}>
                         {t("progress.improv.open")}
                     </Button>
                 </CardContent>

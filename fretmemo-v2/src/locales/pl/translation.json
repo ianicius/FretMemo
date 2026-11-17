@@ -399,7 +399,7 @@
         "challenges": "Wyzwania",
         "progress": "Postępy",
         "sound": "Dźwięk",
-        "improv": "Improv",
+        "improv": "Nauka",
         "help": "Pomoc",
         "settings": "Ustawienia"
     },
@@ -1424,11 +1424,11 @@
             "confidenceLegend": "Strefa pewności"
         },
         "improv": {
-            "title": "Trening improwizacji",
-            "desc": "Moduły zaliczone w Treningu improwizacji.",
+            "title": "Ścieżki nauki",
+            "desc": "Moduły zaliczone na każdej ścieżce.",
             "completed": "{{done}} z {{total}}",
             "loopTime": "Czas gry nad podkładem: {{hours}} godz. {{minutes}} min",
-            "open": "Otwórz mapę"
+            "open": "Otwórz ścieżki nauki"
         }
     },
     "ear": {
@@ -3450,8 +3450,10 @@
             "switchLabel": "Ścieżki nauki",
             "improv": {
                 "tab": "Improwizacja",
-                "title": "Trening improwizacji",
-                "description": "Nauka improwizacji w 22 modułach: od dźwięków na strunie E po Giant Steps. Każdy moduł to krótka teoria i ćwiczenia; zaliczenie modułu otwiera następny."
+                "title": "Improwizacja",
+                "description": "Nauka improwizacji w 22 modułach: od dźwięków na strunie E po Giant Steps. Każdy moduł to krótka teoria i ćwiczenia; zaliczenie modułu otwiera następny.",
+                "promise": "Swoboda w improwizacji: od dźwięków na gryfie przez skale i arpeggia po granie po zmianach akordów.",
+                "duration": "Ok. 4–6 miesięcy przy 20 minutach dziennie"
             },
             "blues": {
                 "tab": "Blues",
@@ -3463,7 +3465,9 @@
                     "language": "Język solówki (4–7)",
                     "colours": "Kolory (8–10)",
                     "changes": "Granie po zmianach (11–14)"
-                }
+                },
+                "promise": "Zagraj pierwszą solówkę nad bluesem 12-taktowym: shuffle, podciągnięcia, frazowanie i granie po zmianach.",
+                "duration": "Ok. 2–3 miesięcy przy 15 minutach dziennie"
             },
             "voicings": {
                 "tab": "Trójdźwięki",
@@ -3474,7 +3478,9 @@
                     "map": "Mapa gryfu (4–7)",
                     "leading": "Prowadzenie głosów (8–10)",
                     "melody": "W solówce (11–12)"
-                }
+                },
+                "promise": "Zagraj każdy akord w każdym miejscu gryfu i łącz akordy bez skakania ręką.",
+                "duration": "Ok. 6–8 tygodni przy 15 minutach dziennie"
             }
         },
         "bend": {
@@ -3516,5 +3522,15 @@
             "runButton": "Przebieg zaliczony",
             "runNeedsMetronome": "Najpierw przejdź z metronomem przez wszystkie chwyty ({{steps}})."
         }
+    },
+    "learn": {
+        "title": "Ścieżki nauki",
+        "description": "Wybierz cel i idź krok po kroku. Każda ścieżka prowadzi przez krótkie moduły z teorią, ćwiczeniami i podkładem, a aplikacja pamięta, gdzie skończyłeś.",
+        "progress": "{{done}} z {{total}} modułów",
+        "next": "Dalej: moduł {{order}}, {{module}}",
+        "done": "Ścieżka ukończona",
+        "continue": "Kontynuuj",
+        "start": "Zacznij",
+        "map": "Mapa ścieżki"
     }
 }
