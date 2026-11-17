@@ -170,7 +170,7 @@
                     <li>FretMemo opens .gp3, .gp4, .gp5, .gpx and .gp files for free at <a href="https://fretmemo.net/train">fretmemo.net/train</a>, in the "Your Songs" section.</li>
                     <li>Imported songs are stored in the browser's IndexedDB on your device; FretMemo does not upload them.</li>
                     <li>Default playback uses the MuseScore General Lite soundfont, a 38 MB download that starts when you open a song and is then cached for offline use.</li>
-                    <li>"Guitar sound" mode plays each track through FretMemo's own guitar sound chain, with at most 3 different NAM amps per song.</li>
+                    <li>In "Guitar sound" mode, only the tracks you give a voice in "Track voices" (a built-in preset or your own) play through FretMemo's own guitar sound chain; tracks without a voice play "Direct (soundfont)", drums always play direct, and a song can use at most 3 different NAM amps.</li>
                     <li>"Export WAV" saves a 16-bit, 44,100 Hz stereo WAV of the full mix, always with the soundfont sound.</li>
                     <li>Song links cannot be shared, because each song's id is created on the device that imported it.</li>
                 </ul>
@@ -192,7 +192,7 @@
 
             <h2>Two ways to hear the song</h2>
             <p>The default engine is a soundfont player. It plays every track with MuseScore General Lite, an MIT-licensed set of instrument sounds that ships with the app. It downloads about 38 MB when you open a song in the viewer. While that runs, the controls show "Loading instrument sounds…" with a percentage, and "Play" appears once it finishes. The service worker then caches it, so soundfont playback works offline after one online session. This mode has the practice controls: play, pause, stop, volume, a "Metronome" switch and "Speed" from 0.5× to 1.5×.</p>
-            <p>The second engine sits behind the "Guitar sound" switch. With it on, FretMemo renders the song offline ("Rendering guitar audio…") and plays the result through its own guitar sound chain, the engine behind the Sound page. The switch also opens a "Track voices" panel, where each track gets either a voice (a built-in preset or one you saved) or "Direct (soundfont)". A track you haven't assigned plays direct, drums always play direct, and muted tracks are skipped. Your choices are saved per song.</p>
+            <p>The second engine sits behind the "Guitar sound" switch. With it on, FretMemo renders the song offline ("Rendering guitar audio…") and plays each track you give a voice through its own guitar sound chain, the engine behind the Sound page. The switch also opens a "Track voices" panel, where each track gets either a voice (a built-in preset or one you saved) or "Direct (soundfont)". A track you haven't assigned plays direct, drums always play direct, and muted tracks are skipped. Your choices are saved per song.</p>
             <p>A song can use at most 3 different NAM amps. Assign a fourth and the extra tracks fall back to the classic chain, with a message saying so. What NAM is and how the presets are built is in the post about the <a href="free-online-amp-simulator-nam.html">free online amp simulator in the Sound tab</a>.</p>
 
             <h2>How to open a Guitar Pro file online</h2>
