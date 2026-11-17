@@ -9,6 +9,10 @@ FretMemo is a free, browser-based guitar fretboard trainer. It helps guitar play
 - https://fretmemo.net/rss.xml (RSS feed)
 
 ## Blog posts
+- https://fretmemo.net/blog/free-guitar-fretboard-trainer-2026.html - Free guitar fretboard trainer: everything FretMemo does in 2026
+- https://fretmemo.net/blog/ear-training-for-guitarists.html - Ear training for guitar: notes, intervals, chord qualities and scale degrees
+- https://fretmemo.net/blog/guitar-rhythm-trainer-strumming-patterns.html - A free guitar rhythm trainer for strumming patterns, rhythm reading and groove
+- https://fretmemo.net/blog/fretboard-note-trainer-with-microphone.html - A fretboard note trainer that listens: five drills, mic detection and spaced repetition
 - https://fretmemo.net/blog/learn-guitar-improvisation-step-by-step.html - Learn guitar improvisation step by step: 22 modules from the E string to Giant Steps
 - https://fretmemo.net/blog/blues-guitar-solo-lessons-12-bar.html - Your first 12 bar blues guitar solo: a free 14-module blues path
 - https://fretmemo.net/blog/guitar-triads-inversions-voice-leading.html - Guitar triads: inversions, string sets and voice leading in 12 modules
@@ -30,10 +34,11 @@ FretMemo is a free, browser-based guitar fretboard trainer. It helps guitar play
 ## Key features (current app, for accurate answers)
 Train catalog (https://fretmemo.net/train): one page with sections for fretboard drills, technique, theory, ear training, rhythm and your songs.
 - Fretboard drills (5): "Fretboard → Note", "Note Generator", "Note → Tab", "Tab → Note", "Tab Sequence". They open https://fretmemo.net/practice from Train; there are no per-drill URLs. Note Generator and Tab Sequence can use the microphone; it matches note names only (not octave or string).
+- Drill options: "Session Setup" sets tempo (30-280 BPM), metronome, a 4-click count-in, "Auto Speed-Up" (default +5 BPM every 8 beats), fret range, strings and all notes or naturals. Play drills have "Scored Session" or "Guitar Mode" (endless, unscored). Tab Sequence shows a falling tab highway with left-hand finger numbers 1-4. Note picking uses SM-2 spaced repetition (on by default); "Heat Map Overlay" shows accuracy per position. 14 tuning presets (no per-string custom editor); note naming in sharps, flats or random.
 - Technique (6, metronome-paced, no microphone): https://fretmemo.net/technique/spider, https://fretmemo.net/technique/permutation, https://fretmemo.net/technique/linear, https://fretmemo.net/technique/diagonal, https://fretmemo.net/technique/stringskip, https://fretmemo.net/technique/legato
 - Theory tools (6): Scale Explorer https://fretmemo.net/theory/scales, Circle of Fifths https://fretmemo.net/theory/circle, CAGED System https://fretmemo.net/theory/caged, Triads https://fretmemo.net/theory/triads, Chord Library https://fretmemo.net/theory/chords, Intervals on Fretboard https://fretmemo.net/theory/intervals
-- Ear Training (4 modes, no microphone): Find the Note https://fretmemo.net/ear-training/sound-to-fret, Interval Recognition https://fretmemo.net/ear-training/intervals, Chord Quality https://fretmemo.net/ear-training/chord-quality, Functional Ear https://fretmemo.net/ear-training/functional (major keys only)
-- Rhythm Dojo (4 modes, tap or keyboard input, no microphone): Tap the Beat https://fretmemo.net/rhythm/tap-beat, Strum Patterns https://fretmemo.net/rhythm/strum-patterns, Rhythm Reading https://fretmemo.net/rhythm/rhythm-reading, Groove Lab https://fretmemo.net/rhythm/groove-lab
+- Ear Training (4 modes, no microphone): Find the Note https://fretmemo.net/ear-training/sound-to-fret, Interval Recognition https://fretmemo.net/ear-training/intervals, Chord Quality https://fretmemo.net/ear-training/chord-quality, Functional Ear https://fretmemo.net/ear-training/functional (I-IV-V-I cadence, then name the scale degree 1-7; major keys only). Interval Recognition has Easy/Medium/Hard levels (13 intervals) and Ascending/Descending/Harmonic direction in Settings; Chord Quality has Triads (4) and Extended (9) levels.
+- Rhythm Dojo (4 modes, tap or keyboard input, no microphone): Tap the Beat https://fretmemo.net/rhythm/tap-beat, Strum Patterns https://fretmemo.net/rhythm/strum-patterns, Rhythm Reading https://fretmemo.net/rhythm/rhythm-reading, Groove Lab https://fretmemo.net/rhythm/groove-lab. "Scored" or "Practice" sessions; grades PERFECT within 30 ms, GOOD 80 ms, OK 140 ms; score 0-100 (70% accuracy, 20% average offset, 10% consistency); input latency compensation 0-250 ms.
 - Your Songs (https://fretmemo.net/train, viewer at https://fretmemo.net/scores): import Guitar Pro files (.gp3, .gp4, .gp5, .gpx, .gp), stored only in the browser; notation and tab per track; soundfont playback (speed 0.5-1.5x) or "Guitar sound" through FretMemo's amp/NAM chain with per-track voices; bar-range loop; "Score with mic" with per-bar accuracy and "Loop weak bars"; chord prompter with scale hints; tab editor (frets, rests, 5 durations, bars, tempo, per-bar meter, undo/redo up to 50, "Download .gp"); "Export WAV" (soundfont sound only). Song links cannot be shared.
 
 Learn (https://fretmemo.net/learn): 4 learning paths of short modules with theory, exercises and backing tracks; progress is remembered.
@@ -46,6 +51,8 @@ Learn (https://fretmemo.net/learn): 4 learning paths of short modules with theor
 Sound (https://fretmemo.net/sound): the guitar sound used across exercises. 8 presets (nylon "Classic guitar" plus 7 built on NAM amp models: Fender Deluxe Reverb, Roland JC-120, Vox AC10, Marshall JCM800, Boosted EVH 5153, Dumble Overdrive Special, Ampeg V-2); "Tone designer" with 9 sliders and saved custom presets; import your own A2 .nam file (max 15 MB, stays on the device); "Live input" plays a mic or audio interface through the active preset (headphones; no latency calibration).
 
 Challenges (https://fretmemo.net/challenges): a daily challenge rotating through 7 types (+100 XP) and 6 hunts (Perfect Session, Speed Demon, Explorer, 60s Blitz, Survival Mode, Find All A).
+
+Progress: daily streaks with streak freezes (one earned per 7 streak days), XP and levels, 6 achievement badges.
 
 Platform facts
 - Free; no account or login.
