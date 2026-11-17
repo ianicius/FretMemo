@@ -118,7 +118,7 @@
           "name": "Does the Guitar Pro viewer work offline?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Soundfont playback does, after one online session. The 38 MB instrument soundfont is cached by the app's service worker the first time you press Play. Guitar sound mode relies on sample and amp files that are only partly cached, so it may not work offline."
+            "text": "Soundfont playback does, after one online session. The 38 MB instrument soundfont downloads when you open a song in the viewer, and the app's service worker caches it. Guitar sound mode relies on sample and amp files that are only partly cached, so it may not work offline."
           }
         }
       ]
@@ -169,7 +169,7 @@
                 <ul>
                     <li>FretMemo opens .gp3, .gp4, .gp5, .gpx and .gp files for free at <a href="https://fretmemo.net/train">fretmemo.net/train</a>, in the "Your Songs" section.</li>
                     <li>Imported songs are stored in the browser's IndexedDB on your device; FretMemo does not upload them.</li>
-                    <li>Default playback uses the MuseScore General Lite soundfont, a 38 MB download that is cached after the first play.</li>
+                    <li>Default playback uses the MuseScore General Lite soundfont, a 38 MB download that starts when you open a song and is then cached for offline use.</li>
                     <li>"Guitar sound" mode plays each track through FretMemo's own guitar sound chain, with at most 3 different NAM amps per song.</li>
                     <li>"Export WAV" saves a 16-bit, 44,100 Hz stereo WAV of the full mix, always with the soundfont sound.</li>
                     <li>Song links cannot be shared, because each song's id is created on the device that imported it.</li>
@@ -191,7 +191,7 @@
             <p>Each song in the "Your Songs" list shows its title and details, with buttons to open or delete it. Everything lives in IndexedDB, the database built into your browser, and nothing in the import, storage or playback code sends the file to a server. The flip side is that a song link only works in the browser that imported it. Open it anywhere else and the app tells you the song "may have been deleted or belongs to another device."</p>
 
             <h2>Two ways to hear the song</h2>
-            <p>The default engine is a soundfont player. It plays every track with MuseScore General Lite, an MIT-licensed set of instrument sounds that ships with the app. The first time you press "Play" it downloads about 38 MB ("Loading instrument sounds…"), and the service worker caches it, so soundfont playback works offline after that first online session. This mode has the practice controls: play, pause, stop, volume, a "Metronome" switch and "Speed" from 0.5× to 1.5×.</p>
+            <p>The default engine is a soundfont player. It plays every track with MuseScore General Lite, an MIT-licensed set of instrument sounds that ships with the app. It downloads about 38 MB when you open a song in the viewer. While that runs, the controls show "Loading instrument sounds…" with a percentage, and "Play" appears once it finishes. The service worker then caches it, so soundfont playback works offline after one online session. This mode has the practice controls: play, pause, stop, volume, a "Metronome" switch and "Speed" from 0.5× to 1.5×.</p>
             <p>The second engine sits behind the "Guitar sound" switch. With it on, FretMemo renders the song offline ("Rendering guitar audio…") and plays the result through its own guitar sound chain, the engine behind the Sound page. The switch also opens a "Track voices" panel, where each track gets either a voice (a built-in preset or one you saved) or "Direct (soundfont)". A track you haven't assigned plays direct, drums always play direct, and muted tracks are skipped. Your choices are saved per song.</p>
             <p>A song can use at most 3 different NAM amps. Assign a fourth and the extra tracks fall back to the classic chain, with a message saying so. What NAM is and how the presets are built is in the post about the <a href="free-online-amp-simulator-nam.html">free online amp simulator in the Sound tab</a>.</p>
 
@@ -214,7 +214,7 @@
             <ul>
                 <li>WAV export is soundfont only, as described above.</li>
                 <li>Songs live in one browser on one device. Links can't be shared, and clearing the site's data in your browser removes the songs, so keep your original files.</li>
-                <li>The first soundfont play needs a connection for the 38 MB download.</li>
+                <li>The first song you open needs a connection for the 38 MB download.</li>
                 <li>"Guitar sound" hides the speed control and the metronome, and one render is capped at about 50 minutes of audio.</li>
                 <li>Guitar sound uses sample and amp files that are only partly cached, so I wouldn't count on it offline.</li>
             </ul>
@@ -227,7 +227,7 @@
             <h3>Can I convert a Guitar Pro file to WAV for free?</h3>
             <p>Yes. Open the song in FretMemo and press Export WAV. You get a 16-bit stereo WAV at 44,100 Hz with all tracks, drums included. The export always uses the soundfont sound, because the button is disabled while Guitar sound is on.</p>
             <h3>Does the Guitar Pro viewer work offline?</h3>
-            <p>Soundfont playback does, after one online session. The 38 MB instrument soundfont is cached by the app's service worker the first time you press Play. Guitar sound mode relies on sample and amp files that are only partly cached, so it may not work offline.</p>
+            <p>Soundfont playback does, after one online session. The 38 MB instrument soundfont downloads when you open a song in the viewer, and the app's service worker caches it. Guitar sound mode relies on sample and amp files that are only partly cached, so it may not work offline.</p>
 
             <div class="blog-cta-box">
                 <h3>Open a Guitar Pro file now</h3>
