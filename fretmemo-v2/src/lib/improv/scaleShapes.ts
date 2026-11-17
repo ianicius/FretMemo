@@ -19,6 +19,7 @@ export type ScaleShapeId =
     | "maj-blues"
     | "mix-blues"
     | "bb-box"
+    | "triad-pair"
     | "major"
     | "melodic-minor"
     | "harmonic-minor"
@@ -53,6 +54,8 @@ export const SCALE_SHAPES: Record<ScaleShapeId, ScaleShapeDefinition> = {
     // Minor and major pentatonic from one root, played as one scale.
     "mix-blues": { id: "mix-blues", semitones: [0, 2, 3, 4, 5, 7, 9, 10], degrees: ["1", "2", "b3", "3", "4", "5", "6", "b7"] },
     // The five notes around the root on the B string ("B.B. King box").
+    // Triads on IV and V of the relative major over a minor chord (F + G over Am).
+    "triad-pair": { id: "triad-pair", semitones: [0, 2, 3, 5, 8, 10], degrees: ["1", "2", "b3", "4", "b6", "b7"] },
     "bb-box": { id: "bb-box", semitones: [0, 2, 5, 7, 9], degrees: ["1", "2", "4", "5", "6"] },
     major: { id: "major", semitones: [0, 2, 4, 5, 7, 9, 11], degrees: ["1", "2", "3", "4", "5", "6", "7"] },
     "melodic-minor": { id: "melodic-minor", semitones: [0, 2, 3, 5, 7, 9, 11], degrees: ["1", "2", "b3", "4", "5", "6", "7"] },

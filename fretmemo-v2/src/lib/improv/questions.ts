@@ -15,6 +15,7 @@ import type { NoteName } from "@/types/fretboard";
 import { NOTES } from "@/lib/constants";
 import { Key } from "tonal";
 import { generateBluesForm, generateBluesScale, generateBluesTones } from "./bluesQuestions";
+import { generateTriadInversion, generateVoiceLeading } from "./triadQuestions";
 
 /* ─────────── Seeded PRNG ─────────── */
 
@@ -355,10 +356,12 @@ export type ChoiceGeneratorId =
     | "coltrane"
     | "bluesForm"
     | "bluesTones"
-    | "bluesScale";
+    | "bluesScale"
+    | "triadInversion"
+    | "voiceLeading";
 
 export function listChoiceGeneratorIds(): ChoiceGeneratorId[] {
-    return ["keySig", "modes", "triadBuild", "chordScaleMajor", "triadType", "chordScaleMelodic", "chordScaleHarmonic", "tritone", "secondaryDom", "borrowed", "pivot", "coltrane", "bluesForm", "bluesTones", "bluesScale"];
+    return ["keySig", "modes", "triadBuild", "chordScaleMajor", "triadType", "chordScaleMelodic", "chordScaleHarmonic", "tritone", "secondaryDom", "borrowed", "pivot", "coltrane", "bluesForm", "bluesTones", "bluesScale", "triadInversion", "voiceLeading"];
 }
 
 function generateKeySig(rng: Rng, direction: string): ChoiceQuestion {
@@ -1141,6 +1144,8 @@ function generateQuestion(generatorId: ChoiceGeneratorId, rng: Rng, direction: s
             case "bluesForm": return rng.pick(["bar-to-chord", "bar-to-chord", "degrees", "bar-to-degree", "quick-change"]);
             case "bluesTones": return rng.pick(["third", "seventh", "guide-move"]);
             case "bluesScale": return rng.pick(["blue-note", "clash", "relative-box", "major-pent-notes"]);
+            case "triadInversion": return rng.pick(["bass-to-inversion", "bass-to-inversion", "inversion-to-bass", "inversion-notes"]);
+            case "voiceLeading": return rng.pick(["common-count", "common-name", "voice-move", "voice-move"]);
             default: return "mixed";
         }
     };
@@ -1191,6 +1196,8 @@ function generateQuestion(generatorId: ChoiceGeneratorId, rng: Rng, direction: s
         case "bluesForm": return generateBluesForm(rng, pickDirection());
         case "bluesTones": return generateBluesTones(rng, pickDirection());
         case "bluesScale": return generateBluesScale(rng, pickDirection());
+        case "triadInversion": return generateTriadInversion(rng, pickDirection());
+        case "voiceLeading": return generateVoiceLeading(rng, pickDirection());
         default: return withKeySigVisual(generateKeySig(rng, "key-notes"));
     }
 }

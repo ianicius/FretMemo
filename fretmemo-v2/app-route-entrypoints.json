@@ -67,6 +67,19 @@
     "/improv/blues-chord-tones",
     "/improv/blues-guide-tones",
     "/improv/blues-forms",
-    "/improv/blues-jazz-blues"
+    "/improv/blues-jazz-blues",
+    "/improv/voicings",
+    "/improv/triad-types",
+    "/improv/triad-inversions",
+    "/improv/triad-diatonic",
+    "/improv/triads-top",
+    "/improv/triads-middle",
+    "/improv/triads-low",
+    "/improv/triads-caged",
+    "/improv/vl-common-tones",
+    "/improv/vl-progressions",
+    "/improv/vl-cycles",
+    "/improv/triad-melody",
+    "/improv/triad-pairs"
   ]
 }

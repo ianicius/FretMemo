@@ -1844,7 +1844,8 @@
             "diagramDrill": "Diagram z metronomem",
             "backingLoop": "Pętla akordowa",
             "practiceLink": "Trening na gryfie",
-            "bendDrill": "Podciągnięcia z mikrofonem"
+            "bendDrill": "Podciągnięcia z mikrofonem",
+            "voicingDrill": "Chwyty na zestawie strun"
         },
         "quiz": {
             "circleTapKey": "Kliknij tonację na kole.",
@@ -1966,7 +1967,9 @@
             "rampToggle": "+5 BPM co 2 udane obiegi",
             "reportTitle": "Ostatni obieg: trafione akordy {{done}}/{{total}}",
             "reportHit": "trafiony",
-            "reportMiss": "nietrafiony"
+            "reportMiss": "nietrafiony",
+            "voicingLegend": "Chwyt na wybranym zestawie strun, prowadzony najkrótszą drogą od poprzedniego akordu. Liczby to stopnie akordu.",
+            "voicingLegendTop": "Zielony: górny głos, sprawdzany mikrofonem."
         },
         "shapes": {
             "dorian": "Skala dorycka",
@@ -1985,7 +1988,8 @@
             "m7b5-arp": "Arpeggio m7b5",
             "maj-blues": "Skala bluesowa durowa",
             "mix-blues": "Pentatonika molowa + durowa",
-            "bb-box": "Boks wokół prymy na strunie H"
+            "bb-box": "Boks wokół prymy na strunie H",
+            "triad-pair": "Para trójdźwięków (IV + V)"
         },
         "goals": {
             "lickLoop3": "W taktach 1 i 3 zagraj zagrywki z boksu 1, w taktach 2 i 4 odpowiedz własną frazą.",
@@ -2117,7 +2121,19 @@
             "formEight": "Forma ośmiotaktowa: akord V pojawia się już w drugim takcie, a ostatnie dwa takty to turnaround.",
             "formEightLabel": "8 taktów",
             "formSixteen": "Forma szesnastotaktowa: osiem taktów na akordzie I, potem druga połowa zwykłego bluesa.",
-            "formSixteenLabel": "16 taktów"
+            "formSixteenLabel": "16 taktów",
+            "triadsComp": "Akompaniuj samymi trójdźwiękami na wskazanym zestawie strun. Przy każdej zmianie weź chwyt pokazany na gryfie, najbliższy poprzedniemu.",
+            "triadsOnePosition": "Zagraj całą progresję w jednym miejscu gryfu: każdy akord jako trójdźwięk na strunach 2-3-4, bez przesuwania ręki o więcej niż dwa progi.",
+            "vlPopAxis": "C–G–Am–F trójdźwiękami najkrótszą drogą. Na „raz” każdego akordu zagraj jego górny głos.",
+            "vlPopAxisLabel": "I–V–vi–IV",
+            "vlTwoFiveOne": "Dm–G–C trójdźwiękami. Zwróć uwagę, które dźwięki zostają przy każdej zmianie.",
+            "vlTwoFiveOneLabel": "ii–V–I",
+            "vlAndalusian": "Am–G–F–E: górny głos schodzi krokami. Zagraj go na „raz” każdego akordu.",
+            "vlAndalusianLabel": "Kadencja andaluzyjska",
+            "vlCycle": "Cały cykl kwartowy trójdźwiękami na strunach 1-2-3, chwytami najbliższymi poprzedniemu.",
+            "triadTonesOnly": "Nad każdym akordem graj tylko dźwięki jego trójdźwięku. Na „raz” każdego taktu zagraj jeden z nich.",
+            "triadTopMelody": "Graj tylko najwyższy dźwięk chwytu pokazanego na gryfie. Razem tworzą melodię progresji.",
+            "triadPairs": "Nad Am7 graj na zmianę dźwięki trójdźwięku F (F A C) i G (G H D). Zaczynaj grupy na różnych dźwiękach."
         },
         "q": {
             "keySig": {
@@ -2253,6 +2269,22 @@
                 "hintClash": "{{first}} to tercja mała; tercją akordu {{chord}} jest {{target}}. To tarcie daje bluesowe brzmienie.",
                 "hintRelative": "Pentatonika durowa {{key}} i molowa {{target}} to te same dźwięki. Boks leży trzy progi niżej.",
                 "hintMajorPent": "Pentatonika durowa to stopnie 1, 2, 3, 5 i 6 skali durowej."
+            },
+            "triadInversion": {
+                "root": "pozycja zasadnicza",
+                "first": "1. przewrót",
+                "second": "2. przewrót",
+                "bassToInversion": "Trójdźwięk {{chord}} z dźwiękiem {{root}} w basie to:",
+                "inversionToBass": "Trójdźwięk {{chord}}, układ: {{type}}. Który dźwięk jest w basie?",
+                "inversionNotes": "Trójdźwięk {{chord}}, układ: {{type}}. Dźwięki od dołu to:",
+                "hintVoiced": "{{chord}} w tym układzie to od dołu {{notes}}."
+            },
+            "voiceLeading": {
+                "commonCount": "Ile wspólnych dźwięków mają {{first}} i {{second}}?",
+                "commonName": "Który dźwięk jest wspólny dla {{first}} i {{second}}?",
+                "voiceMove": "Zmiana {{first}} na {{second}} najkrótszą drogą: dokąd idzie dźwięk {{source}}?",
+                "hintNotes": "{{first}}: {{notes}}. {{second}}: {{list}}.",
+                "hintMoves": "Głosy {{notes}} idą kolejno na {{list}}: wspólny dźwięk zostaje, pozostałe ruszają się o najmniejszy interwał."
             }
         },
         "modules": {
@@ -2435,6 +2467,66 @@
                 "name": "Blues jazzowy",
                 "term": "Jazz Blues",
                 "theory": "Blues jazzowy zachowuje dwanaście taktów i dodaje akordy przejściowe. W takcie 4 pojawia się ii–V prowadzące do akordu IV, w takcie 6 akord zmniejszony pół tonu nad IV, a w takcie 8 dominanta prowadząca do ii–V w taktach 9–10. Forma kończy się turnaroundem I–VI–ii–V. Skala bluesowa tonacji dalej spina całość, ale nad akordami przejściowymi trzeba celować w ich tercje. Zacznij od arpeggiów w wolnym tempie."
+            },
+            "triad-types": {
+                "name": "Cztery rodzaje trójdźwięków",
+                "term": "Triad Qualities",
+                "theory": "Trójdźwięk to trzy dźwięki ułożone tercjami: pryma, tercja i kwinta. Rodzaj zależy od dwóch tercji: wielka i mała dają akord durowy, mała i wielka molowy, dwie małe zmniejszony, dwie wielkie zwiększony. Durowy i molowy mają kwintę czystą, zmniejszony kwintę zmniejszoną, zwiększony zwiększoną. Każdy większy akord, od septymowych po jazzowe rozszerzenia, ma w środku jeden z tych czterech trójdźwięków. Dlatego warto znać je na pamięć, zanim zaczniesz szukać ich na gryfie."
+            },
+            "triad-inversions": {
+                "name": "Przewroty",
+                "term": "Inversions",
+                "theory": "Te same trzy dźwięki można ułożyć na trzy sposoby, zależnie od tego, który jest najniżej. Pozycja zasadnicza ma w basie prymę (C E G), pierwszy przewrót tercję (E G C), drugi przewrót kwintę (G C E). Na trzech sąsiednich strunach każdy przewrót ma własny kształt, a wszystkie trzy następują po sobie w górę gryfu i powtarzają się co dwanaście progów. Najwyższy dźwięk przewrotu słychać jako melodię, więc wybór przewrotu zmienia brzmienie akordu, choć to wciąż ten sam akord."
+            },
+            "triad-diatonic": {
+                "name": "Trójdźwięki w tonacji",
+                "term": "Diatonic Triads",
+                "theory": "Budując trójdźwięk od każdego stopnia skali durowej, dostajesz siedem akordów tonacji: I, IV i V są durowe, ii, iii i vi molowe, a vii° zmniejszony. W C-dur to C, Dm, Em, F, G, Am i H°. Na jednym zestawie strun te akordy idą po gryfie jak skala: każdy głos przesuwa się o jeden dźwięk skali w górę. To ćwiczenie łączy wiedzę o tonacji z ręką i przygotowuje do prowadzenia głosów."
+            },
+            "triads-top": {
+                "name": "Struny 1-2-3",
+                "term": "Top String Set",
+                "theory": "Trzy najwyższe struny (G, H, E) to najważniejszy zestaw: tu trójdźwięki brzmią czysto nad basem i nie wchodzą w drogę reszcie zespołu. Durowy trójdźwięk ma tu trzy kształty, które idą w górę gryfu w stałej kolejności, a molowy różni się od każdego z nich jednym dźwiękiem: tercją o próg niżej. Zacznij od C-dur i c-moll, ucząc się, gdzie w każdym kształcie leży pryma. Potem graj progresję samymi trójdźwiękami, zmieniając przewrót tak, by ręka prawie się nie ruszała."
+            },
+            "triads-middle": {
+                "name": "Struny 2-3-4",
+                "term": "Middle String Set",
+                "theory": "Na strunach D, G i H kształty są inne niż wyżej, bo między strunami G i H jest tercja wielka zamiast kwarty. Ten zestaw brzmi pełniej i ciemniej, dobrze sprawdza się w akompaniamencie z basistą. Pozycja zasadnicza, pierwszy i drugi przewrót znowu idą po sobie w górę gryfu. Ucz się ich od G-dur i g-moll i porównuj z kształtami na strunach 1-2-3."
+            },
+            "triads-low": {
+                "name": "Niskie struny",
+                "term": "Lower String Sets",
+                "theory": "Na strunach A, D, G i E, A, D wszystkie odstępy między strunami to kwarty, więc kształty są regularne i łatwo je przesuwać. Trójdźwięki brzmią tu gęsto i nisko, dlatego w zespole gra się je rzadziej, ale w grze solo i w riffach są bardzo przydatne. Wystarczy, że opanujesz jeden z dwóch zestawów; drugi różni się tylko położeniem na gryfie. Ćwicz na D-dur i d-moll."
+            },
+            "triads-caged": {
+                "name": "Trójdźwięki w chwytach CAGED",
+                "term": "Triads in CAGED Shapes",
+                "theory": "Każdy chwyt barré i każdy otwarty akord składa się z trójdźwięków na sąsiednich strunach. Pięć kształtów CAGED to pięć miejsc na gryfie, w których ten sam akord leży pod ręką; w każdym z nich znajdziesz trójdźwięk na każdym zestawie strun. Kiedy to zobaczysz, możesz zagrać całą progresję w jednej pozycji, biorąc z każdego chwytu tylko trzy struny. Osadzony wizualizator pokazuje pięć kształtów; porównaj je z chwytami w ćwiczeniu."
+            },
+            "vl-common-tones": {
+                "name": "Wspólne dźwięki",
+                "term": "Common Tones",
+                "theory": "Prowadzenie głosów to łączenie akordów tak, by każdy dźwięk przechodził w najbliższy dźwięk następnego akordu. Pierwsza zasada: dźwięk wspólny dla obu akordów zostaje na miejscu. Druga: pozostałe głosy ruszają się krokiem, o pół tonu albo cały ton. C i F mają wspólne C, więc przy zmianie C na F zostaje C, E idzie na F, a G na A. Ręka prawie się nie rusza, a akordy brzmią jak trzy płynne melodie zamiast skoków."
+            },
+            "vl-progressions": {
+                "name": "Progresje najkrótszą drogą",
+                "term": "Voice-Led Progressions",
+                "theory": "Te same zasady stosuje się do całych progresji. Przy I–V–vi–IV, ii–V–I czy kadencji andaluzyjskiej (Am–G–F–E) każdy kolejny trójdźwięk leży o próg lub dwa od poprzedniego. Najwyższy głos tych chwytów tworzy własną melodię; śpiewaj ją, grając akordy. W pętli mikrofon sprawdza, czy na „raz” każdego akordu gra górny głos właściwego chwytu."
+            },
+            "vl-cycles": {
+                "name": "Cykl kwartowy",
+                "term": "Cycle of Fourths",
+                "theory": "Cykl kwartowy prowadzi przez wszystkie dwanaście tonacji: C, F, B, Es i dalej, aż do G i z powrotem do C. Każde dwa sąsiednie akordy mają jeden wspólny dźwięk, a pozostałe dwa głosy ruszają się o pół tonu albo cały ton. Ten układ ćwiczeń pochodzi od Micka Goodricka i jest najszybszą drogą do znajomości trójdźwięków we wszystkich tonacjach. Prowadzone w ten sposób akordy przez cały cykl wędrują o oktawę w górę, więc raz w trakcie trzeba przeskoczyć niżej."
+            },
+            "triad-melody": {
+                "name": "Trójdźwięki w solówce",
+                "term": "Triads as Melody",
+                "theory": "Trójdźwięk zagrany dźwięk po dźwięku to najkrótsza droga do melodii, która brzmi jak akord pod nią. Nad każdym akordem graj tylko jego trzy dźwięki, a przy zmianie przejdź do najbliższego dźwięku nowego trójdźwięku. To ta sama zasada co w prowadzeniu głosów, tylko w jednej linii. Kiedy to działa, dodaj dźwięki skali pomiędzy, ale ląduj na dźwiękach trójdźwięku."
+            },
+            "triad-pairs": {
+                "name": "Pary trójdźwięków",
+                "term": "Triad Pairs",
+                "theory": "Para trójdźwięków to dwa akordy bez wspólnych dźwięków grane na zmianę, zwykle o cały ton od siebie. Nad Am7 pasują F i G, czyli IV i V stopień C-dur: razem dają sześć dźwięków (F A C G B D), które brzmią nowocześnie i bardzo pewnie. Metoda pochodzi z jazzu, gdzie opisał ją między innymi Gary Campbell. Graj najpierw jeden trójdźwięk w górę i drugi w dół, potem mieszaj je w krótkich grupach."
             }
         },
         "ex": {
@@ -2957,6 +3049,138 @@
             "blues-jam.e1": {
                 "name": "Pętla: blues jam",
                 "desc": "Wszystkie formy bluesa w jednym miejscu. Wybierz formę, tonację i styl, a potem po prostu graj. Ta sekcja niczego nie blokuje."
+            },
+            "triad-types.e1": {
+                "name": "Quiz: rodzaje trójdźwięków",
+                "desc": "Jakie interwały ma każdy z czterech rodzajów trójdźwięku i jak się go nazywa."
+            },
+            "triad-types.e2": {
+                "name": "Quiz: dźwięki trójdźwięku na gryfie",
+                "desc": "Znajdź na gryfie tercję, kwintę albo septymę akordu zbudowanego na stopniu tonacji."
+            },
+            "triad-inversions.e1": {
+                "name": "Quiz: przewroty",
+                "desc": "Rozpoznaj przewrót po dźwięku w basie i zbuduj przewrót od dołu."
+            },
+            "triad-inversions.e2": {
+                "name": "Chwyty: trzy przewroty C-dur",
+                "desc": "Pozycja zasadnicza, pierwszy i drugi przewrót na strunach 1-2-3, w górę gryfu. Jeden chwyt na takt."
+            },
+            "triad-inversions.e3": {
+                "name": "Chwyty: trzy przewroty a-moll",
+                "desc": "To samo ćwiczenie z trójdźwiękiem molowym."
+            },
+            "triad-diatonic.e1": {
+                "name": "Quiz: trójdźwięki w tonacji",
+                "desc": "Jaki trójdźwięk leży na danym stopniu tonacji durowej."
+            },
+            "triad-diatonic.e2": {
+                "name": "Chwyty: tonacja C-dur w górę gryfu",
+                "desc": "C, Dm, Em, F, G, Am, H° i C na strunach 1-2-3. Każdy głos idzie o jeden dźwięk skali w górę."
+            },
+            "triad-diatonic.e3": {
+                "name": "Chwyty: tonacja na strunach 2-3-4",
+                "desc": "Ta sama sekwencja na środkowych strunach."
+            },
+            "triads-top.e1": {
+                "name": "Chwyty: dur i moll na strunach 1-2-3",
+                "desc": "Wszystkie chwyty C-dur i c-moll przez cały gryf. Przełącznik „Akord” zmienia rodzaj."
+            },
+            "triads-top.e2": {
+                "name": "Pętla: akompaniament trójdźwiękami",
+                "desc": "G–D–Em–C na strunach 1-2-3. Gryf pokazuje chwyt najbliższy poprzedniemu."
+            },
+            "triads-top.e3": {
+                "name": "Chwyty: zmniejszony i zwiększony",
+                "desc": "C° i C+ na strunach 1-2-3. Zwiększony powtarza się co cztery progi."
+            },
+            "triads-middle.e1": {
+                "name": "Chwyty: dur i moll na strunach 2-3-4",
+                "desc": "Wszystkie chwyty G-dur i g-moll przez cały gryf."
+            },
+            "triads-middle.e2": {
+                "name": "Pętla: akompaniament na środkowych strunach",
+                "desc": "G–D–Em–C na strunach 2-3-4, chwytami najbliższymi poprzedniemu."
+            },
+            "triads-middle.e3": {
+                "name": "Chwyty: zmniejszony i zwiększony",
+                "desc": "G° i G+ na strunach 2-3-4."
+            },
+            "triads-low.e1": {
+                "name": "Chwyty: dur i moll na niskich strunach",
+                "desc": "D-dur i d-moll na strunach 3-4-5 albo 4-5-6. Wybierz zestaw przełącznikiem."
+            },
+            "triads-low.e2": {
+                "name": "Pętla: akompaniament na niskich strunach",
+                "desc": "G–D–Em–C na strunach 3-4-5."
+            },
+            "triads-low.e3": {
+                "name": "Chwyty: zmniejszony i zwiększony",
+                "desc": "D° i D+ na niskich strunach."
+            },
+            "triads-caged.e1": {
+                "name": "Chwyty: G-dur na czterech zestawach strun",
+                "desc": "Przejdź przez chwyty G-dur na każdym zestawie strun. Cztery przebiegi, najlepiej po jednym na zestaw."
+            },
+            "triads-caged.e2": {
+                "name": "Pętla: jedna pozycja",
+                "desc": "G–C–D–G na strunach 2-3-4 w okolicy progów 2–6. Cała progresja bez przesuwania ręki."
+            },
+            "vl-common-tones.e1": {
+                "name": "Quiz: prowadzenie głosów",
+                "desc": "Wspólne dźwięki dwóch akordów i to, dokąd idzie każdy głos przy zmianie."
+            },
+            "vl-common-tones.e2": {
+                "name": "Chwyty: C–F–G–C najkrótszą drogą",
+                "desc": "Wspólne dźwięki są zielone, a strzałki pokazują, dokąd ruszają się pozostałe głosy."
+            },
+            "vl-common-tones.e3": {
+                "name": "Chwyty: Am–Dm–E–Am",
+                "desc": "Ta sama zasada w tonacji molowej."
+            },
+            "vl-progressions.e1": {
+                "name": "Pętla: trzy progresje",
+                "desc": "I–V–vi–IV, ii–V–I i kadencja andaluzyjska na strunach 1-2-3. Mikrofon sprawdza górny głos."
+            },
+            "vl-progressions.e2": {
+                "name": "Pętla: progresje na strunach 2-3-4",
+                "desc": "Te same progresje na środkowych strunach."
+            },
+            "vl-cycles.e1": {
+                "name": "Chwyty: cykl kwartowy",
+                "desc": "Dwanaście trójdźwięków durowych w kwartach, każdy prowadzony od poprzedniego."
+            },
+            "vl-cycles.e2": {
+                "name": "Pętla: cykl kwartowy",
+                "desc": "Cały cykl z podkładem, jeden akord na takt. Zacznij wolno."
+            },
+            "vl-cycles.e3": {
+                "name": "Chwyty: cykl kwartowy w molu",
+                "desc": "Dwanaście trójdźwięków molowych w kwartach."
+            },
+            "triad-melody.licks": {
+                "name": "Frazy z trójdźwięków",
+                "desc": "Arpeggio C-dur oraz fraza, która idzie za akordami C–Am–F–G."
+            },
+            "triad-melody.e1": {
+                "name": "Pętla: tylko dźwięki trójdźwięku",
+                "desc": "Nad każdym akordem graj wyłącznie jego trzy dźwięki. Mikrofon sprawdza „raz” każdego taktu."
+            },
+            "triad-melody.e2": {
+                "name": "Pętla: melodia górnego głosu",
+                "desc": "Zagraj sam górny głos chwytów jako melodię."
+            },
+            "triad-pairs.e1": {
+                "name": "Diagram: skala z pary trójdźwięków",
+                "desc": "Sześć dźwięków trójdźwięków F i G nad a-moll w jednej pozycji."
+            },
+            "triad-pairs.e2": {
+                "name": "Pętla: F i G nad Am7",
+                "desc": "Na zmianę grupy z trójdźwięku F i z trójdźwięku G nad jednym akordem."
+            },
+            "triad-pairs.licks": {
+                "name": "Frazy z pary trójdźwięków",
+                "desc": "Dwie frazy z F i G nad a-moll: w górę przez oba trójdźwięki i w dół."
             }
         },
         "practiceLink": {
@@ -3022,7 +3246,8 @@
             "boxOne": "Boks 1 (próg 5)",
             "boxTwo": "Górna część boksu 2 (próg 8)",
             "boxRoot": "Wokół prymy na strunie H (próg 10)",
-            "turnaround": "Turnaround"
+            "turnaround": "Turnaround",
+            "triadPairFG": "F (F A C) + G (G H D)"
         },
         "session": {
             "title": "Sesja dnia",
@@ -3149,6 +3374,22 @@
             "bluesTurnUp": {
                 "name": "Turnaround w górę",
                 "tip": "Od A na strunie E (próg 5) chromatycznie do E na strunie A: C#, D, D#, E."
+            },
+            "triadArpC": {
+                "name": "Arpeggio C-dur",
+                "tip": "Trójdźwięk C-dur w górę i w dół na strunach 1-2-3, przez dwa przewroty."
+            },
+            "triadChanges": {
+                "name": "Za akordami C–Am–F–G",
+                "tip": "Trzy dźwięki każdego akordu po kolei; między akordami ręka przesuwa się najwyżej o dwa progi."
+            },
+            "pairFG": {
+                "name": "F i G w górę",
+                "tip": "Najpierw trójdźwięk F, potem G o cały ton wyżej, zakończenie na A."
+            },
+            "pairFGDown": {
+                "name": "F i G w dół",
+                "tip": "Te same sześć dźwięków od D w dół, zakończenie na A."
             }
         },
         "standards": {
@@ -3223,6 +3464,17 @@
                     "colours": "Kolory (8–10)",
                     "changes": "Granie po zmianach (11–14)"
                 }
+            },
+            "voicings": {
+                "tab": "Trójdźwięki",
+                "title": "Trójdźwięki i prowadzenie głosów",
+                "description": "Nauka trójdźwięków w 12 modułach: przewroty na każdym zestawie strun, mapa całego gryfu, prowadzenie głosów w prawdziwych progresjach i trójdźwięki w solówce.",
+                "stages": {
+                    "build": "Budowa (1–3)",
+                    "map": "Mapa gryfu (4–7)",
+                    "leading": "Prowadzenie głosów (8–10)",
+                    "melody": "W solówce (11–12)"
+                }
             }
         },
         "bend": {
@@ -3242,6 +3494,27 @@
             "selfMark": "Trafiłem (bez mikrofonu)",
             "reps": "Trafione: {{done}}/{{required}}",
             "holdHint": "Powtórzenie liczy się, gdy utrzymasz dźwięk w zielonym polu przez {{seconds}} s. Przed następnym opuść strunę."
+        },
+        "voicing": {
+            "threshold": "Wymagane przebiegi: {{required}}",
+            "chord": "Akord",
+            "strings": "Zestaw strun",
+            "stringSetLabel": "Struny {{numbers}} ({{notes}})",
+            "inversion": {
+                "0": "pozycja zasadnicza",
+                "1": "1. przewrót",
+                "2": "2. przewrót",
+                "3": "3. przewrót"
+            },
+            "step": "chwyt {{current}} z {{total}}",
+            "legend": "Liczby to stopnie akordu. Zielone: dźwięk zostaje w następnym akordzie. Strzałka: kierunek, w którym głos się przesunie. Półprzezroczyste: następny chwyt.",
+            "empty": "Ten akord nie ma chwytu na tym zestawie strun.",
+            "prev": "Poprzedni chwyt",
+            "next": "Następny chwyt",
+            "playChord": "Zagraj akord",
+            "runs": "Przebiegi: {{done}}/{{required}}",
+            "runButton": "Przebieg zaliczony",
+            "runNeedsMetronome": "Najpierw przejdź z metronomem przez wszystkie chwyty ({{steps}})."
         }
     }
 }

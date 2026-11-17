@@ -30,6 +30,7 @@ import { BackingLoopExercise } from "@/components/improv/BackingLoopExercise";
 import { PracticeLinkExercise } from "@/components/improv/PracticeLinkExercise";
 import { LickExercise } from "@/components/improv/LickExercise";
 import { BendDrill } from "@/components/improv/BendDrill";
+import { VoicingDrill } from "@/components/improv/VoicingDrill";
 import { REVIEW_ID, countCompletedModules, dailySession, passedQuizGenerators, reviewQuiz, isModuleUnlocked, isModuleComplete, isNonGating } from "@/data/improv/curriculum";
 import { DEFAULT_TRACK, TRACKS, getModule, getTrack, trackOfModule, type Track } from "@/data/improv/tracks";
 import type { ChoiceGeneratorId } from "@/lib/improv/questions";
@@ -335,6 +336,8 @@ function renderImprovExercise(moduleId: string, exercise: ImprovExercise) {
             return <LickExercise key={exercise.id} moduleId={moduleId} exercise={exercise} />;
         case "bend-drill":
             return <BendDrill key={exercise.id} moduleId={moduleId} exercise={exercise} />;
+        case "voicing-drill":
+            return <VoicingDrill key={exercise.id} moduleId={moduleId} exercise={exercise} />;
         default:
             return null;
     }

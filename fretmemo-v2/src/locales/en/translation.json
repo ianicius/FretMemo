@@ -1830,7 +1830,8 @@
             "diagramDrill": "Diagram with metronome",
             "backingLoop": "Backing loop",
             "practiceLink": "Fretboard practice",
-            "bendDrill": "Bends with the microphone"
+            "bendDrill": "Bends with the microphone",
+            "voicingDrill": "Voicings on a string set"
         },
         "quiz": {
             "circleTapKey": "Tap the key on the circle.",
@@ -1952,7 +1953,9 @@
             "rampToggle": "+5 BPM every 2 successful loops",
             "reportTitle": "Last loop: {{done}}/{{total}} chords hit",
             "reportHit": "hit",
-            "reportMiss": "missed"
+            "reportMiss": "missed",
+            "voicingLegend": "The chord on the chosen string set, voice-led by the shortest way from the previous chord. Numbers are chord degrees.",
+            "voicingLegendTop": "Green: the top voice, checked by the microphone."
         },
         "shapes": {
             "dorian": "Dorian scale",
@@ -1971,7 +1974,8 @@
             "m7b5-arp": "m7b5 arpeggio",
             "maj-blues": "Major blues scale",
             "mix-blues": "Minor + major pentatonic",
-            "bb-box": "Box around the root on the B string"
+            "bb-box": "Box around the root on the B string",
+            "triad-pair": "Triad pair (IV + V)"
         },
         "goals": {
             "lickLoop3": "In bars 1 and 3 play the box 1 licks, in bars 2 and 4 answer with your own phrase.",
@@ -2103,7 +2107,19 @@
             "formEight": "The eight-bar form: the V chord arrives in the second bar and the last two bars are a turnaround.",
             "formEightLabel": "8 bars",
             "formSixteen": "The sixteen-bar form: eight bars on the I chord, then the second half of a regular blues.",
-            "formSixteenLabel": "16 bars"
+            "formSixteenLabel": "16 bars",
+            "triadsComp": "Comp with triads only on the given string set. At each change take the voicing shown on the board, the nearest to the previous one.",
+            "triadsOnePosition": "Play the whole progression in one place on the neck: every chord as a triad on strings 2-3-4, moving your hand no more than two frets.",
+            "vlPopAxis": "C–G–Am–F with triads by the shortest way. On beat one of each chord play its top voice.",
+            "vlPopAxisLabel": "I–V–vi–IV",
+            "vlTwoFiveOne": "Dm–G–C with triads. Notice which notes stay at each change.",
+            "vlTwoFiveOneLabel": "ii–V–I",
+            "vlAndalusian": "Am–G–F–E: the top voice walks down by step. Play it on beat one of each chord.",
+            "vlAndalusianLabel": "Andalusian cadence",
+            "vlCycle": "The whole cycle of fourths with triads on strings 1-2-3, each voicing nearest to the previous one.",
+            "triadTonesOnly": "Over each chord play only the notes of its triad. On beat one of every bar play one of them.",
+            "triadTopMelody": "Play only the highest note of the voicing shown on the board. Together they form the melody of the progression.",
+            "triadPairs": "Over Am7 play the notes of the F triad (F A C) and the G triad (G B D) in turn. Start the groups on different notes."
         },
         "q": {
             "keySig": {
@@ -2239,6 +2255,22 @@
                 "hintClash": "{{first}} is the minor third; the third of {{chord}} is {{target}}. That rub is the blues sound.",
                 "hintRelative": "{{key}} major pentatonic and {{target}} minor pentatonic are the same notes. The box sits three frets lower.",
                 "hintMajorPent": "The major pentatonic is degrees 1, 2, 3, 5 and 6 of the major scale."
+            },
+            "triadInversion": {
+                "root": "root position",
+                "first": "first inversion",
+                "second": "second inversion",
+                "bassToInversion": "{{chord}} with {{root}} in the bass is in:",
+                "inversionToBass": "{{chord}} in {{type}}. Which note is in the bass?",
+                "inversionNotes": "{{chord}} in {{type}}. The notes from the bottom are:",
+                "hintVoiced": "{{chord}} voiced this way is {{notes}} from the bottom."
+            },
+            "voiceLeading": {
+                "commonCount": "How many notes do {{first}} and {{second}} share?",
+                "commonName": "Which note do {{first}} and {{second}} share?",
+                "voiceMove": "{{first}} to {{second}} by the shortest way: where does {{source}} go?",
+                "hintNotes": "{{first}}: {{notes}}. {{second}}: {{list}}.",
+                "hintMoves": "The voices {{notes}} go to {{list}} in turn: the common note stays, the others move by the smallest interval."
             }
         },
         "modules": {
@@ -2421,6 +2453,66 @@
                 "name": "Jazz blues",
                 "term": "Jazz Blues",
                 "theory": "A jazz blues keeps the twelve bars and adds passing chords. Bar 4 brings a ii–V leading to the IV chord, bar 6 a diminished chord a half step above the IV, and bar 8 a dominant leading to the ii–V in bars 9–10. The form ends with a I–VI–ii–V turnaround. The blues scale of the key still holds everything together, but over the passing chords you need to aim for their thirds. Start with the arpeggios at a slow tempo."
+            },
+            "triad-types": {
+                "name": "The four triad qualities",
+                "term": "Triad Qualities",
+                "theory": "A triad is three notes stacked in thirds: the root, the third and the fifth. Its quality depends on the two thirds: major then minor gives a major chord, minor then major a minor one, two minor thirds a diminished one, two major thirds an augmented one. Major and minor have a perfect fifth, diminished a diminished fifth, augmented an augmented fifth. Every bigger chord, from sevenths to jazz extensions, has one of these four triads inside. That is why they are worth knowing by heart before you look for them on the neck."
+            },
+            "triad-inversions": {
+                "name": "Inversions",
+                "term": "Inversions",
+                "theory": "The same three notes can be stacked three ways, depending on which one is lowest. Root position has the root in the bass (C E G), the first inversion the third (E G C), the second inversion the fifth (G C E). On three adjacent strings each inversion has its own shape, and all three follow each other up the neck and repeat every twelve frets. The highest note of an inversion is heard as the melody, so choosing an inversion changes how the chord sounds even though it is the same chord."
+            },
+            "triad-diatonic": {
+                "name": "Triads in a key",
+                "term": "Diatonic Triads",
+                "theory": "Building a triad on every degree of the major scale gives the seven chords of the key: I, IV and V are major, ii, iii and vi minor, and vii° diminished. In C major they are C, Dm, Em, F, G, Am and B°. On one string set these chords walk up the neck like a scale: every voice moves up by one scale note. This exercise ties what you know about keys to your hand and prepares you for voice leading."
+            },
+            "triads-top": {
+                "name": "Strings 1-2-3",
+                "term": "Top String Set",
+                "theory": "The three highest strings (G, B, E) are the most important set: triads sound clear above the bass here and stay out of the band's way. A major triad has three shapes that go up the neck in a fixed order, and the minor triad differs from each of them by one note: the third, one fret lower. Start with C major and C minor, learning where the root sits in every shape. Then play a progression with triads only, changing inversions so that your hand hardly moves."
+            },
+            "triads-middle": {
+                "name": "Strings 2-3-4",
+                "term": "Middle String Set",
+                "theory": "On the D, G and B strings the shapes differ from those above, because the G and B strings are a major third apart instead of a fourth. This set sounds fuller and darker and works well for comping with a bass player. Root position, first and second inversion again follow each other up the neck. Learn them on G major and G minor and compare them with the shapes on strings 1-2-3."
+            },
+            "triads-low": {
+                "name": "Lower strings",
+                "term": "Lower String Sets",
+                "theory": "On A, D, G and on E, A, D every pair of strings is a fourth apart, so the shapes are regular and easy to move. Triads sound dense and low here, so a band uses them less often, but in solo playing and riffs they are very useful. It is enough to master one of the two sets; the other differs only in where it sits on the neck. Practise on D major and D minor."
+            },
+            "triads-caged": {
+                "name": "Triads in CAGED shapes",
+                "term": "Triads in CAGED Shapes",
+                "theory": "Every barre chord and every open chord is made of triads on adjacent strings. The five CAGED shapes are five places on the neck where the same chord lies under the hand; in each of them you will find a triad on every string set. Once you see this, you can play a whole progression in one position, taking only three strings from each shape. The embedded visualizer shows the five shapes; compare them with the voicings in the exercise."
+            },
+            "vl-common-tones": {
+                "name": "Common tones",
+                "term": "Common Tones",
+                "theory": "Voice leading means joining chords so that every note goes to the nearest note of the next chord. First rule: a note the two chords share stays where it is. Second: the other voices move by step, a half or a whole step. C and F share C, so when C changes to F, C stays, E goes to F and G to A. The hand hardly moves, and the chords sound like three smooth melodies instead of jumps."
+            },
+            "vl-progressions": {
+                "name": "Progressions by the shortest way",
+                "term": "Voice-Led Progressions",
+                "theory": "The same rules apply to whole progressions. In I–V–vi–IV, ii–V–I or the Andalusian cadence (Am–G–F–E) every next triad lies a fret or two from the previous one. The top voice of these voicings forms a melody of its own; sing it while you play the chords. In the loop the microphone checks that you play the top voice of the right voicing on beat one of each chord."
+            },
+            "vl-cycles": {
+                "name": "The cycle of fourths",
+                "term": "Cycle of Fourths",
+                "theory": "The cycle of fourths goes through all twelve keys: C, F, Bb, Eb and on to G and back to C. Every two neighbouring chords share one note, and the other two voices move by a half or a whole step. This kind of drill comes from Mick Goodrick and is the fastest way to know triads in every key. Voice-led this way, the chords climb an octave over the whole cycle, so once along the way you have to jump down."
+            },
+            "triad-melody": {
+                "name": "Triads in the solo",
+                "term": "Triads as Melody",
+                "theory": "A triad played note by note is the shortest way to a melody that sounds like the chord beneath it. Over each chord play only its three notes, and at the change move to the nearest note of the new triad. It is the same rule as voice leading, in a single line. Once that works, add scale notes in between, but land on triad notes."
+            },
+            "triad-pairs": {
+                "name": "Triad pairs",
+                "term": "Triad Pairs",
+                "theory": "A triad pair is two chords with no notes in common, played in turn, usually a whole step apart. Over Am7, F and G fit, the IV and V of C major: together they give six notes (F A C G B D) that sound modern and very sure of themselves. The method comes from jazz, where Gary Campbell among others described it. Play one triad up and the other down first, then mix them in short groups."
             }
         },
         "ex": {
@@ -2943,6 +3035,138 @@
             "blues-jam.e1": {
                 "name": "Loop: blues jam",
                 "desc": "Every blues form in one place. Pick a form, a key and a style, then just play. This section gates nothing."
+            },
+            "triad-types.e1": {
+                "name": "Quiz: triad qualities",
+                "desc": "The intervals of each of the four triad qualities and what each is called."
+            },
+            "triad-types.e2": {
+                "name": "Quiz: triad notes on the fretboard",
+                "desc": "Find the third, fifth or seventh of a chord built on a degree of the key."
+            },
+            "triad-inversions.e1": {
+                "name": "Quiz: inversions",
+                "desc": "Tell the inversion from the bass note and build an inversion from the bottom."
+            },
+            "triad-inversions.e2": {
+                "name": "Voicings: the three inversions of C major",
+                "desc": "Root position, first and second inversion on strings 1-2-3, up the neck. One voicing per bar."
+            },
+            "triad-inversions.e3": {
+                "name": "Voicings: the three inversions of A minor",
+                "desc": "The same exercise with a minor triad."
+            },
+            "triad-diatonic.e1": {
+                "name": "Quiz: triads in a key",
+                "desc": "Which triad sits on a given degree of a major key."
+            },
+            "triad-diatonic.e2": {
+                "name": "Voicings: C major up the neck",
+                "desc": "C, Dm, Em, F, G, Am, B° and C on strings 1-2-3. Every voice moves up one scale note."
+            },
+            "triad-diatonic.e3": {
+                "name": "Voicings: the key on strings 2-3-4",
+                "desc": "The same sequence on the middle strings."
+            },
+            "triads-top.e1": {
+                "name": "Voicings: major and minor on strings 1-2-3",
+                "desc": "Every voicing of C major and C minor across the neck. The \"Chord\" selector changes the quality."
+            },
+            "triads-top.e2": {
+                "name": "Loop: comping with triads",
+                "desc": "G–D–Em–C on strings 1-2-3. The board shows the voicing nearest to the previous one."
+            },
+            "triads-top.e3": {
+                "name": "Voicings: diminished and augmented",
+                "desc": "C° and C+ on strings 1-2-3. The augmented triad repeats every four frets."
+            },
+            "triads-middle.e1": {
+                "name": "Voicings: major and minor on strings 2-3-4",
+                "desc": "Every voicing of G major and G minor across the neck."
+            },
+            "triads-middle.e2": {
+                "name": "Loop: comping on the middle strings",
+                "desc": "G–D–Em–C on strings 2-3-4, each voicing nearest to the previous one."
+            },
+            "triads-middle.e3": {
+                "name": "Voicings: diminished and augmented",
+                "desc": "G° and G+ on strings 2-3-4."
+            },
+            "triads-low.e1": {
+                "name": "Voicings: major and minor on the lower strings",
+                "desc": "D major and D minor on strings 3-4-5 or 4-5-6. Pick the set with the selector."
+            },
+            "triads-low.e2": {
+                "name": "Loop: comping on the lower strings",
+                "desc": "G–D–Em–C on strings 3-4-5."
+            },
+            "triads-low.e3": {
+                "name": "Voicings: diminished and augmented",
+                "desc": "D° and D+ on the lower strings."
+            },
+            "triads-caged.e1": {
+                "name": "Voicings: G major on four string sets",
+                "desc": "Go through the G major voicings on every string set. Four runs, ideally one per set."
+            },
+            "triads-caged.e2": {
+                "name": "Loop: one position",
+                "desc": "G–C–D–G on strings 2-3-4 around frets 2–6. The whole progression without moving your hand."
+            },
+            "vl-common-tones.e1": {
+                "name": "Quiz: voice leading",
+                "desc": "The notes two chords share and where each voice goes at the change."
+            },
+            "vl-common-tones.e2": {
+                "name": "Voicings: C–F–G–C by the shortest way",
+                "desc": "Common notes are green, and arrows show where the other voices move."
+            },
+            "vl-common-tones.e3": {
+                "name": "Voicings: Am–Dm–E–Am",
+                "desc": "The same rule in a minor key."
+            },
+            "vl-progressions.e1": {
+                "name": "Loop: three progressions",
+                "desc": "I–V–vi–IV, ii–V–I and the Andalusian cadence on strings 1-2-3. The microphone checks the top voice."
+            },
+            "vl-progressions.e2": {
+                "name": "Loop: progressions on strings 2-3-4",
+                "desc": "The same progressions on the middle strings."
+            },
+            "vl-cycles.e1": {
+                "name": "Voicings: the cycle of fourths",
+                "desc": "Twelve major triads in fourths, each voice-led from the previous one."
+            },
+            "vl-cycles.e2": {
+                "name": "Loop: the cycle of fourths",
+                "desc": "The whole cycle over a backing, one chord per bar. Start slowly."
+            },
+            "vl-cycles.e3": {
+                "name": "Voicings: the cycle of fourths in minor",
+                "desc": "Twelve minor triads in fourths."
+            },
+            "triad-melody.licks": {
+                "name": "Phrases from triads",
+                "desc": "A C major arpeggio and a phrase that follows the chords C–Am–F–G."
+            },
+            "triad-melody.e1": {
+                "name": "Loop: triad notes only",
+                "desc": "Over each chord play only its three notes. The microphone checks beat one of every bar."
+            },
+            "triad-melody.e2": {
+                "name": "Loop: the top-voice melody",
+                "desc": "Play only the top voice of the voicings as a melody."
+            },
+            "triad-pairs.e1": {
+                "name": "Diagram: the triad-pair scale",
+                "desc": "The six notes of the F and G triads over A minor in one position."
+            },
+            "triad-pairs.e2": {
+                "name": "Loop: F and G over Am7",
+                "desc": "Groups from the F triad and from the G triad in turn over one chord."
+            },
+            "triad-pairs.licks": {
+                "name": "Phrases from a triad pair",
+                "desc": "Two phrases from F and G over A minor: up through both triads and down."
             }
         },
         "practiceLink": {
@@ -3008,7 +3232,8 @@
             "boxOne": "Box 1 (fret 5)",
             "boxTwo": "Top of box 2 (fret 8)",
             "boxRoot": "Around the root on the B string (fret 10)",
-            "turnaround": "Turnaround"
+            "turnaround": "Turnaround",
+            "triadPairFG": "F (F A C) + G (G B D)"
         },
         "session": {
             "title": "Session of the day",
@@ -3135,6 +3360,22 @@
             "bluesTurnUp": {
                 "name": "Turnaround going up",
                 "tip": "From A on the low E string (fret 5) chromatically up to E on the A string: C#, D, D#, E."
+            },
+            "triadArpC": {
+                "name": "C major arpeggio",
+                "tip": "The C major triad up and down on strings 1-2-3, through two inversions."
+            },
+            "triadChanges": {
+                "name": "Following C–Am–F–G",
+                "tip": "The three notes of each chord in turn; between chords the hand moves two frets at most."
+            },
+            "pairFG": {
+                "name": "F and G going up",
+                "tip": "First the F triad, then G a whole step higher, ending on A."
+            },
+            "pairFGDown": {
+                "name": "F and G going down",
+                "tip": "The same six notes from D downwards, ending on A."
             }
         },
         "standards": {
@@ -3209,6 +3450,17 @@
                     "colours": "Colours (8–10)",
                     "changes": "Playing the changes (11–14)"
                 }
+            },
+            "voicings": {
+                "tab": "Triads",
+                "title": "Triads and voice leading",
+                "description": "Learn triads in 12 modules: inversions on every string set, the whole fretboard map, voice leading through real progressions, and triads in your solos.",
+                "stages": {
+                    "build": "Construction (1–3)",
+                    "map": "Fretboard map (4–7)",
+                    "leading": "Voice leading (8–10)",
+                    "melody": "In the solo (11–12)"
+                }
             }
         },
         "bend": {
@@ -3228,6 +3480,27 @@
             "selfMark": "Got it (no microphone)",
             "reps": "Hits: {{done}}/{{required}}",
             "holdHint": "A repetition counts when you hold the note in the green area for {{seconds}} s. Release the string before the next one."
+        },
+        "voicing": {
+            "threshold": "Required runs: {{required}}",
+            "chord": "Chord",
+            "strings": "String set",
+            "stringSetLabel": "Strings {{numbers}} ({{notes}})",
+            "inversion": {
+                "0": "root position",
+                "1": "first inversion",
+                "2": "second inversion",
+                "3": "third inversion"
+            },
+            "step": "voicing {{current}} of {{total}}",
+            "legend": "Numbers are chord degrees. Green: the note stays in the next chord. Arrow: the direction the voice will move. Faded: the next voicing.",
+            "empty": "This chord has no voicing on this string set.",
+            "prev": "Previous voicing",
+            "next": "Next voicing",
+            "playChord": "Play the chord",
+            "runs": "Runs: {{done}}/{{required}}",
+            "runButton": "Run done",
+            "runNeedsMetronome": "First go through every voicing with the metronome ({{steps}})."
         }
     }
 }

@@ -21,7 +21,7 @@ import type { DrumStyleId } from "@/lib/improv/drumStyles";
 
 /* ─────────── Engine parameter types ─────────── */
 
-export type ImprovEngineType = "choice-quiz" | "diagram-drill" | "backing-improv" | "practice-link" | "lick" | "bend-drill";
+export type ImprovEngineType = "choice-quiz" | "diagram-drill" | "backing-improv" | "practice-link" | "lick" | "bend-drill" | "voicing-drill";
 
 /** Tonic for shapes/keys: sharp spellings plus the flat keys the curriculum needs. */
 export type ImprovKey = NoteName | "Bb" | "Db" | "Eb" | "Gb" | "Ab";
@@ -158,6 +158,35 @@ export interface BackingLoopParams {
      * lets them change it for this loop.
      */
     style?: DrumStyleId;
+    /**
+     * Show each chord as a voicing on this string set, voice-led from the
+     * previous chord (lib/improv/voicings.ts), instead of all its tones.
+     */
+    voicing?: { strings: number[]; startFret?: number };
+    /** With `voicing`: the microphone checks the top voice of the voicing path (in every key). */
+    topVoiceTargets?: boolean;
+}
+
+/**
+ * Voicing drill: chord voicings on a string set, one per bar with the
+ * metronome. "inversions" walks every voicing of one chord up the neck;
+ * "path" plays the progression with each chord voice-led from the previous one.
+ */
+export interface VoicingDrillParams {
+    mode: "inversions" | "path";
+    /** Inversions: the chords to choose from. Path: the progression, in order. */
+    chords: string[];
+    /** String sets to choose from, lowest-sounding string first (see STRING_SETS). */
+    stringSets: number[][];
+    /** Key of the chords for the transposition selector; omitted = taken from the first chord. */
+    key?: string;
+    /** Path mode: the first chord sits closest to this fret. */
+    startFret?: number;
+    beatsPerChord: number;
+    defaultBpm: number;
+    /** Full passes through the sequence with the metronome. */
+    requiredRuns: number;
+    nonGating?: boolean;
 }
 
 /** Theory tool embedded in the module's theory card (plan phase 2). */
@@ -173,7 +202,8 @@ export type ImprovExerciseParams =
     | BackingLoopParams
     | PracticeLinkParams
     | LickParams
-    | BendDrillParams;
+    | BendDrillParams
+    | VoicingDrillParams;
 
 /** Plan D2: licks from `licks.ts`; each one needs `requiredRuns` "played it" marks. Extra practice. */
 export interface LickParams {
@@ -1341,8 +1371,9 @@ export function isExercisePassed(
             // exerciseRuns holds the number of PASSED attempts (plan 1.1/1.3).
             return (progress.exerciseRuns[exercise.id] ?? 0) >= QUIZ_PASSED_ATTEMPTS;
         }
-        case "diagram-drill": {
-            const params = exercise.params as DiagramDrillParams;
+        case "diagram-drill":
+        case "voicing-drill": {
+            const params = exercise.params as DiagramDrillParams | VoicingDrillParams;
             return (progress.exerciseRuns[exercise.id] ?? 0) >= params.requiredRuns;
         }
         case "backing-improv": {

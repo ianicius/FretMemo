@@ -102,6 +102,18 @@ export const LICKS: Lick[] = [
         notes: [[2, 10, 2], [1, 10, 1], [2, 12, 1, { bend: 2 }], [2, 10, 4, { tech: "v" }]] },
     { id: "bluesBoxSweet", key: "A", fits: { scale: ["A mixolydian", "A minor pentatonic"] }, landsOn: "A7",
         notes: [[3, 11, 1], [2, 10, 1], [2, 12, 2, { bend: 1 }], [2, 12, 1], [2, 10, 1], [3, 11, 1], [2, 10, 3, { tech: "v" }]] },
+    // ── Triads track ──
+    // A C major triad up and down on the top strings.
+    { id: "triadArpC", key: "C", fits: { chord: "C" }, landsOn: "C",
+        notes: [[3, 5, 1], [2, 5, 1], [1, 3, 1], [2, 8, 1], [1, 8, 2], [1, 3, 1], [2, 5, 1], [3, 5, 2]] },
+    // One triad per chord of C–Am–F–G, each a step from the last, back home to C.
+    { id: "triadChanges", key: "C", fits: { scale: "C major" }, landsOn: "C",
+        notes: [[3, 5, 1], [2, 5, 1], [2, 8, 2], [2, 5, 1], [1, 5, 1], [1, 8, 2], [2, 6, 1], [1, 5, 1], [1, 8, 2], [2, 8, 1], [1, 7, 1], [1, 10, 2], [1, 8, 4]] },
+    // Triad pair F + G over Am: up through both triads, and the same notes coming down.
+    { id: "pairFG", key: "Am", fits: { scale: "C major" }, landsOn: "Am",
+        notes: [[3, 10, 1], [2, 10, 1], [1, 8, 1], [3, 12, 1], [2, 12, 1], [1, 10, 1], [2, 10, 2]] },
+    { id: "pairFGDown", key: "Am", fits: { scale: "C major" }, landsOn: "Am",
+        notes: [[1, 10, 1], [1, 8, 1], [2, 12, 1], [2, 10, 1], [3, 12, 1], [3, 10, 1], [3, 14, 2]] },
     // Turnarounds: a chromatic line into the V chord.
     { id: "bluesTurnDown", key: "A", fits: { scale: "A chromatic" }, landsOn: "E7", feel: "shuffle",
         notes: [[4, 5, 1], [1, 5, 1], [4, 4, 1], [1, 5, 1], [4, 3, 1], [1, 5, 1], [4, 2, 2]] },

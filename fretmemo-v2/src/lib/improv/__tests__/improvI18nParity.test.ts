@@ -21,7 +21,7 @@ const EXTRA_EXERCISE_IDS = TRACKS.flatMap((track) => (track.extra ? [track.extra
 
 const IMPROV_SOURCES = [
     path.resolve(process.cwd(), "src/pages/ImprovTraining.tsx"),
-    ...["TheoryCard", "ExerciseFrame", "ChoiceQuiz", "DiagramDrill", "BackingLoopExercise", "PracticeLinkExercise", "LoopHitReport", "LickExercise", "BendDrill"]
+    ...["TheoryCard", "ExerciseFrame", "ChoiceQuiz", "DiagramDrill", "BackingLoopExercise", "PracticeLinkExercise", "LoopHitReport", "LickExercise", "BendDrill", "VoicingDrill"]
         .map((name) => path.resolve(process.cwd(), `src/components/improv/${name}.tsx`)),
 ];
 

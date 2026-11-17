@@ -10,6 +10,7 @@
 
 import { CURRICULUM, STANDARDS, STANDARDS_ID, type ImprovExercise, type ImprovModule } from "./curriculum";
 import { BLUES_CURRICULUM, BLUES_JAM, BLUES_JAM_ID } from "./blues";
+import { TRIADS_CURRICULUM } from "./triads";
 import { TRACK_META, type TrackMeta } from "./trackMeta";
 
 export interface Track extends TrackMeta {
@@ -45,6 +46,16 @@ export const TRACKS: Track[] = [
             { labelKey: "improv.tracks.blues.stages.changes", from: 11, to: 14 },
         ],
         extra: { id: BLUES_JAM_ID, titleKey: "improv.tracks.blues.extraTitle", exercise: BLUES_JAM },
+    },
+    {
+        ...TRACK_META.voicings,
+        modules: TRIADS_CURRICULUM,
+        stages: [
+            { labelKey: "improv.tracks.voicings.stages.build", from: 1, to: 3 },
+            { labelKey: "improv.tracks.voicings.stages.map", from: 4, to: 7 },
+            { labelKey: "improv.tracks.voicings.stages.leading", from: 8, to: 10 },
+            { labelKey: "improv.tracks.voicings.stages.melody", from: 11, to: 12 },
+        ],
     },
 ];
 

@@ -23,6 +23,14 @@ export const TRACK_META = {
             description: "Learn guitar improvisation step by step with a 22-module roadmap covering scales, modes, arpeggios, chord tones, and backing-track practice.",
         },
     },
+    voicings: {
+        id: "voicings",
+        path: "/improv/voicings",
+        seo: {
+            title: "Guitar Triads & Voice Leading Roadmap | FretMemo",
+            description: "Learn guitar triads in 12 modules: inversions on every string set, the whole fretboard map, voice leading through real progressions, and triads in your solos.",
+        },
+    },
     blues: {
         id: "blues",
         path: "/improv/blues",

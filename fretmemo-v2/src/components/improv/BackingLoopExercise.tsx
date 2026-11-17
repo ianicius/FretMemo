@@ -27,6 +27,8 @@ import { Fretboard } from "@/components/fretboard/Fretboard";
 import { AudioLines, Mic, MicOff } from "lucide-react";
 import { getSoundEngineContext } from "@/audio/engine";
 import { getChordTonePositions } from "@/lib/improv/chords";
+import { chordShape, degreeLabel, topVoiceTargets, voiceLeadPath, type ChordShape } from "@/lib/improv/voicings";
+import { getNoteAt } from "@/lib/constants";
 import { BackingLoopScheduler, type BackingLoopEntry } from "@/lib/improv/backingLoop";
 import { DRUM_STYLE_IDS, scheduleBackingBeat, type DrumStyleId } from "@/lib/improv/drumStyles";
 import {
@@ -136,10 +138,21 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
     const activeKey = selectedKey ?? originalKey;
     const shiftInterval = keyShiftInterval(originalKey, activeKey);
     const transposed = shiftInterval !== "1P";
-    const targets = transposeTargets(sourceTargets, shiftInterval);
     const entries = normalizeEntries(transposeProgression(sourceProgression, shiftInterval), params.beatsPerChord);
     const progression = entries.map((entry) => entry.chord);
     const hintKeys = entries.map((entry) => entry.hintKey);
+    // One voice-led voicing per progression entry (same index), recomputed per key and tuning.
+    const voicingPath = params.voicing
+        ? voiceLeadPath(
+            progression.map(chordShape).filter((shape): shape is ChordShape => shape !== null),
+            params.voicing.strings,
+            tuning,
+            { startFret: params.voicing.startFret },
+        )
+        : null;
+    const targets = params.topVoiceTargets && voicingPath
+        ? topVoiceTargets(progression, voicingPath, tuning)
+        : transposeTargets(sourceTargets, shiftInterval);
 
     const [bpm, setBpm] = useState(params.defaultBpm);
     const bpmRef = useRef(bpm);
@@ -355,8 +368,22 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
 
     const currentChord = progression[currentChordIndex] ?? progression[0] ?? "";
     const currentTargets = targets?.find((entry) => entry.chord === currentChord)?.pitchClasses;
-    // B1: chord tones of the current chord (root emphasized, mic targets green).
-    const chordToneNotes: NoteStatus[] = getChordTonePositions(currentChord, { tuning, fretFrom: 1, fretTo: 12, targets: currentTargets })
+    // B1: chord tones of the current chord (root emphasized, mic targets green), or its voicing on the string set.
+    const currentVoicing = voicingPath?.[currentChordIndex];
+    const currentShape = chordShape(currentChord);
+    const voicingNotes: NoteStatus[] | null = currentVoicing && currentShape
+        ? currentVoicing.frets.map((fret, index) => {
+            const stringIndex = currentVoicing.strings[index] as number;
+            const top = index === currentVoicing.frets.length - 1;
+            return {
+                position: { stringIndex, fret, note: getNoteAt(tuning[stringIndex] ?? "E", fret) },
+                status: top && params.topVoiceTargets ? "correct" : "active",
+                label: degreeLabel(currentShape, currentVoicing.tones[index] as number),
+                emphasis: currentVoicing.tones[index] === 0 ? "strong" : "normal",
+            };
+        })
+        : null;
+    const chordToneNotes: NoteStatus[] = voicingNotes ?? getChordTonePositions(currentChord, { tuning, fretFrom: 1, fretTo: 12, targets: currentTargets })
         .map((position) => ({
             position: { stringIndex: position.stringIndex, fret: position.fret, note: position.note },
             status: position.isTarget ? "correct" : "active",
@@ -486,7 +513,7 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
             {showFretboard && (
                 <div className={cn("space-y-1", resting && "opacity-40")}>
                     <Fretboard
-                        frets={12}
+                        frets={voicingPath ? 15 : 12}
                         activeNotes={chordToneNotes}
                         tuning={tuning}
                         leftHanded={leftHanded}
@@ -494,8 +521,9 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
                         className={`rounded-lg border border-border bg-card/60 ${IMPROV_FRETBOARD_ROWS}`}
                     />
                     <p className="text-xs text-muted-foreground">
-                        {t("improv.loop.fretboardLegend")}
-                        {currentTargets ? ` ${t("improv.loop.fretboardLegendTargets")}` : ""}
+                        {voicingPath ? t("improv.loop.voicingLegend") : t("improv.loop.fretboardLegend")}
+                        {voicingPath && params.topVoiceTargets ? ` ${t("improv.loop.voicingLegendTop")}` : ""}
+                        {!voicingPath && currentTargets ? ` ${t("improv.loop.fretboardLegendTargets")}` : ""}
                     </p>
                 </div>
             )}

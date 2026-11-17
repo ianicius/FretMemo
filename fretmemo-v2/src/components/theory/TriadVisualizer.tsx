@@ -7,6 +7,7 @@ import { Fretboard } from "@/components/fretboard/Fretboard";
 import { Select } from "@/components/ui/select";
 import type { NoteStatus, NoteName } from "@/types/fretboard";
 import { useTranslation } from "react-i18next";
+import { chordVoicings } from "@/lib/improv/voicings";
 
 /* ── constants ── */
 
@@ -53,68 +54,6 @@ function buildStringGroups(
 const INVERSION_NAMES = ["theory.triads.invRoot", "theory.triads.invFirst", "theory.triads.invSecond"];
 const INVERSION_COLORS = ["#ef4444", "#3b82f6", "#22c55e"]; // red, blue, green
 
-/**
- * For a given root, quality, and string group, compute all playable
- * triad shapes (3 inversions × octave repeats) up to maxFret.
- */
-function computeShapes(
-    rootIdx: number,
-    intervals: readonly number[],
-    strings: [number, number, number], // lowest→highest pitch
-    tuning: NoteName[],
-    maxFret: number,
-) {
-    // Inversions: which chord-tone index sits on each string (lo, mid, hi)
-    const inversions = [
-        [0, 1, 2], // root position: R-3-5 (bottom to top)
-        [1, 2, 0], // 1st inversion: 3-5-R
-        [2, 0, 1], // 2nd inversion: 5-R-3
-    ];
-
-    const shapes: {
-        inversion: number;
-        frets: [number, number, number];
-        tones: [number, number, number];
-    }[] = [];
-
-    const seen = new Set<string>();
-
-    for (let inv = 0; inv < 3; inv++) {
-        const tones = inversions[inv];
-
-        // Base fret (0–11) for each string
-        const baseFrets = strings.map((s, i) => {
-            const openIdx = NOTES.indexOf(tuning[s]);
-            const targetIdx = (rootIdx + intervals[tones[i]]) % 12;
-            return (targetIdx - openIdx + 12) % 12;
-        });
-
-        // Try all octave combos (add 0 or 12 to each) — 8 combos
-        for (let mask = 0; mask < 8; mask++) {
-            const frets = baseFrets.map((bf, i) =>
-                bf + ((mask >> i) & 1) * 12,
-            ) as [number, number, number];
-
-            if (frets.some(f => f < 0 || f > maxFret)) continue;
-
-            const span = Math.max(...frets) - Math.min(...frets);
-            if (span > 5) continue;
-
-            const key = `${inv}-${frets.join(",")}`;
-            if (seen.has(key)) continue;
-            seen.add(key);
-
-            shapes.push({
-                inversion: inv,
-                frets,
-                tones: tones as [number, number, number],
-            });
-        }
-    }
-
-    return shapes;
-}
-
 /* ── component ── */
 
 export default function TriadVisualizer({ initialRoot }: { initialRoot?: NoteName } = {}) {
@@ -152,9 +91,9 @@ export default function TriadVisualizer({ initialRoot }: { initialRoot?: NoteNam
         for (const group of stringGroups) {
             if (!activeGroupIds.has(group.id)) continue;
 
-            const shapes = computeShapes(
-                rootIdx, quality.intervals,
-                group.strings, tuning, maxFret,
+            const shapes = chordVoicings(
+                { rootPc: rootIdx, intervals: [...quality.intervals] },
+                group.strings, tuning, { maxFret, maxSpan: 5 },
             );
 
             for (const shape of shapes) {
