@@ -162,7 +162,7 @@
 
         <article class="prose-content">
 <p>FretMemo works as a free Guitar Pro viewer online. Import a .gp3, .gp4, .gp5, .gpx or .gp file on the Train page and it opens as standard notation and tab that plays in the browser. You don't need an account, and the file stays in your browser's storage on your own device.</p>
-            <p>A score viewer is an odd thing to find in a <a href="https://fretmemo.net/">free guitar fretboard trainer</a>, I know. It got there because songs are what most guitarists actually want to practice, and once a song is open you can loop it, score it, edit it and hear it through an amp.</p>
+            <p>A score viewer is an odd thing to find in a <a href="https://fretmemo.net/">free guitar fretboard trainer</a>, I know. It got there because songs are what most guitarists want to practice, and once a song is open you can loop it, score it, edit it and hear it through an amp.</p>
 
             <aside class="key-facts">
                 <p class="key-facts-title">Key facts</p>
@@ -186,7 +186,7 @@
             <p>The annoying part has always been opening the file. You need a desktop program, and it's never installed on the computer you happen to be sitting at. I wanted to drop the file into a browser tab and hear it.</p>
 
             <h2>What the viewer shows</h2>
-            <p>After import the song opens with standard notation and tablature, one track at a time. It starts on the first track that isn't drums, and the "Track" selector switches to the others. The parsing is done by alphaTab, an open-source library (MPL-2.0), which the app loads only when you actually open a song.</p>
+            <p>After import the song opens with standard notation and tablature, one track at a time. It starts on the first track that isn't drums, and the "Track" selector switches to the others. The parsing is done by alphaTab, an open-source library (MPL-2.0), which the app loads only when you open a song.</p>
             <p>FretMemo reads the first bytes of the file to work out the format and ignores the extension. A ZIP header means .gpx or a newer .gp file, and the "FICHIER GUITAR PRO" header means GP3, GP4 or GP5. If the bytes are something else, you get a plain message: "This file is not a Guitar Pro file."</p>
             <p>Each song in the "Your Songs" list shows its title and details, with buttons to open or delete it. Everything lives in IndexedDB, the database built into your browser, and nothing in the import, storage or playback code sends the file to a server. The flip side is that a song link only works in the browser that imported it. Open it anywhere else and the app tells you the song "may have been deleted or belongs to another device."</p>
 
@@ -212,7 +212,7 @@
 
             <h2>Limits</h2>
             <ul>
-                <li>WAV export is soundfont only, as described above.</li>
+                <li>WAV export is soundfont only, because "Export WAV" is disabled while "Guitar sound" is on.</li>
                 <li>Songs live in one browser on one device. Links can't be shared, and clearing the site's data in your browser removes the songs, so keep your original files.</li>
                 <li>The first song you open needs a connection for the 38 MB download.</li>
                 <li>"Guitar sound" hides the speed control and the metronome, and one render is capped at about 50 minutes of audio.</li>
