@@ -1429,6 +1429,18 @@ const STANDARD_FORMS: Array<{ id: string; key: string; progression: Array<string
         "Fm7", "Bb7", "Ebmaj7", "Ebm7", "Dm7", "G7", "Cm7", "F7",
     ].map(half) },
     { id: "stdCycle", key: "C", progression: CYCLE_OF_FOURTHS },
+    { id: "stdBlueBossa", key: "Cm", progression: [
+        "Cm7", "Cm7", "Fm7", "Fm7", "Dm7b5", "G7", "Cm7", "Cm7",
+        "Ebm7", "Ab7", "Dbmaj7", "Dbmaj7", "Dm7b5", "G7", "Cm7", half("Dm7b5"), half("G7"),
+    ] },
+    { id: "stdATrain", key: "C", progression: ["Cmaj7", "Cmaj7", "D7", "D7", "Dm7", "G7", "Cmaj7", half("Dm7"), half("G7")] },
+    { id: "stdAllThings", key: "Ab", progression: ["Fm7", "Bbm7", "Eb7", "Abmaj7", "Dbmaj7", "G7", "Cmaj7", "Cmaj7"] },
+    { id: "stdSoWhat", key: "Dm", progression: [
+        ...Array<string>(16).fill("Dm7"), ...Array<string>(8).fill("Ebm7"), ...Array<string>(8).fill("Dm7"),
+    ] },
+    { id: "stdPopAxis", key: "C", progression: ["C", "G", "Am", "F"] },
+    { id: "stdFifties", key: "G", progression: ["G", "Em", "C", "D"] },
+    { id: "stdAndalusian", key: "Am", progression: ["Am", "G", "F", "E"] },
 ];
 
 /** Progress of the standards loop is stored under this id, next to the modules. */
