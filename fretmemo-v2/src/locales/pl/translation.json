@@ -1843,7 +1843,8 @@
             "choiceQuiz": "Quiz",
             "diagramDrill": "Diagram z metronomem",
             "backingLoop": "Pętla akordowa",
-            "practiceLink": "Trening na gryfie"
+            "practiceLink": "Trening na gryfie",
+            "bendDrill": "Podciągnięcia z mikrofonem"
         },
         "quiz": {
             "circleTapKey": "Kliknij tonację na kole.",
@@ -1876,7 +1877,7 @@
             "play": "Odtwórz"
         },
         "build": {
-                "badge": "Klikany gryf",
+            "badge": "Klikany gryf",
             "threshold_one": "Do zaliczenia: {{count}} boks",
             "threshold_few": "Do zaliczenia: {{count}} boksy",
             "threshold_many": "Do zaliczenia: {{count}} boksów",
@@ -1952,7 +1953,8 @@
                 "bossa": "Bossa nova",
                 "funk": "Funk",
                 "reggae": "Reggae",
-                "ballad": "Ballada (arpeggio)"
+                "ballad": "Ballada (arpeggio)",
+                "slow12": "Slow blues (12/8)"
             },
             "allVariants": "Do zaliczenia ćwiczenia potrzebne są udane obiegi w każdym wariancie.",
             "key": "Tonacja",
@@ -1980,7 +1982,10 @@
             "m7-arp": "Arpeggio m7",
             "dom7-arp": "Arpeggio 7 (dominantowe)",
             "maj7-arp": "Arpeggio maj7",
-            "m7b5-arp": "Arpeggio m7b5"
+            "m7b5-arp": "Arpeggio m7b5",
+            "maj-blues": "Skala bluesowa durowa",
+            "mix-blues": "Pentatonika molowa + durowa",
+            "bb-box": "Boks wokół prymy na strunie H"
         },
         "goals": {
             "lickLoop3": "W taktach 1 i 3 zagraj zagrywki z boksu 1, w taktach 2 i 4 odpowiedz własną frazą.",
@@ -2085,7 +2090,34 @@
             "playRest": "Graj tylko w taktach oznaczonych „graj”. W taktach „pauza” nic nie graj: słuchaj podkładu i zaplanuj następną frazę.",
             "callResponse": "Dwa takty pytania, dwa takty odpowiedzi. Odpowiedź zacznij motywem z pytania i zakończ ją na dźwięku akordu.",
             "playRestLabel": "Takt gry, takt pauzy",
-            "callResponseLabel": "Pytanie–odpowiedź (2+2 takty)"
+            "callResponseLabel": "Pytanie–odpowiedź (2+2 takty)",
+            "bluesRoots": "Na „raz” każdego taktu zagraj prymę akordu: A nad A7, D nad D7, E nad E7.",
+            "bluesRootsQuick": "Jak wyżej, ale z quick change: w takcie 2 brzmi D7, więc tam zagraj D.",
+            "bluesRiff": "Graj riff boogie przez całą formę. Przesuwaj go razem z akordem i pilnuj długiej i krótkiej ósemki.",
+            "bluesComping": "Akompaniuj: dwa uderzenia w takcie albo same tercje z septymami na strunach D i G.",
+            "bluesLickLoop": "W taktach 1, 5 i 9 zagraj wskazaną zagrywkę. W pozostałych odpowiedz własną frazą albo zostaw pauzę.",
+            "bluesAAB": "Takty 1–2: fraza. Takty 5–6: ta sama fraza jeszcze raz. Takty 9–10: odpowiedź. W pozostałych taktach nie graj.",
+            "bluesMotif": "Wybierz jeden krótki rytm i zagraj nim cały chorus. Zmieniaj tylko dźwięki.",
+            "bluesBoxes": "Zmieniaj pole gryfu co cztery takty, zgodnie z podpowiedzią. Przejście zrób ślizgiem po jednej strunie.",
+            "bluesTurnaround": "Przez 10 taktów improwizuj, a w taktach 11–12 zagraj turnaround i zakończ na dźwięku akordu E7.",
+            "bluesTargetRoot": "Na „raz” każdego taktu ląduj na prymie akordu: A, D albo E.",
+            "bluesTargetThird": "Na „raz” każdego taktu ląduj na tercji akordu: C# nad A7, F# nad D7, G# nad E7.",
+            "bluesTargetSeventh": "Na „raz” każdego taktu ląduj na septymie akordu: G nad A7, C nad D7, D nad E7.",
+            "bluesApproach": "Tuż przed „raz” zagraj dźwięk pół tonu pod tercją akordu i wyląduj na tercji: C→C#, F→F#, G→G#.",
+            "bluesGuideTones": "Na „raz” graj tercję albo septymę akordu. Szukaj ruchów o pół tonu: C#→C i G→F# przy zmianie z A7 na D7.",
+            "bluesJazzThirds": "Na każdej zmianie akordu ląduj na jego tercji. Między zmianami łącz tercje skalą bluesową F.",
+            "formStandard": "Zwykła forma 12-taktowa. Graj to, czego nauczyły cię moduły.",
+            "formStandardLabel": "12 taktów",
+            "formQuick": "Quick change: w takcie 2 brzmi akord IV. Zaznacz tę zmianę dźwiękiem akordu D7.",
+            "formQuickLabel": "Quick change",
+            "formSlow": "Slow blues w 12/8. Graj mniej dźwięków, dłuższe frazy i wolne podciągnięcia.",
+            "formSlowLabel": "Slow blues",
+            "formMinor": "Blues molowy. Pentatonika molowa pasuje do całej formy; nad F7 i E7 w taktach 9–10 celuj w dźwięki akordu.",
+            "formMinorLabel": "Blues molowy",
+            "formEight": "Forma ośmiotaktowa: akord V pojawia się już w drugim takcie, a ostatnie dwa takty to turnaround.",
+            "formEightLabel": "8 taktów",
+            "formSixteen": "Forma szesnastotaktowa: osiem taktów na akordzie I, potem druga połowa zwykłego bluesa.",
+            "formSixteenLabel": "16 taktów"
         },
         "q": {
             "keySig": {
@@ -2195,6 +2227,32 @@
             },
             "chordScaleHM": {
                 "inContext": "Z której skali molowej harmonicznej pochodzi skala do akordu {{chord}}?"
+            },
+            "bluesForm": {
+                "barToChord": "Blues 12-taktowy w {{key}}. Jaki akord brzmi w takcie {{bar}}?",
+                "quickBarToChord": "Blues w {{key}} z quick change. Jaki akord brzmi w takcie {{bar}}?",
+                "degreeToChord": "Blues w {{key}}. Który akord jest stopniem {{degree}}?",
+                "barToDegree": "Blues 12-taktowy: który stopień brzmi w takcie {{bar}}?",
+                "hintForm": "Akordy bluesa w {{key}} to {{chord}} (I–IV–V). Forma: I I I I, IV IV I I, V IV I I.",
+                "hintBars": "Forma: I I I I, IV IV I I, V IV I I.",
+                "hintQuick": "Quick change: w takcie 2 pojawia się akord IV ({{chord}}), w takcie 3 wraca I. Reszta formy bez zmian."
+            },
+            "bluesTones": {
+                "third": "Tercja akordu {{chord}} to:",
+                "seventh": "Septyma akordu {{chord}} to:",
+                "guideMove": "Blues w {{key}}: tercja akordu I ({{first}}) przy zmianie na {{chord}} schodzi o pół tonu na:",
+                "hintTones": "{{chord}} składa się z dźwięków {{notes}}: pryma, tercja wielka, kwinta, septyma mała.",
+                "hintGuide": "{{first}} schodzi o pół tonu na {{target}}, czyli septymę akordu {{chord}}."
+            },
+            "bluesScale": {
+                "blueNote": "Blue note (b5) w skali bluesowej {{key}} to:",
+                "clash": "Pentatonika molowa {{key}} nad akordem {{chord}}: który jej dźwięk leży pół tonu pod tercją akordu?",
+                "relativeBox": "Pentatonika durowa {{key}} ma te same dźwięki co pentatonika molowa:",
+                "majorPentNotes": "Pentatonika durowa {{key}} to dźwięki:",
+                "hintBlueNote": "W tonacji {{key}} blue note to {{target}}: dźwięk między kwartą a kwintą.",
+                "hintClash": "{{first}} to tercja mała; tercją akordu {{chord}} jest {{target}}. To tarcie daje bluesowe brzmienie.",
+                "hintRelative": "Pentatonika durowa {{key}} i molowa {{target}} to te same dźwięki. Boks leży trzy progi niżej.",
+                "hintMajorPent": "Pentatonika durowa to stopnie 1, 2, 3, 5 i 6 skali durowej."
             }
         },
         "modules": {
@@ -2307,6 +2365,76 @@
                 "name": "Giant Steps",
                 "term": "Giant Steps",
                 "theory": "„Giant Steps” Johna Coltrane’a zamyka listę. Tonacje zmieniają się tu co tercję wielką w dół (H → G → Eb), a akordy często co dwa uderzenia. Każdą nową tonację wprowadza jej dominanta (D7 → G, B7 → Eb, F#7 → H) albo ii–V (Am7–D7, Fm7–B7, C#m7–F#7). Ćwicz całą 16-taktową formę w trzech krokach: najpierw same prymy, potem wzór 1-2-3-5 na każdym akordzie, na końcu arpeggia. Zacznij od 60 BPM; kiedy przejdziesz formę bez gubienia się, wszystkie wcześniejsze moduły złożą się w jeden system."
+            },
+            "blues-form": {
+                "name": "Forma 12-taktowa",
+                "term": "12-Bar Blues",
+                "theory": "Blues to dwanaście taktów i trzy akordy: I, IV i V stopień tonacji, wszystkie jako akordy dominantowe (w A: A7, D7, E7). Układ jest stały: cztery takty I, dwa takty IV, dwa takty I, potem V, IV i znowu dwa takty I. Wariant quick change przechodzi na IV już w drugim takcie i wraca na I w trzecim. Zanim zagrasz solo, naucz się słyszeć, w którym takcie jesteś: zmiana na IV w takcie 5 i na V w takcie 9 to punkty, do których zmierza każda fraza. Licz chorusy na głos tak długo, aż przestaniesz musieć."
+            },
+            "blues-shuffle": {
+                "name": "Shuffle",
+                "term": "Shuffle Feel",
+                "theory": "W bluesie ósemki nie są równe: pierwsza w parze trwa dwie trzecie ćwierćnuty, druga jedną trzecią. To rytm triolowy z opuszczoną środkową nutą i to on daje muzyce kołysanie. Podstawowy akompaniament to riff boogie: pryma akordu grana razem z kwintą, a potem z sekstą, po dwie ósemki na każdy dwudźwięk. Tłum struny nasadą prawej dłoni tuż przy mostku, żeby riff brzmiał krótko i gęsto. Ten sam kształt przesuwasz na akordy IV i V."
+            },
+            "blues-dominant-chords": {
+                "name": "Akordy dominantowe",
+                "term": "Dominant 7th Chords",
+                "theory": "Akord dominantowy to trójdźwięk durowy z dodaną septymą małą: 1, 3, 5, b7 (A7 = A, C#, E, G). W bluesie wszystkie trzy akordy mają tę budowę, choć w muzyce tonalnej dominantą byłby tylko V stopień. Tercja i septyma tworzą tryton i to one decydują o charakterze akordu; pryma i kwinta są mniej ważne. Dlatego w zespole często wystarcza sama tercja z septymą, zagrane na strunach D i G. Zagraj arpeggia trzech akordów, żeby zobaczyć, gdzie leżą ich tercje i septymy."
+            },
+            "blues-pentatonic": {
+                "name": "Pentatonika i skala bluesowa",
+                "term": "Minor Pentatonic & Blues Scale",
+                "theory": "Pentatonika molowa (1 b3 4 5 b7) pasuje do całej formy bluesa, mimo że akordy są durowe. Jej tercja mała ściera się z tercją wielką akordu i właśnie to tarcie słyszymy jako brzmienie bluesowe. Skala bluesowa dodaje jeden dźwięk: b5, tak zwaną blue note, między kwartą a kwintą. Traktuj go jako dźwięk przejściowy: przechodź przez niego, nie zatrzymuj się na nim. Na razie zostań w pierwszym boksie; ważniejsze od liczby dźwięków jest to, co z nimi zrobisz."
+            },
+            "blues-bends": {
+                "name": "Podciągnięcia",
+                "term": "String Bending",
+                "theory": "Podciągnięcie zmienia wysokość dźwięku płynnie, tak jak głos. Na początek wystarczą trzy: kwarta do kwinty (cały ton na strunie G), septyma mała do prymy (cały ton na strunie H) i kwarta do blue note (pół tonu). Podciągaj trzecim palcem, a pierwszy i drugi połóż za nim na tej samej strunie, żeby pomagały; ruch wychodzi z obrotu nadgarstka, nie z samych palców. Osobnym gestem jest lekkie podciągnięcie tercji małej o ćwierć tonu, w stronę tercji wielkiej. Zanim podciągniesz, zagraj dźwięk docelowy normalnie i zapamiętaj go: podciągnięcie ma trafić w tę wysokość, a nie w jej okolice."
+            },
+            "blues-licks": {
+                "name": "Słownik zagrywek",
+                "term": "Blues Licks",
+                "theory": "Improwizacja bluesowa składa się w dużej części z gotowych zwrotów, tak jak mowa składa się ze słów. Każdą zagrywkę najpierw zaśpiewaj, potem zagraj wolno, a dopiero potem w tempie. Kiedy leży pod palcami, zmień w niej jedną rzecz: rytm, ostatni dźwięk albo miejsce w takcie, w którym ją zaczynasz. W pętli zagrywka jest pytaniem, a twoja własna fraza odpowiedzią. Sześć zagrywek zagranych pewnie daje więcej niż sześćdziesiąt zagranych niepewnie."
+            },
+            "blues-phrasing": {
+                "name": "Frazowanie",
+                "term": "Phrasing",
+                "theory": "Solo bluesowe jest rozmową, a nie ciągiem dźwięków. Najstarsza forma tej rozmowy to AAB, wzięta z tekstów bluesowych: fraza, jej powtórzenie nad zmienionym akordem i odpowiedź. Każda fraza zajmuje około dwóch taktów, a dwa następne zostają na oddech. Pauza nie jest przerwą w muzyce: to w niej słuchacz słyszy, co zagrałeś. Dobrym ćwiczeniem jest zagrać cały chorus jednym motywem rytmicznym i zmieniać tylko dźwięki."
+            },
+            "blues-major-minor": {
+                "name": "Dur i moll",
+                "term": "Mixing Major & Minor",
+                "theory": "Nad akordem I pasuje też pentatonika durowa (1 2 3 5 6): brzmi jaśniej, bo zawiera tercję wielką akordu. Jej boks to ten sam kształt co pentatonika molowa, tylko trzy progi niżej. Najprostsza zasada mieszania: pentatonika durowa nad akordem I, molowa nad IV i V. Nad akordem IV tercja wielka tonacji gryzie się z jego septymą, więc tam wracaj do molowej. Kiedy obie skale leżą pod palcami w jednym miejscu gryfu, zaczynasz grać jedną, ośmiodźwiękową skalą i wybierać kolor dźwięk po dźwięku."
+            },
+            "blues-boxes": {
+                "name": "Boksy na górnych strunach",
+                "term": "Upper-String Boxes",
+                "theory": "Wielu gitarzystów bluesowych gra większość solówek na trzech górnych strunach, w małych polach wokół prymy. Najbardziej znane leży wokół prymy na strunie H granej pierwszym palcem: pod ręką są sekunda, kwarta, kwinta i seksta, a sekundę podciąga się do tercji małej albo wielkiej. Drugie pole to górna część drugiego boksu pentatoniki, dwa progi wyżej niż boks pierwszy; tam podciąga się kwartę i septymę. Pola łączy się ślizgiem po jednej strunie. Zmieniaj pole razem z frazą, a nie w jej środku."
+            },
+            "blues-turnarounds": {
+                "name": "Turnaround",
+                "term": "Turnarounds",
+                "theory": "Dwa ostatnie takty formy to turnaround: krótki zwrot, który zamyka chorus i prowadzi do następnego. Harmonicznie to zwykle I–IV–I–V, po pół taktu na akord, z akordem V na samym końcu. Melodycznie turnaround jest najczęściej linią chromatyczną, która schodzi albo wchodzi do dźwięku akordu V. Ten sam zwrot służy jako wstęp: zagrany sam, przed pierwszym taktem, podaje zespołowi tonację i tempo. Jako zakończenie kończy się na akordzie I zamiast V."
+            },
+            "blues-chord-tones": {
+                "name": "Dźwięki akordowe",
+                "term": "Targeting Chord Tones",
+                "theory": "Pentatonika pasuje do całej formy, ale nie mówi, który akord właśnie brzmi. Robi to dźwięk akordu zagrany na „raz” w takcie zmiany. Zacznij od prym, potem celuj w tercje: C# nad A7, F# nad D7, G# nad E7. Tercje tych akordów nie należą do pentatoniki molowej A, więc to one najmocniej pokazują zmianę. Reszta frazy może zostać w pentatonice; wystarczy, że wyląduje we właściwym miejscu."
+            },
+            "blues-guide-tones": {
+                "name": "Tercje i septymy",
+                "term": "Guide Tones & Mixolydian",
+                "theory": "Tercja i septyma to dźwięki prowadzące akordu dominantowego. Przy zmianie z I na IV poruszają się tylko o pół tonu: tercja A7 (C#) schodzi na septymę D7 (C), a septyma A7 (G) schodzi na tercję D7 (F#). Linia zbudowana z samych dźwięków prowadzących brzmi, jakby grała harmonię. Pełną skalą każdego z akordów jest skala miksolidyjska od jego prymy (1 2 3 4 5 6 b7). W praktyce miesza się ją z pentatoniką molową tonacji."
+            },
+            "blues-forms": {
+                "name": "Odmiany formy",
+                "term": "Blues Forms",
+                "theory": "Dwanaście taktów ma wiele wersji. Quick change przechodzi na IV w drugim takcie. Slow blues gra się w metrum 12/8, w wolnym tempie, z miejscem na długie dźwięki i podciągnięcia. Blues molowy zamienia akordy na molowe i często wstawia w takt 9 akord bVI przed dominantą. Są też formy ośmio- i szesnastotaktowe; w każdej z nich punktami orientacyjnymi pozostają zmiana na IV i powrót na I."
+            },
+            "blues-jazz-blues": {
+                "name": "Blues jazzowy",
+                "term": "Jazz Blues",
+                "theory": "Blues jazzowy zachowuje dwanaście taktów i dodaje akordy przejściowe. W takcie 4 pojawia się ii–V prowadzące do akordu IV, w takcie 6 akord zmniejszony pół tonu nad IV, a w takcie 8 dominanta prowadząca do ii–V w taktach 9–10. Forma kończy się turnaroundem I–VI–ii–V. Skala bluesowa tonacji dalej spina całość, ale nad akordami przejściowymi trzeba celować w ich tercje. Zacznij od arpeggiów w wolnym tempie."
             }
         },
         "ex": {
@@ -2657,6 +2785,178 @@
             "target-chord-tones.e4": {
                 "name": "Pętla: fraza i pauza",
                 "desc": "Ćwiczenie dodatkowe. Am–C–Em–D: takt gry i takt pauzy albo pytanie i odpowiedź po dwa takty; frazę kończ na dźwięku akordu."
+            },
+            "blues-form.e1": {
+                "name": "Quiz: forma 12-taktowa",
+                "desc": "Który akord brzmi w którym takcie. Pytania w kilku tonacjach, także o wariant quick change."
+            },
+            "blues-form.e2": {
+                "name": "Quiz: I, IV i V w tonacji",
+                "desc": "Znajdź trzy akordy bluesa w podanej tonacji."
+            },
+            "blues-form.e3": {
+                "name": "Pętla: prymy na „raz”",
+                "desc": "Blues w A. Na pierwszą miarę każdego taktu zagraj prymę akordu, który właśnie brzmi. Mikrofon sprawdza trafienia."
+            },
+            "blues-form.e4": {
+                "name": "Pętla: prymy z quick change",
+                "desc": "To samo ćwiczenie, ale w takcie 2 pojawia się akord IV."
+            },
+            "blues-shuffle.licks": {
+                "name": "Riff boogie",
+                "desc": "Dwa riffy akompaniamentu: pryma z kwintą i sekstą oraz wersja z septymą. Słuchaj długich i krótkich ósemek."
+            },
+            "blues-shuffle.e1": {
+                "name": "Pętla: riff przez całą formę",
+                "desc": "Graj riff boogie przez 12 taktów, przesuwając go na akordy IV i V. Zalicz obieg, gdy nie zgubisz formy."
+            },
+            "blues-dominant-chords.e1": {
+                "name": "Quiz: dźwięki akordów dominantowych",
+                "desc": "Tercje i septymy akordów oraz ich ruch przy zmianie z I na IV."
+            },
+            "blues-dominant-chords.e2": {
+                "name": "Diagram: arpeggia A7, D7, E7",
+                "desc": "Przełącznik „Kształt” zmienia akord. Zagraj arpeggio każdego z trzech akordów w górę i w dół."
+            },
+            "blues-dominant-chords.e3": {
+                "name": "Pętla: akompaniament",
+                "desc": "Zagraj akordy A7, D7 i E7 przez całą formę: pełne chwyty albo same tercje z septymami."
+            },
+            "blues-pentatonic.e1": {
+                "name": "Diagram: pentatonika molowa, boks 1",
+                "desc": "Pierwszy boks pentatoniki molowej. Przełącznik „Widok” dodaje blue note albo zaznacza dźwięki do podciągania."
+            },
+            "blues-pentatonic.e2": {
+                "name": "Pętla: pierwsza solówka",
+                "desc": "Blues w A. Improwizuj w pierwszym boksie pentatoniki."
+            },
+            "blues-pentatonic.e3": {
+                "name": "Pętla: ograniczenia",
+                "desc": "Ten sam blues z jednym ograniczeniem naraz: trzy dźwięki, jedna struna albo jeden rytm."
+            },
+            "blues-pentatonic.e4": {
+                "name": "Trening: dźwięki pentatoniki",
+                "desc": "Zagraj dźwięki pentatoniki a-moll na progach 5–8 w trybie z mikrofonem."
+            },
+            "blues-bends.e1": {
+                "name": "Podciągnięcie o pół tonu",
+                "desc": "Kwarta do blue note na strunie G. Miernik pokazuje, jak daleko jesteś od celu."
+            },
+            "blues-bends.e2": {
+                "name": "Podciągnięcie o cały ton",
+                "desc": "Dwa najważniejsze podciągnięcia bluesa: kwarta do kwinty na strunie G i septyma do prymy na strunie H."
+            },
+            "blues-bends.e3": {
+                "name": "Podciągnięcie o ćwierć tonu",
+                "desc": "Tercja mała lekko w górę, w stronę tercji wielkiej. Dźwięk ma zostać między progami."
+            },
+            "blues-bends.licks": {
+                "name": "Zagrywki z podciągnięciem",
+                "desc": "Trzy krótkie frazy, w których podciągnięcie jest najważniejszym dźwiękiem."
+            },
+            "blues-licks.licks": {
+                "name": "Sześć zagrywek w boksie 1",
+                "desc": "Podstawowy słownik: otwarcie, triole, blue note, ślizg, odpowiedź i fraza na basowych strunach."
+            },
+            "blues-licks.e1": {
+                "name": "Pętla: zagrywka i odpowiedź",
+                "desc": "W taktach 1, 5 i 9 zagraj wskazaną zagrywkę, w pozostałych odpowiedz własną frazą."
+            },
+            "blues-phrasing.e1": {
+                "name": "Pętla: forma AAB",
+                "desc": "Fraza, jej powtórzenie i odpowiedź, każda na dwa takty, po każdej dwa takty pauzy."
+            },
+            "blues-phrasing.e2": {
+                "name": "Pętla: takt gry, takt pauzy",
+                "desc": "Cztery takty z podpowiedzią, kiedy grać, a kiedy słuchać. Drugi wariant to pytanie i odpowiedź."
+            },
+            "blues-phrasing.e3": {
+                "name": "Pętla: jeden motyw",
+                "desc": "Cały chorus jednym motywem rytmicznym. Zmieniają się tylko dźwięki."
+            },
+            "blues-major-minor.e1": {
+                "name": "Diagram: pentatonika durowa",
+                "desc": "Boks pentatoniki durowej: ten sam kształt co molowa, trzy progi niżej."
+            },
+            "blues-major-minor.e2": {
+                "name": "Quiz: skale w bluesie",
+                "desc": "Blue note, dźwięki pentatoniki durowej i jej związek z molową."
+            },
+            "blues-major-minor.e3": {
+                "name": "Pętla: dur, moll i obie naraz",
+                "desc": "Trzy warianty tego samego bluesa: pentatonika molowa, durowa i zmiana koloru razem z akordem."
+            },
+            "blues-major-minor.e4": {
+                "name": "Diagram: obie pentatoniki razem",
+                "desc": "Pentatonika molowa i durowa od tej samej prymy w jednym miejscu gryfu oraz skala bluesowa durowa."
+            },
+            "blues-boxes.e1": {
+                "name": "Diagram: boks wokół prymy na strunie H",
+                "desc": "Pięć dźwięków na trzech górnych strunach. Pryma leży na strunie H pod pierwszym palcem."
+            },
+            "blues-boxes.e2": {
+                "name": "Diagram: górna część boksu 2",
+                "desc": "Drugi boks pentatoniki na trzech górnych strunach. Kwartę i septymę podciąga się tu o cały ton."
+            },
+            "blues-boxes.e3": {
+                "name": "Pętla: zmiana pola co 4 takty",
+                "desc": "Takty 1–4 w boksie 1, takty 5–8 w górnej części boksu 2, takty 9–12 wokół prymy na strunie H."
+            },
+            "blues-boxes.e4": {
+                "name": "Diagram: przekątna przez boksy",
+                "desc": "Ten sam układ trzech strun powtarza się wyżej na gryfie i łączy boksy w jedną linię."
+            },
+            "blues-boxes.licks": {
+                "name": "Zagrywki wokół prymy na strunie H",
+                "desc": "Dwie frazy z podciągnięciem sekundy do tercji."
+            },
+            "blues-turnarounds.licks": {
+                "name": "Dwa turnaroundy",
+                "desc": "Linia chromatyczna w dół i w górę. Obie kończą się na dźwięku akordu V."
+            },
+            "blues-turnarounds.e1": {
+                "name": "Pętla: turnaround w taktach 11–12",
+                "desc": "Improwizuj przez 10 taktów, a dwa ostatnie zamknij turnaroundem."
+            },
+            "blues-chord-tones.e1": {
+                "name": "Pętla: drabinka dźwięków akordu",
+                "desc": "Trzy poziomy: na „raz” każdego taktu ląduj na prymie, potem na tercji, potem na septymie akordu."
+            },
+            "blues-chord-tones.e2": {
+                "name": "Pętla: dojście od dołu",
+                "desc": "Tuż przed „raz” zagraj dźwięk pół tonu pod tercją akordu i wyląduj na tercji."
+            },
+            "blues-guide-tones.e1": {
+                "name": "Diagram: skala miksolidyjska",
+                "desc": "Skala każdego z trzech akordów: A, D i E miksolidyjska. Przełącznik „Kształt” zmienia akord."
+            },
+            "blues-guide-tones.e2": {
+                "name": "Quiz: ruch dźwięków prowadzących",
+                "desc": "Na jaki dźwięk schodzi tercja akordu I, gdy wchodzi akord IV."
+            },
+            "blues-guide-tones.e3": {
+                "name": "Pętla: tercje i septymy",
+                "desc": "Na „raz” każdego taktu zagraj tercję albo septymę akordu. Szukaj ruchów o pół tonu."
+            },
+            "blues-forms.e1": {
+                "name": "Quiz: quick change",
+                "desc": "Akordy w taktach formy z szybką zmianą na IV."
+            },
+            "blues-forms.e2": {
+                "name": "Pętla: pięć odmian formy",
+                "desc": "Quick change, slow blues, blues molowy, forma ośmio- i szesnastotaktowa. Każdą trzeba zagrać."
+            },
+            "blues-jazz-blues.e1": {
+                "name": "Diagram: arpeggia bluesa jazzowego",
+                "desc": "F7, Gm7 i C7: akordy, wokół których zbudowana jest forma w F."
+            },
+            "blues-jazz-blues.e2": {
+                "name": "Pętla: blues jazzowy w F",
+                "desc": "Na każdej zmianie akordu ląduj na jego tercji. Zacznij w wolnym tempie."
+            },
+            "blues-jam.e1": {
+                "name": "Pętla: blues jam",
+                "desc": "Wszystkie formy bluesa w jednym miejscu. Wybierz formę, tonację i styl, a potem po prostu graj. Ta sekcja niczego nie blokuje."
             }
         },
         "practiceLink": {
@@ -2715,7 +3015,14 @@
             "barQuestion1": "Pytanie, takt 1 z 2",
             "barQuestion2": "Pytanie, takt 2 z 2",
             "barAnswer1": "Odpowiedź, takt 1 z 2",
-            "barAnswer2": "Odpowiedź, takt 2 z 2"
+            "barAnswer2": "Odpowiedź, takt 2 z 2",
+            "lickBluesOpen": "Zagrywka: otwarcie",
+            "lickBluesBlueNote": "Zagrywka: z blue note",
+            "lickBluesAnswer": "Zagrywka: odpowiedź z podciągnięciem",
+            "boxOne": "Boks 1 (próg 5)",
+            "boxTwo": "Górna część boksu 2 (próg 8)",
+            "boxRoot": "Wokół prymy na strunie H (próg 10)",
+            "turnaround": "Turnaround"
         },
         "session": {
             "title": "Sesja dnia",
@@ -2738,7 +3045,9 @@
             "played": "Zagrałem tę zagrywkę",
             "runs": "Zagrana: {{done}}/{{total}}",
             "notes": "Dźwięki zagrywki po kolei",
-            "legend": "Liczby to kolejność dźwięków. Pozycja z kilkoma liczbami jest grana kilka razy. Gryf w stroju standardowym."
+            "legend": "Liczby to kolejność dźwięków. Pozycja z kilkoma liczbami jest grana kilka razy. Gryf w stroju standardowym.",
+            "legendShuffle": "Ósemki są grane triolowo: długa–krótka.",
+            "legendTech": "Znaki przy dźwiękach: ¼↑, ½↑, 1↑ — podciągnięcie o ćwierć tonu, pół tonu, cały ton; h — hammer-on, p — pull-off, s — ślizg z poprzedniego dźwięku, ~ — vibrato; + — dwa dźwięki naraz."
         },
         "licks": {
             "pent3Descent": {
@@ -2780,6 +3089,66 @@
             "tgt12C": {
                 "name": "Lądowanie na E nad C",
                 "tip": "Ten sam pomysł nad akordem C: koniec na E, tercji C."
+            },
+            "bluesBoogie": {
+                "name": "Riff boogie",
+                "tip": "Pusta struna A z kwintą (próg 2 na strunie D), potem z sekstą (próg 4). Tłum struny dłonią przy mostku."
+            },
+            "bluesBoogieSeventh": {
+                "name": "Riff boogie z septymą",
+                "tip": "Ten sam riff, ale w drugiej połowie taktu palec sięga po septymę (próg 5) i wraca na sekstę."
+            },
+            "bluesBendFifth": {
+                "name": "Podciągnięcie do kwinty",
+                "tip": "Podciągnij D do E, odpowiedz dwoma dźwiękami i zakończ na prymie A z vibrato."
+            },
+            "bluesBendRoot": {
+                "name": "Podciągnięcie do prymy",
+                "tip": "Podciągnij G do A i zejdź przez boks na niższą prymę. Pierwszy dźwięk trzymaj długo."
+            },
+            "bluesCurl": {
+                "name": "Tercja z podciągnięciem",
+                "tip": "C lekko w górę, zaraz potem pryma A. Tercja ma zabrzmieć między C a C#."
+            },
+            "bluesOpen": {
+                "name": "Otwarcie",
+                "tip": "Krótka fraza na początek chorusu. Drugi dźwięk zagraj hammer-onem i zakończ na prymie."
+            },
+            "bluesTriplet": {
+                "name": "Triole",
+                "tip": "Trzy dźwięki powtarzane w triolach. Graj je równo i zakończ na wysokiej prymie."
+            },
+            "bluesBlueNote": {
+                "name": "Z blue note",
+                "tip": "Zejście przez boks z Es jako dźwiękiem przejściowym między E a D."
+            },
+            "bluesSlide": {
+                "name": "Ślizg do boksu 2",
+                "tip": "Dwa ślizgi przenoszą rękę z boksu 1 do boksu 2. Zakończ na prymie z vibrato."
+            },
+            "bluesAnswer": {
+                "name": "Odpowiedź",
+                "tip": "Zaczyna się od podciągnięcia do kwinty i spokojnie schodzi na prymę. Dobra jako odpowiedź na dowolną frazę."
+            },
+            "bluesLow": {
+                "name": "Na basowych strunach",
+                "tip": "Ta sama skala na trzech najniższych strunach, z blue note po drodze."
+            },
+            "bluesBoxCall": {
+                "name": "Pryma i podciągnięcie",
+                "tip": "Pryma A na strunie H, potem H podciągnięte do C# i powrót na prymę z vibrato."
+            },
+            "bluesBoxSweet": {
+                "name": "Seksta i pół tonu",
+                "tip": "Zaczyna się od seksty (F#). Sekundę podciągnij tylko o pół tonu, do tercji małej."
+            },
+            "bluesTurnDown": {
+                "name": "Turnaround w dół",
+                "tip": "Linia G–F#–F–E na strunie D na przemian z wysokim A. Kończy się na E, prymie akordu V."
+            },
+            "bluesTurnUp": {
+                "name": "Turnaround w górę",
+                "tip": "Od A na strunie E (próg 5) chromatycznie do E na strunie A: C#, D, D#, E."
             }
         },
         "standards": {
@@ -2835,6 +3204,44 @@
                 "melodic": "{{key}}-moll melodyczna",
                 "harmonic": "{{key}}-moll harmoniczna"
             }
+        },
+        "tracks": {
+            "switchLabel": "Ścieżki nauki",
+            "improv": {
+                "tab": "Improwizacja",
+                "title": "Trening improwizacji",
+                "description": "Nauka improwizacji w 22 modułach: od dźwięków na strunie E po Giant Steps. Każdy moduł to krótka teoria i ćwiczenia; zaliczenie modułu otwiera następny."
+            },
+            "blues": {
+                "tab": "Blues",
+                "title": "Blues",
+                "description": "Nauka bluesa w 14 modułach: od formy 12-taktowej i shuffle, przez podciągnięcia i frazowanie, po granie po zmianach.",
+                "extraTitle": "Blues jam",
+                "stages": {
+                    "rhythm": "Rytm i forma (1–3)",
+                    "language": "Język solówki (4–7)",
+                    "colours": "Kolory (8–10)",
+                    "changes": "Granie po zmianach (11–14)"
+                }
+            }
+        },
+        "bend": {
+            "threshold": "Do zaliczenia: każde podciągnięcie {{required}} razy",
+            "choose": "Podciągnięcie",
+            "option": "Struna {{string}}, próg {{fret}}",
+            "prompt": {
+                "half": "Struna {{string}}, próg {{fret}} ({{note}}): podciągnij o pół tonu, do {{target}}.",
+                "whole": "Struna {{string}}, próg {{fret}} ({{note}}): podciągnij o cały ton, do {{target}}.",
+                "curl": "Struna {{string}}, próg {{fret}} ({{note}}): podciągnij lekko, o ćwierć tonu. Dźwięk ma zostać poniżej {{target}}."
+            },
+            "meter": "Wysokość podciągnięcia",
+            "micOffHint": "Włącz mikrofon, żeby zobaczyć, jak wysoko podciągasz. Zielone pole to cel.",
+            "waiting": "Zagraj dźwięk i podciągnij strunę.",
+            "cents": "{{cents}} centów powyżej dźwięku wyjściowego (cel: {{min}}–{{max}}).",
+            "playTarget": "Posłuchaj dźwięku docelowego",
+            "selfMark": "Trafiłem (bez mikrofonu)",
+            "reps": "Trafione: {{done}}/{{required}}",
+            "holdHint": "Powtórzenie liczy się, gdy utrzymasz dźwięk w zielonym polu przez {{seconds}} s. Przed następnym opuść strunę."
         }
     }
 }

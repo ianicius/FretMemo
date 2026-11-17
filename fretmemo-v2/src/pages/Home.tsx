@@ -17,7 +17,8 @@ import { ArrowRight, Compass, Flame, Music2, Play, Sparkles, Star, Target, Troph
 import { getLevelProgress } from "@/lib/progression";
 import { useQuestStore } from "@/stores/useQuestStore";
 import { useImprovStore } from "@/stores/useImprovStore";
-import { CURRICULUM, nextImprovExercise } from "@/data/improv/curriculum";
+import { nextImprovExercise } from "@/data/improv/curriculum";
+import { TRACKS } from "@/data/improv/tracks";
 
 type PracticeMode = "fretboardToNote" | "tabToNote" | "noteToTab" | "playNotes" | "playTab";
 type ExerciseDifficulty = "beginner" | "intermediate" | "advanced";
@@ -123,8 +124,16 @@ export default function Home() {
     const navigate = useNavigate();
     // Plan F2: the next required improv exercise, straight from the home page.
     const improvModuleState = useImprovStore((state) => state.moduleState);
-    const improvNext = useMemo(() => nextImprovExercise(improvModuleState), [improvModuleState]);
-    const improvStarted = Object.values(improvModuleState).some((module) => Object.values(module.exerciseRuns).some((runs) => runs > 0));
+    // One card per track the learner has started; before any start, the first track.
+    const improvCards = useMemo(() => {
+        const cards = TRACKS.map((track) => ({
+            track,
+            next: nextImprovExercise(improvModuleState, track.modules),
+            started: track.modules.some((module) => Object.values(improvModuleState[module.id]?.exerciseRuns ?? {}).some((runs) => runs > 0)),
+        })).filter((card) => card.next);
+        const started = cards.filter((card) => card.started);
+        return started.length > 0 ? started : cards.slice(0, 1);
+    }, [improvModuleState]);
     const { streakDays, totalCorrect, totalIncorrect, positionStats, totalXP } = useProgressStore();
     const { setMode, setPracticeConstraints } = useGameStore();
     const quickTuning = useSettingsStore((state) => state.quick.tuning);
@@ -405,17 +414,17 @@ export default function Home() {
                 </CardContent>
             </Card>
 
-            {improvNext && (
-                <Card className="border-border/80">
+            {improvCards.map(({ track, next: improvNext, started: improvStarted }) => improvNext && (
+                <Card key={track.id} className="border-border/80">
                     <CardHeader>
                         <div className="flex items-center gap-2">
                             <Music2 className="h-5 w-5 text-primary" />
-                            <CardTitle>{t('home.improvContinue.title')}</CardTitle>
+                            <CardTitle>{t(`improv.tracks.${track.id}.title`)}</CardTitle>
                         </div>
                         <CardDescription>
                             {t('home.improvContinue.desc', {
                                 order: improvNext.module.order,
-                                total: CURRICULUM.length,
+                                total: track.modules.length,
                                 module: t(`improv.modules.${improvNext.module.id}.name`),
                             })}
                         </CardDescription>
@@ -426,13 +435,13 @@ export default function Home() {
                             {t(improvStarted ? 'home.improvContinue.continue' : 'home.improvContinue.start')}
                             <ArrowRight className="h-4 w-4" />
                         </Button>
-                        <Button className="w-full justify-between" onClick={() => navigate('/improv/session')}>
+                        <Button className="w-full justify-between" onClick={() => navigate(`/improv/session?track=${track.id}`)}>
                             {t('home.improvContinue.session')}
                             <ArrowRight className="h-4 w-4" />
                         </Button>
                     </CardContent>
                 </Card>
-            )}
+            ))}
 
             <Card className="border-border/80">
                 <CardHeader>

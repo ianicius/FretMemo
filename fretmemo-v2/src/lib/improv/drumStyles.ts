@@ -7,7 +7,7 @@ import { playChord } from "@/lib/audio";
 import { getChordMidis, getChordPitchClasses, tonicMidi } from "@/lib/improv/chords";
 import { scheduleBass, scheduleHat, scheduleKick, scheduleSnare } from "@/rhythm/engine/drumVoices";
 
-export type DrumStyleId = "off" | "rock" | "swing" | "shuffle" | "bossa" | "funk" | "reggae" | "ballad";
+export type DrumStyleId = "off" | "rock" | "swing" | "shuffle" | "slow12" | "bossa" | "funk" | "reggae" | "ballad";
 type Voice = "kick" | "snare" | "hat";
 interface DrumHit { at: number; voice: Voice; accent?: boolean }
 
@@ -30,6 +30,12 @@ export const DRUM_STYLES: Record<DrumStyleId, DrumHit[]> = {
     shuffle: [
         ...[0, 1, 2, 3].flatMap((beat) => [{ at: beat, voice: "hat" as const, accent: true }, { at: beat + T2, voice: "hat" as const }]),
         { at: 0, voice: "kick", accent: true }, { at: 2, voice: "kick" }, { at: 2 + T2, voice: "kick" },
+        { at: 1, voice: "snare", accent: true }, { at: 3, voice: "snare", accent: true },
+    ],
+    // Slow blues in 12/8: every triplet on the hat, kick on 1 and 3, backbeat on 2 and 4.
+    slow12: [
+        ...[0, 1, 2, 3].flatMap((beat) => [0, 1 / 3, T2].map((part) => ({ at: beat + part, voice: "hat" as const, accent: part === 0 }))),
+        { at: 0, voice: "kick", accent: true }, { at: 2, voice: "kick" },
         { at: 1, voice: "snare", accent: true }, { at: 3, voice: "snare", accent: true },
     ],
     // Bass drum "1, (2-and), 3, (4-and)", rim on a clave-like figure, straight eighths on the hat.
@@ -72,6 +78,10 @@ export const COMP_STYLES: Record<DrumStyleId, CompHit[]> = {
         { at: beat, len: 0.55, vel: beat % 2 ? 0.95 : 0.8 },
         { at: beat + T2, len: 0.3, vel: 0.55, up: true },
     ]),
+    // One chord tone per triplet, up and down, so the chord rings through the bar.
+    slow12: [0, 1, 2, 3].flatMap((beat) => [0, 1, 2].map((part) => ({
+        at: beat + part / 3, len: Math.min(1, 4 - beat - part / 3), vel: part === 0 ? 0.8 : 0.6, pick: beat % 2 === 0 ? part : 2 - part,
+    }))),
     // First bar of the classic bossa figure: 1, the "and" of 2, 4.
     bossa: [{ at: 0, len: 0.45, vel: 0.8 }, { at: 1.5, len: 0.45, vel: 0.75 }, { at: 3, len: 0.45, vel: 0.8 }],
     // Sixteenth-note chops, the upstrokes lighter.
@@ -92,6 +102,7 @@ export const BASS_STYLES: Record<DrumStyleId, BassHit[]> = {
     swing: [{ at: 0, len: 1.8, degree: "root" }, { at: 2, len: 1.8, degree: "fifth" }],
     // Boogie figure: root, fifth, sixth (minor seventh over minor chords), fifth.
     shuffle: [{ at: 0, len: 0.9, degree: "root" }, { at: 1, len: 0.9, degree: "fifth" }, { at: 2, len: 0.9, degree: "sixth" }, { at: 3, len: 0.9, degree: "fifth" }],
+    slow12: [{ at: 0, len: 1.9, degree: "root" }, { at: 2, len: 0.9, degree: "fifth" }, { at: 3, len: 0.9, degree: "sixth" }],
     bossa: [{ at: 0, len: 1.4, degree: "root" }, { at: 1.5, len: 0.45, degree: "root" }, { at: 2, len: 1.4, degree: "fifth" }, { at: 3.5, len: 0.45, degree: "fifth" }],
     funk: [{ at: 0, len: 0.4, degree: "root" }, { at: 0.75, len: 0.2, degree: "root" }, { at: 1.5, len: 0.2, degree: "octave" }, { at: 2.5, len: 0.4, degree: "root" }, { at: 3.25, len: 0.2, degree: "fifth" }, { at: 3.5, len: 0.4, degree: "octave" }],
     reggae: [{ at: 0, len: 0.9, degree: "root" }, { at: 1.5, len: 0.45, degree: "fifth" }, { at: 2, len: 0.9, degree: "root" }],

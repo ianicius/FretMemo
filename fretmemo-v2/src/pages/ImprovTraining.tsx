@@ -1,17 +1,18 @@
 /**
  * Improv Training page (run improv-training-2026-11-13).
  *
- * Two views on one page component:
- * - `/improv` (no route param): the roadmap — all 22 curriculum modules in
- *   the canonical order from the source video, with locked/available/passed
- *   status, overall progress and an unlock-all switch;
+ * Three views on one page component, for every track in the registry
+ * (src/data/improv/tracks.ts):
+ * - `/improv` and `/improv/<trackId>`: the roadmap of a track — its modules
+ *   in order, with locked/available/passed status, overall progress and an
+ *   unlock-all switch;
  * - `/improv/:moduleId`: module detail — theory card + all curriculum
- *   exercises rendered by their engines (fretboard quiz, choice quiz,
- *   diagram drill, backing loop).
+ *   exercises rendered by their engines;
+ * - `/improv/session?track=<trackId>`: the session of the day.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, Fragment } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, CheckCircle2, ChevronRight, GraduationCap, Lock, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,9 @@ import type { DiagramDrillParams, ImprovExercise } from "@/data/improv/curriculu
 import { BackingLoopExercise } from "@/components/improv/BackingLoopExercise";
 import { PracticeLinkExercise } from "@/components/improv/PracticeLinkExercise";
 import { LickExercise } from "@/components/improv/LickExercise";
-import { CURRICULUM, REVIEW_ID, STANDARDS, STANDARDS_ID, countCompletedModules, dailySession, passedQuizGenerators, reviewQuiz, getImprovModule, isModuleUnlocked, isModuleComplete, isNonGating } from "@/data/improv/curriculum";
+import { BendDrill } from "@/components/improv/BendDrill";
+import { REVIEW_ID, countCompletedModules, dailySession, passedQuizGenerators, reviewQuiz, isModuleUnlocked, isModuleComplete, isNonGating } from "@/data/improv/curriculum";
+import { DEFAULT_TRACK, TRACKS, getModule, getTrack, trackOfModule, type Track } from "@/data/improv/tracks";
 import type { ChoiceGeneratorId } from "@/lib/improv/questions";
 import { useImprovStore } from "@/stores/useImprovStore";
 import { IMPROV_SESSION_MODE, useQuestStore } from "@/stores/useQuestStore";
@@ -46,21 +49,16 @@ export default function ImprovTraining() {
     if (moduleId === "session") {
         return <SessionView />;
     }
-    if (!moduleId) {
-        return <RoadmapView />;
+    const track = moduleId ? getTrack(moduleId) : DEFAULT_TRACK;
+    if (track) {
+        // Keyed: switching tracks starts from a fresh roadmap (closed quizzes).
+        return <RoadmapView key={track.id} track={track} />;
     }
-    return <ModuleView moduleId={moduleId} />;
+    return <ModuleView moduleId={moduleId as string} />;
 }
 
-/** Plan phase 6: display stages over the canonical order (display only). */
-const STAGES: Array<{ labelKey: string; from: number; to: number }> = [
-    { labelKey: "improv.stage.podstawy", from: 1, to: 6 },
-    { labelKey: "improv.stage.harmonia", from: 7, to: 11 },
-    { labelKey: "improv.stage.granie", from: 12, to: 17 },
-    { labelKey: "improv.stage.zaawansowane", from: 18, to: 22 },
-];
-
-function RoadmapView() {
+function RoadmapView({ track }: { track: Track }) {
+    const modules = track.modules;
     const { t } = useTranslation();
     const navigate = useNavigate();
     const moduleState = useImprovStore((state) => state.moduleState);
@@ -71,12 +69,14 @@ function RoadmapView() {
     const reviewSRS = useImprovStore((state) => state.reviewSRS);
     const setEntranceUnlockCount = useImprovStore((state) => state.setEntranceUnlockCount);
 
-    const completed = countCompletedModules(moduleState);
-    const total = CURRICULUM.length;
+    const completed = countCompletedModules(moduleState, modules);
+    const total = modules.length;
+    // The placement quiz unlocks by module order, so it belongs to the track that offers it.
+    const entranceCount = track.entranceTest ? entranceUnlockCount : null;
 
     // Plan phase 6: mixed review quiz from the choice-quiz generators of
     // passed modules; SM-2 entries per generator schedule the review.
-    const passedGenerators = useMemo(() => passedQuizGenerators(moduleState), [moduleState]);
+    const passedGenerators = useMemo(() => passedQuizGenerators(moduleState, modules), [moduleState, modules]);
     // SM-2 schedule: review the generators that are due (never reviewed or
     // past their date); when nothing is due, review everything passed.
     const reviewGenerators = useMemo(() => {
@@ -97,7 +97,7 @@ function RoadmapView() {
     // up to the first failed one.
     const generatorModuleOrder = useMemo(() => {
         const map = new Map<string, number>();
-        for (const module of CURRICULUM) {
+        for (const module of modules) {
             for (const exercise of module.exercises) {
                 if (exercise.engine !== "choice-quiz") continue;
                 const generatorId = (exercise.params as { generatorId: string }).generatorId;
@@ -106,7 +106,7 @@ function RoadmapView() {
             }
         }
         return map;
-    }, []);
+    }, [modules]);
     const orderedEntranceGenerators = useMemo(
         () => [...generatorModuleOrder.entries()].sort((a, b) => a[1] - b[1]).map(([generatorId]) => generatorId),
         [generatorModuleOrder],
@@ -134,20 +134,37 @@ function RoadmapView() {
         if (order) failedOrdersRef.current.add(order);
     }, [generatorModuleOrder]);
     const handleEntranceFinished = useCallback(() => {
-        const firstFailed = failedOrdersRef.current.size > 0 ? Math.min(...failedOrdersRef.current) : CURRICULUM.length;
+        const firstFailed = failedOrdersRef.current.size > 0 ? Math.min(...failedOrdersRef.current) : modules.length;
         // Modules up to AND including the first failed one unlock — the
         // failed module is the one to study next.
         setEntranceUnlockCount(firstFailed);
         failedOrdersRef.current = new Set();
         setEntranceOpen(false);
-    }, [setEntranceUnlockCount, setEntranceOpen]);
+    }, [modules, setEntranceUnlockCount, setEntranceOpen]);
 
     return (
         <div className="space-y-5 pb-8">
             <div>
-                <h1 className="type-display">{t("improv.title")}</h1>
-                <p className="mt-1 text-muted-foreground">{t("improv.description")}</p>
+                <h1 className="type-display">{t(`improv.tracks.${track.id}.title`)}</h1>
+                <p className="mt-1 text-muted-foreground">{t(`improv.tracks.${track.id}.description`)}</p>
             </div>
+
+            {TRACKS.length > 1 && (
+                <nav className="flex flex-wrap gap-2" aria-label={t("improv.tracks.switchLabel")}>
+                    {TRACKS.map((item) => (
+                        <Button
+                            key={item.id}
+                            type="button"
+                            size="sm"
+                            variant={item.id === track.id ? "default" : "outline"}
+                            aria-current={item.id === track.id ? "page" : undefined}
+                            onClick={() => navigate(item.path)}
+                        >
+                            {t(`improv.tracks.${item.id}.tab`)}
+                        </Button>
+                    ))}
+                </nav>
+            )}
 
             <Card>
                 <CardContent className="space-y-3">
@@ -181,18 +198,23 @@ function RoadmapView() {
                             <RotateCcw className="mr-2 h-4 w-4" />
                             {t("improv.review.button")}
                         </Button>
-                        <Button
-                            type="button"
-                            size="sm"
-                            variant={entranceOpen ? "secondary" : "outline"}
-                            onClick={() => {
-                                setReviewOpen(false);
-                                failedOrdersRef.current = new Set();
-                                setEntranceOpen((previous) => !previous);
-                            }}
-                        >
-                            <GraduationCap className="mr-2 h-4 w-4" />
-                            {t("improv.roadmap.entranceTest")}
+                        {track.entranceTest && (
+                            <Button
+                                type="button"
+                                size="sm"
+                                variant={entranceOpen ? "secondary" : "outline"}
+                                onClick={() => {
+                                    setReviewOpen(false);
+                                    failedOrdersRef.current = new Set();
+                                    setEntranceOpen((previous) => !previous);
+                                }}
+                            >
+                                <GraduationCap className="mr-2 h-4 w-4" />
+                                {t("improv.roadmap.entranceTest")}
+                            </Button>
+                        )}
+                        <Button type="button" size="sm" variant="outline" onClick={() => navigate(`/improv/session?track=${track.id}`)}>
+                            {t("improv.session.title")}
                         </Button>
                     </div>
                 </CardContent>
@@ -220,9 +242,9 @@ function RoadmapView() {
             )}
 
             <div className="space-y-2">
-                {CURRICULUM.map((module) => {
-                    const stageLabel = STAGES.find((stage) => stage.from === module.order)?.labelKey;
-                    const unlocked = isModuleUnlocked(module.id, moduleState, unlockAll, entranceUnlockCount);
+                {modules.map((module) => {
+                    const stageLabel = track.stages.find((stage) => stage.from === module.order)?.labelKey;
+                    const unlocked = isModuleUnlocked(module.id, moduleState, unlockAll, entranceCount, modules);
                     const isComplete = isModuleComplete(module, moduleState[module.id]);
                     const moduleName = t(`improv.modules.${module.id}.name`);
                     const moduleTerm = t(`improv.modules.${module.id}.term`);
@@ -285,10 +307,14 @@ function RoadmapView() {
                 })}
             </div>
 
-            <p className="pt-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                {t("improv.standards.title")}
-            </p>
-            <BackingLoopExercise moduleId={STANDARDS_ID} exercise={STANDARDS} />
+            {track.extra && (
+                <>
+                    <p className="pt-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        {t(track.extra.titleKey)}
+                    </p>
+                    {renderImprovExercise(track.extra.id, track.extra.exercise)}
+                </>
+            )}
         </div>
     );
 }
@@ -307,6 +333,8 @@ function renderImprovExercise(moduleId: string, exercise: ImprovExercise) {
             return <PracticeLinkExercise key={exercise.id} moduleId={moduleId} exercise={exercise} />;
         case "lick":
             return <LickExercise key={exercise.id} moduleId={moduleId} exercise={exercise} />;
+        case "bend-drill":
+            return <BendDrill key={exercise.id} moduleId={moduleId} exercise={exercise} />;
         default:
             return null;
     }
@@ -320,8 +348,10 @@ function SessionView() {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const updateReviewSR = useImprovStore((state) => state.updateReviewSR);
+    const [searchParams] = useSearchParams();
+    const track = getTrack(searchParams.get("track")) ?? DEFAULT_TRACK;
     // Chosen once on entry: passing a step must not swap the steps that follow.
-    const [steps] = useState(() => dailySession(useImprovStore.getState().moduleState));
+    const [steps] = useState(() => dailySession(useImprovStore.getState().moduleState, track.modules));
     const [index, setIndex] = useState(0);
     const step = steps[index];
     const last = index === steps.length - 1;
@@ -377,7 +407,8 @@ function ModuleView({ moduleId }: { moduleId: string }) {
     const unlockAll = useImprovStore((state) => state.unlockAll);
     const entranceUnlockCount = useImprovStore((state) => state.entranceUnlockCount);
 
-    const module = getImprovModule(moduleId);
+    const module = getModule(moduleId);
+    const track = trackOfModule(moduleId);
 
     useEffect(() => {
         if (!module) return;
@@ -389,7 +420,7 @@ function ModuleView({ moduleId }: { moduleId: string }) {
             <div className="flex flex-col items-center gap-4 py-16 text-center">
                 <h2 className="type-h1">{t("improv.module.notFoundTitle")}</h2>
                 <p className="type-body text-muted-foreground">{t("improv.module.notFoundDesc", { moduleId })}</p>
-                <Button variant="outline" onClick={() => navigate("/improv")}>
+                <Button variant="outline" onClick={() => navigate(track.path)}>
                     <ArrowLeft className="mr-2 h-4 w-4" /> {t("improv.module.backToRoadmap")}
                 </Button>
             </div>
@@ -399,7 +430,7 @@ function ModuleView({ moduleId }: { moduleId: string }) {
     const renderExercise = (exercise: ImprovExercise) => renderImprovExercise(module.id, exercise);
     const extraExercises = module.exercises.filter(isNonGating);
 
-    const unlocked = isModuleUnlocked(module.id, moduleState, unlockAll, entranceUnlockCount);
+    const unlocked = isModuleUnlocked(module.id, moduleState, unlockAll, track.entranceTest ? entranceUnlockCount : null, track.modules);
     const isComplete = isModuleComplete(module, moduleState[module.id]);
     const moduleName = t(`improv.modules.${module.id}.name`);
     const moduleTerm = t(`improv.modules.${module.id}.term`);
@@ -407,7 +438,7 @@ function ModuleView({ moduleId }: { moduleId: string }) {
     return (
         <div className="space-y-4 pb-8">
             <div className="flex items-center gap-3">
-                <Button variant="ghost" size="icon" onClick={() => navigate("/improv")} aria-label={t("improv.module.backToRoadmap")} className="shrink-0">
+                <Button variant="ghost" size="icon" onClick={() => navigate(track.path)} aria-label={t("improv.module.backToRoadmap")} className="shrink-0">
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div className="min-w-0">
@@ -430,7 +461,7 @@ function ModuleView({ moduleId }: { moduleId: string }) {
                         <Lock className="h-6 w-6 text-muted-foreground" />
                         <p className="text-sm font-medium">{t("improv.module.lockedTitle")}</p>
                         <p className="max-w-sm text-xs text-muted-foreground">{t("improv.module.lockedDesc")}</p>
-                        <Button variant="outline" size="sm" onClick={() => navigate("/improv")}>
+                        <Button variant="outline" size="sm" onClick={() => navigate(track.path)}>
                             {t("improv.module.backToRoadmap")}
                         </Button>
                     </CardContent>

@@ -17,10 +17,11 @@ import type { NoteName } from "@/types/fretboard";
 import type { ScaleShapeId } from "@/lib/improv/scaleShapes";
 import type { ChoiceGeneratorId } from "@/lib/improv/questions";
 import type { PracticeMode, ScaleType } from "@/stores/useGameStore";
+import type { DrumStyleId } from "@/lib/improv/drumStyles";
 
 /* ─────────── Engine parameter types ─────────── */
 
-export type ImprovEngineType = "choice-quiz" | "diagram-drill" | "backing-improv" | "practice-link" | "lick";
+export type ImprovEngineType = "choice-quiz" | "diagram-drill" | "backing-improv" | "practice-link" | "lick" | "bend-drill";
 
 /** Tonic for shapes/keys: sharp spellings plus the flat keys the curriculum needs. */
 export type ImprovKey = NoteName | "Bb" | "Db" | "Eb" | "Gb" | "Ab";
@@ -67,6 +68,8 @@ export interface DiagramDrillParams {
     nonGating?: boolean;
     /** Plan C6: show the shape on this string only (0 = high E). */
     onlyString?: number;
+    /** Show the shape on these strings only (0 = high E) — boxes that live on a few strings. */
+    onlyStrings?: number[];
     /** Plan C5: wide window with the repeating stack highlighted. */
     diagonal?: boolean;
     /** Plan C4: "build the box from a root" — rendered by BuildScaleDrill. */
@@ -125,6 +128,8 @@ export interface BackingLoopVariant {
     targets?: ChordMicTargets[];
     /** Key of the variant for the transposition selector (B2); see `BackingLoopParams.key`. */
     key?: string;
+    /** Backing style this variant starts with; see `BackingLoopParams.style`. */
+    style?: DrumStyleId;
 }
 
 export interface BackingLoopParams {
@@ -147,6 +152,12 @@ export interface BackingLoopParams {
     key?: string;
     /** Extra practice that never gates module completion (plan rule 3; B4 variants). */
     nonGating?: boolean;
+    /**
+     * Backing style the loop starts with (a shuffle for a blues, a swing for a
+     * jazz form). Omitted = the learner's own style setting. The selector still
+     * lets them change it for this loop.
+     */
+    style?: DrumStyleId;
 }
 
 /** Theory tool embedded in the module's theory card (plan phase 2). */
@@ -161,13 +172,34 @@ export type ImprovExerciseParams =
     | DiagramDrillParams
     | BackingLoopParams
     | PracticeLinkParams
-    | LickParams;
+    | LickParams
+    | BendDrillParams;
 
 /** Plan D2: licks from `licks.ts`; each one needs `requiredRuns` "played it" marks. Extra practice. */
 export interface LickParams {
     lickIds: string[];
     requiredRuns: number;
-    nonGating: true;
+    nonGating?: boolean;
+}
+
+/**
+ * One string bend: the fretted note and how far above it (in cents) the pitch
+ * must be held. A half step is 80–120, a whole step 180–220, a blues curl 25–75.
+ */
+export interface BendSpec {
+    id: string;
+    /** 1 = high E … 6 = low E, as in the licks. */
+    string: number;
+    fret: number;
+    minCents: number;
+    maxCents: number;
+}
+
+/** Bend trainer: every bend needs `requiredReps` held repetitions. */
+export interface BendDrillParams {
+    bends: BendSpec[];
+    requiredReps: number;
+    nonGating?: boolean;
 }
 
 export interface ImprovExercise {
@@ -197,21 +229,21 @@ const PENTATONIC_KEYS: ImprovKey[] = ["C", "A", "D", "E", "G"];
 const SCALE_KEYS: ImprovKey[] = ["A", "C", "D", "E", "G"];
 
 /** Plan D3: a loop whose prompter says in which bar to play a lick and where to answer it. */
-function lickLoop(goal: string, progression: ProgressionEntry[]): BackingLoopParams {
+export function lickLoop(goal: string, progression: ProgressionEntry[]): BackingLoopParams {
     return { ...EXTRA_LOOP, progression, goalKey: `improv.goals.${goal}` };
 }
 
-function lickExercise(moduleId: string, lickIds: string[]): ImprovExercise {
+export function lickExercise(moduleId: string, lickIds: string[], nonGating = true): ImprovExercise {
     return {
         id: `${moduleId}.licks`,
         engine: "lick",
         nameKey: `improv.ex.${moduleId}.licks.name`,
         descKey: `improv.ex.${moduleId}.licks.desc`,
-        params: { lickIds, requiredRuns: 3, nonGating: true },
+        params: { lickIds, requiredRuns: 3, nonGating },
     };
 }
 
-function practiceLinkExercise(
+export function practiceLinkExercise(
     moduleId: string,
     suffix: string,
     mode: PracticeMode,
@@ -239,7 +271,7 @@ function practiceLinkExercise(
     };
 }
 
-function choiceExercise(
+export function choiceExercise(
     moduleId: string,
     suffix: string,
     generatorId: ChoiceGeneratorId,
@@ -261,7 +293,7 @@ function choiceExercise(
     };
 }
 
-function drillExercise(
+export function drillExercise(
     moduleId: string,
     suffix: string,
     shapes: DiagramShapeRef[],
@@ -280,7 +312,7 @@ function drillExercise(
     };
 }
 
-function loopExercise(
+export function loopExercise(
     moduleId: string,
     suffix: string,
     params: BackingLoopParams,
@@ -309,10 +341,10 @@ export const BUILD_STARTS: BuildStart[] = [
 ];
 
 /** Shared tempo settings of the stage D extra loops. */
-const EXTRA_LOOP = { beatsPerChord: 4, defaultBpm: 80, minBpm: 50, maxBpm: 160, requiredPasses: 2, nonGating: true } as const;
+export const EXTRA_LOOP = { beatsPerChord: 4, defaultBpm: 80, minBpm: 50, maxBpm: 160, requiredPasses: 2, nonGating: true } as const;
 
 /** One goal per variant over the same progression. */
-function goalVariants(progression: Array<string | ProgressionEntry>, ids: string[], targets?: ChordMicTargets[]): BackingLoopVariant[] {
+export function goalVariants(progression: Array<string | ProgressionEntry>, ids: string[], targets?: ChordMicTargets[]): BackingLoopVariant[] {
     return ids.map((id) => ({ id, labelKey: `improv.goals.${id}Label`, progression, goalKey: `improv.goals.${id}`, targets }));
 }
 
@@ -320,7 +352,7 @@ function goalVariants(progression: Array<string | ProgressionEntry>, ids: string
  * Plan D6: a 12-bar blues played with the minor pentatonic, the major one,
  * and both in turn (major over the I chord, minor over IV and V).
  */
-function bluesPentatonicLoop(one: string, four: string, five: string): BackingLoopParams {
+export function bluesPentatonicLoop(one: string, four: string, five: string): BackingLoopParams {
     const form = [one, one, one, one, four, four, one, one, five, four, one, one];
     const mixed = form.map((chord) => ({ chord, hintKey: chord === one ? "improv.hints.bluesMajorPent" : "improv.hints.bluesMinorPent" }));
     return {
@@ -352,7 +384,7 @@ const CALL_RESPONSE_HINTS = ["improv.hints.barQuestion1", "improv.hints.barQuest
  * and as a 2+2-bar question–answer, cued by per-chord hints. Non-gating
  * extra practice (plan rule 3) so the modules do not get harder to pass.
  */
-function phraseLoop(chords: [string, string, string, string]): BackingLoopParams {
+export function phraseLoop(chords: [string, string, string, string]): BackingLoopParams {
     const withHints = (hints: string[]): ProgressionEntry[] =>
         chords.map((chord, index) => ({ chord, hintKey: hints[index] }));
     return {
@@ -1331,6 +1363,10 @@ export function isExercisePassed(
             const params = exercise.params as LickParams;
             return params.lickIds.every((id) => (progress.exerciseRuns[loopRunKey(exercise.id, id)] ?? 0) >= params.requiredRuns);
         }
+        case "bend-drill": {
+            const params = exercise.params as BendDrillParams;
+            return params.bends.every((bend) => (progress.exerciseRuns[loopRunKey(exercise.id, bend.id)] ?? 0) >= params.requiredReps);
+        }
         default:
             return false;
     }
@@ -1373,25 +1409,25 @@ export function isModuleUnlocked(
     moduleState: Record<string, ImprovProgressShape & { completed: boolean }> | undefined,
     unlockAll: boolean,
     entranceUnlockCount?: number | null,
+    modules: ImprovModule[] = CURRICULUM,
 ): boolean {
     if (unlockAll) return true;
-    const index = IMPROV_ORDER.indexOf(moduleId);
+    const index = modules.findIndex((module) => module.id === moduleId);
     // Entrance test (plan phase 6): modules up to the first failed one are
     // unlocked by the result of the placement quiz.
     if (typeof entranceUnlockCount === "number" && index < entranceUnlockCount) return true;
     if (index <= 0) return true;
-    const previousId = IMPROV_ORDER[index - 1] as string;
-    const previousState = moduleState?.[previousId];
+    const previousModule = modules[index - 1] as ImprovModule;
+    const previousState = moduleState?.[previousModule.id];
     if (!previousState) return false;
-    if (previousState.completed) return true;
-    const previousModule = getImprovModule(previousId);
-    return previousModule ? isModuleComplete(previousModule, previousState) : false;
+    return previousState.completed || isModuleComplete(previousModule, previousState);
 }
 
 export function countCompletedModules(
     moduleState: Record<string, ImprovProgressShape & { completed: boolean }> | undefined,
+    modules: ImprovModule[] = CURRICULUM,
 ): number {
-    return CURRICULUM.filter((module) => isModuleComplete(module, moduleState?.[module.id])).length;
+    return modules.filter((module) => isModuleComplete(module, moduleState?.[module.id])).length;
 }
 
 /**
@@ -1400,14 +1436,15 @@ export function countCompletedModules(
  */
 export function nextImprovExercise(
     moduleState: Record<string, ImprovProgressShape & { completed: boolean }> | undefined,
+    modules: ImprovModule[] = CURRICULUM,
 ): { module: ImprovModule; exercise: ImprovExercise } | null {
-    const module = CURRICULUM.find((item) => !isModuleComplete(item, moduleState?.[item.id]));
+    const module = modules.find((item) => !isModuleComplete(item, moduleState?.[item.id]));
     const exercise = module?.exercises.find((item) => !isNonGating(item) && !isExercisePassed(item, moduleState?.[module.id]));
     return module && exercise ? { module, exercise } : null;
 }
 
 /** Two chords in one bar. */
-const half = (chord: string): ProgressionEntry => ({ chord, beats: 2 });
+export const half = (chord: string): ProgressionEntry => ({ chord, beats: 2 });
 
 /** ii–V–I in every key, each tonic a fourth above the previous one (two bars per key). */
 const CYCLE_OF_FOURTHS: ProgressionEntry[] = [
@@ -1416,7 +1453,7 @@ const CYCLE_OF_FOURTHS: ProgressionEntry[] = [
     ["F#m7", "B7", "Emaj7"], ["Bm7", "E7", "Amaj7"], ["Em7", "A7", "Dmaj7"], ["Am7", "D7", "Gmaj7"],
 ].flatMap(([two, five, one]) => [half(two), half(five), { chord: one, beats: 4 }]);
 
-const STANDARD_FORMS: Array<{ id: string; key: string; progression: Array<string | ProgressionEntry> }> = [
+export const STANDARD_FORMS: Array<{ id: string; key: string; progression: Array<string | ProgressionEntry> }> = [
     { id: "stdJazzBlues", key: "F", progression: [
         "F7", "Bb7", "F7", half("Cm7"), half("F7"),
         "Bb7", "Bdim7", "F7", half("Am7"), half("D7"),
@@ -1471,9 +1508,9 @@ export const STANDARDS: ImprovExercise = loopExercise(STANDARDS_ID, "e1", {
 type ModuleStateShape = Record<string, ImprovProgressShape & { completed: boolean }> | undefined;
 
 /** Quiz generators of the completed modules: the pool of the mixed review quiz. */
-export function passedQuizGenerators(moduleState: ModuleStateShape): ChoiceGeneratorId[] {
+export function passedQuizGenerators(moduleState: ModuleStateShape, modules: ImprovModule[] = CURRICULUM): ChoiceGeneratorId[] {
     const generators = new Set<ChoiceGeneratorId>();
-    for (const module of CURRICULUM) {
+    for (const module of modules) {
         if (!isModuleComplete(module, moduleState?.[module.id])) continue;
         for (const exercise of module.exercises) {
             if (exercise.engine !== "choice-quiz") continue;
@@ -1504,10 +1541,10 @@ export const REVIEW_ID = "review";
  * that has one (earlier modules first). Before any module is complete the
  * quiz is the nearest module quiz instead of a review.
  */
-export function dailySession(moduleState: ModuleStateShape): Array<{ moduleId: string; exercise: ImprovExercise }> {
-    const current = nextImprovExercise(moduleState)?.module ?? CURRICULUM[CURRICULUM.length - 1];
-    const distance = (module: ImprovModule) => (module.order <= current.order ? current.order - module.order : CURRICULUM.length + module.order);
-    const nearest = [...CURRICULUM].sort((a, b) => distance(a) - distance(b));
+export function dailySession(moduleState: ModuleStateShape, modules: ImprovModule[] = CURRICULUM): Array<{ moduleId: string; exercise: ImprovExercise }> {
+    const current = nextImprovExercise(moduleState, modules)?.module ?? modules[modules.length - 1];
+    const distance = (module: ImprovModule) => (module.order <= current.order ? current.order - module.order : modules.length + module.order);
+    const nearest = [...modules].sort((a, b) => distance(a) - distance(b));
     const pick = (engine: ImprovEngineType) => {
         for (const module of nearest) {
             const exercise = module.exercises.find((item) => item.engine === engine);
@@ -1515,7 +1552,7 @@ export function dailySession(moduleState: ModuleStateShape): Array<{ moduleId: s
         }
         return [];
     };
-    const passed = passedQuizGenerators(moduleState);
+    const passed = passedQuizGenerators(moduleState, modules);
     return [
         ...(passed.length > 0 ? [{ moduleId: REVIEW_ID, exercise: reviewQuiz(passed) }] : pick("choice-quiz")),
         ...pick("diagram-drill"),

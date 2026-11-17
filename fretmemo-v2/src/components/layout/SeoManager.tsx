@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { TRACK_META_LIST } from "@/data/improv/trackMeta";
 
 type SeoRouteMeta = {
     title: string;
@@ -35,20 +36,16 @@ function getRouteMeta(pathname: string): SeoRouteMeta {
         };
     }
 
-    if (pathname === "/improv") {
-        return {
-            title: "Guitar Improv Training Roadmap | FretMemo",
-            description:
-                "Learn guitar improvisation step by step with a 22-module roadmap covering scales, modes, arpeggios, chord tones, and backing-track practice.",
-            path: "/improv",
-        };
+    const track = TRACK_META_LIST.find((item) => item.path === pathname);
+    if (track) {
+        return { ...track.seo, path: track.path };
     }
 
     if (pathname.startsWith("/improv/")) {
         return {
-            title: "Guitar Improv Training Module | FretMemo",
+            title: "Guitar Training Module | FretMemo",
             description:
-                "Practice one improvisation skill at a time: a short theory recap plus graded exercises with pass thresholds inside the 22-module improv roadmap.",
+                "Practice one guitar skill at a time: a short theory recap plus graded exercises with pass thresholds inside a step-by-step roadmap.",
             path: pathname,
         };
     }

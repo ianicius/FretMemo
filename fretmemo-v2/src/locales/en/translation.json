@@ -1829,7 +1829,8 @@
             "choiceQuiz": "Quiz",
             "diagramDrill": "Diagram with metronome",
             "backingLoop": "Backing loop",
-            "practiceLink": "Fretboard practice"
+            "practiceLink": "Fretboard practice",
+            "bendDrill": "Bends with the microphone"
         },
         "quiz": {
             "circleTapKey": "Tap the key on the circle.",
@@ -1862,7 +1863,7 @@
             "play": "Play"
         },
         "build": {
-                "badge": "Tap the fretboard",
+            "badge": "Tap the fretboard",
             "threshold_one": "To pass: {{count}} box",
             "threshold_few": "To pass: {{count}} boxes",
             "threshold_many": "To pass: {{count}} boxes",
@@ -1938,7 +1939,8 @@
                 "bossa": "Bossa nova",
                 "funk": "Funk",
                 "reggae": "Reggae",
-                "ballad": "Ballad (arpeggio)"
+                "ballad": "Ballad (arpeggio)",
+                "slow12": "Slow blues (12/8)"
             },
             "allVariants": "To pass the exercise, every variant needs its own successful loops.",
             "key": "Key",
@@ -1966,7 +1968,10 @@
             "m7-arp": "m7 arpeggio",
             "dom7-arp": "7 (dominant) arpeggio",
             "maj7-arp": "maj7 arpeggio",
-            "m7b5-arp": "m7b5 arpeggio"
+            "m7b5-arp": "m7b5 arpeggio",
+            "maj-blues": "Major blues scale",
+            "mix-blues": "Minor + major pentatonic",
+            "bb-box": "Box around the root on the B string"
         },
         "goals": {
             "lickLoop3": "In bars 1 and 3 play the box 1 licks, in bars 2 and 4 answer with your own phrase.",
@@ -2071,7 +2076,34 @@
             "playRest": "Play only in bars marked “play”. In “rest” bars play nothing: listen to the backing and plan the next phrase.",
             "callResponse": "Two bars of question, two bars of answer. Start the answer with a motif from the question and end it on a chord tone.",
             "playRestLabel": "Play a bar, rest a bar",
-            "callResponseLabel": "Call and response (2+2 bars)"
+            "callResponseLabel": "Call and response (2+2 bars)",
+            "bluesRoots": "On beat one of every bar play the root of the chord: A over A7, D over D7, E over E7.",
+            "bluesRootsQuick": "As above, but with a quick change: bar 2 is D7, so play D there.",
+            "bluesRiff": "Play the boogie riff through the whole form. Move it with the chord and keep the long and short eighths.",
+            "bluesComping": "Comp: two strums a bar, or just the thirds and sevenths on the D and G strings.",
+            "bluesLickLoop": "In bars 1, 5 and 9 play the named lick. In the others answer with your own phrase or leave a rest.",
+            "bluesAAB": "Bars 1–2: a phrase. Bars 5–6: the same phrase again. Bars 9–10: the answer. Do not play in the other bars.",
+            "bluesMotif": "Pick one short rhythm and play the whole chorus with it. Change only the notes.",
+            "bluesBoxes": "Change area of the neck every four bars, following the cue. Make the move with a slide along one string.",
+            "bluesTurnaround": "Improvise for 10 bars, then play a turnaround in bars 11–12 and end on a note of E7.",
+            "bluesTargetRoot": "On beat one of every bar land on the root of the chord: A, D or E.",
+            "bluesTargetThird": "On beat one of every bar land on the third of the chord: C# over A7, F# over D7, G# over E7.",
+            "bluesTargetSeventh": "On beat one of every bar land on the seventh of the chord: G over A7, C over D7, D over E7.",
+            "bluesApproach": "Just before beat one play the note a half step below the chord's third and land on the third: C→C#, F→F#, G→G#.",
+            "bluesGuideTones": "On beat one play the third or the seventh of the chord. Look for half-step moves: C#→C and G→F# when A7 changes to D7.",
+            "bluesJazzThirds": "On every chord change land on the chord's third. Between the changes connect the thirds with the F blues scale.",
+            "formStandard": "The plain 12-bar form. Play what the modules taught you.",
+            "formStandardLabel": "12 bars",
+            "formQuick": "Quick change: bar 2 is the IV chord. Mark that change with a note of D7.",
+            "formQuickLabel": "Quick change",
+            "formSlow": "Slow blues in 12/8. Play fewer notes, longer phrases and slow bends.",
+            "formSlowLabel": "Slow blues",
+            "formMinor": "Minor blues. The minor pentatonic fits the whole form; over F7 and E7 in bars 9–10 aim for chord tones.",
+            "formMinorLabel": "Minor blues",
+            "formEight": "The eight-bar form: the V chord arrives in the second bar and the last two bars are a turnaround.",
+            "formEightLabel": "8 bars",
+            "formSixteen": "The sixteen-bar form: eight bars on the I chord, then the second half of a regular blues.",
+            "formSixteenLabel": "16 bars"
         },
         "q": {
             "keySig": {
@@ -2181,6 +2213,32 @@
             },
             "chordScaleHM": {
                 "inContext": "Which harmonic minor scale is the parent of the scale for {{chord}}?"
+            },
+            "bluesForm": {
+                "barToChord": "12-bar blues in {{key}}. Which chord sounds in bar {{bar}}?",
+                "quickBarToChord": "Blues in {{key}} with a quick change. Which chord sounds in bar {{bar}}?",
+                "degreeToChord": "Blues in {{key}}. Which chord is the {{degree}}?",
+                "barToDegree": "12-bar blues: which degree sounds in bar {{bar}}?",
+                "hintForm": "The chords of a blues in {{key}} are {{chord}} (I–IV–V). The form: I I I I, IV IV I I, V IV I I.",
+                "hintBars": "The form: I I I I, IV IV I I, V IV I I.",
+                "hintQuick": "Quick change: the IV chord ({{chord}}) comes in bar 2 and the I returns in bar 3. The rest of the form is unchanged."
+            },
+            "bluesTones": {
+                "third": "The third of {{chord}} is:",
+                "seventh": "The seventh of {{chord}} is:",
+                "guideMove": "Blues in {{key}}: when the chord changes to {{chord}}, the third of the I chord ({{first}}) moves down a half step to:",
+                "hintTones": "{{chord}} is made of {{notes}}: root, major third, fifth, minor seventh.",
+                "hintGuide": "{{first}} moves down a half step to {{target}}, the seventh of {{chord}}."
+            },
+            "bluesScale": {
+                "blueNote": "The blue note (b5) of the {{key}} blues scale is:",
+                "clash": "{{key}} minor pentatonic over {{chord}}: which of its notes sits a half step below the chord's third?",
+                "relativeBox": "{{key}} major pentatonic has the same notes as the minor pentatonic of:",
+                "majorPentNotes": "The notes of {{key}} major pentatonic are:",
+                "hintBlueNote": "In {{key}} the blue note is {{target}}: the note between the fourth and the fifth.",
+                "hintClash": "{{first}} is the minor third; the third of {{chord}} is {{target}}. That rub is the blues sound.",
+                "hintRelative": "{{key}} major pentatonic and {{target}} minor pentatonic are the same notes. The box sits three frets lower.",
+                "hintMajorPent": "The major pentatonic is degrees 1, 2, 3, 5 and 6 of the major scale."
             }
         },
         "modules": {
@@ -2293,6 +2351,76 @@
                 "name": "Giant Steps",
                 "term": "Giant Steps",
                 "theory": "John Coltrane’s “Giant Steps” closes the list. The key moves down by major thirds (B → G → Eb), often with a new chord every two beats. Each new key is introduced by its dominant (D7 → G, Bb7 → Eb, F#7 → B) or by a ii–V (Am7–D7, Fm7–Bb7, C#m7–F#7). Practice the whole 16-bar form in three steps: roots only, then a 1-2-3-5 pattern on each chord, finally arpeggios. Start at 60 BPM; once you get through the form without getting lost, all the earlier modules come together into one system."
+            },
+            "blues-form": {
+                "name": "The 12-bar form",
+                "term": "12-Bar Blues",
+                "theory": "A blues is twelve bars and three chords: the I, IV and V of the key, all played as dominant chords (in A: A7, D7, E7). The layout is fixed: four bars of I, two of IV, two of I, then V, IV and two more bars of I. The quick change goes to IV in the second bar and comes back to I in the third. Before you solo, learn to hear which bar you are in: the move to IV in bar 5 and to V in bar 9 are the points every phrase leads to. Count the choruses out loud until you no longer need to."
+            },
+            "blues-shuffle": {
+                "name": "Shuffle",
+                "term": "Shuffle Feel",
+                "theory": "Eighth notes in the blues are not even: the first of each pair lasts two thirds of the beat, the second one third. It is a triplet rhythm with the middle note left out, and it is what makes the music swing. The basic accompaniment is the boogie riff: the root of the chord played with its fifth, then with its sixth, two eighths on each. Mute the strings with the heel of your picking hand right at the bridge so the riff sounds short and tight. The same shape moves to the IV and V chords."
+            },
+            "blues-dominant-chords": {
+                "name": "Dominant chords",
+                "term": "Dominant 7th Chords",
+                "theory": "A dominant chord is a major triad with a minor seventh added: 1, 3, 5, b7 (A7 = A, C#, E, G). In the blues all three chords are built this way, although in tonal music only the V would be a dominant. The third and the seventh form a tritone and give the chord its character; the root and the fifth matter less. That is why in a band the third and seventh alone, played on the D and G strings, are often enough. Play the arpeggios of the three chords to see where their thirds and sevenths sit."
+            },
+            "blues-pentatonic": {
+                "name": "Pentatonic and the blues scale",
+                "term": "Minor Pentatonic & Blues Scale",
+                "theory": "The minor pentatonic (1 b3 4 5 b7) fits the whole blues form even though the chords are major. Its minor third rubs against the chord's major third, and that rub is what we hear as the blues sound. The blues scale adds one note: the b5, the so-called blue note, between the fourth and the fifth. Treat it as a passing note: move through it, do not stop on it. Stay in the first box for now; what you do with the notes matters more than how many you have."
+            },
+            "blues-bends": {
+                "name": "Bends",
+                "term": "String Bending",
+                "theory": "A bend changes the pitch smoothly, the way a voice does. Three bends are enough to start with: the fourth up to the fifth (a whole step on the G string), the minor seventh up to the root (a whole step on the B string) and the fourth up to the blue note (a half step). Bend with your third finger and put the first and second behind it on the same string to help; the movement comes from turning the wrist, not from the fingers alone. A separate gesture is the slight quarter-tone bend of the minor third towards the major third. Before you bend, play the target note normally and remember it: the bend has to land on that pitch, not near it."
+            },
+            "blues-licks": {
+                "name": "A vocabulary of licks",
+                "term": "Blues Licks",
+                "theory": "Blues improvisation is made largely of ready phrases, the way speech is made of words. Sing each lick first, then play it slowly, and only then at tempo. Once it sits under your fingers, change one thing about it: the rhythm, the last note, or where in the bar it starts. In the loop the lick is the question and your own phrase is the answer. Six licks played with confidence are worth more than sixty played without it."
+            },
+            "blues-phrasing": {
+                "name": "Phrasing",
+                "term": "Phrasing",
+                "theory": "A blues solo is a conversation, not a stream of notes. Its oldest form is AAB, taken from blues lyrics: a phrase, the same phrase again over a different chord, and an answer. Each phrase takes about two bars and the next two are left for a breath. A rest is not a gap in the music: it is where the listener hears what you played. A good exercise is to play a whole chorus with one rhythmic motif and change only the notes."
+            },
+            "blues-major-minor": {
+                "name": "Major and minor",
+                "term": "Mixing Major & Minor",
+                "theory": "The major pentatonic (1 2 3 5 6) also fits over the I chord: it sounds brighter because it contains the chord's major third. Its box is the same shape as the minor pentatonic, three frets lower. The simplest rule for mixing them: major pentatonic over the I chord, minor over IV and V. Over the IV chord the key's major third clashes with that chord's seventh, so go back to the minor there. When both scales sit under your fingers in one place on the neck, you start playing one eight-note scale and choosing the colour note by note."
+            },
+            "blues-boxes": {
+                "name": "Boxes on the top strings",
+                "term": "Upper-String Boxes",
+                "theory": "Many blues guitarists play most of their solos on the top three strings, in small areas around the root. The best known sits around the root on the B string under the first finger: the second, fourth, fifth and sixth are within reach, and the second is bent up to the minor or major third. Another area is the top of the second pentatonic box, two frets above the first box; there the fourth and the seventh are the notes to bend. The areas are joined by a slide along one string. Change area with the phrase, not in the middle of it."
+            },
+            "blues-turnarounds": {
+                "name": "Turnarounds",
+                "term": "Turnarounds",
+                "theory": "The last two bars of the form are the turnaround: a short figure that closes the chorus and leads into the next one. Harmonically it is usually I–IV–I–V, half a bar per chord, with the V chord at the very end. Melodically it is most often a chromatic line that walks down or up into a note of the V chord. The same figure works as an intro: played alone before bar one, it gives the band the key and the tempo. As an ending it stops on the I chord instead of the V."
+            },
+            "blues-chord-tones": {
+                "name": "Chord tones",
+                "term": "Targeting Chord Tones",
+                "theory": "The pentatonic fits the whole form, but it does not say which chord is sounding. A chord tone played on beat one of the bar where the chord changes does. Start with the roots, then aim for the thirds: C# over A7, F# over D7, G# over E7. The thirds of these chords are not in the A minor pentatonic, so they are the notes that show the change most clearly. The rest of the phrase can stay in the pentatonic; it only has to land in the right place."
+            },
+            "blues-guide-tones": {
+                "name": "Thirds and sevenths",
+                "term": "Guide Tones & Mixolydian",
+                "theory": "The third and the seventh are the guide tones of a dominant chord. When the I chord changes to the IV they move by just a half step: the third of A7 (C#) falls to the seventh of D7 (C), and the seventh of A7 (G) falls to the third of D7 (F#). A line built from guide tones alone sounds as if it were playing the harmony. The full scale of each chord is the Mixolydian mode from its root (1 2 3 4 5 6 b7). In practice it is mixed with the minor pentatonic of the key."
+            },
+            "blues-forms": {
+                "name": "Forms of the blues",
+                "term": "Blues Forms",
+                "theory": "The twelve bars come in many versions. The quick change goes to IV in the second bar. A slow blues is played in 12/8 at a slow tempo, with room for long notes and bends. A minor blues turns the chords minor and often puts a bVI chord in bar 9 before the dominant. There are eight-bar and sixteen-bar forms too; in all of them the move to IV and the return to I remain the landmarks."
+            },
+            "blues-jazz-blues": {
+                "name": "Jazz blues",
+                "term": "Jazz Blues",
+                "theory": "A jazz blues keeps the twelve bars and adds passing chords. Bar 4 brings a ii–V leading to the IV chord, bar 6 a diminished chord a half step above the IV, and bar 8 a dominant leading to the ii–V in bars 9–10. The form ends with a I–VI–ii–V turnaround. The blues scale of the key still holds everything together, but over the passing chords you need to aim for their thirds. Start with the arpeggios at a slow tempo."
             }
         },
         "ex": {
@@ -2643,6 +2771,178 @@
             "target-chord-tones.e4": {
                 "name": "Loop: phrase and rest",
                 "desc": "Extra practice. Am–C–Em–D: play a bar and rest a bar, or a two-bar question and a two-bar answer; end each phrase on a chord tone."
+            },
+            "blues-form.e1": {
+                "name": "Quiz: the 12-bar form",
+                "desc": "Which chord sounds in which bar. Questions in several keys, including the quick change."
+            },
+            "blues-form.e2": {
+                "name": "Quiz: I, IV and V in a key",
+                "desc": "Find the three chords of a blues in the given key."
+            },
+            "blues-form.e3": {
+                "name": "Loop: roots on beat one",
+                "desc": "Blues in A. On the first beat of every bar play the root of the chord that is sounding. The microphone checks the hits."
+            },
+            "blues-form.e4": {
+                "name": "Loop: roots with a quick change",
+                "desc": "The same exercise, but the IV chord comes in bar 2."
+            },
+            "blues-shuffle.licks": {
+                "name": "The boogie riff",
+                "desc": "Two accompaniment riffs: the root with the fifth and the sixth, and a version with the seventh. Listen for the long and short eighths."
+            },
+            "blues-shuffle.e1": {
+                "name": "Loop: the riff through the form",
+                "desc": "Play the boogie riff for 12 bars, moving it to the IV and V chords. Mark the loop when you did not lose the form."
+            },
+            "blues-dominant-chords.e1": {
+                "name": "Quiz: tones of dominant chords",
+                "desc": "Thirds and sevenths of the chords and how they move when the I changes to the IV."
+            },
+            "blues-dominant-chords.e2": {
+                "name": "Diagram: A7, D7, E7 arpeggios",
+                "desc": "The \"Shape\" selector changes the chord. Play the arpeggio of each of the three chords up and down."
+            },
+            "blues-dominant-chords.e3": {
+                "name": "Loop: comping",
+                "desc": "Play A7, D7 and E7 through the form: full shapes or just the thirds and sevenths."
+            },
+            "blues-pentatonic.e1": {
+                "name": "Diagram: minor pentatonic, box 1",
+                "desc": "The first box of the minor pentatonic. The \"View\" selector adds the blue note or marks the notes to bend."
+            },
+            "blues-pentatonic.e2": {
+                "name": "Loop: your first solo",
+                "desc": "Blues in A. Improvise in the first pentatonic box."
+            },
+            "blues-pentatonic.e3": {
+                "name": "Loop: constraints",
+                "desc": "The same blues with one constraint at a time: three notes, one string or one rhythm."
+            },
+            "blues-pentatonic.e4": {
+                "name": "Practice: pentatonic notes",
+                "desc": "Play the notes of A minor pentatonic on frets 5–8 in the microphone mode."
+            },
+            "blues-bends.e1": {
+                "name": "Half-step bend",
+                "desc": "The fourth up to the blue note on the G string. The meter shows how far you are from the target."
+            },
+            "blues-bends.e2": {
+                "name": "Whole-step bend",
+                "desc": "The two most important bends in the blues: the fourth to the fifth on the G string and the seventh to the root on the B string."
+            },
+            "blues-bends.e3": {
+                "name": "Quarter-tone bend",
+                "desc": "The minor third nudged up towards the major third. The note should stay between the frets."
+            },
+            "blues-bends.licks": {
+                "name": "Licks with a bend",
+                "desc": "Three short phrases in which the bend is the most important note."
+            },
+            "blues-licks.licks": {
+                "name": "Six licks in box 1",
+                "desc": "A basic vocabulary: an opener, triplets, the blue note, a slide, an answer and a phrase on the bass strings."
+            },
+            "blues-licks.e1": {
+                "name": "Loop: lick and answer",
+                "desc": "In bars 1, 5 and 9 play the named lick; in the others answer with your own phrase."
+            },
+            "blues-phrasing.e1": {
+                "name": "Loop: the AAB form",
+                "desc": "A phrase, the phrase again and an answer, two bars each, with two bars of rest after each one."
+            },
+            "blues-phrasing.e2": {
+                "name": "Loop: play a bar, rest a bar",
+                "desc": "Four bars with a cue for when to play and when to listen. The second variant is question and answer."
+            },
+            "blues-phrasing.e3": {
+                "name": "Loop: one motif",
+                "desc": "A whole chorus with one rhythmic motif. Only the notes change."
+            },
+            "blues-major-minor.e1": {
+                "name": "Diagram: major pentatonic",
+                "desc": "The major pentatonic box: the same shape as the minor one, three frets lower."
+            },
+            "blues-major-minor.e2": {
+                "name": "Quiz: scales in the blues",
+                "desc": "The blue note, the notes of the major pentatonic and how it relates to the minor one."
+            },
+            "blues-major-minor.e3": {
+                "name": "Loop: major, minor and both",
+                "desc": "Three variants of the same blues: minor pentatonic, major pentatonic, and changing colour with the chord."
+            },
+            "blues-major-minor.e4": {
+                "name": "Diagram: both pentatonics together",
+                "desc": "The minor and major pentatonic from the same root in one place on the neck, and the major blues scale."
+            },
+            "blues-boxes.e1": {
+                "name": "Diagram: the box around the root on the B string",
+                "desc": "Five notes on the top three strings. The root is on the B string under the first finger."
+            },
+            "blues-boxes.e2": {
+                "name": "Diagram: the top of box 2",
+                "desc": "The second pentatonic box on the top three strings. The fourth and the seventh are bent a whole step here."
+            },
+            "blues-boxes.e3": {
+                "name": "Loop: change area every 4 bars",
+                "desc": "Bars 1–4 in box 1, bars 5–8 at the top of box 2, bars 9–12 around the root on the B string."
+            },
+            "blues-boxes.e4": {
+                "name": "Diagram: the diagonal through the boxes",
+                "desc": "The same three-string pattern repeats higher up the neck and joins the boxes into one line."
+            },
+            "blues-boxes.licks": {
+                "name": "Licks around the root on the B string",
+                "desc": "Two phrases that bend the second up to the third."
+            },
+            "blues-turnarounds.licks": {
+                "name": "Two turnarounds",
+                "desc": "A chromatic line down and one up. Both end on a note of the V chord."
+            },
+            "blues-turnarounds.e1": {
+                "name": "Loop: turnaround in bars 11–12",
+                "desc": "Improvise for 10 bars and close the last two with a turnaround."
+            },
+            "blues-chord-tones.e1": {
+                "name": "Loop: the chord-tone ladder",
+                "desc": "Three levels: on beat one of every bar land on the root, then on the third, then on the seventh of the chord."
+            },
+            "blues-chord-tones.e2": {
+                "name": "Loop: approach from below",
+                "desc": "Just before beat one play the note a half step below the chord's third and land on the third."
+            },
+            "blues-guide-tones.e1": {
+                "name": "Diagram: the Mixolydian mode",
+                "desc": "The scale of each of the three chords: A, D and E Mixolydian. The \"Shape\" selector changes the chord."
+            },
+            "blues-guide-tones.e2": {
+                "name": "Quiz: how guide tones move",
+                "desc": "Which note the third of the I chord falls to when the IV chord arrives."
+            },
+            "blues-guide-tones.e3": {
+                "name": "Loop: thirds and sevenths",
+                "desc": "On beat one of every bar play the third or the seventh of the chord. Look for half-step moves."
+            },
+            "blues-forms.e1": {
+                "name": "Quiz: the quick change",
+                "desc": "Chords in the bars of the form with the early move to IV."
+            },
+            "blues-forms.e2": {
+                "name": "Loop: five forms",
+                "desc": "Quick change, slow blues, minor blues, the eight-bar and the sixteen-bar form. Each one has to be played."
+            },
+            "blues-jazz-blues.e1": {
+                "name": "Diagram: jazz blues arpeggios",
+                "desc": "F7, Gm7 and C7: the chords the form in F is built around."
+            },
+            "blues-jazz-blues.e2": {
+                "name": "Loop: jazz blues in F",
+                "desc": "On every chord change land on the chord's third. Start at a slow tempo."
+            },
+            "blues-jam.e1": {
+                "name": "Loop: blues jam",
+                "desc": "Every blues form in one place. Pick a form, a key and a style, then just play. This section gates nothing."
             }
         },
         "practiceLink": {
@@ -2701,7 +3001,14 @@
             "barQuestion1": "Question, bar 1 of 2",
             "barQuestion2": "Question, bar 2 of 2",
             "barAnswer1": "Answer, bar 1 of 2",
-            "barAnswer2": "Answer, bar 2 of 2"
+            "barAnswer2": "Answer, bar 2 of 2",
+            "lickBluesOpen": "Lick: the opener",
+            "lickBluesBlueNote": "Lick: with the blue note",
+            "lickBluesAnswer": "Lick: the answer with a bend",
+            "boxOne": "Box 1 (fret 5)",
+            "boxTwo": "Top of box 2 (fret 8)",
+            "boxRoot": "Around the root on the B string (fret 10)",
+            "turnaround": "Turnaround"
         },
         "session": {
             "title": "Session of the day",
@@ -2724,7 +3031,9 @@
             "played": "I played this lick",
             "runs": "Played: {{done}}/{{total}}",
             "notes": "Notes of the lick in order",
-            "legend": "Numbers are the order of the notes. A position with several numbers is played several times. Standard tuning."
+            "legend": "Numbers are the order of the notes. A position with several numbers is played several times. Standard tuning.",
+            "legendShuffle": "Eighth notes are swung: long–short.",
+            "legendTech": "Marks next to the notes: ¼↑, ½↑, 1↑ — bend by a quarter tone, a half step, a whole step; h — hammer-on, p — pull-off, s — slide from the previous note, ~ — vibrato; + — two notes together."
         },
         "licks": {
             "pent3Descent": {
@@ -2766,6 +3075,66 @@
             "tgt12C": {
                 "name": "Landing on E over C",
                 "tip": "The same idea over C: it ends on E, the third of C."
+            },
+            "bluesBoogie": {
+                "name": "The boogie riff",
+                "tip": "The open A string with the fifth (fret 2 on the D string), then with the sixth (fret 4). Mute the strings with your palm at the bridge."
+            },
+            "bluesBoogieSeventh": {
+                "name": "Boogie riff with the seventh",
+                "tip": "The same riff, but in the second half of the bar the finger reaches for the seventh (fret 5) and comes back to the sixth."
+            },
+            "bluesBendFifth": {
+                "name": "Bend to the fifth",
+                "tip": "Bend D up to E, answer with two notes and end on the root A with vibrato."
+            },
+            "bluesBendRoot": {
+                "name": "Bend to the root",
+                "tip": "Bend G up to A and come down through the box to the lower root. Hold the first note long."
+            },
+            "bluesCurl": {
+                "name": "The third with a curl",
+                "tip": "C nudged up, then straight to the root A. The third should sound between C and C#."
+            },
+            "bluesOpen": {
+                "name": "The opener",
+                "tip": "A short phrase to start a chorus. Hammer on the second note and end on the root."
+            },
+            "bluesTriplet": {
+                "name": "Triplets",
+                "tip": "Three notes repeated in triplets. Keep them even and end on the high root."
+            },
+            "bluesBlueNote": {
+                "name": "With the blue note",
+                "tip": "A run down the box with Eb as a passing note between E and D."
+            },
+            "bluesSlide": {
+                "name": "Slide into box 2",
+                "tip": "Two slides move the hand from box 1 to box 2. End on the root with vibrato."
+            },
+            "bluesAnswer": {
+                "name": "The answer",
+                "tip": "It starts with a bend to the fifth and comes calmly down to the root. A good answer to any phrase."
+            },
+            "bluesLow": {
+                "name": "On the bass strings",
+                "tip": "The same scale on the three lowest strings, with the blue note on the way."
+            },
+            "bluesBoxCall": {
+                "name": "Root and a bend",
+                "tip": "The root A on the B string, then B bent up to C# and back to the root with vibrato."
+            },
+            "bluesBoxSweet": {
+                "name": "The sixth and a half step",
+                "tip": "It starts on the sixth (F#). Bend the second only a half step, to the minor third."
+            },
+            "bluesTurnDown": {
+                "name": "Turnaround going down",
+                "tip": "The line G–F#–F–E on the D string alternating with the high A. It ends on E, the root of the V chord."
+            },
+            "bluesTurnUp": {
+                "name": "Turnaround going up",
+                "tip": "From A on the low E string (fret 5) chromatically up to E on the A string: C#, D, D#, E."
             }
         },
         "standards": {
@@ -2821,6 +3190,44 @@
                 "melodic": "{{key}} melodic minor",
                 "harmonic": "{{key}} harmonic minor"
             }
+        },
+        "tracks": {
+            "switchLabel": "Learning tracks",
+            "improv": {
+                "tab": "Improvisation",
+                "title": "Improv Training",
+                "description": "Learn guitar improvisation in 22 graded modules, from the E-string notes to Giant Steps. Each module pairs a short theory recap with exercises; passing them unlocks the next module."
+            },
+            "blues": {
+                "tab": "Blues",
+                "title": "Blues",
+                "description": "Learn the blues in 14 modules: from the 12-bar form and the shuffle, through bends and phrasing, to playing the changes.",
+                "extraTitle": "Blues jam",
+                "stages": {
+                    "rhythm": "Rhythm and form (1–3)",
+                    "language": "The language of the solo (4–7)",
+                    "colours": "Colours (8–10)",
+                    "changes": "Playing the changes (11–14)"
+                }
+            }
+        },
+        "bend": {
+            "threshold": "To pass: each bend {{required}} times",
+            "choose": "Bend",
+            "option": "String {{string}}, fret {{fret}}",
+            "prompt": {
+                "half": "String {{string}}, fret {{fret}} ({{note}}): bend up a half step, to {{target}}.",
+                "whole": "String {{string}}, fret {{fret}} ({{note}}): bend up a whole step, to {{target}}.",
+                "curl": "String {{string}}, fret {{fret}} ({{note}}): bend slightly, by a quarter tone. The note should stay below {{target}}."
+            },
+            "meter": "Bend height",
+            "micOffHint": "Turn the microphone on to see how far you bend. The green area is the target.",
+            "waiting": "Play the note and bend the string.",
+            "cents": "{{cents}} cents above the fretted note (target: {{min}}–{{max}}).",
+            "playTarget": "Hear the target note",
+            "selfMark": "Got it (no microphone)",
+            "reps": "Hits: {{done}}/{{required}}",
+            "holdHint": "A repetition counts when you hold the note in the green area for {{seconds}} s. Release the string before the next one."
         }
     }
 }

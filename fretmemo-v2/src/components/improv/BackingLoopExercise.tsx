@@ -172,8 +172,14 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
     // take effect mid-loop instead of after a restart.
     const micOnRef = useRef(micOn);
     const bassOnRef = useRef(bassOn);
-    const drumStyle = useImprovStore((state) => state.drumStyle);
-    const setDrumStyle = useImprovStore((state) => state.setDrumStyle);
+    // The exercise (or its variant) may start in its own style; changing it then
+    // stays with this loop, while loops without one share the learner's setting.
+    const storedStyle = useImprovStore((state) => state.drumStyle);
+    const storeStyle = useImprovStore((state) => state.setDrumStyle);
+    const presetStyle = variant?.style ?? params.style;
+    const [localStyle, setLocalStyle] = useState<DrumStyleId | null>(null);
+    const drumStyle = presetStyle ? localStyle ?? presetStyle : storedStyle;
+    const setDrumStyle = presetStyle ? setLocalStyle : storeStyle;
     const drumStyleRef = useRef(drumStyle);
     useEffect(() => { drumStyleRef.current = drumStyle; }, [drumStyle]);
     useEffect(() => { micOnRef.current = micOn; }, [micOn]);
@@ -386,6 +392,7 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
                             value={variant?.id ?? ""}
                             onChange={(event) => {
                                 resetSession();
+                                setLocalStyle(null);
                                 setVariantId(event.target.value);
                                 setSelectedKey(null);
                             }}

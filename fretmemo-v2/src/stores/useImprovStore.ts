@@ -21,14 +21,8 @@ import type { DrumStyleId } from "@/lib/improv/drumStyles";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { calculateNextReview, type SpacedRepetitionEntry } from "@/lib/sm2";
-import {
-    CURRICULUM,
-    getImprovModule,
-    STANDARDS_ID,
-    isModuleComplete,
-    loopRunKey,
-    type ImprovExercise,
-} from "@/data/improv/curriculum";
+import { isModuleComplete, loopRunKey, type ImprovExercise } from "@/data/improv/curriculum";
+import { ALL_MODULES, getModule, isExtraProgressId } from "@/data/improv/tracks";
 
 export interface ImprovModuleProgress {
     /** Per-exercise counters (see the engine semantics in the header). */
@@ -77,7 +71,7 @@ export function emptyProgress(): ImprovModuleProgress {
 
 function createInitialModuleState(): Record<string, ImprovModuleProgress> {
     const state: Record<string, ImprovModuleProgress> = {};
-    for (const module of CURRICULUM) {
+    for (const module of ALL_MODULES) {
         state[module.id] = emptyProgress();
     }
     return state;
@@ -88,8 +82,8 @@ function updateModule(
     moduleId: string,
     update: (progress: ImprovModuleProgress) => ImprovModuleProgress,
 ): Record<string, ImprovModuleProgress> {
-    const module = getImprovModule(moduleId);
-    if (!module && moduleId !== STANDARDS_ID) return previous;
+    const module = getModule(moduleId);
+    if (!module && !isExtraProgressId(moduleId)) return previous;
     const current = previous[moduleId] ?? emptyProgress();
     const next = update({ ...current });
     // Single source of truth for the pass predicate (curriculum.ts).
@@ -114,7 +108,7 @@ function migrateLegacyModuleState(
         const exerciseRuns = { ...(legacy.exerciseRuns ?? {}) };
         const quizBest = typeof legacy.quizBest === "number" ? legacy.quizBest : 0;
         if (quizBest > 0) {
-            const firstQuizExercise = getImprovModule(moduleId)?.exercises.find(
+            const firstQuizExercise = getModule(moduleId)?.exercises.find(
                 (exercise: ImprovExercise) => exercise.engine === "choice-quiz",
             );
             if (firstQuizExercise && (exerciseRuns[firstQuizExercise.id] ?? 0) === 0) {
@@ -147,7 +141,7 @@ export const useImprovStore = create<ImprovStoreState>()(
             recordQuizResult: (moduleId, exerciseId, correct) => {
                 set((state) => ({
                     moduleState: updateModule(state.moduleState, moduleId, (progress) => {
-                        const exercise = getImprovModule(moduleId)?.exercises.find((item) => item.id === exerciseId);
+                        const exercise = getModule(moduleId)?.exercises.find((item) => item.id === exerciseId);
                         if (!exercise) return progress;
                         const params = exercise.params as { requiredCorrect: number };
                         if (Math.max(0, Math.round(correct)) < params.requiredCorrect) return progress;

@@ -12,7 +12,8 @@ import { useFeedbackStore, type AppFeedbackTone } from "@/stores/useFeedbackStor
 import { useProgressStore } from "@/stores/useProgressStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { useImprovStore } from "@/stores/useImprovStore";
-import { CURRICULUM, isModuleComplete } from "@/data/improv/curriculum";
+import { isModuleComplete } from "@/data/improv/curriculum";
+import { TRACKS } from "@/data/improv/tracks";
 import type { NoteStatus } from "@/types/fretboard";
 import { getNoteAt } from "@/lib/constants";
 import { normalizeTuning } from "@/lib/tuning";
@@ -54,8 +55,10 @@ export default function ProgressPage() {
     const { t } = useTranslation();
 
     // Plan phase 6: improv progress card (completed modules).
-    const completedImprovModules = CURRICULUM.filter((module) =>
-        isModuleComplete(module, improvModuleState[module.id]));
+    const trackProgress = TRACKS.map((track) => ({
+        track,
+        completed: track.modules.filter((module) => isModuleComplete(module, improvModuleState[module.id])),
+    }));
     const [searchParams, setSearchParams] = useSearchParams();
     const [isResetHeatMapConfirmOpen, setIsResetHeatMapConfirmOpen] = useState(false);
 
@@ -277,14 +280,21 @@ export default function ProgressPage() {
                     <CardDescription>{t("progress.improv.desc")}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                    <p className="text-2xl font-bold tabular-nums">
-                        {t("progress.improv.completed", { done: completedImprovModules.length, total: CURRICULUM.length })}
-                    </p>
-                    {completedImprovModules.length > 0 && (
-                        <p className="text-xs text-muted-foreground">
-                            {completedImprovModules.map((module) => t(`improv.modules.${module.id}.name`)).join(" · ")}
-                        </p>
-                    )}
+                    {trackProgress.map(({ track, completed }) => (
+                        <div key={track.id} className="space-y-1">
+                            <p className="flex items-baseline justify-between gap-3">
+                                <span className="text-sm font-medium">{t(`improv.tracks.${track.id}.tab`)}</span>
+                                <span className="text-2xl font-bold tabular-nums">
+                                    {t("progress.improv.completed", { done: completed.length, total: track.modules.length })}
+                                </span>
+                            </p>
+                            {completed.length > 0 && (
+                                <p className="text-xs text-muted-foreground">
+                                    {completed.map((module) => t(`improv.modules.${module.id}.name`)).join(" · ")}
+                                </p>
+                            )}
+                        </div>
+                    ))}
                     <p className="text-sm text-muted-foreground">
                         {t("progress.improv.loopTime", { hours: Math.floor(improvLoopSeconds / 3600), minutes: Math.floor((improvLoopSeconds % 3600) / 60) })}
                     </p>

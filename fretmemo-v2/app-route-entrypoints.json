@@ -52,6 +52,21 @@
     "/improv/chord-scale-melodic",
     "/improv/harmonic-minor",
     "/improv/chord-scale-harmonic",
-    "/improv/giant-steps"
+    "/improv/giant-steps",
+    "/improv/blues",
+    "/improv/blues-form",
+    "/improv/blues-shuffle",
+    "/improv/blues-dominant-chords",
+    "/improv/blues-pentatonic",
+    "/improv/blues-bends",
+    "/improv/blues-licks",
+    "/improv/blues-phrasing",
+    "/improv/blues-major-minor",
+    "/improv/blues-boxes",
+    "/improv/blues-turnarounds",
+    "/improv/blues-chord-tones",
+    "/improv/blues-guide-tones",
+    "/improv/blues-forms",
+    "/improv/blues-jazz-blues"
   ]
 }

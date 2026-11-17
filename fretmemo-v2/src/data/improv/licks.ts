@@ -7,15 +7,27 @@ import { Key, Note } from "tonal";
  * phrase, the chord its last note lands on.
  */
 
-/** One note: string 1 = high E … 6 = low E, fret, length in eighths. */
-export type LickNote = [string: number, fret: number, eighths: number];
+/** How a note is played, when it is not simply picked. */
+export interface LickMods {
+    /** Bend up by this many semitones (0.5 = a quarter-tone "curl"). */
+    bend?: number;
+    /** Hammer-on, pull-off or slide from the previous note; vibrato on this one. */
+    tech?: "h" | "p" | "s" | "v";
+    /** A second note sounding together with this one (double stop). */
+    also?: [string: number, fret: number];
+}
+
+/** One note: string 1 = high E … 6 = low E, fret, length in eighths, and how it is played. */
+export type LickNote = [string: number, fret: number, eighths: number, mods?: LickMods];
 
 export interface Lick {
     id: string;
     /** Key the frets are written in; the transposition selector starts here. */
     key: string;
-    /** Notes must come from this tonal scale ("A minor pentatonic") or chord ("Am7"). */
-    fits: { scale: string } | { chord: string };
+    /** Notes must come from this tonal scale ("A minor pentatonic"), from any of several scales, or from a chord ("Am7"). */
+    fits: { scale: string | string[] } | { chord: string };
+    /** "shuffle": pairs of eighths are played long–short (two thirds and one third of the beat). */
+    feel?: "shuffle";
     /** The last note is a tone of this chord (target-tone licks). */
     landsOn?: string;
     notes: LickNote[];
@@ -50,6 +62,51 @@ export const LICKS: Lick[] = [
         notes: [[2, 5, 1], [2, 8, 1], [2, 5, 1], [3, 7, 1], [3, 5, 4]] },
     { id: "tgt12C", key: "Am", fits: { scale: "A minor pentatonic" }, landsOn: "C",
         notes: [[3, 5, 1], [3, 7, 1], [3, 5, 1], [3, 7, 1], [2, 5, 4]] },
+    // ── Blues track ──
+    // Boogie riffs on the two lowest strings of the chord: root with the fifth, then with the sixth.
+    { id: "bluesBoogie", key: "A", fits: { scale: "A mixolydian" }, feel: "shuffle",
+        notes: [
+            [5, 0, 1, { also: [4, 2] }], [5, 0, 1, { also: [4, 2] }], [5, 0, 1, { also: [4, 4] }], [5, 0, 1, { also: [4, 4] }],
+            [5, 0, 1, { also: [4, 2] }], [5, 0, 1, { also: [4, 2] }], [5, 0, 1, { also: [4, 4] }], [5, 0, 1, { also: [4, 4] }],
+        ] },
+    { id: "bluesBoogieSeventh", key: "A", fits: { scale: "A mixolydian" }, feel: "shuffle",
+        notes: [
+            [5, 0, 1, { also: [4, 2] }], [5, 0, 1, { also: [4, 2] }], [5, 0, 1, { also: [4, 4] }], [5, 0, 1, { also: [4, 4] }],
+            [5, 0, 1, { also: [4, 5] }], [5, 0, 1, { also: [4, 5] }], [5, 0, 1, { also: [4, 4] }], [5, 0, 1, { also: [4, 4] }],
+        ] },
+    // Bends in the first box of A minor pentatonic.
+    { id: "bluesBendFifth", key: "A", fits: { scale: "A minor pentatonic" }, landsOn: "A7",
+        notes: [[3, 7, 2, { bend: 2 }], [2, 5, 1], [2, 8, 1], [1, 5, 4, { tech: "v" }]] },
+    { id: "bluesBendRoot", key: "A", fits: { scale: "A minor pentatonic" }, landsOn: "A7",
+        notes: [[2, 8, 3, { bend: 2 }], [2, 8, 1], [2, 5, 1], [3, 7, 1], [3, 5, 1], [4, 7, 3, { tech: "v" }]] },
+    { id: "bluesCurl", key: "A", fits: { scale: "A minor pentatonic" }, landsOn: "A7", feel: "shuffle",
+        notes: [[3, 5, 2, { bend: 0.5 }], [4, 7, 2], [3, 5, 1, { bend: 0.5 }], [4, 7, 1], [4, 5, 1], [4, 7, 3]] },
+    // A small vocabulary in the first box.
+    { id: "bluesOpen", key: "A", fits: { scale: "A minor pentatonic" }, landsOn: "A7", feel: "shuffle",
+        notes: [[3, 5, 1], [3, 7, 1, { tech: "h" }], [2, 5, 2], [3, 7, 1], [3, 5, 1], [4, 7, 4]] },
+    { id: "bluesTriplet", key: "A", fits: { scale: "A minor pentatonic" }, landsOn: "A7",
+        notes: [
+            [1, 5, 2 / 3], [2, 8, 2 / 3], [2, 5, 2 / 3], [1, 5, 2 / 3], [2, 8, 2 / 3], [2, 5, 2 / 3],
+            [1, 5, 2 / 3], [2, 8, 2 / 3], [2, 5, 2 / 3], [1, 5, 2],
+        ] },
+    { id: "bluesBlueNote", key: "A", fits: { scale: "A minor blues" }, landsOn: "A7", feel: "shuffle",
+        notes: [[1, 8, 1], [1, 5, 1], [2, 8, 1], [2, 5, 1], [3, 7, 1], [3, 8, 1], [3, 7, 1, { tech: "p" }], [3, 5, 1], [4, 7, 4]] },
+    { id: "bluesSlide", key: "A", fits: { scale: "A minor pentatonic" }, landsOn: "A7", feel: "shuffle",
+        notes: [[3, 7, 1], [3, 9, 1, { tech: "s" }], [2, 8, 1], [2, 10, 2, { tech: "s" }], [1, 8, 1], [2, 10, 3, { tech: "v" }]] },
+    { id: "bluesAnswer", key: "A", fits: { scale: "A minor pentatonic" }, landsOn: "A7", feel: "shuffle",
+        notes: [[3, 7, 2, { bend: 2 }], [3, 5, 1], [4, 7, 1], [4, 5, 1], [4, 7, 3, { tech: "v" }]] },
+    { id: "bluesLow", key: "A", fits: { scale: "A minor blues" }, landsOn: "A7", feel: "shuffle",
+        notes: [[6, 5, 1], [6, 8, 1], [5, 5, 1], [5, 6, 1], [5, 7, 1], [4, 5, 1], [4, 7, 2]] },
+    // The box around the root on the B string.
+    { id: "bluesBoxCall", key: "A", fits: { scale: ["A mixolydian", "A minor pentatonic"] }, landsOn: "A7",
+        notes: [[2, 10, 2], [1, 10, 1], [2, 12, 1, { bend: 2 }], [2, 10, 4, { tech: "v" }]] },
+    { id: "bluesBoxSweet", key: "A", fits: { scale: ["A mixolydian", "A minor pentatonic"] }, landsOn: "A7",
+        notes: [[3, 11, 1], [2, 10, 1], [2, 12, 2, { bend: 1 }], [2, 12, 1], [2, 10, 1], [3, 11, 1], [2, 10, 3, { tech: "v" }]] },
+    // Turnarounds: a chromatic line into the V chord.
+    { id: "bluesTurnDown", key: "A", fits: { scale: "A chromatic" }, landsOn: "E7", feel: "shuffle",
+        notes: [[4, 5, 1], [1, 5, 1], [4, 4, 1], [1, 5, 1], [4, 3, 1], [1, 5, 1], [4, 2, 2]] },
+    { id: "bluesTurnUp", key: "A", fits: { scale: "A chromatic" }, landsOn: "E7", feel: "shuffle",
+        notes: [[6, 5, 2], [5, 4, 1], [5, 5, 1], [5, 6, 1], [5, 7, 3]] },
 ];
 
 export function getLick(id: string): Lick | undefined {
@@ -61,8 +118,43 @@ export const LICK_MAX_FRET = 17;
 /** Open strings of standard tuning as MIDI numbers, string 1 (high E) first. */
 const OPEN_MIDI = [64, 59, 55, 50, 45, 40];
 
-export function lickNoteMidi([string, fret]: LickNote): number {
+export function lickNoteMidi([string, fret]: LickNote | [number, number]): number {
     return OPEN_MIDI[string - 1] + fret;
+}
+
+/** The pitch a note sounds at: a bend of whole semitones reaches the bent note (a curl stays on the fretted one). */
+export function lickSoundingMidi(note: LickNote): number {
+    return lickNoteMidi(note) + Math.floor(note[3]?.bend ?? 0);
+}
+
+/** Short mark of how a note is played, shown next to it ("½" curl, "↑1" whole-step bend, "h", "~"). */
+export function lickTechMark(mods: LickMods | undefined): string {
+    if (!mods) return "";
+    if (mods.bend === 0.5) return "¼↑";
+    if (mods.bend) return mods.bend === 1 ? "½↑" : "1↑";
+    return mods.tech === "v" ? "~" : mods.tech ?? "";
+}
+
+/** Order numbers of one position as a short label: runs are joined ("1–8", "1–2·5–6"). */
+export function lickOrderLabel(indexes: number[]): string {
+    const runs: Array<[number, number]> = [];
+    for (const index of indexes) {
+        const last = runs[runs.length - 1];
+        if (last && index === last[1] + 1) last[1] = index;
+        else runs.push([index, index]);
+    }
+    return runs.map(([from, to]) => (from === to ? `${from + 1}` : `${from + 1}–${to + 1}`)).join("·");
+}
+
+/**
+ * Start of a note in beats, from its start in eighths. Straight: two eighths
+ * per beat. Shuffle: the first eighth of each beat takes two thirds of it.
+ */
+export function lickBeat(eighths: number, feel?: "shuffle"): number {
+    if (feel !== "shuffle") return eighths / 2;
+    const beat = Math.floor(eighths / 2 + 1e-9);
+    const within = eighths - beat * 2;
+    return beat + (within <= 1 ? within * (2 / 3) : 2 / 3 + (within - 1) / 3);
 }
 
 /** Note name in the given key ("Gm", "E"): sharps only in keys whose signature has sharps. */
@@ -81,7 +173,7 @@ export function lickNoteName(note: LickNote, key: string): string {
  */
 export function lickShift(lick: Lick, originalPc: number, targetPc: number): number {
     const up = (targetPc - originalPc + 12) % 12;
-    const frets = lick.notes.map(([, fret]) => fret);
+    const frets = lick.notes.flatMap(([, fret, , mods]) => (mods?.also ? [fret, mods.also[1]] : [fret]));
     const fits = (shift: number) => Math.min(...frets) + shift >= 0 && Math.max(...frets) + shift <= LICK_MAX_FRET;
     const choices = [up, up - 12].filter(fits).sort((a, b) => Math.abs(a) - Math.abs(b));
     return choices[0] ?? up;

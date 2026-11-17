@@ -78,8 +78,9 @@ export function DiagramDrill({ moduleId, exercise }: DiagramDrillProps) {
             tuning,
             fretFrom: windowFrom,
             fretTo: windowTo,
-        }).filter((position) => params.onlyString === undefined || position.stringIndex === params.onlyString),
-        [key, windowFrom, windowTo, shape.shapeId, tuning, params.onlyString],
+        }).filter((position) => (params.onlyString === undefined || position.stringIndex === params.onlyString)
+            && (!params.onlyStrings || params.onlyStrings.includes(position.stringIndex))),
+        [key, windowFrom, windowTo, shape.shapeId, tuning, params.onlyString, params.onlyStrings],
     );
 
     // Plan C2: the blues / hexatonic view adds one note to the pentatonic.
@@ -139,7 +140,7 @@ export function DiagramDrill({ moduleId, exercise }: DiagramDrillProps) {
         ? [{ color: COLOR.pent, label: t(`improv.shapes.${basePentatonic}`) }, { color: COLOR.added, label: t("improv.drill.legendAdded") }]
         : params.diagonal
             ? [{ color: COLOR.stack, label: t("improv.drill.legendStack") }, { color: COLOR.pent, label: t("improv.drill.legendOther") }]
-        : isPentatonic && params.onlyString === undefined
+        : isPentatonic && params.onlyString === undefined && !params.onlyStrings
             ? [
                 { color: COLOR.rect, label: t("improv.drill.legendRect") },
                 { color: COLOR.stack, label: t("improv.drill.legendStack") },

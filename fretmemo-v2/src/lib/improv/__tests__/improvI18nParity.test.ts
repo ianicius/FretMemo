@@ -3,7 +3,13 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import en from "@/locales/en/translation.json";
 import pl from "@/locales/pl/translation.json";
-import { CURRICULUM, IMPROV_ORDER, STANDARDS, type BackingLoopParams } from "@/data/improv/curriculum";
+import { type BackingLoopParams } from "@/data/improv/curriculum";
+import { ALL_MODULES, TRACKS } from "@/data/improv/tracks";
+
+// Every track shares the `improv` namespace, so the checks below cover all of them.
+const CURRICULUM = ALL_MODULES;
+const IMPROV_ORDER = ALL_MODULES.map((module) => module.id);
+const EXTRA_EXERCISE_IDS = TRACKS.flatMap((track) => (track.extra ? [track.extra.exercise.id] : []));
 
 /**
  * E-IMPROV-I18N: every improv key must resolve in BOTH locales.
@@ -15,7 +21,7 @@ import { CURRICULUM, IMPROV_ORDER, STANDARDS, type BackingLoopParams } from "@/d
 
 const IMPROV_SOURCES = [
     path.resolve(process.cwd(), "src/pages/ImprovTraining.tsx"),
-    ...["TheoryCard", "ExerciseFrame", "ChoiceQuiz", "DiagramDrill", "BackingLoopExercise", "PracticeLinkExercise", "LoopHitReport"]
+    ...["TheoryCard", "ExerciseFrame", "ChoiceQuiz", "DiagramDrill", "BackingLoopExercise", "PracticeLinkExercise", "LoopHitReport", "LickExercise", "BendDrill"]
         .map((name) => path.resolve(process.cwd(), `src/components/improv/${name}.tsx`)),
 ];
 
@@ -112,7 +118,7 @@ describe("improv i18n parity (en + pl)", () => {
     });
 
     it("every curriculum exercise has name + desc entries in both locales", () => {
-        const exerciseIds = [...CURRICULUM.flatMap((module) => module.exercises.map((exercise) => exercise.id)), STANDARDS.id];
+        const exerciseIds = [...CURRICULUM.flatMap((module) => module.exercises.map((exercise) => exercise.id)), ...EXTRA_EXERCISE_IDS];
         for (const locale of [en, pl]) {
             const exMap = locale.improv.ex as Record<string, { name: string; desc: string }>;
             const keys = Object.keys(exMap);
@@ -126,7 +132,8 @@ describe("improv i18n parity (en + pl)", () => {
 
     it("every loop goal/label/hint key of the curriculum resolves in both locales (plan B4)", () => {
         const keys = new Set<string>();
-        for (const module of CURRICULUM) {
+        const loops = [...CURRICULUM.flatMap((module) => module.exercises), ...TRACKS.flatMap((track) => (track.extra ? [track.extra.exercise] : []))];
+        for (const module of [{ exercises: loops }]) {
             for (const exercise of module.exercises) {
                 if (exercise.engine !== "backing-improv") continue;
                 const params = exercise.params as BackingLoopParams;
