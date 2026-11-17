@@ -110,7 +110,7 @@
           "name": "Does FretMemo work offline?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes, once it has loaded. FretMemo installs as a PWA, the app shell is cached, and sound files are cached the first time you use them, so offline playback works after one online session."
+            "text": "Mostly, once it has loaded. FretMemo installs as a PWA and the app shell is cached. Song playback with the soundfont works offline after one online session, because the soundfont is cached on first use. The Sound page's samples and amp models are only partly cached, with 12 files kept, so the full guitar sound may not work offline."
           }
         },
         {
@@ -222,7 +222,7 @@
                 <li>Daily challenges. Seven types rotate, without "Precision Practice" and "Position Challenge".</li>
                 <li>XP and levels exist, with a streak multiplier. I said they would be optional, and only the pop-ups are: "Show XP Animations" hides them.</li>
                 <li>Find All Notes is one hunt, "Find All A", fixed to the note A.</li>
-                <li>The 60s Blitz has no personal-best tracking.</li>
+                <li>The 60s Blitz keeps no best score of its own. The session summary only flags a new overall accuracy best.</li>
                 <li>There is no speed ladder mode. "Auto Speed-Up" in Session Setup does the same job: +5 BPM every 8 beats by default.</li>
             </ul>
             <p>Not built: the custom tuning where you set each string yourself. "Custom (Current)" sits in the tuning list, but there is no per-string editor. The switch to hide fret numbers is there too, and it isn't working yet.</p>
@@ -232,7 +232,7 @@
                 <li>Free, with no login. Settings has a "Buy me a coffee" link.</li>
                 <li>Progress, settings, songs, sound presets and imported models live in your browser's localStorage and IndexedDB.</li>
                 <li>"Progress Backup" in Settings exports and imports your progress. As far as I can tell from the code, learning-path progress, rhythm bests, songs and sound presets are not in that file.</li>
-                <li>It installs as a PWA. The app shell works offline, and sound files are cached the first time you use them, so offline playback works after one online session.</li>
+                <li>It installs as a PWA, and the app shell works offline. Song playback with the soundfont works offline after one online session, because the soundfont is cached on first use. The Sound page's samples and amp models are only partly cached, with 12 files kept, so I can't promise the full guitar sound offline.</li>
                 <li>English and Polish, picked from your browser language with English as the fallback.</li>
                 <li>The site loads Google Analytics and Amplitude with session replay.</li>
             </ul>
@@ -254,7 +254,7 @@
             <h3>What is a good fretboard memorization game?</h3>
             <p>Look for drills in both directions, from a position to its note name and from a note name to a position, plus a way to play the notes on a real guitar. FretMemo has five such drills, two of them checked by the microphone, and challenge hunts such as 60s Blitz and Survival Mode. It is free in the browser.</p>
             <h3>Does FretMemo work offline?</h3>
-            <p>Yes, once it has loaded. FretMemo installs as a PWA, the app shell is cached, and sound files are cached the first time you use them, so offline playback works after one online session.</p>
+            <p>Mostly, once it has loaded. FretMemo installs as a PWA and the app shell is cached. Song playback with the soundfont works offline after one online session, because the soundfont is cached on first use. The Sound page's samples and amp models are only partly cached, with 12 files kept, so the full guitar sound may not work offline.</p>
             <h3>Did FretMemo ship its 2026 roadmap?</h3>
             <p>Most of it. Streak freezes, the heat map, fret and string focus, SM-2, ear training, alternate tunings, the scale explorer, chord diagrams, the PWA and export/import shipped. Badges, daily challenge types, optional XP and Find All Notes shipped in part, and a per-string custom tuning editor was not built.</p>
 
