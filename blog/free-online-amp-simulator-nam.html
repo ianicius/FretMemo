@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Online Amp Simulator With NAM Amp Models | FretMemo</title>
+    <meta name="description" content="A free online amp simulator with 7 NAM amp models, a tone designer, .nam import and live input for your guitar. Runs in the browser, no account.">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <link rel="canonical" href="https://fretmemo.net/blog/free-online-amp-simulator-nam.html" />
+
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="apple-touch-icon" href="/icon.svg" />
+
+    <!-- Open Graph / Twitter -->
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="FretMemo">
+    <meta property="og:url" content="https://fretmemo.net/blog/free-online-amp-simulator-nam.html">
+    <meta property="og:title" content="A free online amp simulator with NAM amp models, in your browser">
+    <meta property="og:description" content="A free online amp simulator with 7 NAM amp models, a tone designer, .nam import and live input for your guitar. Runs in the browser, no account.">
+    <meta property="og:image" content="https://fretmemo.net/blog/img/free-online-amp-simulator-nam.jpg">
+    <meta property="og:image:width" content="1280">
+    <meta property="og:image:height" content="800">
+    <meta property="og:image:alt" content="FretMemo Sound page with NAM preset cards for Dumble ODS and Ampeg V-2, a custom preset AC10 crunch marked active, and the Tone designer below with the amp set to Vox AC10 (NAM), an Import .nam button and nine sliders from Input gain to Output gain">
+    <meta property="article:published_time" content="2026-11-17">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="A free online amp simulator with NAM amp models, in your browser">
+    <meta name="twitter:description" content="A free online amp simulator with 7 NAM amp models, a tone designer, .nam import and live input for your guitar. Runs in the browser, no account.">
+    <meta name="twitter:image" content="https://fretmemo.net/blog/img/free-online-amp-simulator-nam.jpg">
+
+    <link rel="alternate" type="application/rss+xml" title="FretMemo Blog" href="https://fretmemo.net/rss.xml" />
+
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BlogPosting",
+      "headline": "A free online amp simulator with NAM amp models, in your browser",
+      "description": "A free online amp simulator with 7 NAM amp models, a tone designer, .nam import and live input for your guitar. Runs in the browser, no account.",
+      "image": "https://fretmemo.net/blog/img/free-online-amp-simulator-nam.jpg",
+      "datePublished": "2026-11-17",
+      "dateModified": "2026-11-17",
+      "author": {
+        "@type": "Organization",
+        "name": "FretMemo",
+        "url": "https://fretmemo.net/"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "FretMemo",
+        "url": "https://fretmemo.net/",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://fretmemo.net/icon.svg"
+        }
+      },
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://fretmemo.net/blog/free-online-amp-simulator-nam.html"
+      },
+      "keywords": "free online amp simulator, neural amp modeler in browser, load .nam file online, play guitar through amp sim in browser, guitar tone designer",
+      "about": "FretMemo's Sound tab: presets, NAM amp models, tone designer, .nam import and live input",
+      "inLanguage": "en"
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://fretmemo.net/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Blog",
+          "item": "https://fretmemo.net/blog.html"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "A free online amp simulator with NAM amp models, in your browser",
+          "item": "https://fretmemo.net/blog/free-online-amp-simulator-nam.html"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Is there a free online amp simulator that runs in the browser?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. FretMemo's Sound tab is free and needs no account. It has 8 presets, 7 of them built on NAM amp models, a tone designer with 9 sliders, and Live input to play your guitar through the active preset."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I load a .nam file in the browser?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, if it is an A2 (SlimmableContainer) file of 15 MB or less. Use Import .nam in FretMemo's Tone designer. The model is stored only in your browser on this device."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I play guitar through an amp sim in my browser with an audio interface?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. FretMemo's Live input takes a microphone or an audio interface and routes it through the selected preset. Use headphones, and note that live input has no latency calibration."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which amps are in FretMemo's amp simulator?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Seven NAM amp models: Fender Deluxe Reverb, Roland JC-120, Vox AC10, Marshall JCM800, Boosted EVH 5153, Dumble Overdrive Special and Ampeg V-2. They are A2 captures from TONE3000 under the MIT license."
+          }
+        }
+      ]
+    }
+  ]
+}
+    </script>
+
+    <script src="../js/theme-init.js"></script>
+
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="../css/app.css">
+    <link rel="stylesheet" href="../css/blog.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@400;600&family=Chakra+Petch:wght@400;600;700&family=Literata:opsz,wght@7..72,400..700&family=Spline+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Google Analytics (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QVM7JS1NZW"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-QVM7JS1NZW');
+    </script>
+</head>
+
+<body class="min-h-screen">
+    <div class="back-nav">
+        <a href="../blog.html" class="nav-btn" onclick="if(window.opener) { window.close(); return false; }">← Back to
+            Blog</a>
+    </div>
+
+    <main class="article-container">
+        <header class="article-header">
+            <div class="article-meta"><span class="tag-pill">Sound</span><span>7 min read</span><span><time datetime="2026-11-17">November 17, 2026</time></span></div>
+            <h1>A free online amp simulator with NAM amp models, in your browser</h1>
+        </header>
+
+        <article class="prose-content">
+<p>FretMemo's Sound tab is a free online amp simulator. It has 8 presets built on sampled guitars and 7 NAM amp models, a "Tone designer" with amp, EQ and effects, and a "Live input" mode that plays your own guitar through the active sound in the browser. You can import your own A2 .nam file too, and it stays on your device.</p>
+            <p>I built the Sound tab so that every exercise in FretMemo plays through one switchable sound. Once that chain existed, letting you plug in and play through it was the obvious next thing to add.</p>
+
+            <aside class="key-facts">
+                <p class="key-facts-title">Key facts</p>
+                <ul>
+                    <li>FretMemo's amp simulator is free at <a href="https://fretmemo.net/sound">fretmemo.net/sound</a> and needs no account.</li>
+                    <li>It has 8 built-in presets: a nylon "Classic guitar" and 7 presets built on NAM amp models of the Fender Deluxe Reverb, Roland JC-120, Vox AC10, Marshall JCM800, Boosted EVH 5153, Dumble Overdrive Special and Ampeg V-2.</li>
+                    <li>The "Tone designer" has 9 sliders (input gain, drive, bass, mids, treble, compressor, delay, reverb, output gain) and saves named presets in the browser.</li>
+                    <li>"Import .nam" accepts A2 (SlimmableContainer) .nam files up to 15 MB and stores them only on your device.</li>
+                    <li>"Live input" routes a microphone or audio interface through the active preset and is designed for headphones.</li>
+                    <li>There is no latency calibration for live input.</li>
+                </ul>
+            </aside>
+
+            <figure class="post-figure">
+                <img src="img/free-online-amp-simulator-nam.jpg" width="1280" height="800" alt="FretMemo Sound page with NAM preset cards for Dumble ODS and Ampeg V-2, a custom preset AC10 crunch marked active, and the Tone designer below with the amp set to Vox AC10 (NAM), an Import .nam button and nine sliders from Input gain to Output gain" loading="eager" decoding="async">
+                <figcaption>Two built-in NAM presets, a custom preset saved from the Tone designer, and the designer with the Vox AC10 (NAM) amp selected.</figcaption>
+            </figure>
+
+<h2>Why a guitar trainer has an amp simulator</h2>
+            <p>Practice apps tend to sound like a cheap keyboard. That's tolerable for a quiz, but if the ear-training note or the backing loop sounds nothing like a guitar, you're training your ear on the wrong sound.</p>
+            <p>So FretMemo has one sound engine that the whole app shares. Ear-training prompts, the Chord Library, improv drills and backing loops, and the notes in fretboard drills all play through whatever preset you pick on the Sound page. Your Songs uses it too, in "Guitar sound" mode, which the <a href="guitar-pro-file-viewer-online.html">Guitar Pro file viewer post</a> explains. A few things stay outside it: metronome and count-in clicks, Rhythm Dojo drums, the soundfont playback of songs, and mic calibration.</p>
+
+            <h2>Presets and NAM amp models</h2>
+            <p>There are 8 built-in presets. "Classic guitar" is the default, a nylon-string voice. The other seven are electric: "Clean JC-120", "Clean Deluxe", "Crunch AC10", "Lead JCM800", "High Gain 5153", "Dumble ODS" and "Ampeg V-2". Each card has "Select", and "Audition", which plays an A chord and a short A minor pentatonic lick so you can compare presets by ear.</p>
+            <p>The electric presets run on NAM amp models of the Fender Deluxe Reverb, Roland JC-120, Vox AC10, Marshall JCM800, Boosted EVH 5153, Dumble Overdrive Special and Ampeg V-2. All seven are A2 captures from TONE3000 under the MIT license, and they run in the browser on neural-amp-modeler-wasm 3.0.7, also MIT. At most 3 models are loaded at once, and if one fails, the engine falls back to its classic stage instead of going silent.</p>
+            <p>The bundled models capture the amp alone, and an amp heard without a cabinet sounds fizzy. So a fixed cabinet stand-in follows them: five filters, namely a highpass at 80 Hz, +3 dB at 200 Hz, a -6 dB shelf from 1.5 kHz and lowpasses at 4.8 and 6.5 kHz. It's an EQ curve and not a cabinet impulse response. Imported .nam models skip it.</p>
+            <p>The guitar itself is sampled. "Classic guitar" uses 42 nylon notes from the University of Iowa (a Raimundo 118 played by Brian Penkrot in 2011), released for use in any project without restrictions. Every NAM preset uses 28 electric notes from Karoryfer's "Black and Green Guitars", a green Gretsch Anniversary, released as CC0. Until the samples load, a simple synth plays instead.</p>
+
+            <h2>The tone designer</h2>
+            <p>Open "Tone designer" and you get an "Amp" menu with the seven NAM amps and a classic option, plus nine sliders:</p>
+            <ul>
+                <li>"Input gain" and "Output gain", 0 to 2×</li>
+                <li>"Drive" and "Compressor", 0 to 1</li>
+                <li>"Bass", "Mids" and "Treble", ±12 dB each (a shelf at 200 Hz, a peak at 1 kHz, a shelf at 3.2 kHz)</li>
+                <li>"Delay", mix 0 to 1, about 280 ms with feedback 0.35</li>
+                <li>"Reverb", mix 0 to 1, with a synthetic impulse response</li>
+            </ul>
+            <p>You hear changes live, about 180 ms after you stop dragging. "Play phrase" plays a test phrase, and "Save preset" stores the tone under a name in your browser, where it appears next to the built-ins with a "Custom" badge.</p>
+
+            <h2>Importing your own .nam file</h2>
+            <p>If you have a NAM capture you like, "Import .nam" loads it as an amp. It has to be in the A2 (SlimmableContainer) format and 15 MB or smaller; older files are refused with a message saying only A2 files are supported. The model is stored only in your browser's IndexedDB. The designer puts it plainly: "Imported models are yours: they stay local and are not covered by the bundled-model licenses." Imported models skip the cabinet stand-in, so you hear the model as it is.</p>
+
+            <h2>How to play your guitar through it</h2>
+            <ol>
+                <li>Open <a href="https://fretmemo.net/sound">Sound on fretmemo.net</a>. It's "Sound" in the sidebar on desktop and in the bottom bar on a phone.</li>
+                <li>Press "Audition" on a few presets and "Select" the one you like.</li>
+                <li>Optionally open "Tone designer", pick an "Amp" or press "Import .nam", move the sliders, type a name and press "Save preset".</li>
+                <li>Put on headphones. Connect the guitar through an audio interface, or put a microphone in front of it.</li>
+                <li>Open "Live input", press "Enable live input" and allow microphone access in the browser.</li>
+                <li>Watch the level meter. If it starts to feed back, press "Emergency mute".</li>
+                <li>When you're done, switch live input off on the Sound page. Leaving the page does not turn it off.</li>
+            </ol>
+            <p>For live input FretMemo turns off the browser's echo cancellation, noise suppression and auto gain, because they cut long sustains. With echo cancellation off, sound from speakers can loop back into the mic, which is why the page shows a "Headphones on!" warning. Your saved presets also show up in Your Songs: in "Guitar sound" mode, "Track voices" lets you give each track a built-in or saved preset, which is a nicer sound to <a href="how-to-practice-a-song-on-guitar.html">practice a song with a looped section</a> against.</p>
+
+            <h2>Limits</h2>
+            <ul>
+                <li>No latency calibration for live input, so how much delay you hear depends on your device and setup.</li>
+                <li>The microphone stays on after you leave the Sound page, until you switch it off there.</li>
+                <li>The bundled models are amp-only, and the cabinet is a five-filter EQ, not an impulse response.</li>
+                <li>Imported .nam files must be A2 and at most 15 MB.</li>
+                <li>Sound files are cached on first use, but only 12 entries are kept, so I can't promise the full sound set offline.</li>
+                <li>In Your Songs, one song can use at most 3 different NAM amps in "Guitar sound" mode.</li>
+            </ul>
+
+            <h2>FAQ</h2>
+            <h3>Is there a free online amp simulator that runs in the browser?</h3>
+            <p>Yes. FretMemo's Sound tab is free and needs no account. It has 8 presets, 7 of them built on NAM amp models, a tone designer with 9 sliders, and Live input to play your guitar through the active preset.</p>
+            <h3>Can I load a .nam file in the browser?</h3>
+            <p>Yes, if it is an A2 (SlimmableContainer) file of 15 MB or less. Use Import .nam in FretMemo's Tone designer. The model is stored only in your browser on this device.</p>
+            <h3>Can I play guitar through an amp sim in my browser with an audio interface?</h3>
+            <p>Yes. FretMemo's Live input takes a microphone or an audio interface and routes it through the selected preset. Use headphones, and note that live input has no latency calibration.</p>
+            <h3>Which amps are in FretMemo's amp simulator?</h3>
+            <p>Seven NAM amp models: Fender Deluxe Reverb, Roland JC-120, Vox AC10, Marshall JCM800, Boosted EVH 5153, Dumble Overdrive Special and Ampeg V-2. They are A2 captures from TONE3000 under the MIT license.</p>
+
+            <div class="blog-cta-box">
+                <h3>Try the amp simulator</h3>
+                <p>Audition the presets, build a tone in the designer, or plug in and play through it with headphones.</p>
+                <a href="https://fretmemo.net/sound" class="blog-cta-btn">Open Sound</a>
+                <span class="blog-cta-subtle">Free, no account, runs in the browser.</span>
+            </div>
+
+            <div class="related-posts">
+                <h3>Keep reading</h3>
+                <ul>
+                    <li><a href="free-guitar-fretboard-trainer-2026.html">Free guitar fretboard trainer: everything FretMemo does in 2026</a></li>
+                    <li><a href="guitar-pro-file-viewer-online.html">A free Guitar Pro viewer online: open .gp5, .gpx and .gp files in your browser</a></li>
+                    <li><a href="how-to-practice-a-song-on-guitar.html">How to practice a song on guitar by looping the bars you keep missing</a></li>
+                    <li><a href="free-online-guitar-tab-editor.html">A free online guitar tab editor for the Guitar Pro files you already have</a></li>
+                </ul>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid var(--border-subtle); margin: 4rem 0;">
+
+            <footer style="text-align: center; color: var(--text-secondary); font-size: 0.875rem;">
+                <p style="margin-top: 2rem;">&copy; 2026 FretMemo. <a href="../index.html"
+                        style="color: var(--text-primary); text-decoration: none;">Home</a></p>
+            </footer>
+        </article>
+    </main>
+</body>
+
+</html>

@@ -331,3 +331,104 @@
 .related-posts a:hover {
     opacity: 0.8;
 }
+
+/* --- Article figures, key facts, FAQ and numbered steps (November 2026 posts) --- */
+.post-figure {
+    margin: 0 0 2.5rem;
+}
+
+.post-figure img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: 12px;
+    border: 1px solid var(--border-subtle, var(--border));
+}
+
+.post-figure figcaption {
+    margin-top: 0.75rem;
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--text-secondary, var(--muted));
+}
+
+.key-facts {
+    background: var(--bg-surface, var(--surface));
+    border: 1px solid var(--border-subtle, var(--border));
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem 0.25rem;
+    margin: 0 0 2.5rem;
+}
+
+.prose-content .key-facts-title {
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-primary, var(--text));
+    margin-bottom: 0.75rem;
+}
+
+.key-facts ul {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+.key-facts li {
+    margin-bottom: 0.6rem;
+}
+
+/* direct children only, so the CTA and related-posts h3 keep their own rules */
+.prose-content > h3 {
+    font-family: var(--font-display);
+    color: var(--text-primary, var(--text));
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 1.35;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+}
+
+.prose-content > ol {
+    font-family: var(--font-reading, var(--font-body));
+    color: var(--text-secondary, var(--muted));
+    list-style: decimal;
+    padding-left: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.prose-content > ol > li {
+    padding-left: 0.4rem;
+}
+
+.prose-content > ol > li::before {
+    content: none;
+}
+
+.prose-content > ol > li::marker {
+    color: var(--accent-primary, var(--accent));
+    font-weight: 700;
+}
+
+.article-meta {
+    flex-wrap: wrap;
+    row-gap: 0.5rem;
+}
+
+.article-meta time {
+    font-variant-numeric: tabular-nums;
+}
+
+.prose-content p a,
+.prose-content > ol a,
+.prose-content > ul a,
+.key-facts a,
+.post-figure a {
+    color: var(--text-primary, var(--text));
+    text-decoration: underline;
+    text-decoration-color: var(--accent-primary, var(--accent));
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+}

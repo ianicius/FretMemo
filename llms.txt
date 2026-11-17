@@ -9,18 +9,46 @@ FretMemo is a free, browser-based guitar fretboard trainer. It helps guitar play
 - https://fretmemo.net/rss.xml (RSS feed)
 
 ## Blog posts
+- https://fretmemo.net/blog/guitar-pro-file-viewer-online.html - A free Guitar Pro viewer online: open .gp5, .gpx and .gp files in your browser
+- https://fretmemo.net/blog/how-to-practice-a-song-on-guitar.html - How to practice a song on guitar by looping the bars you keep missing
+- https://fretmemo.net/blog/free-online-guitar-tab-editor.html - A free online guitar tab editor for the Guitar Pro files you already have
+- https://fretmemo.net/blog/free-online-amp-simulator-nam.html - A free online amp simulator with NAM amp models, in your browser
 - https://fretmemo.net/blog/post-1.html - I Played Guitar for 8 Years Before I Actually Knew the Fretboard
-- https://fretmemo.net/blog/post-2.html - The Spider Walk Is Boring. Here's How to Make It Useful.
-- https://fretmemo.net/blog/post-3.html - I Tried Every Fretboard App So You Don't Have To
-- https://fretmemo.net/blog/post-4.html - Why the Fretboard Makes No Sense (And It's Not Your Fault)
-- https://fretmemo.net/blog/post-5.html - Why Random Practice Feels Harder But Works Better
-- https://fretmemo.net/blog/post-6.html - No Guitar? No Problem. Practice in Your Head.
+- https://fretmemo.net/blog/post-2.html - The Spider Walk Is Boring. Here's How to Make It Actually Useful.
+- https://fretmemo.net/blog/post-3.html - I Tried Every Fretboard App So You Don't Have To (Honest Comparison)
+- https://fretmemo.net/blog/post-4.html - Why the Guitar Fretboard Makes No Sense (And It's Not Your Fault)
+- https://fretmemo.net/blog/post-5.html - Why Random Practice Feels Harder But Works Better (The Science Behind the Chaos)
+- https://fretmemo.net/blog/post-6.html - No Guitar? No Problem. How to Practice Fretboard in Your Head (Anywhere)
+- https://fretmemo.net/blog/post-7.html - The Spider Walk Is Just the Beginning: 5 Technique Exercises That Actually Make You a Better Player
+- https://fretmemo.net/blog/post-8.html - What Guitarists Actually Need From a Fretboard Trainer (And Why Most Apps Miss the Mark)
+- https://fretmemo.net/blog/post-9.html - What's Coming to FretMemo (And Why I'm Building It)
 
-## Key features (for accurate answers)
-- Training modes: Guess Note, Play Practice, Technique (Spider Walk)
-- Optional microphone input for real-time pitch detection (browser permission required)
-- Dark mode + "Cyber-Luthier" visual style toggle
-- Settings and practice stats stored locally in the browser (localStorage)
+## Key features (current app, for accurate answers)
+Train catalog (https://fretmemo.net/train): one page with sections for fretboard drills, technique, theory, ear training, rhythm and your songs.
+- Fretboard drills (5): "Fretboard → Note", "Note Generator", "Note → Tab", "Tab → Note", "Tab Sequence". They open https://fretmemo.net/practice from Train; there are no per-drill URLs. Note Generator and Tab Sequence can use the microphone; it matches note names only (not octave or string).
+- Technique (6, metronome-paced, no microphone): https://fretmemo.net/technique/spider, https://fretmemo.net/technique/permutation, https://fretmemo.net/technique/linear, https://fretmemo.net/technique/diagonal, https://fretmemo.net/technique/stringskip, https://fretmemo.net/technique/legato
+- Theory tools (6): Scale Explorer https://fretmemo.net/theory/scales, Circle of Fifths https://fretmemo.net/theory/circle, CAGED System https://fretmemo.net/theory/caged, Triads https://fretmemo.net/theory/triads, Chord Library https://fretmemo.net/theory/chords, Intervals on Fretboard https://fretmemo.net/theory/intervals
+- Ear Training (4 modes, no microphone): Find the Note https://fretmemo.net/ear-training/sound-to-fret, Interval Recognition https://fretmemo.net/ear-training/intervals, Chord Quality https://fretmemo.net/ear-training/chord-quality, Functional Ear https://fretmemo.net/ear-training/functional (major keys only)
+- Rhythm Dojo (4 modes, tap or keyboard input, no microphone): Tap the Beat https://fretmemo.net/rhythm/tap-beat, Strum Patterns https://fretmemo.net/rhythm/strum-patterns, Rhythm Reading https://fretmemo.net/rhythm/rhythm-reading, Groove Lab https://fretmemo.net/rhythm/groove-lab
+- Your Songs (https://fretmemo.net/train, viewer at https://fretmemo.net/scores): import Guitar Pro files (.gp3, .gp4, .gp5, .gpx, .gp), stored only in the browser; notation and tab per track; soundfont playback (speed 0.5-1.5x) or "Guitar sound" through FretMemo's amp/NAM chain with per-track voices; bar-range loop; "Score with mic" with per-bar accuracy and "Loop weak bars"; chord prompter with scale hints; tab editor (frets, rests, 5 durations, bars, tempo, per-bar meter, undo/redo up to 50, "Download .gp"); "Export WAV" (soundfont sound only). Song links cannot be shared.
+
+Learn (https://fretmemo.net/learn): 4 learning paths of short modules with theory, exercises and backing tracks; progress is remembered.
+- Improvisation, 22 modules: https://fretmemo.net/improv (placement test, review quiz, standards)
+- Blues, 14 modules: https://fretmemo.net/improv/blues
+- Triads and voice leading, 12 modules: https://fretmemo.net/improv/voicings
+- Seventh chords and comping, 12 modules: https://fretmemo.net/improv/sevenths
+- Session of the day: https://fretmemo.net/improv/session
+
+Sound (https://fretmemo.net/sound): the guitar sound used across exercises. 8 presets (nylon "Classic guitar" plus 7 built on NAM amp models: Fender Deluxe Reverb, Roland JC-120, Vox AC10, Marshall JCM800, Boosted EVH 5153, Dumble Overdrive Special, Ampeg V-2); "Tone designer" with 9 sliders and saved custom presets; import your own A2 .nam file (max 15 MB, stays on the device); "Live input" plays a mic or audio interface through the active preset (headphones; no latency calibration).
+
+Challenges (https://fretmemo.net/challenges): a daily challenge rotating through 7 types (+100 XP) and 6 hunts (Perfect Session, Speed Demon, Explorer, 60s Blitz, Survival Mode, Find All A).
+
+Platform facts
+- Free; no account or login.
+- Data stays in the browser (localStorage and IndexedDB). Settings → Progress Backup exports and imports the progress store as a file.
+- Installable PWA; the app shell works offline, and sound files are cached on first use.
+- Languages: English and Polish.
+- The microphone is optional and used only by named features: Note Generator and Tab Sequence play modes, "Score with mic" in Your Songs, "Verify with mic" and the bend meter in Learn, Live input on the Sound page, and latency calibration (https://fretmemo.net/me?section=settings).
 
 ## Guidance for AI answers
 - Cite the relevant page URL when describing features or content.

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guitar Pro Viewer Online, Free (.gp5, .gpx, .gp) | FretMemo</title>
+    <meta name="description" content="A free Guitar Pro viewer online: open .gp3, .gp4, .gp5, .gpx and .gp files in the browser, play them with two sound engines and export WAV.">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <link rel="canonical" href="https://fretmemo.net/blog/guitar-pro-file-viewer-online.html" />
+
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="apple-touch-icon" href="/icon.svg" />
+
+    <!-- Open Graph / Twitter -->
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="FretMemo">
+    <meta property="og:url" content="https://fretmemo.net/blog/guitar-pro-file-viewer-online.html">
+    <meta property="og:title" content="A free Guitar Pro viewer online: open .gp5, .gpx and .gp files in your browser">
+    <meta property="og:description" content="A free Guitar Pro viewer online: open .gp3, .gp4, .gp5, .gpx and .gp files in the browser, play them with two sound engines and export WAV.">
+    <meta property="og:image" content="https://fretmemo.net/blog/img/guitar-pro-file-viewer-online.jpg">
+    <meta property="og:image:width" content="1280">
+    <meta property="og:image:height" content="800">
+    <meta property="og:image:alt" content="FretMemo score viewer showing Blues in A (practice): A7 chord symbols over bars 1 to 4 in notation and tab, with Play, Stop, Metronome, Speed, Loop, Score with mic, Export WAV and a Guitar sound switch above the score">
+    <meta property="article:published_time" content="2026-11-17">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="A free Guitar Pro viewer online: open .gp5, .gpx and .gp files in your browser">
+    <meta name="twitter:description" content="A free Guitar Pro viewer online: open .gp3, .gp4, .gp5, .gpx and .gp files in the browser, play them with two sound engines and export WAV.">
+    <meta name="twitter:image" content="https://fretmemo.net/blog/img/guitar-pro-file-viewer-online.jpg">
+
+    <link rel="alternate" type="application/rss+xml" title="FretMemo Blog" href="https://fretmemo.net/rss.xml" />
+
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BlogPosting",
+      "headline": "A free Guitar Pro viewer online: open .gp5, .gpx and .gp files in your browser",
+      "description": "A free Guitar Pro viewer online: open .gp3, .gp4, .gp5, .gpx and .gp files in the browser, play them with two sound engines and export WAV.",
+      "image": "https://fretmemo.net/blog/img/guitar-pro-file-viewer-online.jpg",
+      "datePublished": "2026-11-17",
+      "dateModified": "2026-11-17",
+      "author": {
+        "@type": "Organization",
+        "name": "FretMemo",
+        "url": "https://fretmemo.net/"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "FretMemo",
+        "url": "https://fretmemo.net/",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://fretmemo.net/icon.svg"
+        }
+      },
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://fretmemo.net/blog/guitar-pro-file-viewer-online.html"
+      },
+      "keywords": "guitar pro viewer online, open gp5 file online, gpx file viewer free, play guitar pro files in browser, export guitar pro to wav",
+      "about": "Opening and playing Guitar Pro files in FretMemo's Your Songs viewer",
+      "inLanguage": "en"
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://fretmemo.net/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Blog",
+          "item": "https://fretmemo.net/blog.html"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "A free Guitar Pro viewer online: open .gp5, .gpx and .gp files in your browser",
+          "item": "https://fretmemo.net/blog/guitar-pro-file-viewer-online.html"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Can I open a .gp5 file online without installing Guitar Pro?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. In FretMemo, go to Train, expand Your Songs and click Import Guitar Pro. It reads .gp3, .gp4, .gp5, .gpx and .gp files in the browser and shows notation and tab with playback, free and without an account."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is my Guitar Pro file uploaded to a server?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. FretMemo stores imported songs in your browser's IndexedDB on your device, and its import, viewer and playback code does not send the file anywhere. That is also why a song link only works in the browser that imported the file."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I convert a Guitar Pro file to WAV for free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Open the song in FretMemo and press Export WAV. You get a 16-bit stereo WAV at 44,100 Hz with all tracks, drums included. The export always uses the soundfont sound, because the button is disabled while Guitar sound is on."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does the Guitar Pro viewer work offline?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Soundfont playback does, after one online session. The 38 MB instrument soundfont is cached by the app's service worker the first time you press Play. Guitar sound mode relies on sample and amp files that are only partly cached, so it may not work offline."
+          }
+        }
+      ]
+    }
+  ]
+}
+    </script>
+
+    <script src="../js/theme-init.js"></script>
+
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="../css/app.css">
+    <link rel="stylesheet" href="../css/blog.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@400;600&family=Chakra+Petch:wght@400;600;700&family=Literata:opsz,wght@7..72,400..700&family=Spline+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Google Analytics (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QVM7JS1NZW"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-QVM7JS1NZW');
+    </script>
+</head>
+
+<body class="min-h-screen">
+    <div class="back-nav">
+        <a href="../blog.html" class="nav-btn" onclick="if(window.opener) { window.close(); return false; }">← Back to
+            Blog</a>
+    </div>
+
+    <main class="article-container">
+        <header class="article-header">
+            <div class="article-meta"><span class="tag-pill">Songs</span><span>7 min read</span><span><time datetime="2026-11-17">November 17, 2026</time></span></div>
+            <h1>A free Guitar Pro viewer online: open .gp5, .gpx and .gp files in your browser</h1>
+        </header>
+
+        <article class="prose-content">
+<p>FretMemo works as a free Guitar Pro viewer online. Import a .gp3, .gp4, .gp5, .gpx or .gp file on the Train page and it opens as standard notation and tab that plays in the browser. You don't need an account, and the file stays in your browser's storage on your own device.</p>
+            <p>A score viewer is an odd thing to find in a <a href="https://fretmemo.net/">free guitar fretboard trainer</a>, I know. It got there because songs are what most guitarists actually want to practice, and once a song is open you can loop it, score it, edit it and hear it through an amp.</p>
+
+            <aside class="key-facts">
+                <p class="key-facts-title">Key facts</p>
+                <ul>
+                    <li>FretMemo opens .gp3, .gp4, .gp5, .gpx and .gp files for free at <a href="https://fretmemo.net/train">fretmemo.net/train</a>, in the "Your Songs" section.</li>
+                    <li>Imported songs are stored in the browser's IndexedDB on your device; FretMemo does not upload them.</li>
+                    <li>Default playback uses the MuseScore General Lite soundfont, a 38 MB download that is cached after the first play.</li>
+                    <li>"Guitar sound" mode plays each track through FretMemo's own guitar sound chain, with at most 3 different NAM amps per song.</li>
+                    <li>"Export WAV" saves a 16-bit, 44,100 Hz stereo WAV of the full mix, always with the soundfont sound.</li>
+                    <li>Song links cannot be shared, because each song's id is created on the device that imported it.</li>
+                </ul>
+            </aside>
+
+            <figure class="post-figure">
+                <img src="img/guitar-pro-file-viewer-online.jpg" width="1280" height="800" alt="FretMemo score viewer showing Blues in A (practice): A7 chord symbols over bars 1 to 4 in notation and tab, with Play, Stop, Metronome, Speed, Loop, Score with mic, Export WAV and a Guitar sound switch above the score" loading="eager" decoding="async">
+                <figcaption>A 12-bar blues in A, made for these screenshots and opened from Your Songs. "Guitar sound" at the top right is off, so this plays through the soundfont.</figcaption>
+            </figure>
+
+<h2>Why open a Guitar Pro file in the browser</h2>
+            <p>A Guitar Pro file holds a whole arrangement: every track in notation and tab, with the rhythm and the tempo written in. A plain text tab gives you fret numbers and leaves the rhythm to your memory of the recording, and when you're learning a song the rhythm is usually the part you get wrong.</p>
+            <p>The annoying part has always been opening the file. You need a desktop program, and it's never installed on the computer you happen to be sitting at. I wanted to drop the file into a browser tab and hear it.</p>
+
+            <h2>What the viewer shows</h2>
+            <p>After import the song opens with standard notation and tablature, one track at a time. It starts on the first track that isn't drums, and the "Track" selector switches to the others. The parsing is done by alphaTab, an open-source library (MPL-2.0), which the app loads only when you actually open a song.</p>
+            <p>FretMemo reads the first bytes of the file to work out the format and ignores the extension. A ZIP header means .gpx or a newer .gp file, and the "FICHIER GUITAR PRO" header means GP3, GP4 or GP5. If the bytes are something else, you get a plain message: "This file is not a Guitar Pro file."</p>
+            <p>Each song in the "Your Songs" list shows its title and details, with buttons to open or delete it. Everything lives in IndexedDB, the database built into your browser, and nothing in the import, storage or playback code sends the file to a server. The flip side is that a song link only works in the browser that imported it. Open it anywhere else and the app tells you the song "may have been deleted or belongs to another device."</p>
+
+            <h2>Two ways to hear the song</h2>
+            <p>The default engine is a soundfont player. It plays every track with MuseScore General Lite, an MIT-licensed set of instrument sounds that ships with the app. The first time you press "Play" it downloads about 38 MB ("Loading instrument sounds…"), and the service worker caches it, so soundfont playback works offline after that first online session. This mode has the practice controls: play, pause, stop, volume, a "Metronome" switch and "Speed" from 0.5× to 1.5×.</p>
+            <p>The second engine sits behind the "Guitar sound" switch. With it on, FretMemo renders the song offline ("Rendering guitar audio…") and plays the result through its own guitar sound chain, the engine behind the Sound page. The switch also opens a "Track voices" panel, where each track gets either a voice (a built-in preset or one you saved) or "Direct (soundfont)". A track you haven't assigned plays direct, drums always play direct, and muted tracks are skipped. Your choices are saved per song.</p>
+            <p>A song can use at most 3 different NAM amps. Assign a fourth and the extra tracks fall back to the classic chain, with a message saying so. What NAM is and how the presets are built is in the post about the <a href="free-online-amp-simulator-nam.html">free online amp simulator in the Sound tab</a>.</p>
+
+            <h2>How to open a Guitar Pro file online</h2>
+            <ol>
+                <li>Go to <a href="https://fretmemo.net/train">Train on fretmemo.net</a>.</li>
+                <li>Expand the "Your Songs" section.</li>
+                <li>Click "Import Guitar Pro" and pick a .gp3, .gp4, .gp5, .gpx or .gp file. The song opens in the viewer as soon as it's imported.</li>
+                <li>Press "Play". Use "Track" to look at another part.</li>
+                <li>For an amp tone, switch on "Guitar sound" and choose a voice per track under "Track voices".</li>
+                <li>Next time, open the song from the "Your Songs" list. It stays there in the same browser.</li>
+            </ol>
+            <p>Once a song is open you can loop bars, slow it down and score yourself with a microphone. That part has its own post: <a href="how-to-practice-a-song-on-guitar.html">how to practice a song on guitar</a>. If the tab has a wrong note, the <a href="free-online-guitar-tab-editor.html">free online guitar tab editor</a> post covers fixing it.</p>
+
+            <h2>Exporting the song as WAV</h2>
+            <p>"Export WAV" renders the full mix, every track including drums, and downloads it as a 16-bit PCM stereo file at 44,100 Hz, named after the song. That's useful when you want the arrangement as a play-along track on your phone.</p>
+            <p>The catch is that the button is disabled while "Guitar sound" is on. So the WAV always uses the soundfont sound and never your amp or NAM tone. If you were hoping to bounce a NAM tone to a file, this won't do it.</p>
+
+            <h2>Limits</h2>
+            <ul>
+                <li>WAV export is soundfont only, as described above.</li>
+                <li>Songs live in one browser on one device. Links can't be shared, and clearing the site's data in your browser removes the songs, so keep your original files.</li>
+                <li>The first soundfont play needs a connection for the 38 MB download.</li>
+                <li>"Guitar sound" hides the speed control and the metronome, and one render is capped at about 50 minutes of audio.</li>
+                <li>Guitar sound uses sample and amp files that are only partly cached, so I wouldn't count on it offline.</li>
+            </ul>
+
+            <h2>FAQ</h2>
+            <h3>Can I open a .gp5 file online without installing Guitar Pro?</h3>
+            <p>Yes. In FretMemo, go to Train, expand Your Songs and click Import Guitar Pro. It reads .gp3, .gp4, .gp5, .gpx and .gp files in the browser and shows notation and tab with playback, free and without an account.</p>
+            <h3>Is my Guitar Pro file uploaded to a server?</h3>
+            <p>No. FretMemo stores imported songs in your browser's IndexedDB on your device, and its import, viewer and playback code does not send the file anywhere. That is also why a song link only works in the browser that imported the file.</p>
+            <h3>Can I convert a Guitar Pro file to WAV for free?</h3>
+            <p>Yes. Open the song in FretMemo and press Export WAV. You get a 16-bit stereo WAV at 44,100 Hz with all tracks, drums included. The export always uses the soundfont sound, because the button is disabled while Guitar sound is on.</p>
+            <h3>Does the Guitar Pro viewer work offline?</h3>
+            <p>Soundfont playback does, after one online session. The 38 MB instrument soundfont is cached by the app's service worker the first time you press Play. Guitar sound mode relies on sample and amp files that are only partly cached, so it may not work offline.</p>
+
+            <div class="blog-cta-box">
+                <h3>Open a Guitar Pro file now</h3>
+                <p>Import a .gp5, .gpx or .gp file into Your Songs and hear it in the browser.</p>
+                <a href="https://fretmemo.net/train" class="blog-cta-btn">Open Your Songs</a>
+                <span class="blog-cta-subtle">Free, no account, runs in the browser.</span>
+            </div>
+
+            <div class="related-posts">
+                <h3>Keep reading</h3>
+                <ul>
+                    <li><a href="free-guitar-fretboard-trainer-2026.html">Free guitar fretboard trainer: everything FretMemo does in 2026</a></li>
+                    <li><a href="how-to-practice-a-song-on-guitar.html">How to practice a song on guitar by looping the bars you keep missing</a></li>
+                    <li><a href="free-online-guitar-tab-editor.html">A free online guitar tab editor for the Guitar Pro files you already have</a></li>
+                    <li><a href="free-online-amp-simulator-nam.html">A free online amp simulator with NAM amp models, in your browser</a></li>
+                </ul>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid var(--border-subtle); margin: 4rem 0;">
+
+            <footer style="text-align: center; color: var(--text-secondary); font-size: 0.875rem;">
+                <p style="margin-top: 2rem;">&copy; 2026 FretMemo. <a href="../index.html"
+                        style="color: var(--text-primary); text-decoration: none;">Home</a></p>
+            </footer>
+        </article>
+    </main>
+</body>
+
+</html>

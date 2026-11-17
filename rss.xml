@@ -6,7 +6,39 @@
     <description>Insights on theory, practice, and the art of the guitar.</description>
     <language>en</language>
     <atom:link href="https://fretmemo.net/rss.xml" rel="self" type="application/rss+xml" />
-    <lastBuildDate>Fri, 30 Jan 2026 00:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Tue, 17 Nov 2026 00:00:00 GMT</lastBuildDate>
+
+    <item>
+      <title>A free Guitar Pro viewer online: open .gp5, .gpx and .gp files in your browser</title>
+      <link>https://fretmemo.net/blog/guitar-pro-file-viewer-online.html</link>
+      <guid isPermaLink="true">https://fretmemo.net/blog/guitar-pro-file-viewer-online.html</guid>
+      <pubDate>Tue, 17 Nov 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A free Guitar Pro viewer online: open .gp3, .gp4, .gp5, .gpx and .gp files in the browser, play them with two sound engines and export WAV.]]></description>
+    </item>
+
+    <item>
+      <title>How to practice a song on guitar by looping the bars you keep missing</title>
+      <link>https://fretmemo.net/blog/how-to-practice-a-song-on-guitar.html</link>
+      <guid isPermaLink="true">https://fretmemo.net/blog/how-to-practice-a-song-on-guitar.html</guid>
+      <pubDate>Tue, 17 Nov 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[How to practice a song on guitar: loop 2-4 bars, slow them down, find your weak bars with a mic score and loop those. A free browser method.]]></description>
+    </item>
+
+    <item>
+      <title>A free online guitar tab editor for the Guitar Pro files you already have</title>
+      <link>https://fretmemo.net/blog/free-online-guitar-tab-editor.html</link>
+      <guid isPermaLink="true">https://fretmemo.net/blog/free-online-guitar-tab-editor.html</guid>
+      <pubDate>Tue, 17 Nov 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A free online guitar tab editor for Guitar Pro files: change frets, rests, durations, bars, tempo and meter, then save or download a .gp file.]]></description>
+    </item>
+
+    <item>
+      <title>A free online amp simulator with NAM amp models, in your browser</title>
+      <link>https://fretmemo.net/blog/free-online-amp-simulator-nam.html</link>
+      <guid isPermaLink="true">https://fretmemo.net/blog/free-online-amp-simulator-nam.html</guid>
+      <pubDate>Tue, 17 Nov 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A free online amp simulator with 7 NAM amp models, a tone designer, .nam import and live input for your guitar. Runs in the browser, no account.]]></description>
+    </item>
 
     <item>
       <title>I Played Guitar for 8 Years Before I Actually Knew the Fretboard</title>
