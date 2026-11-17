@@ -50,9 +50,11 @@ function buildSteps(params: VoicingDrillParams, chords: string[], chordIndex: nu
     });
     if (params.mode === "inversions") {
         const picked = parsed[Math.min(chordIndex, parsed.length - 1)];
-        return picked ? chordVoicings(picked.shape, strings, tuning).map((voicing) => ({ ...picked, voicing })) : [];
+        return picked ? chordVoicings(picked.shape, strings, tuning, { orders: params.orders, maxSpan: params.maxSpan }).map((voicing) => ({ ...picked, voicing })) : [];
     }
-    const path = voiceLeadPath(parsed.map((item) => item.shape), strings, tuning, { startFret: params.startFret });
+    const path = voiceLeadPath(parsed.map((item) => item.shape), strings, tuning, {
+        startFret: params.startFret, orders: params.orders, maxSpan: params.maxSpan, layouts: params.layouts,
+    });
     return path.map((voicing, index) => ({ ...(parsed[index] as { chord: string; shape: ChordShape }), voicing }));
 }
 
@@ -149,7 +151,7 @@ export function VoicingDrill({ moduleId, exercise }: VoicingDrillProps) {
 
     const activeNotes = ((): NoteStatus[] => {
         if (!current) return [];
-        const moves = next ? voicingMoves(current.voicing, next.voicing) : current.voicing.frets.map(() => 0);
+        const moves = next ? voicingMoves(current.voicing, next.voicing, tuning) : current.voicing.frets.map(() => 0);
         const notes: NoteStatus[] = current.voicing.frets.map((fret, index) => {
             const stringIndex = current.voicing.strings[index] as number;
             const move = moves[index] ?? 0;
@@ -240,7 +242,8 @@ export function VoicingDrill({ moduleId, exercise }: VoicingDrillProps) {
                     </Select>
                 </div>
             </div>
-            {params.stringSets.length === 1 && (
+            {/* A path that may move to other string sets has no single set to name. */}
+            {params.stringSets.length === 1 && !params.layouts && (
                 <p className="text-xs text-muted-foreground">{stringSetLabel(strings, tuning, t)}</p>
             )}
 
@@ -252,8 +255,8 @@ export function VoicingDrill({ moduleId, exercise }: VoicingDrillProps) {
                         <p className="mt-1 text-center text-4xl font-bold tabular-nums text-primary">{localizeToken(current.chord)}</p>
                         <p className="mt-1 text-center text-xl font-semibold text-foreground opacity-70">{next ? localizeToken(next.chord) : "—"}</p>
                         <p className="col-span-2 mt-1 text-center text-sm text-muted-foreground">
-                            {t(`improv.voicing.inversion.${current.voicing.inversion}`)}
-                            {" · "}
+                            {/* Shells and guide tones leave chord tones out, so they have no inversion name. */}
+                            {current.voicing.tones.length === current.shape.intervals.length && <>{t(`improv.voicing.inversion.${current.voicing.inversion}`)}{" · "}</>}
                             {t("improv.voicing.step", { current: stepIndex + 1, total: stepCount })}
                         </p>
                     </div>

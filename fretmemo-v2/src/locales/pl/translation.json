@@ -2133,7 +2133,15 @@
             "vlCycle": "Cały cykl kwartowy trójdźwiękami na strunach 1-2-3, chwytami najbliższymi poprzedniemu.",
             "triadTonesOnly": "Nad każdym akordem graj tylko dźwięki jego trójdźwięku. Na „raz” każdego taktu zagraj jeden z nich.",
             "triadTopMelody": "Graj tylko najwyższy dźwięk chwytu pokazanego na gryfie. Razem tworzą melodię progresji.",
-            "triadPairs": "Nad Am7 graj na zmianę dźwięki trójdźwięku F (F A C) i G (G H D). Zaczynaj grupy na różnych dźwiękach."
+            "triadPairs": "Nad Am7 graj na zmianę dźwięki trójdźwięku F (F A C) i G (G H D). Zaczynaj grupy na różnych dźwiękach.",
+            "shells251": "Graj Dm7–G7–Cmaj7 shell voicingami, czterema krótkimi uderzeniami na takt. Weź chwyt pokazany na gryfie; ręka prawie się nie rusza.",
+            "shellsBlues": "Cały blues jazzowy shell voicingami, cztery uderzenia na takt. Przy szybkich zmianach graj po dwa uderzenia na akord.",
+            "drop2TwoFiveOne": "ii–V–I chwytami drop-2 najbliższymi poprzedniemu. Na „raz” każdego akordu zagraj jego górny głos, potem resztę chwytu.",
+            "guideTonesBlues": "Graj tylko tercję i septymę każdego akordu na strunach D i G. Zauważ, że przy zmianie akordu jeden dźwięk zostaje, a drugi rusza się o pół tonu.",
+            "guideTonesCycle": "Tercje i septymy przez ii–V–I we wszystkich tonacjach. Zacznij wolno i nie przeskakuj po gryfie.",
+            "compFourToTheBar": "Cztery krótkie, równe uderzenia na takt, akcent na 2 i 4. Chwyty mają brzmieć jak perkusja z wysokością dźwięku.",
+            "compBossa": "Akompaniuj Blue Bossa w rytmie bossy, chwytami drop-2. Trzymaj się wzoru rytmicznego z podkładu.",
+            "compStandards": "Akompaniuj chwytami drop-2 pokazanymi na gryfie, w rytmie swingu. Na „raz” każdego akordu zagraj jego górny głos."
         },
         "q": {
             "keySig": {
@@ -2527,6 +2535,66 @@
                 "name": "Pary trójdźwięków",
                 "term": "Triad Pairs",
                 "theory": "Para trójdźwięków to dwa akordy bez wspólnych dźwięków grane na zmianę, zwykle o cały ton od siebie. Nad Am7 pasują F i G, czyli IV i V stopień C-dur: razem dają sześć dźwięków (F A C G B D), które brzmią nowocześnie i bardzo pewnie. Metoda pochodzi z jazzu, gdzie opisał ją między innymi Gary Campbell. Graj najpierw jeden trójdźwięk w górę i drugi w dół, potem mieszaj je w krótkich grupach."
+            },
+            "seventh-types": {
+                "name": "Rodzaje akordów septymowych",
+                "term": "Seventh Chord Qualities",
+                "theory": "Akord septymowy to trójdźwięk z dodaną septymą: cztery dźwięki ułożone tercjami. Pięć rodzajów pokrywa prawie całą muzykę: maj7 (trójdźwięk durowy i septyma wielka), 7 (durowy i septyma mała), m7 (molowy i septyma mała), m7b5 (zmniejszony i septyma mała) oraz dim7 (zmniejszony i septyma zmniejszona). Najważniejsze są tercja i septyma: to one mówią, czy akord jest durowy czy molowy i jaką ma funkcję. Pryma i kwinta brzmią w nich mniej ważnie, dlatego gitarzyści często je pomijają."
+            },
+            "seventh-diatonic": {
+                "name": "Akordy septymowe w tonacji",
+                "term": "Diatonic Seventh Chords",
+                "theory": "Dodając septymę do każdego trójdźwięku tonacji durowej, dostajesz siedem akordów septymowych: Imaj7, iim7, iiim7, IVmaj7, V7, vim7 i viim7b5. W C-dur to Cmaj7, Dm7, Em7, Fmaj7, G7, Am7 i Hm7b5. Tylko jeden z nich jest dominantowy (V7), i to on najmocniej ciągnie do toniki. Na tym zbiorze opiera się progresja ii–V–I, najczęstszy zwrot w jazzie."
+            },
+            "shells-sixth": {
+                "name": "Shell voicings: pryma na strunie 6",
+                "term": "Shell Voicings, Root on 6",
+                "theory": "Shell voicing to akord z trzech dźwięków: pryma w basie, nad nią tercja i septyma, bez kwinty. Z prymą na strunie 6 są dwa układy: pryma–septyma–tercja na strunach 6, 4 i 3 oraz pryma–tercja–septyma na strunach 6, 5 i 4. Zmiana rodzaju akordu to przesunięcie jednego palca o próg: z maj7 na 7 schodzi septyma, z 7 na m7 schodzi tercja. Takich akordów używał Freddie Green w big bandzie Counta Basiego, grając cztery równe uderzenia na takt."
+            },
+            "shells-fifth": {
+                "name": "Shell voicings: pryma na strunie 5",
+                "term": "Shell Voicings, Root on 5",
+                "theory": "Te same dwa układy da się zagrać z prymą na strunie 5: pryma–septyma–tercja na strunach 5, 3 i 2 oraz pryma–tercja–septyma na strunach 5, 4 i 3. Kształty różnią się od tych z prymą na strunie 6, bo między strunami G i H jest tercja wielka zamiast kwarty. Opanowanie obu strun basowych pozwala grać całą progresję w jednym miejscu gryfu. Ucz się ich od C, porównując z kształtami na strunie 6."
+            },
+            "shells-251": {
+                "name": "ii–V–I shell voicingami",
+                "term": "ii–V–I with Shells",
+                "theory": "W ii–V–I prymy skaczą o kwartę, ale ręka nie musi: akord ii z prymą na strunie 5, V z prymą na strunie 6, I znowu na strunie 5. Septyma akordu ii zostaje i staje się tercją akordu V, a septyma akordu V schodzi o pół tonu na tercję akordu I. Gryf w ćwiczeniu pokazuje najbliższy chwyt, także gdy zmienia się struna basowa. Graj cztery równe uderzenia na takt, krótko i lekko."
+            },
+            "drop2-top": {
+                "name": "Drop-2 na strunach 1-4",
+                "term": "Drop 2, Strings 1-4",
+                "theory": "Akord septymowy w układzie zamkniętym na gitarze jest trudny do złapania. Drop-2 bierze drugi dźwięk od góry i przenosi go o oktawę niżej, dzięki czemu cztery dźwięki leżą na czterech sąsiednich strunach. Każdy z czterech przewrotów ma własny kształt, a wszystkie razem pokrywają cały gryf. Na strunach 1-4 te chwyty brzmią jasno i najczęściej się ich używa w akompaniamencie i melodii akordowej."
+            },
+            "drop2-middle": {
+                "name": "Drop-2 na strunach 2-5",
+                "term": "Drop 2, Strings 2-5",
+                "theory": "Te same cztery przewroty na strunach A, D, G i H brzmią pełniej i niżej. Kształty różnią się od tych na strunach 1-4 przesunięciem dźwięków na strunie H o jeden próg. Ten zestaw dobrze sprawdza się, gdy nie ma basisty albo gdy melodia gra wyżej. Ucz się go od G, porównując z chwytami na strunach 1-4."
+            },
+            "drop2-251": {
+                "name": "ii–V–I chwytami drop-2",
+                "term": "ii–V–I with Drop 2",
+                "theory": "Połączone najkrótszą drogą chwyty drop-2 w ii–V–I prawie się nie ruszają: każdy głos przechodzi najwyżej o dwa progi, a część zostaje na miejscu. Najwyższy głos tworzy własną linię melodyczną, którą słychać nad zespołem. W pętli mikrofon sprawdza, czy na „raz” każdego akordu zagrałeś jego górny głos. Kiedy to działa, spróbuj tej samej progresji w innych tonacjach przełącznikiem."
+            },
+            "drop3": {
+                "name": "Drop-3",
+                "term": "Drop 3",
+                "theory": "Drop-3 przenosi o oktawę niżej trzeci dźwięk od góry, więc między basem a resztą akordu zostaje przerwa na jedną strunę. Chwyty leżą na strunach 6-4-3-2 albo 5-3-2-1, a pusta struna w środku jest tłumiona palcem. Brzmią szeroko, z wyraźnym basem, i dobrze zastępują shell voicings, gdy chcesz grać pełniej. Są trudniejsze do złapania niż drop-2, więc graj je wolno."
+            },
+            "guide-tones": {
+                "name": "Dźwięki prowadzące",
+                "term": "Guide Tones",
+                "theory": "Tercja i septyma wystarczą, żeby usłyszeć akord. Na strunach D i G tworzą dwudźwięk, który w ii–V–I i w bluesie jazzowym przechodzi z akordu na akord o pół tonu albo zostaje na miejscu. Tercja jednego akordu staje się septymą następnego i odwrotnie. To najlżejszy akompaniament, zostawiający miejsce basowi i solistom, i najlepsza mapa harmonii do improwizacji."
+            },
+            "comping-rhythm": {
+                "name": "Rytm akompaniamentu",
+                "term": "Comping Rhythms",
+                "theory": "Akompaniament to przede wszystkim rytm. W swingu najprostszy jest styl Freddiego Greena: cztery krótkie, równe uderzenia na takt, z lekkim akcentem na 2 i 4. Charleston to uderzenie na „raz” i na „i” drugiej ćwierćnuty. W bossie novie akordy padają według stałego wzoru synkop, zgranego z bębnami. Najpierw ustal rytm, a dopiero potem dodawaj chwyty."
+            },
+            "comping-standards": {
+                "name": "Akompaniament w standardach",
+                "term": "Comping Standards",
+                "theory": "Na koniec wszystko razem: prawdziwe progresje standardów, chwyty drop-2 prowadzone najkrótszą drogą i rytm swingu. Autumn Leaves to ciąg ii–V–I w dur i w moll, Rhythm changes szybka zmiana akordów co dwie ćwierćnuty, a All the Things You Are przejścia między odległymi tonacjami. Wybierz jedną progresję, zwolnij tempo i graj, aż przestaniesz myśleć o chwytach."
             }
         },
         "ex": {
@@ -3181,6 +3249,94 @@
             "triad-pairs.licks": {
                 "name": "Frazy z pary trójdźwięków",
                 "desc": "Dwie frazy z F i G nad a-moll: w górę przez oba trójdźwięki i w dół."
+            },
+            "seventh-types.e1": {
+                "name": "Quiz: interwały akordów",
+                "desc": "Jakie interwały ma każdy rodzaj akordu, także septymowego, i jak się go nazywa."
+            },
+            "seventh-types.e2": {
+                "name": "Quiz: septyma akordu dominantowego",
+                "desc": "Znajdź septymę akordu 7 w różnych tonacjach."
+            },
+            "seventh-diatonic.e1": {
+                "name": "Quiz: akordy septymowe w tonacji",
+                "desc": "Jaki akord septymowy leży na danym stopniu tonacji durowej."
+            },
+            "seventh-diatonic.e2": {
+                "name": "Diagram: arpeggia maj7, m7, 7 i m7b5",
+                "desc": "Cztery akordy z tonacji C-dur jako arpeggia w jednej pozycji. Przełącznik „Kształt” zmienia akord."
+            },
+            "shells-sixth.e1": {
+                "name": "Chwyty: pryma–septyma–tercja",
+                "desc": "Gmaj7, G7, Gm7 i Gm7b5 na strunach 6, 4 i 3. Przełącznik „Akord” zmienia rodzaj."
+            },
+            "shells-sixth.e2": {
+                "name": "Chwyty: pryma–tercja–septyma",
+                "desc": "Te same cztery akordy na strunach 6, 5 i 4."
+            },
+            "shells-fifth.e1": {
+                "name": "Chwyty: pryma–septyma–tercja",
+                "desc": "Cmaj7, C7, Cm7 i Cm7b5 na strunach 5, 3 i 2."
+            },
+            "shells-fifth.e2": {
+                "name": "Chwyty: pryma–tercja–septyma",
+                "desc": "Te same cztery akordy na strunach 5, 4 i 3."
+            },
+            "shells-251.e1": {
+                "name": "Chwyty: ii–V–I shellami",
+                "desc": "Dm7, G7 i Cmaj7 najbliższymi chwytami; struna basowa zmienia się tam, gdzie ręka może zostać."
+            },
+            "shells-251.e2": {
+                "name": "Pętla: ii–V–I w swingu",
+                "desc": "Shell voicings, cztery uderzenia na takt. Zmieniaj tonację przełącznikiem."
+            },
+            "shells-251.e3": {
+                "name": "Pętla: blues jazzowy shellami",
+                "desc": "Cały blues jazzowy w F samymi shell voicings."
+            },
+            "drop2-top.e1": {
+                "name": "Chwyty: drop-2 na strunach 1-4",
+                "desc": "Cztery przewroty Cmaj7, C7, Cm7 i Cm7b5 w górę gryfu."
+            },
+            "drop2-middle.e1": {
+                "name": "Chwyty: drop-2 na strunach 2-5",
+                "desc": "Cztery przewroty Gmaj7, G7, Gm7 i Gm7b5 w górę gryfu."
+            },
+            "drop2-251.e1": {
+                "name": "Chwyty: ii–V–I drop-2",
+                "desc": "Dm7, G7 i Cmaj7 najbliższymi chwytami. Wybierz zestaw strun przełącznikiem."
+            },
+            "drop2-251.e2": {
+                "name": "Pętla: ii–V–I drop-2 na strunach 1-4",
+                "desc": "Mikrofon sprawdza górny głos chwytu na „raz” każdego akordu."
+            },
+            "drop2-251.e3": {
+                "name": "Pętla: ii–V–I drop-2 na strunach 2-5",
+                "desc": "To samo na środkowych strunach."
+            },
+            "drop3.e1": {
+                "name": "Chwyty: drop-3",
+                "desc": "Cztery przewroty Gmaj7, G7, Gm7 i Gm7b5 z basem na strunie 6 albo 5."
+            },
+            "guide-tones.e1": {
+                "name": "Pętla: blues jazzowy dwudźwiękami",
+                "desc": "Sama tercja i septyma każdego akordu na strunach D i G."
+            },
+            "guide-tones.e2": {
+                "name": "Pętla: ii–V–I we wszystkich tonacjach",
+                "desc": "Tercje i septymy przez cały cykl ii–V–I."
+            },
+            "comping-rhythm.e1": {
+                "name": "Pętla: cztery na takt",
+                "desc": "Blues jazzowy shell voicingami w stylu Freddiego Greena."
+            },
+            "comping-rhythm.e2": {
+                "name": "Pętla: bossa nova",
+                "desc": "Blue Bossa chwytami drop-2 w rytmie bossy."
+            },
+            "comping-standards.e1": {
+                "name": "Pętla: trzy standardy",
+                "desc": "Autumn Leaves, Rhythm changes i All the Things You Are chwytami drop-2. Mikrofon sprawdza górny głos."
             }
         },
         "practiceLink": {
@@ -3481,6 +3637,19 @@
                 },
                 "promise": "Zagraj każdy akord w każdym miejscu gryfu i łącz akordy bez skakania ręką.",
                 "duration": "Ok. 6–8 tygodni przy 15 minutach dziennie"
+            },
+            "sevenths": {
+                "tab": "Akordy septymowe",
+                "title": "Akordy septymowe i akompaniament",
+                "description": "Nauka akordów septymowych w 12 modułach: shell voicings, chwyty drop-2 i drop-3, dźwięki prowadzące i akompaniament w prawdziwych progresjach.",
+                "promise": "Akompaniuj w jazzie, soulu i bossie: od trzech strun po pełne chwyty drop-2.",
+                "duration": "Ok. 2–3 miesięcy przy 20 minutach dziennie",
+                "stages": {
+                    "build": "Budowa (1–2)",
+                    "shells": "Shell voicings (3–5)",
+                    "drop2": "Drop-2 (6–8)",
+                    "comping": "Akompaniament (9–12)"
+                }
             }
         },
         "bend": {

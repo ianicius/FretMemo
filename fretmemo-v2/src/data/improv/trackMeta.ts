@@ -31,6 +31,14 @@ export const TRACK_META = {
             description: "Learn guitar triads in 12 modules: inversions on every string set, the whole fretboard map, voice leading through real progressions, and triads in your solos.",
         },
     },
+    sevenths: {
+        id: "sevenths",
+        path: "/improv/sevenths",
+        seo: {
+            title: "Seventh Chords & Comping Roadmap | FretMemo",
+            description: "Learn seventh chords and comping in 12 modules: shell voicings, drop 2 and drop 3 on every string set, guide tones, and comping real progressions over swing and bossa backing tracks.",
+        },
+    },
     blues: {
         id: "blues",
         path: "/improv/blues",

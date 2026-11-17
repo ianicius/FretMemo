@@ -162,7 +162,7 @@ export interface BackingLoopParams {
      * Show each chord as a voicing on this string set, voice-led from the
      * previous chord (lib/improv/voicings.ts), instead of all its tones.
      */
-    voicing?: { strings: number[]; startFret?: number };
+    voicing?: VoicingLoopOptions;
     /** With `voicing`: the microphone checks the top voice of the voicing path (in every key). */
     topVoiceTargets?: boolean;
 }
@@ -172,8 +172,24 @@ export interface BackingLoopParams {
  * metronome. "inversions" walks every voicing of one chord up the neck;
  * "path" plays the progression with each chord voice-led from the previous one.
  */
+/** Voicing of a backing loop: a string set and how the chords sit on it (see lib/improv/voicings.ts). */
+export interface VoicingLoopOptions {
+    strings: number[];
+    startFret?: number;
+    /** Chord tone on each string from the lowest; omitted = closed voicings. */
+    orders?: number[][];
+    maxSpan?: number;
+    /** Other string sets the path may move to. */
+    layouts?: Array<{ strings: number[]; orders?: number[][] }>;
+}
+
 export interface VoicingDrillParams {
     mode: "inversions" | "path";
+    /** Chord tone on each string from the lowest (drop 2, shells …); omitted = closed voicings. */
+    orders?: number[][];
+    maxSpan?: number;
+    /** Path mode: other string sets the path may move to. */
+    layouts?: Array<{ strings: number[]; orders?: number[][] }>;
     /** Inversions: the chords to choose from. Path: the progression, in order. */
     chords: string[];
     /** String sets to choose from, lowest-sounding string first (see STRING_SETS). */

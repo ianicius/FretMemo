@@ -1,8 +1,9 @@
 /**
- * Chord voicings on a set of adjacent strings and voice leading between them.
+ * Chord voicings on a set of strings and voice leading between them.
  * Pure functions shared by the triad visualizer, the voicing drill and the
- * backing loop. Works for any chord with as many tones as strings in the set
- * (triads on three strings, seventh chords on four).
+ * backing loop. By default a voicing is closed (each string holds the next
+ * chord tone up); `orders` give any other layout — drop 2, drop 3, shells,
+ * guide tones — as the chord tone on each string from the lowest.
  *
  * String indices follow the app convention: 0 = high E … 5 = low E. A string
  * set is listed from the lowest-sounding string to the highest ([2, 1, 0] =
@@ -60,7 +61,32 @@ export interface VoicingOptions {
     maxFret?: number;
     /** Widest stretch between the lowest and highest fret of a voicing. */
     maxSpan?: number;
+    /**
+     * Chord tone (index into the intervals: 0 = root, 1 = third …) on each
+     * string, lowest string first; one list per voicing type or inversion.
+     * Omitted = the closed inversions of a chord with one tone per string.
+     */
+    orders?: number[][];
 }
+
+/** A string set together with the voicing orders played on it. */
+export interface VoicingLayout {
+    strings: number[];
+    orders?: number[][];
+}
+
+/** Closed inversions of a four-note chord, lowest string first. */
+const CLOSED4 = [0, 1, 2, 3].map((start) => [0, 1, 2, 3].map((step) => (start + step) % 4));
+
+/** Drop 2: the second voice from the top of each closed inversion goes down an octave. */
+export const DROP2_ORDERS = CLOSED4.map(([a, b, c, d]) => [c, a, b, d] as number[]);
+/** Drop 3: the third voice from the top goes down an octave (for string sets with a gap). */
+export const DROP3_ORDERS = CLOSED4.map(([a, b, c, d]) => [b, a, c, d] as number[]);
+/** Shell voicings: root, seventh, third and root, third, seventh (no fifth). */
+export const SHELL_ROOT_7_3 = [[0, 3, 1]];
+export const SHELL_ROOT_3_7 = [[0, 1, 3]];
+/** Guide tones: third and seventh, either one on top. */
+export const GUIDE_TONE_ORDERS = [[1, 3], [3, 1]];
 
 /**
  * Every closed-position voicing of the chord on the string set: each string
@@ -72,25 +98,29 @@ export function chordVoicings(
     shape: ChordShape,
     strings: readonly number[],
     tuning: readonly NoteName[],
-    { maxFret = 15, maxSpan = 4 }: VoicingOptions = {},
+    { maxFret = 15, maxSpan = 4, orders }: VoicingOptions = {},
 ): Voicing[] {
     const size = shape.intervals.length;
-    if (strings.length !== size || strings.some((string) => string >= tuning.length)) return [];
+    if (strings.some((string) => string >= tuning.length)) return [];
+    const closed = strings.length === size ? strings.map((_, inversion) => strings.map((__, index) => (inversion + index) % size)) : [];
+    const layouts = (orders ?? closed).filter((order) => order.length === strings.length && order.every((tone) => tone < size));
     const voicings: Voicing[] = [];
     const seen = new Set<string>();
-    for (let inversion = 0; inversion < size; inversion += 1) {
-        const tones = strings.map((_, index) => (inversion + index) % size);
+    for (const tones of layouts) {
         const baseFrets = strings.map((string, index) =>
             (shape.rootPc + (shape.intervals[tones[index] as number] ?? 0) - pcOf(tuning[string] as string) + 24) % 12);
         // Each string can sit in either octave of the board; keep the playable combinations.
-        for (let mask = 0; mask < 2 ** size; mask += 1) {
+        for (let mask = 0; mask < 2 ** strings.length; mask += 1) {
             const frets = baseFrets.map((fret, index) => fret + ((mask >> index) & 1) * 12);
             if (frets.some((fret) => fret > maxFret)) continue;
             if (Math.max(...frets) - Math.min(...frets) > maxSpan) continue;
+            // The voices must rise from the lowest string, or the layout is not the one asked for.
+            const midis = frets.map((fret, index) => openStringMidi(tuning, strings[index] as number) + fret);
+            if (midis.some((midi, index) => index > 0 && midi <= (midis[index - 1] as number))) continue;
             const key = frets.join(",");
             if (seen.has(key)) continue;
             seen.add(key);
-            voicings.push({ strings: [...strings], frets, tones, inversion });
+            voicings.push({ strings: [...strings], frets, tones: [...tones], inversion: tones[0] as number });
         }
     }
     return voicings.sort((a, b) => Math.min(...a.frets) - Math.min(...b.frets) || a.inversion - b.inversion);
@@ -98,18 +128,34 @@ export function chordVoicings(
 
 const averageFret = (voicing: Voicing) => voicing.frets.reduce((sum, fret) => sum + fret, 0) / voicing.frets.length;
 
-/** Fret movement of every string from one voicing to the next (0 = the note stays). */
-export function voicingMoves(from: Voicing, to: Voicing): number[] {
-    return from.frets.map((fret, index) => (to.frets[index] ?? fret) - fret);
+/**
+ * Movement of every voice from one voicing to the next in semitones, lowest
+ * voice first (0 = the note stays). On one string set it equals the fret move.
+ */
+export function voicingMoves(from: Voicing, to: Voicing, tuning: readonly NoteName[]): number[] {
+    const target = voicingMidis(to, tuning);
+    return voicingMidis(from, tuning).map((midi, index) => (target[index] ?? midi) - midi);
 }
 
-/** The candidate closest to `from`: least total fret movement, then smallest single move, then lower on the neck. */
+/**
+ * Fret movement of the hand per voice: on the same strings, each string's own
+ * move; on other strings (a shell with the root on the other bass string),
+ * how far the whole hand shifts, since the bass leaps a fourth either way.
+ */
+function handMoves(from: Voicing, to: Voicing): number[] {
+    const sameStrings = from.strings.every((string, index) => to.strings[index] === string);
+    if (sameStrings) return from.frets.map((fret, index) => Math.abs((to.frets[index] ?? fret) - fret));
+    const shift = Math.abs(averageFret(to) - averageFret(from));
+    return to.frets.map(() => shift);
+}
+
+/** The candidate closest to `from`: least total hand movement, then smallest single move, then lower on the neck. */
 export function nearestVoicing(from: Voicing, candidates: Voicing[]): Voicing | undefined {
     const score = (candidate: Voicing) => {
-        const moves = voicingMoves(from, candidate).map(Math.abs);
+        const moves = handMoves(from, candidate);
         return [moves.reduce((sum, move) => sum + move, 0), Math.max(...moves), averageFret(candidate)];
     };
-    return [...candidates].sort((a, b) => {
+    return candidates.filter((candidate) => candidate.frets.length === from.frets.length).sort((a, b) => {
         const [sa, sb] = [score(a), score(b)];
         return (sa[0] as number) - (sb[0] as number) || (sa[1] as number) - (sb[1] as number) || (sa[2] as number) - (sb[2] as number);
     })[0];
@@ -118,18 +164,22 @@ export function nearestVoicing(from: Voicing, candidates: Voicing[]): Voicing | 
 /**
  * Voice-led path through a progression on one string set: the first chord
  * sits closest to `startFret`, every next chord takes the voicing nearest to
- * the previous one. Chords without a voicing on the set are left out of the
- * path (the result is then shorter than `shapes`).
+ * the previous one. `layouts` add other string sets to choose from (shells
+ * with the root on the sixth or the fifth string). Chords without a voicing
+ * are left out of the path (the result is then shorter than `shapes`).
  */
 export function voiceLeadPath(
     shapes: ChordShape[],
     strings: readonly number[],
     tuning: readonly NoteName[],
-    { startFret = 5, ...options }: VoicingOptions & { startFret?: number } = {},
+    { startFret = 5, layouts = [], ...options }: VoicingOptions & { startFret?: number; layouts?: VoicingLayout[] } = {},
 ): Voicing[] {
     const path: Voicing[] = [];
     for (const shape of shapes) {
-        const candidates = chordVoicings(shape, strings, tuning, options);
+        const candidates = [
+            ...chordVoicings(shape, strings, tuning, options),
+            ...layouts.flatMap((layout) => chordVoicings(shape, layout.strings, tuning, { ...options, orders: layout.orders })),
+        ];
         const previous = path[path.length - 1];
         const next = previous
             ? nearestVoicing(previous, candidates)

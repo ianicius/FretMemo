@@ -147,7 +147,12 @@ export function BackingLoopExercise({ moduleId, exercise }: BackingLoopExerciseP
             progression.map(chordShape).filter((shape): shape is ChordShape => shape !== null),
             params.voicing.strings,
             tuning,
-            { startFret: params.voicing.startFret },
+            {
+                startFret: params.voicing.startFret,
+                orders: params.voicing.orders,
+                maxSpan: params.voicing.maxSpan,
+                layouts: params.voicing.layouts,
+            },
         )
         : null;
     const targets = params.topVoiceTargets && voicingPath

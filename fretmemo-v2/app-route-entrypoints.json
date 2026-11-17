@@ -81,6 +81,19 @@
     "/improv/vl-progressions",
     "/improv/vl-cycles",
     "/improv/triad-melody",
-    "/improv/triad-pairs"
+    "/improv/triad-pairs",
+    "/improv/sevenths",
+    "/improv/seventh-types",
+    "/improv/seventh-diatonic",
+    "/improv/shells-sixth",
+    "/improv/shells-fifth",
+    "/improv/shells-251",
+    "/improv/drop2-top",
+    "/improv/drop2-middle",
+    "/improv/drop2-251",
+    "/improv/drop3",
+    "/improv/guide-tones",
+    "/improv/comping-rhythm",
+    "/improv/comping-standards"
   ]
 }

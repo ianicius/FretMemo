@@ -2119,7 +2119,15 @@
             "vlCycle": "The whole cycle of fourths with triads on strings 1-2-3, each voicing nearest to the previous one.",
             "triadTonesOnly": "Over each chord play only the notes of its triad. On beat one of every bar play one of them.",
             "triadTopMelody": "Play only the highest note of the voicing shown on the board. Together they form the melody of the progression.",
-            "triadPairs": "Over Am7 play the notes of the F triad (F A C) and the G triad (G B D) in turn. Start the groups on different notes."
+            "triadPairs": "Over Am7 play the notes of the F triad (F A C) and the G triad (G B D) in turn. Start the groups on different notes.",
+            "shells251": "Play Dm7–G7–Cmaj7 with shell voicings, four short strokes to the bar. Take the voicing shown on the board; your hand hardly moves.",
+            "shellsBlues": "The whole jazz blues with shell voicings, four strokes to the bar. On the quick changes play two strokes per chord.",
+            "drop2TwoFiveOne": "ii–V–I with drop 2 voicings nearest to the previous one. On beat one of each chord play its top voice, then the rest of the voicing.",
+            "guideTonesBlues": "Play only the third and seventh of each chord on the D and G strings. Notice that at each change one note stays and the other moves a half step.",
+            "guideTonesCycle": "Thirds and sevenths through ii–V–I in every key. Start slowly and do not jump around the neck.",
+            "compFourToTheBar": "Four short, even strokes to the bar, accented on 2 and 4. The chords should sound like a drum with pitch.",
+            "compBossa": "Comp Blue Bossa in a bossa rhythm with drop 2 voicings. Stay with the rhythmic pattern of the backing.",
+            "compStandards": "Comp with the drop 2 voicings shown on the board, in a swing feel. On beat one of each chord play its top voice."
         },
         "q": {
             "keySig": {
@@ -2513,6 +2521,66 @@
                 "name": "Triad pairs",
                 "term": "Triad Pairs",
                 "theory": "A triad pair is two chords with no notes in common, played in turn, usually a whole step apart. Over Am7, F and G fit, the IV and V of C major: together they give six notes (F A C G B D) that sound modern and very sure of themselves. The method comes from jazz, where Gary Campbell among others described it. Play one triad up and the other down first, then mix them in short groups."
+            },
+            "seventh-types": {
+                "name": "Seventh chord qualities",
+                "term": "Seventh Chord Qualities",
+                "theory": "A seventh chord is a triad with a seventh added: four notes stacked in thirds. Five qualities cover almost all music: maj7 (major triad and major seventh), 7 (major and minor seventh), m7 (minor and minor seventh), m7b5 (diminished and minor seventh) and dim7 (diminished and diminished seventh). The third and the seventh matter most: they say whether the chord is major or minor and what job it does. The root and fifth matter less, which is why guitarists often leave them out."
+            },
+            "seventh-diatonic": {
+                "name": "Seventh chords in a key",
+                "term": "Diatonic Seventh Chords",
+                "theory": "Adding a seventh to every triad of a major key gives seven seventh chords: Imaj7, iim7, iiim7, IVmaj7, V7, vim7 and viim7b5. In C major they are Cmaj7, Dm7, Em7, Fmaj7, G7, Am7 and Bm7b5. Only one of them is a dominant (V7), and it pulls hardest towards the tonic. The ii–V–I, the most common move in jazz, is built on this set."
+            },
+            "shells-sixth": {
+                "name": "Shell voicings: root on string 6",
+                "term": "Shell Voicings, Root on 6",
+                "theory": "A shell voicing is a three-note chord: the root in the bass with the third and the seventh above it, no fifth. With the root on string 6 there are two layouts: root–seventh–third on strings 6, 4 and 3, and root–third–seventh on strings 6, 5 and 4. Changing the chord quality means moving one finger one fret: from maj7 to 7 the seventh drops, from 7 to m7 the third drops. Freddie Green used chords like these in the Count Basie band, playing four even strokes to the bar."
+            },
+            "shells-fifth": {
+                "name": "Shell voicings: root on string 5",
+                "term": "Shell Voicings, Root on 5",
+                "theory": "The same two layouts work with the root on string 5: root–seventh–third on strings 5, 3 and 2, and root–third–seventh on strings 5, 4 and 3. The shapes differ from the root-on-6 ones because the G and B strings are a major third apart instead of a fourth. Knowing both bass strings lets you play a whole progression in one place on the neck. Learn them from C and compare with the root-on-6 shapes."
+            },
+            "shells-251": {
+                "name": "ii–V–I with shells",
+                "term": "ii–V–I with Shells",
+                "theory": "In a ii–V–I the roots leap a fourth, but the hand does not have to: ii with the root on string 5, V with the root on string 6, I back on string 5. The seventh of ii stays and becomes the third of V, and the seventh of V falls a half step to the third of I. The board in the exercise shows the nearest voicing, also when the bass string changes. Play four even strokes to the bar, short and light."
+            },
+            "drop2-top": {
+                "name": "Drop 2 on strings 1-4",
+                "term": "Drop 2, Strings 1-4",
+                "theory": "A seventh chord in close position is hard to grab on the guitar. Drop 2 takes the second note from the top down an octave, so the four notes sit on four adjacent strings. Each of the four inversions has its own shape, and together they cover the whole neck. On strings 1-4 these voicings sound bright and are the ones most used for comping and chord melody."
+            },
+            "drop2-middle": {
+                "name": "Drop 2 on strings 2-5",
+                "term": "Drop 2, Strings 2-5",
+                "theory": "The same four inversions on the A, D, G and B strings sound fuller and lower. The shapes differ from strings 1-4 by moving the notes on the B string one fret. This set works well without a bass player or when the melody sits higher. Learn it from G and compare it with the voicings on strings 1-4."
+            },
+            "drop2-251": {
+                "name": "ii–V–I with drop 2",
+                "term": "ii–V–I with Drop 2",
+                "theory": "Joined by the shortest way, drop 2 voicings in a ii–V–I hardly move: every voice goes two frets at most, and some stay put. The top voice forms a melodic line of its own that is heard above the band. In the loop the microphone checks that you play the top voice on beat one of each chord. Once that works, try the progression in other keys with the selector."
+            },
+            "drop3": {
+                "name": "Drop 3",
+                "term": "Drop 3",
+                "theory": "Drop 3 takes the third note from the top down an octave, which leaves a one-string gap between the bass and the rest of the chord. The voicings sit on strings 6-4-3-2 or 5-3-2-1, with the string in the gap muted by a finger. They sound wide, with a clear bass, and make a fuller replacement for shell voicings. They are harder to grab than drop 2, so play them slowly."
+            },
+            "guide-tones": {
+                "name": "Guide tones",
+                "term": "Guide Tones",
+                "theory": "The third and the seventh are enough to hear a chord. On the D and G strings they form a two-note shape that, in a ii–V–I and a jazz blues, moves from chord to chord by a half step or stays put. The third of one chord becomes the seventh of the next and the other way round. It is the lightest comping, leaving room for the bass and the soloists, and the best map of the harmony for improvising."
+            },
+            "comping-rhythm": {
+                "name": "Comping rhythms",
+                "term": "Comping Rhythms",
+                "theory": "Comping is rhythm first. In swing the simplest style is Freddie Green's: four short, even strokes to the bar, lightly accented on 2 and 4. The Charleston is a stroke on beat one and on the and of beat two. In bossa nova the chords fall on a fixed syncopated pattern locked with the drums. Settle the rhythm first and only then add voicings."
+            },
+            "comping-standards": {
+                "name": "Comping standards",
+                "term": "Comping Standards",
+                "theory": "Finally everything together: real standard progressions, drop 2 voicings by the shortest way and a swing feel. Autumn Leaves is a chain of ii–V–Is in major and minor, Rhythm changes moves a chord every two beats, and All the Things You Are travels between distant keys. Pick one progression, slow it down and play until you stop thinking about the shapes."
             }
         },
         "ex": {
@@ -3167,6 +3235,94 @@
             "triad-pairs.licks": {
                 "name": "Phrases from a triad pair",
                 "desc": "Two phrases from F and G over A minor: up through both triads and down."
+            },
+            "seventh-types.e1": {
+                "name": "Quiz: chord intervals",
+                "desc": "The intervals of each chord quality, sevenths included, and what each is called."
+            },
+            "seventh-types.e2": {
+                "name": "Quiz: the seventh of a dominant chord",
+                "desc": "Find the seventh of a 7 chord in different keys."
+            },
+            "seventh-diatonic.e1": {
+                "name": "Quiz: seventh chords in a key",
+                "desc": "Which seventh chord sits on a given degree of a major key."
+            },
+            "seventh-diatonic.e2": {
+                "name": "Diagram: maj7, m7, 7 and m7b5 arpeggios",
+                "desc": "Four chords of C major as arpeggios in one position. The \"Shape\" selector changes the chord."
+            },
+            "shells-sixth.e1": {
+                "name": "Voicings: root–seventh–third",
+                "desc": "Gmaj7, G7, Gm7 and Gm7b5 on strings 6, 4 and 3. The \"Chord\" selector changes the quality."
+            },
+            "shells-sixth.e2": {
+                "name": "Voicings: root–third–seventh",
+                "desc": "The same four chords on strings 6, 5 and 4."
+            },
+            "shells-fifth.e1": {
+                "name": "Voicings: root–seventh–third",
+                "desc": "Cmaj7, C7, Cm7 and Cm7b5 on strings 5, 3 and 2."
+            },
+            "shells-fifth.e2": {
+                "name": "Voicings: root–third–seventh",
+                "desc": "The same four chords on strings 5, 4 and 3."
+            },
+            "shells-251.e1": {
+                "name": "Voicings: ii–V–I with shells",
+                "desc": "Dm7, G7 and Cmaj7 by the nearest voicings; the bass string changes wherever the hand can stay."
+            },
+            "shells-251.e2": {
+                "name": "Loop: ii–V–I in swing",
+                "desc": "Shell voicings, four strokes to the bar. Change the key with the selector."
+            },
+            "shells-251.e3": {
+                "name": "Loop: jazz blues with shells",
+                "desc": "The whole jazz blues in F with shell voicings only."
+            },
+            "drop2-top.e1": {
+                "name": "Voicings: drop 2 on strings 1-4",
+                "desc": "The four inversions of Cmaj7, C7, Cm7 and Cm7b5 up the neck."
+            },
+            "drop2-middle.e1": {
+                "name": "Voicings: drop 2 on strings 2-5",
+                "desc": "The four inversions of Gmaj7, G7, Gm7 and Gm7b5 up the neck."
+            },
+            "drop2-251.e1": {
+                "name": "Voicings: ii–V–I with drop 2",
+                "desc": "Dm7, G7 and Cmaj7 by the nearest voicings. Pick the string set with the selector."
+            },
+            "drop2-251.e2": {
+                "name": "Loop: ii–V–I drop 2 on strings 1-4",
+                "desc": "The microphone checks the top voice on beat one of each chord."
+            },
+            "drop2-251.e3": {
+                "name": "Loop: ii–V–I drop 2 on strings 2-5",
+                "desc": "The same on the middle strings."
+            },
+            "drop3.e1": {
+                "name": "Voicings: drop 3",
+                "desc": "The four inversions of Gmaj7, G7, Gm7 and Gm7b5 with the bass on string 6 or 5."
+            },
+            "guide-tones.e1": {
+                "name": "Loop: jazz blues in two notes",
+                "desc": "Only the third and seventh of each chord on the D and G strings."
+            },
+            "guide-tones.e2": {
+                "name": "Loop: ii–V–I in every key",
+                "desc": "Thirds and sevenths through the whole ii–V–I cycle."
+            },
+            "comping-rhythm.e1": {
+                "name": "Loop: four to the bar",
+                "desc": "A jazz blues with shell voicings in Freddie Green style."
+            },
+            "comping-rhythm.e2": {
+                "name": "Loop: bossa nova",
+                "desc": "Blue Bossa with drop 2 voicings in a bossa rhythm."
+            },
+            "comping-standards.e1": {
+                "name": "Loop: three standards",
+                "desc": "Autumn Leaves, Rhythm changes and All the Things You Are with drop 2 voicings. The microphone checks the top voice."
             }
         },
         "practiceLink": {
@@ -3467,6 +3623,19 @@
                 },
                 "promise": "Play any chord anywhere on the neck and move between chords without jumping around.",
                 "duration": "About 6–8 weeks at 15 minutes a day"
+            },
+            "sevenths": {
+                "tab": "Seventh chords",
+                "title": "Seventh chords and comping",
+                "description": "Learn seventh chords in 12 modules: shell voicings, drop 2 and drop 3 voicings, guide tones, and comping real progressions.",
+                "promise": "Comp in jazz, soul and bossa: from three strings to full drop 2 voicings.",
+                "duration": "About 2–3 months at 20 minutes a day",
+                "stages": {
+                    "build": "Construction (1–2)",
+                    "shells": "Shell voicings (3–5)",
+                    "drop2": "Drop 2 (6–8)",
+                    "comping": "Comping (9–12)"
+                }
             }
         },
         "bend": {
