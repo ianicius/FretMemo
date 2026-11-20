@@ -225,6 +225,36 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
+## Impulse responses (`public/sound/irs/`)
+
+Cabinet and reverb IRs used by the sound studio (`IMPULSE_RESPONSES` in
+`src/audio/presets.ts`), fetched lazily only when a preset selects them.
+Same source and license basis as the NAM models above: the demo IR set of the
+MIT-licensed `tone-3000/neural-amp-modeler-wasm` repository (`ui/public/irs/`),
+whose root LICENSE (MIT, "TONE3000", 2026) has no carve-outs for data files.
+The upstream `irs/README.md` lists no per-file contributors, so provenance
+beyond "published by TONE3000 in that repo" is not recorded upstream.
+**Recommended follow-up:** written confirmation from TONE3000 before relying on
+these commercially (same open point as the models).
+
+| File | Gear | Format | Source URL | SHA-256 (first 16) | Verified |
+| --- | --- | --- | --- | --- | --- |
+| `mesa.wav` | Mesa 4x12 OS cab | mono, 32-bit float, 48 kHz | https://raw.githubusercontent.com/tone-3000/neural-amp-modeler-wasm/main/ui/public/irs/mesa.wav | `50656f74a3f67aed` | 2026-11-20 |
+| `celestion.wav` | Celestion G12 Vintage | mono, 24-bit, 48 kHz | https://raw.githubusercontent.com/tone-3000/neural-amp-modeler-wasm/main/ui/public/irs/celestion.wav | `804a74b176a1c423` | 2026-11-20 |
+| `eminence.wav` | Eminence Governor | mono, 24-bit, 44.1 kHz | https://raw.githubusercontent.com/tone-3000/neural-amp-modeler-wasm/main/ui/public/irs/eminence.wav | `74c0ed71cd788b25` | 2026-11-20 |
+| `ampeg.wav` | Ampeg 8x10 (bass) | mono, 24-bit, 48 kHz | https://raw.githubusercontent.com/tone-3000/neural-amp-modeler-wasm/main/ui/public/irs/ampeg.wav | `6f5a8ae7c2670821` | 2026-11-20 |
+| `plate.wav` | EMT 140 Plate reverb | stereo, 24-bit, 48 kHz | https://raw.githubusercontent.com/tone-3000/neural-amp-modeler-wasm/main/ui/public/irs/plate.wav | `8d031c292e6af0ad` | 2026-11-20 |
+| `spring.wav` | Fender Spring reverb | mono, 24-bit, 48 kHz | https://raw.githubusercontent.com/tone-3000/neural-amp-modeler-wasm/main/ui/public/irs/spring.wav | `f976fe55f8b08413` | 2026-11-20 |
+
+```
+50656f74a3f67aed28ff01912d0eb8bb66f3b8b769f7b56f6fbce04dd2096182  irs/mesa.wav
+804a74b176a1c4239767a0acda0447e5a8396f84a9a9de9b56db327c7bd4439e  irs/celestion.wav
+74c0ed71cd788b252a4b77a7717b304f65cf1bc874277b1bf2995aa2689770de  irs/eminence.wav
+6f5a8ae7c26708219aa3d37f4f3b862453c285984b374f56b93107b051e1a580  irs/ampeg.wav
+8d031c292e6af0ad878927cce7f5f00db5aef1e1bf740f20bb65eccf247d3f9f  irs/plate.wav
+f976fe55f8b08413568896378de64739d440fdc71dea1a8be44f46b52afa492e  irs/spring.wav
+```
+
 ## Verification notes (2026-11-03)
 
 - Model format confirmed by parsing each file's JSON header: top-level
