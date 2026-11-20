@@ -1,36 +1,71 @@
 /**
- * Sound screen: audition and switch the global guitar sound, design and
- * manage custom presets.
- *
- * Wiring contract (see docs/sound-feature.md):
- * - The active preset id is owned by the SETTINGS store (`full.audio.soundPreset`);
- *   every switch goes through `selectSoundPreset`, which persists it AND calls
- *   `soundEngine.setPreset`, so the engine chain and the persisted default
- *   never diverge at rest.
- * - Custom presets live in `useSoundStore` (IndexedDB); the engine status
- *   mirror drives per-card loading/error states.
+ * Sound Studio: one surface for the rig editor, preset browser, master
+ * volume and live input. The active preset id stays in the settings store.
+ * A saved custom rig is what exercises play after a reload.
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AudioWaveform, ExternalLink, Loader2 } from "lucide-react";
-import { initSoundEngine } from "@/audio/engine";
-import { BUILT_IN_PRESETS, DEFAULT_PRESET_ID, getPresetById, type SoundPreset } from "@/audio/presets";
+import { useTranslation } from "react-i18next";
+import { initSoundEngine, soundEngine } from "@/audio/engine";
+import {
+    BUILT_IN_PRESETS,
+    DEFAULT_PRESET_ID,
+    deriveLegacyStudio,
+    emptyStudio,
+    getPresetById,
+    neutralChainParams,
+    projectStudioFields,
+    type SoundPreset,
+} from "@/audio/presets";
+import { listUserModels, type UserModelMeta } from "@/audio/userModels";
 import { LiveInputPanel } from "@/components/sound/LiveInputPanel";
-import { PresetCard } from "@/components/sound/PresetCard";
-import { ToneDesigner } from "@/components/sound/ToneDesigner";
-import { SoundSlider } from "@/components/sound/SoundSlider";
 import { formatPercentValue, getPresetName } from "@/components/sound/presetUtils";
-import { selectSoundPreset, useAudition } from "@/components/sound/useAudition";
+import { SoundSlider } from "@/components/sound/SoundSlider";
+import { StudioBoard, type StudioEditor } from "@/components/sound/StudioBoard";
+import { playAuditionPhrase, selectSoundPreset, useAudition } from "@/components/sound/useAudition";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { EmptyState } from "@/components/ui/empty-state";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SectionCollapse } from "@/components/ui/section-collapse";
 import { useFeedbackStore } from "@/stores/useFeedbackStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
-import { useSoundStore } from "@/stores/useSoundStore";
-import { useTranslation } from "react-i18next";
+import { toEnginePreset, useSoundStore } from "@/stores/useSoundStore";
+
+function editorFromPreset(preset: SoundPreset, name: string): StudioEditor {
+    if (preset.assembly === "blocks" && preset.chain && preset.globals) {
+        return {
+            sourceId: preset.kind === "custom" ? preset.id : null,
+            name,
+            blocks: preset.chain.map((block) => ({ ...block, params: { ...block.params } })),
+            globals: { ...preset.globals },
+            dirty: false,
+        };
+    }
+    const derived = deriveLegacyStudio(preset);
+    return {
+        sourceId: preset.kind === "custom" ? preset.id : null,
+        name,
+        blocks: derived.blocks,
+        globals: derived.globals,
+        dirty: false,
+    };
+}
+
+function draftFromEditor(editor: StudioEditor): SoundPreset {
+    const projected = projectStudioFields(editor.blocks, editor.globals);
+    return {
+        id: editor.sourceId ?? "studio-draft",
+        kind: "custom",
+        ...projected,
+        nameKey: editor.name.trim() || "Draft",
+        builtIn: false,
+        assembly: "blocks",
+        chain: editor.blocks,
+        globals: editor.globals,
+    };
+}
 
 export default function Sound() {
     const { t } = useTranslation();
@@ -38,60 +73,37 @@ export default function Sound() {
     const customPresets = useSoundStore((state) => state.customPresets);
     const engine = useSoundStore((state) => state.engine);
     const loadCustomPresets = useSoundStore((state) => state.loadCustomPresets);
+    const saveCustomPreset = useSoundStore((state) => state.saveCustomPreset);
     const deleteCustomPreset = useSoundStore((state) => state.deleteCustomPreset);
     const audioSettings = useSettingsStore((state) => state.full.audio);
     const updateFullSettings = useSettingsStore((state) => state.updateFullSettings);
     const enqueueFeedback = useFeedbackStore((state) => state.enqueue);
+    const { target, audition } = useAudition();
 
-    const [designerOpen, setDesignerOpen] = useState(false);
     const [pendingDelete, setPendingDelete] = useState<SoundPreset | null>(null);
-    const [pendingDesignerScroll, setPendingDesignerScroll] = useState(false);
-    const designerSectionRef = useRef<HTMLDivElement | null>(null);
-
-    const { target, audition, auditionDraft } = useAudition();
+    const [userAmps, setUserAmps] = useState<UserModelMeta[]>([]);
+    const [saving, setSaving] = useState(false);
+    const [nameError, setNameError] = useState(false);
+    const [nameTouched, setNameTouched] = useState(false);
+    const [editor, setEditor] = useState<StudioEditor>(() => {
+        const savedId = useSettingsStore.getState().full.audio.soundPreset;
+        const preset = getPresetById(savedId) ?? getPresetById(DEFAULT_PRESET_ID)!;
+        return editorFromPreset(preset, "");
+    });
+    const [syncedPresetId, setSyncedPresetId] = useState(() => {
+        const savedId = useSettingsStore.getState().full.audio.soundPreset;
+        return getPresetById(savedId)?.id ?? "";
+    });
 
     useEffect(() => {
         void loadCustomPresets();
+        void listUserModels().then(setUserAmps).catch(() => setUserAmps([]));
     }, [loadCustomPresets]);
 
-    // Once the custom list is hydrated, warm the engine up (idempotent, no
-    // playback — context creation is gesture-free and stays suspended until a
-    // real gesture elsewhere). The engine then reports a real status for the
-    // restored preset, which makes the active card's "Ready" line
-    // deterministic on every path: initial restore, explicit select and the
-    // post-delete fallback all converge on "engine ready for the active
-    // preset". Gating on `isLoaded` (not on the load promise) keeps this
-    // correct under StrictMode's double-invoked effects.
     const isCustomsLoaded = useSoundStore((state) => state.isLoaded);
     useEffect(() => {
-        if (isCustomsLoaded) {
-            initSoundEngine();
-        }
+        if (isCustomsLoaded) initSoundEngine();
     }, [isCustomsLoaded]);
-
-    // While the custom list is empty the collapsed designer accordion would
-    // duplicate the empty-state CTA — the CTA is the single entry point: it
-    // reveals the accordion and scrolls it into view.
-    const handleOpenDesigner = useCallback(() => {
-        setDesignerOpen(true);
-        setPendingDesignerScroll(true);
-    }, []);
-
-    useEffect(() => {
-        if (!pendingDesignerScroll) {
-            return;
-        }
-        // One frame so the accordion (mounted only while open) is in the DOM;
-        // existence-checked because jsdom does not implement scrollIntoView.
-        const frame = requestAnimationFrame(() => {
-            setPendingDesignerScroll(false);
-            const node = designerSectionRef.current;
-            if (node && typeof node.scrollIntoView === "function") {
-                node.scrollIntoView({ behavior: "smooth", block: "start" });
-            }
-        });
-        return () => cancelAnimationFrame(frame);
-    }, [pendingDesignerScroll]);
 
     const allPresets = useMemo(
         () => [...BUILT_IN_PRESETS, ...customPresets],
@@ -102,17 +114,51 @@ export default function Sound() {
         [allPresets, audioSettings.soundPreset],
     );
 
+    // Customs arrive after the first paint. Adopt that rig while the editor is
+    // still clean. Doing it here, not in an effect, keeps the chain in step
+    // with the saved preset without a second render cycle from the effect.
+    if (activePreset && !editor.dirty && syncedPresetId !== activePreset.id) {
+        setSyncedPresetId(activePreset.id);
+        setNameTouched(false);
+        setEditor(editorFromPreset(activePreset, getPresetName(activePreset, t)));
+    }
+
+    const followsActive = Boolean(
+        activePreset && editor.sourceId === (activePreset.kind === "custom" ? activePreset.id : null),
+    );
+    const shown: StudioEditor = !nameTouched && editor.name === "" && !editor.dirty && followsActive && activePreset
+        ? { ...editor, name: getPresetName(activePreset, t) }
+        : editor;
+
+    useEffect(() => {
+        if (!editor.dirty) return;
+        const handle = window.setTimeout(() => {
+            void soundEngine.setPreset(toEnginePreset(draftFromEditor(editor)), { force: true });
+        }, 120);
+        return () => window.clearTimeout(handle);
+    }, [editor]);
+
     const handleSelect = useCallback((preset: SoundPreset) => {
         initSoundEngine();
+        setNameError(false);
+        setNameTouched(false);
+        setSyncedPresetId(preset.id);
+        setEditor(editorFromPreset(preset, getPresetName(preset, t)));
         void selectSoundPreset(preset);
-    }, []);
+    }, [t]);
 
-    const handleAudition = useCallback(
-        (preset: SoundPreset) => {
-            void audition(preset);
-        },
-        [audition],
-    );
+    const handleNewRig = () => {
+        const blank = emptyStudio();
+        setNameError(false);
+        setNameTouched(true);
+        setEditor({
+            sourceId: null,
+            name: "",
+            blocks: blank.blocks,
+            globals: blank.globals,
+            dirty: true,
+        });
+    };
 
     const handleVolumeChange = (percent: number) => {
         if (typeof percent !== "number") return;
@@ -121,134 +167,156 @@ export default function Sound() {
         });
     };
 
+    const handleSave = async () => {
+        const name = shown.name.trim();
+        if (!name) {
+            setNameError(true);
+            return;
+        }
+        setSaving(true);
+        const saved = await saveCustomPreset({
+            id: editor.sourceId ?? undefined,
+            name,
+            amp: "classic",
+            params: neutralChainParams(),
+            chain: editor.blocks,
+            globals: editor.globals,
+            assembly: "blocks",
+        });
+        setSaving(false);
+        if (!saved) {
+            enqueueFeedback(t("sound.studio.saveFailed"), "error");
+            return;
+        }
+        setNameTouched(false);
+        setSyncedPresetId(saved.id);
+        setEditor(editorFromPreset(saved, name));
+        await selectSoundPreset(saved);
+        enqueueFeedback(t("sound.studio.saved", { name }), "success");
+    };
+
+    const handleAudition = async () => {
+        initSoundEngine();
+        // A saved custom rig, or any edited chain, must be rebuilt before the
+        // phrase. Reusing a pooled NAM node used to leave the live chain silent
+        // until the rig was selected again.
+        const hearsChain = editor.dirty || activePreset?.kind === "custom" || activePreset?.assembly === "blocks";
+        if (hearsChain) {
+            await soundEngine.setPreset(toEnginePreset(draftFromEditor(shown)), { force: true });
+            await playAuditionPhrase();
+            return;
+        }
+        if (activePreset) await audition(activePreset);
+    };
+
     const handleConfirmDelete = async () => {
         const deleted = pendingDelete;
         if (!deleted) return;
         setPendingDelete(null);
         await deleteCustomPreset(deleted.id);
-        // If the deleted preset was active, fall back to the default sound
-        // (persisted + engine) instead of leaving a dangling selection.
         if (useSettingsStore.getState().full.audio.soundPreset === deleted.id) {
             const fallback = getPresetById(DEFAULT_PRESET_ID);
-            if (fallback) {
-                await selectSoundPreset(fallback);
-            }
+            if (fallback) await selectSoundPreset(fallback);
         }
-        enqueueFeedback(
-            t("sound.custom.feedback.deleted", { name: getPresetName(deleted, t) }),
-            "success",
-        );
+        if (editor.sourceId === deleted.id) {
+            const fallback = getPresetById(DEFAULT_PRESET_ID)!;
+            setNameTouched(false);
+            setSyncedPresetId(fallback.id);
+            setEditor(editorFromPreset(fallback, getPresetName(fallback, t)));
+        }
+        enqueueFeedback(t("sound.custom.feedback.deleted", { name: getPresetName(deleted, t) }), "success");
     };
 
-    const activeName = activePreset
-        ? getPresetName(activePreset, t)
-        : t("sound.activeFallback");
+    const activeName = activePreset ? getPresetName(activePreset, t) : t("sound.activeFallback");
 
     return (
-        <div className="space-y-6 pb-8">
+        <div className="min-w-0 space-y-5 overflow-x-hidden pb-8">
             <header className="space-y-1">
                 <h1 className="type-display">{t("sound.title")}</h1>
                 <p className="type-body text-muted-foreground">{t("sound.subtitle")}</p>
                 <p className="flex items-center gap-2 text-sm text-muted-foreground">
                     <AudioWaveform className="h-4 w-4 text-primary" />
                     <span>{t("sound.activeSummary", { name: activeName })}</span>
-                    {engine.status === "loading" && (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
-                    )}
+                    {engine.status === "loading" && <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />}
+                    {engine.status === "error" && <span className="text-destructive">{t("sound.status.error")}</span>}
                 </p>
+                {editor.dirty && <p className="text-xs text-muted-foreground">{t("sound.studio.unsaved")}</p>}
             </header>
 
+            <StudioBoard
+                editor={shown}
+                builtInPresets={BUILT_IN_PRESETS}
+                customPresets={customPresets}
+                activePresetId={audioSettings.soundPreset}
+                userAmps={userAmps}
+                onUserAmpsChange={setUserAmps}
+                onSelectPreset={handleSelect}
+                onDeletePreset={setPendingDelete}
+                onNewRig={handleNewRig}
+                onChange={(next) => {
+                    setNameError(false);
+                    setEditor(next);
+                }}
+            />
+
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+                <Card>
+                    <CardContent className="space-y-3 pt-6">
+                        <div className="flex flex-wrap items-end gap-3">
+                            <div className="min-w-[12rem] flex-1 space-y-1">
+                                <Label htmlFor="studio-name">{t("sound.studio.nameLabel")}</Label>
+                                <Input
+                                    id="studio-name"
+                                    value={shown.name}
+                                    placeholder={t("sound.studio.namePlaceholder")}
+                                    onChange={(event) => {
+                                        setNameTouched(true);
+                                        setNameError(false);
+                                        setEditor((current) => ({ ...current, name: event.target.value }));
+                                    }}
+                                />
+                                {nameError && <p className="text-xs text-destructive">{t("sound.designer.nameRequired")}</p>}
+                            </div>
+                            <Button type="button" variant="outline" onClick={() => void handleAudition()}>
+                                {target ? t("sound.actions.auditioning") : t("sound.studio.audition")}
+                            </Button>
+                            <Button type="button" onClick={() => void handleSave()} disabled={saving}>
+                                {saving ? t("sound.studio.saving") : t("sound.studio.save")}
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardContent className="space-y-4 pt-6">
+                        <div className="flex items-baseline justify-between gap-2">
+                            <Label htmlFor="sound-volume">{t("sound.volume.label")}</Label>
+                            <span className="text-sm tabular-nums text-muted-foreground">
+                                {formatPercentValue(audioSettings.volume, t)}
+                            </span>
+                        </div>
+                        <SoundSlider
+                            id="sound-volume"
+                            label={t("sound.volume.label")}
+                            valueText={formatPercentValue(audioSettings.volume, t)}
+                            value={Math.round(audioSettings.volume * 100)}
+                            min={0}
+                            max={100}
+                            step={1}
+                            onValueChange={handleVolumeChange}
+                        />
+                        <p className="text-xs text-muted-foreground">{t("sound.volume.hint")}</p>
+                    </CardContent>
+                </Card>
+            </div>
+
             <Card>
-                <CardContent className="space-y-4 pt-6">
-                    <div className="flex items-baseline justify-between gap-2">
-                        <Label htmlFor="sound-volume">{t("sound.volume.label")}</Label>
-                        <span className="text-sm tabular-nums text-muted-foreground">
-                            {formatPercentValue(audioSettings.volume, t)}
-                        </span>
-                    </div>
-                    <SoundSlider
-                        id="sound-volume"
-                        label={t("sound.volume.label")}
-                        valueText={formatPercentValue(audioSettings.volume, t)}
-                        value={Math.round(audioSettings.volume * 100)}
-                        min={0}
-                        max={100}
-                        step={1}
-                        onValueChange={handleVolumeChange}
-                    />
-                    <p className="text-xs text-muted-foreground">{t("sound.volume.hint")}</p>
+                <CardContent className="pt-6">
+                    <LiveInputPanel embedded />
                 </CardContent>
             </Card>
 
-            <section aria-label={t("sound.title")} className="space-y-3">
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                    {allPresets.map((preset) => (
-                        <PresetCard
-                            key={preset.id}
-                            preset={preset}
-                            active={preset.id === audioSettings.soundPreset}
-                            engineStatus={
-                                engine.presetId === preset.id ? engine.status : null
-                            }
-                            auditioning={target?.kind === "preset" && target.id === preset.id}
-                            onSelect={() => handleSelect(preset)}
-                            onAudition={() => handleAudition(preset)}
-                            onDelete={
-                                preset.kind === "custom"
-                                    ? () => setPendingDelete(preset)
-                                    : undefined
-                            }
-                        />
-                    ))}
-                </div>
-                {isCustomsLoaded && customPresets.length === 0 && (
-                    <EmptyState
-                        icon={AudioWaveform}
-                        title={t("sound.custom.emptyTitle")}
-                        description={t("sound.custom.emptyDescription")}
-                        ctaLabel={t("sound.designer.title")}
-                        onCtaClick={handleOpenDesigner}
-                    />
-                )}
-            </section>
-
-            {/* Single entry point while the custom list is empty: the collapsed
-                accordion would duplicate the empty-state CTA above, so it only
-                renders once revealed (open) or once a custom preset exists. The
-                neutral graphite hover keeps the trigger from reading as a state
-                indicator (the ghost variant's accent tint is olive/gold). */}
-            {(designerOpen || !(isCustomsLoaded && customPresets.length === 0)) && (
-                <div ref={designerSectionRef} className="scroll-mt-4">
-                    <SectionCollapse
-                        title={t("sound.designer.title")}
-                        summary={t("sound.designer.summary")}
-                        open={designerOpen}
-                        onOpenChange={setDesignerOpen}
-                        className="[&>button:hover]:bg-muted/50"
-                    >
-                        <ToneDesigner
-                            open={designerOpen}
-                            onOpenChange={setDesignerOpen}
-                            basePreset={activePreset}
-                            onAuditionDraft={auditionDraft}
-                            auditioningDraft={target?.kind === "draft"}
-                        />
-                    </SectionCollapse>
-                </div>
-            )}
-
-            {/* Live input: mic monitoring through the active chain (see
-                docs/sound-feature.md). Own collapse state; rendered after the
-                tone designer so the preset/designer flow stays on top. */}
-            <LiveInputPanel />
-
             <div className="flex justify-center">
-                <Button
-                    variant="link"
-                    size="sm"
-                    className="h-auto text-muted-foreground"
-                    onClick={() => navigate("/me?section=settings")}
-                >
+                <Button variant="link" size="sm" className="h-auto text-muted-foreground" onClick={() => navigate("/me?section=settings")}>
                     {t("sound.moreSettings")}
                     <ExternalLink className="ml-1.5 h-3.5 w-3.5" />
                 </Button>

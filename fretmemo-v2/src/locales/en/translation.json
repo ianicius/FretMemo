@@ -398,7 +398,7 @@
         "practice": "Train",
         "challenges": "Challenges",
         "progress": "Me",
-        "sound": "Sound",
+        "sound": "Sound Studio",
         "improv": "Learn",
         "help": "Help",
         "settings": "Settings"
@@ -536,8 +536,8 @@
         }
     },
     "sound": {
-        "title": "Sound",
-        "subtitle": "Pick the guitar sound used across all exercises.",
+        "title": "Sound Studio",
+        "subtitle": "Build a rig on the chain and use it for every exercise.",
         "activeSummary": "Active sound: {{name}}",
         "activeFallback": "Unknown sound",
         "moreSettings": "More audio settings",
@@ -566,7 +566,7 @@
         },
         "custom": {
             "emptyTitle": "No custom tones yet",
-            "emptyDescription": "Open the tone designer, dial in the parameters and save your first preset.",
+            "emptyDescription": "Open the sound studio, dial in amp and effects, then save your first preset.",
             "deleteConfirmTitle": "Delete this tone?",
             "deleteConfirmDescription": "\"{{name}}\" will be permanently deleted.",
             "deleteConfirmConfirm": "Delete",
@@ -576,9 +576,9 @@
             }
         },
         "designer": {
-            "title": "Tone designer",
-            "summary": "Amp, EQ, effects",
-            "description": "Build your own tone: pick an amp, dial in the chain parameters and check them with the test phrase. Saved presets appear in the list next to the built-ins.",
+            "title": "Sound studio",
+            "summary": "Amp, cabinet, effects",
+            "description": "Build your own rig like a pedalboard: amp, cabinet, EQ and effects. Changes are audible right away (also from a mic or interface in the Live input section). Saved presets appear next to the built-ins.",
             "amp": "Amp",
             "amps": {
                 "classic": "Classic (synthesis)",
@@ -596,15 +596,25 @@
                 "bass": "Bass",
                 "mid": "Mids",
                 "treble": "Treble",
-                "comp": "Compressor",
-                "delayMix": "Delay",
-                "reverbMix": "Reverb",
-                "outputGain": "Output gain"
+                "comp": "Amount",
+                "delayMix": "Level",
+                "reverbMix": "Level",
+                "outputGain": "Output gain",
+                "chorusMix": "Level",
+                "tremoloDepth": "Depth",
+                "tremoloRate": "Rate",
+                "wahResponse": "Response",
+                "delayTime": "Time",
+                "delayFeedback": "Repeats",
+                "reverbDecay": "Decay"
             },
             "units": {
                 "db": "dB",
                 "percent": "%",
-                "x": "x"
+                "x": "x",
+                "hz": "Hz",
+                "ms": "ms",
+                "s": "s"
             },
             "audition": "Play phrase",
             "auditioning": "Playing…",
@@ -632,7 +642,29 @@
                     "too-large": "File exceeds the 15 MB limit.",
                     "storage-error": "Could not store the model locally."
                 }
-            }
+            },
+            "groups": {
+                "preamp": "Preamp",
+                "cab": "Cabinet",
+                "eq": "EQ",
+                "comp": "Compressor",
+                "chorus": "Chorus",
+                "tremolo": "Tremolo",
+                "delay": "Delay",
+                "reverb": "Reverb",
+                "output": "Output"
+            },
+            "cab": {
+                "label": "Impulse response (IR)",
+                "auto": "Default",
+                "none": "None (amp only)",
+                "hint": "\"None\" is for playing through a real speaker cabinet."
+            },
+            "reverb": {
+                "label": "Reverb type",
+                "room": "Room (synthetic)"
+            },
+            "browseTone3000": "Find models on TONE3000"
         },
         "live": {
             "title": "Live input",
@@ -701,6 +733,93 @@
             "namVintageAmpeg": {
                 "name": "Ampeg V-2",
                 "description": "Warm vintage tube-amp character with a light crunch."
+            }
+        },
+        "studio": {
+            "chainLabel": "Signal chain",
+            "toneSlot": "EQ",
+            "addEffect": "Add effect",
+            "pickerTitle": "Choose an effect",
+            "appSound": "The highlighted rig is the guitar sound in every exercise. Pick one in this list to change it.",
+            "unsaved": "Play phrase uses this chain. Save the rig so exercises keep these edits.",
+            "empty": "Empty chain — the guitar stays dry, then the tone stack.",
+            "presets": "Presets",
+            "builtIn": "Built-in",
+            "yourRigs": "Your rigs",
+            "noRigs": "No saved rigs yet.",
+            "newRig": "New rig",
+            "inspector": "Block controls",
+            "bypass": "Bypass",
+            "enable": "Enable",
+            "moveLeft": "Move left",
+            "moveRight": "Move right",
+            "remove": "Remove block",
+            "input": "Input",
+            "gate": "Gate",
+            "gateThreshold": "Threshold",
+            "bass": "Bass",
+            "middle": "Middle",
+            "treble": "Treble",
+            "output": "Output",
+            "cabFilter": "Speaker curve",
+            "yourModelsEmpty": "A .nam file stays on this device and shows up as a card.",
+            "insertHere": "The next effect lands on the highlighted +.",
+            "groups": {
+                "classic": "Classic",
+                "clean": "Clean",
+                "crunch": "Crunch",
+                "lead": "Lead",
+                "bass": "Bass",
+                "yours": "Your models",
+                "speaker": "Speaker",
+                "cabinets": "Cabinets",
+                "reverb": "Reverb",
+                "character": "Character"
+            },
+            "drives": {
+                "soft": "Smooth",
+                "screamer": "Screamer",
+                "transparent": "Transparent",
+                "hard": "Hard clip",
+                "fuzz": "Fuzz",
+                "note": "These are FretMemo circuits, not a capture of a specific pedal."
+            },
+            "wah": {
+                "note": "Opens with each note. FretMemo circuit."
+            },
+            "eq": {
+                "low": "Low",
+                "mid": "Mid",
+                "high": "High",
+                "note": "Sits where you place it in the chain."
+            },
+            "palette": {
+                "ampCab": "Amp and cabinet",
+                "gain": "Gain",
+                "tone": "Tone",
+                "modulation": "Modulation",
+                "time": "Time"
+            },
+            "audition": "Play phrase",
+            "save": "Save rig",
+            "saving": "Saving…",
+            "saveFailed": "Could not save the rig.",
+            "saved": "Saved rig \"{{name}}\".",
+            "nameLabel": "Rig name",
+            "namePlaceholder": "e.g. Room clean",
+            "blocks": {
+                "amp": "Amp",
+                "cab": "Cabinet",
+                "drive": "Drive",
+                "comp": "Compressor",
+                "eq": "EQ",
+                "chorus": "Chorus",
+                "tremolo": "Tremolo",
+                "phaser": "Phaser",
+                "flanger": "Flanger",
+                "wah": "Wah",
+                "delay": "Delay",
+                "reverb": "Reverb"
             }
         }
     },
@@ -1831,7 +1950,8 @@
             "backingLoop": "Backing loop",
             "practiceLink": "Fretboard practice",
             "bendDrill": "Bends with the microphone",
-            "voicingDrill": "Voicings on a string set"
+            "voicingDrill": "Voicings on a string set",
+            "echoDrill": "Play what you hear"
         },
         "quiz": {
             "circleTapKey": "Tap the key on the circle.",
@@ -2279,6 +2399,31 @@
                 "voiceMove": "{{first}} to {{second}} by the shortest way: where does {{source}} go?",
                 "hintNotes": "{{first}}: {{notes}}. {{second}}: {{list}}.",
                 "hintMoves": "The voices {{notes}} go to {{list}} in turn: the common note stays, the others move by the smallest interval."
+            },
+            "earDegree": {
+                "promptMajor": "A cadence in {{key}} major, then one note. Which degree is it?",
+                "promptMinor": "A cadence in {{key}} minor, then one note. Which degree is it?",
+                "hint": "It was {{note}}, degree {{degree}}."
+            },
+            "earInterval": {
+                "promptUp": "Two notes, the second higher. Which interval is it?",
+                "promptDown": "Two notes, the second lower. Which interval is it?",
+                "promptHarmonic": "Two notes at once. Which interval is it?",
+                "hint": "From {{first}} to {{second}}."
+            },
+            "earChord": {
+                "promptQuality": "Listen to the chord. Which quality is it?",
+                "promptBass": "Listen to the chord. What is in the bass?",
+                "hint": "It was {{chord}}.",
+                "hintBass": "It was {{chord}}, with {{root}} in the bass.",
+                "bassRoot": "Root in the bass",
+                "bassThird": "Third in the bass",
+                "bassFifth": "Fifth in the bass"
+            },
+            "earProgression": {
+                "promptFunction": "A cadence in {{key}} major, then a chord. Which function is it?",
+                "promptProgression": "A cadence in {{key}} major, then four chords. Which progression is it?",
+                "hint": "In {{key}} major: {{chord}}."
             }
         },
         "modules": {
@@ -2581,6 +2726,66 @@
                 "name": "Comping standards",
                 "term": "Comping Standards",
                 "theory": "Finally everything together: real standard progressions, drop 2 voicings by the shortest way and a swing feel. Autumn Leaves is a chain of ii–V–Is in major and minor, Rhythm changes moves a chord every two beats, and All the Things You Are travels between distant keys. Pick one progression, slow it down and play until you stop thinking about the shapes."
+            },
+            "ear-tonic": {
+                "name": "Tonic, third and fifth",
+                "term": "Tonic, Third and Fifth",
+                "theory": "Functional ear training starts from the key, not from single notes. A I–IV–V–I cadence sets the tonic in your head, and every note after it sounds like one of its degrees: the tonic like coming home, the third bright and calm, the fifth open, as if something else were coming. You start with just these three degrees, because they form the tonic chord. When unsure, sing in your head from the note you heard down to the tonic; the number of steps gives the degree. The key changes with every question, so you learn relationships, not pitches."
+            },
+            "ear-degrees": {
+                "name": "All major degrees",
+                "term": "Major Scale Degrees",
+                "theory": "The other degrees tell you where they want to go. The seventh pulls a half step up to the tonic, the fourth down to the third, the second to the tonic or the third, the sixth to the fifth. That pull is the surest clue: after hearing a note, feel where it would like to resolve. The Benbassat and Arnold method is simple: a cadence, one note, an answer, hundreds of times, in ever-changing keys."
+            },
+            "ear-minor": {
+                "name": "Minor degrees",
+                "term": "Minor Scale Degrees",
+                "theory": "Minor has the same tonic and fifth, but the third, sixth and seventh sit a half step lower (b3, b6, b7). An i–iv–V–i cadence with a major dominant tells you at once that you are in minor. The b3 sounds darker than the major third, the b6 pulls down to the fifth, and the b7 no longer leads so strongly to the tonic. The answers name the degrees against major, the way jazz and rock players describe them."
+            },
+            "ear-intervals-up": {
+                "name": "Ascending intervals: the easy ones",
+                "term": "Ascending Intervals",
+                "theory": "An interval is the distance between two notes, with no key. Start with the five most distinct: minor and major third, fourth, fifth and octave. A minor third sounds sad, a major third bright, a fourth like a call, a fifth empty and strong, an octave like the same note higher. Openings of well-known tunes help too, but the character of the interval is more reliable. On the fretboard these are the commonest shapes: a fourth is the same fret on the next higher string (except the G–B pair)."
+            },
+            "ear-intervals-all": {
+                "name": "All intervals, up and down",
+                "term": "All Intervals",
+                "theory": "Now the full set from the minor second to the octave, also descending. Seconds sound like a scale step, the major sixth like a wide, bright leap, the minor seventh like a dominant chord without its middle, the tritone unstable. Descending intervals are harder, because the ear wants to hear the last note as the tonic; singing both notes from the bottom up helps. The extra exercise ties this to the fretboard: hear two notes and play them."
+            },
+            "ear-intervals-harmonic": {
+                "name": "Intervals played together",
+                "term": "Harmonic Intervals",
+                "theory": "When two notes sound at once, there is no direction, only the colour of the sound. Thirds and sixths sound soft and full, fourths, fifths and octaves empty, and seconds, sevenths and the tritone rough. This is the basis of double stops and of the guide tones in seventh chords. If you cannot name an interval, pick out the lower note in your head, then the upper one, and turn it into a melodic interval."
+            },
+            "ear-triads": {
+                "name": "Major, minor, diminished, augmented",
+                "term": "Triad Qualities",
+                "theory": "The four triad qualities differ in their third and fifth. Major sounds bright and stable, minor darker, diminished tense and tight (two minor thirds), augmented uncertain and blurred (two major thirds). The quiz plays real guitar voicings on different strings and in different inversions, so you listen for the quality, not for one shape. After the strum, the chord is also played note by note."
+            },
+            "ear-sevenths": {
+                "name": "Seventh chords",
+                "term": "Seventh Chord Qualities",
+                "theory": "maj7 sounds soft and dreamy, because the major seventh sits a half step below the octave. 7 (dominant) has a tritone between its third and seventh and wants to resolve. m7 sounds mellow and warm, m7b5 dark and restless. The quiz plays the drop 2 voicings of the Seventh chords track."
+            },
+            "ear-inversions": {
+                "name": "What is in the bass",
+                "term": "Hearing Inversions",
+                "theory": "The same chord sounds different depending on its lowest note. The root in the bass gives the fullest, most stable sound. The third in the bass is lighter and seems to move, which is why it shows up in passing bass lines. The fifth in the bass sounds suspended and usually leads on. Listen to the lowest note on its own: sing it in your head and check whether it is the chord's root."
+            },
+            "ear-functions": {
+                "name": "Chord function",
+                "term": "Chord Function",
+                "theory": "After a cadence, every chord of the key has its role. I is home, IV moves away with a bright sound, V comes back with tension, vi is the tonic's minor relative, ii is the minor chord before V, and iii, the rarest, sounds soft and minor. Listen to the bass, which points to the degree, while the chord quality (major or minor) narrows the choice. Upper case marks major chords, lower case minor ones."
+            },
+            "ear-progressions": {
+                "name": "Four-chord progressions",
+                "term": "Chord Progressions",
+                "theory": "Most songs use a handful of the same progressions: I–V–vi–IV, I–vi–IV–V, I–IV–V–I, ii–V–I. Follow the bass line chord by chord and name the degrees in your head. It helps to catch the minor chords (ii, iii, vi) and the spot where the tonic returns. This is the skill that lets you play a song by ear without looking up the chords."
+            },
+            "ear-echo": {
+                "name": "Play what you hear",
+                "term": "Playing by Ear",
+                "theory": "The last step ties your ear to the fretboard. The app plays a cadence and a short phrase, and you play it back on the guitar in any octave; the microphone checks it note by note. Find the tonic on the fretboard first, then think in degrees. Phrases start with three notes within the first five degrees, then four notes from the whole scale. Sing the phrase before you play it: what you can sing, you will easily find on the fretboard. Play with headphones if you can, so the microphone does not hear the speaker."
             }
         },
         "ex": {
@@ -2610,7 +2815,7 @@
             },
             "standards.e1": {
                 "name": "Loop: progressions from standards",
-                "desc": "Five progressions from the real repertoire. Pick one, slow the tempo down and play what the modules taught you. This section blocks nothing."
+                "desc": "Progressions from the real repertoire. Pick one, slow the tempo down and play what the modules taught you. This section blocks nothing."
             },
             "e-string-notes.e1": {
                 "name": "Practice: position → note (E string)",
@@ -3323,6 +3528,78 @@
             "comping-standards.e1": {
                 "name": "Loop: three standards",
                 "desc": "Autumn Leaves, Rhythm changes and All the Things You Are with drop 2 voicings. The microphone checks the top voice."
+            },
+            "ear-tonic.e1": {
+                "name": "Quiz: tonic, third or fifth",
+                "desc": "A cadence in a random key, then one note. Which degree is it?"
+            },
+            "ear-tonic.e2": {
+                "name": "Play a note by ear",
+                "desc": "After the cadence you hear the tonic, the third or the fifth. Find it on the fretboard and play it."
+            },
+            "ear-degrees.e1": {
+                "name": "Quiz: major degrees",
+                "desc": "A cadence, then one of the seven degrees of the major scale."
+            },
+            "ear-degrees.e2": {
+                "name": "Play a degree by ear",
+                "desc": "One note from the whole major scale: find it and play it."
+            },
+            "ear-minor.e1": {
+                "name": "Quiz: minor degrees",
+                "desc": "A minor cadence, then one degree of the minor scale."
+            },
+            "ear-minor.e2": {
+                "name": "Play a minor degree",
+                "desc": "One note from the minor scale: find it and play it."
+            },
+            "ear-intervals-up.e1": {
+                "name": "Quiz: easy ascending intervals",
+                "desc": "Thirds, the fourth, the fifth and the octave, from the lower note."
+            },
+            "ear-intervals-all.e1": {
+                "name": "Quiz: all intervals",
+                "desc": "From the minor second to the octave, up and down."
+            },
+            "ear-intervals-all.e2": {
+                "name": "Play two notes by ear",
+                "desc": "After the cadence you hear two notes: play them in the same order."
+            },
+            "ear-intervals-harmonic.e1": {
+                "name": "Quiz: intervals played together",
+                "desc": "Two notes at once. Which interval is it?"
+            },
+            "ear-triads.e1": {
+                "name": "Quiz: triad quality",
+                "desc": "Major, minor, diminished or augmented, in voicings on different strings."
+            },
+            "ear-sevenths.e1": {
+                "name": "Quiz: seventh chord quality",
+                "desc": "maj7, 7, m7 or m7b5, in drop 2 voicings."
+            },
+            "ear-inversions.e1": {
+                "name": "Quiz: what is in the bass",
+                "desc": "A major or minor triad: root, third or fifth in the bass?"
+            },
+            "ear-functions.e1": {
+                "name": "Quiz: chord function",
+                "desc": "A cadence, then one chord of the key: I, ii, iii, IV, V or vi?"
+            },
+            "ear-progressions.e1": {
+                "name": "Quiz: progression",
+                "desc": "A cadence, then four chords. Which progression is it?"
+            },
+            "ear-echo.e1": {
+                "name": "Three-note phrases",
+                "desc": "Degrees 1–5 in major, mostly stepwise. Play each phrase after you hear it."
+            },
+            "ear-echo.e2": {
+                "name": "Four-note phrases",
+                "desc": "The whole major scale, mostly stepwise, sometimes a leap."
+            },
+            "ear-echo.e3": {
+                "name": "Minor phrases",
+                "desc": "Three notes from the minor scale."
             }
         },
         "practiceLink": {
@@ -3338,7 +3615,10 @@
             "caged": "Open the CAGED system",
             "rhythm": "Open the rhythm trainer",
             "earTraining": "Open ear training",
-            "chordQuality": "Open chord-quality trainer"
+            "chordQuality": "Open chord-quality trainer",
+            "functionalEar": "Open the functional ear trainer",
+            "intervalTrainer": "Open the interval trainer",
+            "triadsTrack": "Open the Triads track"
         },
         "hints": {
             "lickPent3Descent": "Lick: down through the box",
@@ -3636,6 +3916,19 @@
                     "drop2": "Drop 2 (6–8)",
                     "comping": "Comping (9–12)"
                 }
+            },
+            "ear": {
+                "tab": "Ear",
+                "title": "Ear training for guitarists",
+                "description": "Ear training in 12 modules: scale degrees after a cadence, intervals, chord qualities and inversions, chord functions and progressions, then playing by ear.",
+                "promise": "Recognise degrees, intervals and chords, then play back by ear what you hear.",
+                "duration": "About 2–3 months at 15 minutes a day",
+                "stages": {
+                    "degrees": "Key and degrees (1–3)",
+                    "intervals": "Intervals (4–6)",
+                    "chords": "Chords (7–9)",
+                    "music": "Music (10–12)"
+                }
             }
         },
         "bend": {
@@ -3676,6 +3969,21 @@
             "runs": "Runs: {{done}}/{{required}}",
             "runButton": "Run done",
             "runNeedsMetronome": "First go through every voicing with the metronome ({{steps}})."
+        },
+        "echo": {
+            "threshold": "To pass: {{required}} phrases",
+            "promptMajor": "Key of {{key}} major. Listen to the cadence and the notes after it, then play them on the guitar in any octave.",
+            "promptMinor": "Key of {{key}} minor. Listen to the cadence and the notes after it, then play them on the guitar in any octave.",
+            "progress": "Notes played: {{done}}/{{total}}",
+            "done": "Well done! Phrase passed.",
+            "listen": "Listen…",
+            "micOffHint": "Turn on the microphone so the app can check what you play. Without it, mark the phrase yourself.",
+            "waiting": "Play the phrase. A wrong note starts the attempt over.",
+            "degrees": "Degrees: {{degrees}}",
+            "next": "Next phrase",
+            "reveal": "Show the notes",
+            "selfMark": "Played it (no mic)",
+            "count": "Phrases: {{done}}/{{required}}"
         }
     },
     "learn": {

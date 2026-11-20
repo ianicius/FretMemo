@@ -1,5 +1,6 @@
 /**
- * Visual tone designer: amp selector + one slider per `ChainParams` field.
+ * Sound studio (tone designer): amp selector, cabinet/reverb IR pickers and
+ * one slider per `ChainParams` field, grouped as pedals in signal order.
  *
  * Live audition model:
  * - Opening the designer does NOT touch the engine. The first change marks the
@@ -13,8 +14,8 @@
  *   (settings + engine) and closes without restoring.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Loader2, Play, Save, Trash2, Upload } from "lucide-react";
-import { DEFAULT_PRESET_ID, getPresetById, neutralChainParams, CHAIN_PARAM_RANGES, type ChainParams, type SoundPreset } from "@/audio/presets";
+import { ExternalLink, Loader2, Play, Save, Trash2, Upload } from "lucide-react";
+import { CAB_NONE, DEFAULT_PRESET_ID, getPresetById, IMPULSE_RESPONSES, neutralChainParams, CHAIN_PARAM_RANGES, type ChainParams, type SoundPreset } from "@/audio/presets";
 import type { SoundEngineStatus } from "@/audio/engine";
 import { soundEngine } from "@/audio/engine";
 import { Button } from "@/components/ui/button";
@@ -36,7 +37,7 @@ import { useTranslation } from "react-i18next";
 import { selectSoundPreset } from "./useAudition";
 import { SoundSlider } from "./SoundSlider";
 import {
-    CHAIN_PARAM_ORDER,
+    CHAIN_PARAM_GROUPS,
     CHAIN_PARAM_STEPS,
     ampLabelKey,
     chainParamLabelKey,
@@ -55,6 +56,8 @@ interface ToneDesignerProps {
 }
 
 const DRAFT_ID_PREFIX = "custom-draft-";
+const CAB_IRS = Object.entries(IMPULSE_RESPONSES).filter(([, ir]) => ir.kind === "cab");
+const REVERB_IRS = Object.entries(IMPULSE_RESPONSES).filter(([, ir]) => ir.kind === "reverb");
 const APPLY_DEBOUNCE_MS = 180;
 
 export function ToneDesigner({
@@ -71,6 +74,9 @@ export function ToneDesigner({
 
     const [amp, setAmp] = useState("classic");
     const [params, setParams] = useState<ChainParams>(() => basePreset?.params ?? neutralChainParams());
+    /** "" = default cabinet handling / synthetic room reverb. */
+    const [cab, setCab] = useState("");
+    const [reverb, setReverb] = useState("");
     const [name, setName] = useState("");
     const [nameError, setNameError] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -100,7 +106,7 @@ export function ToneDesigner({
 
     /** Apply the current draft to the engine (transient preset, unique id per apply). */
     const applyDraft = useCallback(() => {
-        const signature = JSON.stringify({ amp, params });
+        const signature = JSON.stringify({ amp, params, cab, reverb });
         if (signature === lastAppliedSignatureRef.current) {
             return Promise.resolve();
         }
@@ -111,11 +117,13 @@ export function ToneDesigner({
             kind: "custom" as const,
             amp,
             params,
+            ...(cab ? { cab } : {}),
+            ...(reverb ? { reverb } : {}),
             nameKey: name,
             builtIn: false,
         };
         return soundEngine.setPreset(toEnginePreset(draft));
-    }, [amp, params, name]);
+    }, [amp, params, cab, reverb, name]);
 
     const clearApplyTimer = useCallback(() => {
         if (applyTimerRef.current !== null) {
@@ -135,7 +143,7 @@ export function ToneDesigner({
             void applyDraft();
         }, APPLY_DEBOUNCE_MS);
         return clearApplyTimer;
-    }, [open, dirty, amp, params, applyDraft, clearApplyTimer]);
+    }, [open, dirty, amp, params, cab, reverb, applyDraft, clearApplyTimer]);
 
     // Open/close transitions: reset the draft on open, restore the base chain
     // on discard (close without save).
@@ -146,6 +154,8 @@ export function ToneDesigner({
             const base = basePresetRef.current;
             setAmp(base?.amp ?? "classic");
             setParams(base?.params ?? neutralChainParams());
+            setCab(base?.cab ?? "");
+            setReverb(base?.reverb ?? "");
             setName("");
             setNameError(false);
             setSaving(false);
@@ -252,7 +262,13 @@ export function ToneDesigner({
         }
         setSaving(true);
         try {
-            const saved = await saveCustomPreset({ name: trimmed, amp, params });
+            const saved = await saveCustomPreset({
+                name: trimmed,
+                amp,
+                params,
+                cab: cab || undefined,
+                reverb: reverb || undefined,
+            });
             if (!saved) {
                 enqueueFeedback(t("sound.designer.feedback.saveFailed"), "error");
                 return;
@@ -341,6 +357,15 @@ export function ToneDesigner({
                     </div>
                 )}
                 <p className="text-xs text-muted-foreground">{t("sound.designer.import.licenseNote")}</p>
+                <a
+                    href="https://www.tone3000.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs text-primary underline-offset-4 hover:underline"
+                >
+                    {t("sound.designer.browseTone3000")}
+                    <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                </a>
             </FormField>
 
             <ConfirmDialog
@@ -357,28 +382,76 @@ export function ToneDesigner({
                 onConfirm={() => void confirmDeleteUserAmp()}
             />
 
-            <div className="grid gap-x-8 gap-y-5 md:grid-cols-2">
-                {CHAIN_PARAM_ORDER.map((key) => {
-                    const range = CHAIN_PARAM_RANGES[key];
+            <div className="grid gap-4 md:grid-cols-2">
+                {CHAIN_PARAM_GROUPS.map((group) => {
+                    const groupLabel = t(`sound.designer.groups.${group.id}`);
+                    // IR reverbs carry their own tail: the decay slider only shapes the synthetic room.
+                    const keys = reverb ? group.keys.filter((key) => key !== "reverbDecay") : group.keys;
                     return (
-                        <div key={key} className="space-y-2">
-                            <div className="flex items-baseline justify-between gap-2">
-                                <Label htmlFor={`designer-param-${key}`}>{t(chainParamLabelKey(key))}</Label>
-                                <span className="type-mono text-xs tabular-nums text-muted-foreground">
-                                    {formatChainParamValue(key, params[key], t)}
-                                </span>
-                            </div>
-                            <SoundSlider
-                                id={`designer-param-${key}`}
-                                label={t(chainParamLabelKey(key))}
-                                valueText={formatChainParamValue(key, params[key], t)}
-                                value={params[key]}
-                                min={range.min}
-                                max={range.max}
-                                step={CHAIN_PARAM_STEPS[key]}
-                                onValueChange={(value) => handleParamChange(key, value)}
-                            />
-                        </div>
+                        <fieldset key={group.id} className="min-w-0 space-y-4 rounded-lg border border-border p-4">
+                            <legend className="px-1 text-sm font-medium">{groupLabel}</legend>
+                            {group.id === "cab" && (
+                                <FormField id="designer-cab" label={t("sound.designer.cab.label")} hint={t("sound.designer.cab.hint")}>
+                                    <Select
+                                        value={cab}
+                                        onChange={(event) => {
+                                            markDirty();
+                                            setCab(event.target.value);
+                                        }}
+                                    >
+                                        <option value="">{t("sound.designer.cab.auto")}</option>
+                                        <option value={CAB_NONE}>{t("sound.designer.cab.none")}</option>
+                                        {CAB_IRS.map(([id, ir]) => (
+                                            <option key={id} value={id}>
+                                                {ir.label}
+                                            </option>
+                                        ))}
+                                    </Select>
+                                </FormField>
+                            )}
+                            {group.id === "reverb" && (
+                                <FormField id="designer-reverb" label={t("sound.designer.reverb.label")}>
+                                    <Select
+                                        value={reverb}
+                                        onChange={(event) => {
+                                            markDirty();
+                                            setReverb(event.target.value);
+                                        }}
+                                    >
+                                        <option value="">{t("sound.designer.reverb.room")}</option>
+                                        {REVERB_IRS.map(([id, ir]) => (
+                                            <option key={id} value={id}>
+                                                {ir.label}
+                                            </option>
+                                        ))}
+                                    </Select>
+                                </FormField>
+                            )}
+                            {keys.map((key) => {
+                                const range = CHAIN_PARAM_RANGES[key];
+                                const ariaLabel = `${groupLabel}: ${t(chainParamLabelKey(key))}`;
+                                return (
+                                    <div key={key} className="space-y-2">
+                                        <div className="flex items-baseline justify-between gap-2">
+                                            <Label htmlFor={`designer-param-${key}`}>{t(chainParamLabelKey(key))}</Label>
+                                            <span className="type-mono text-xs tabular-nums text-muted-foreground">
+                                                {formatChainParamValue(key, params[key], t)}
+                                            </span>
+                                        </div>
+                                        <SoundSlider
+                                            id={`designer-param-${key}`}
+                                            label={ariaLabel}
+                                            valueText={formatChainParamValue(key, params[key], t)}
+                                            value={params[key]}
+                                            min={range.min}
+                                            max={range.max}
+                                            step={CHAIN_PARAM_STEPS[key]}
+                                            onValueChange={(value) => handleParamChange(key, value)}
+                                        />
+                                    </div>
+                                );
+                            })}
+                        </fieldset>
                     );
                 })}
             </div>

@@ -398,7 +398,7 @@
         "practice": "Trening",
         "challenges": "Wyzwania",
         "progress": "Postępy",
-        "sound": "Dźwięk",
+        "sound": "Sound Studio",
         "improv": "Nauka",
         "help": "Pomoc",
         "settings": "Ustawienia"
@@ -491,8 +491,8 @@
         }
     },
     "sound": {
-        "title": "Dźwięk",
-        "subtitle": "Wybierz brzmienie gitary używane we wszystkich ćwiczeniach.",
+        "title": "Sound Studio",
+        "subtitle": "Ułóż brzmienie na łańcuchu i używaj go we wszystkich ćwiczeniach.",
         "activeSummary": "Aktywne brzmienie: {{name}}",
         "activeFallback": "Nieznane brzmienie",
         "moreSettings": "Więcej ustawień audio",
@@ -521,7 +521,7 @@
         },
         "custom": {
             "emptyTitle": "Brak własnych brzmień",
-            "emptyDescription": "Otwórz projektant brzmienia, ustaw parametry i zapisz swój pierwszy preset.",
+            "emptyDescription": "Otwórz studio brzmienia, ustaw wzmacniacz i efekty, a potem zapisz swój pierwszy preset.",
             "deleteConfirmTitle": "Usunąć brzmienie?",
             "deleteConfirmDescription": "„{{name}}” zostanie trwale usunięte.",
             "deleteConfirmConfirm": "Usuń",
@@ -531,9 +531,9 @@
             }
         },
         "designer": {
-            "title": "Projektant brzmienia",
-            "summary": "Wzmacniacz, EQ, efekty",
-            "description": "Zbuduj własne brzmienie: wybierz wzmacniacz, ustaw parametry łańcucha i posłuchaj frazy testowej. Zapisane presety pojawią się na liście obok wbudowanych.",
+            "title": "Studio brzmienia",
+            "summary": "Wzmacniacz, kolumna, efekty",
+            "description": "Zbuduj własny tor jak na pedalboardzie: wzmacniacz, kolumna, EQ i efekty. Zmiany słychać od razu (także z mikrofonu lub interfejsu w sekcji „Granie na żywo”). Zapisane presety pojawią się obok wbudowanych.",
             "amp": "Wzmacniacz",
             "amps": {
                 "classic": "Klasyczny (synteza)",
@@ -551,15 +551,25 @@
                 "bass": "Bas",
                 "mid": "Środek",
                 "treble": "Góra",
-                "comp": "Kompresor",
-                "delayMix": "Delay",
-                "reverbMix": "Pogłos",
-                "outputGain": "Wzmocnienie wyjścia"
+                "comp": "Siła",
+                "delayMix": "Poziom",
+                "reverbMix": "Poziom",
+                "outputGain": "Wzmocnienie wyjścia",
+                "chorusMix": "Poziom",
+                "tremoloDepth": "Głębokość",
+                "tremoloRate": "Tempo",
+                "wahResponse": "Reakcja",
+                "delayTime": "Czas",
+                "delayFeedback": "Powtórzenia",
+                "reverbDecay": "Długość"
             },
             "units": {
                 "db": "dB",
                 "percent": "%",
-                "x": "x"
+                "x": "x",
+                "hz": "Hz",
+                "ms": "ms",
+                "s": "s"
             },
             "audition": "Posłuchaj frazy",
             "auditioning": "Gram…",
@@ -587,7 +597,29 @@
                     "too-large": "Plik przekracza limit 15 MB.",
                     "storage-error": "Nie udało się zapisać modelu lokalnie."
                 }
-            }
+            },
+            "groups": {
+                "preamp": "Przedwzmacniacz",
+                "cab": "Kolumna",
+                "eq": "Korektor",
+                "comp": "Kompresor",
+                "chorus": "Chorus",
+                "tremolo": "Tremolo",
+                "delay": "Delay",
+                "reverb": "Pogłos",
+                "output": "Wyjście"
+            },
+            "cab": {
+                "label": "Odpowiedź impulsowa (IR)",
+                "auto": "Domyślna",
+                "none": "Brak (sam wzmacniacz)",
+                "hint": "„Brak” przydaje się, gdy grasz przez prawdziwą kolumnę."
+            },
+            "reverb": {
+                "label": "Typ pogłosu",
+                "room": "Pokój (syntetyczny)"
+            },
+            "browseTone3000": "Szukaj modeli na TONE3000"
         },
         "live": {
             "title": "Wejście na żywo",
@@ -656,6 +688,93 @@
             "namVintageAmpeg": {
                 "name": "Ampeg V-2",
                 "description": "Ciepły, vintage'owy charakter lampowego wzmacniacza z lekkim crunchem."
+            }
+        },
+        "studio": {
+            "chainLabel": "Łańcuch sygnału",
+            "toneSlot": "EQ",
+            "addEffect": "Dodaj efekt",
+            "pickerTitle": "Wybierz efekt",
+            "appSound": "Podświetlone brzmienie gra w każdym ćwiczeniu. Wybierz je na tej liście, żeby je zmienić.",
+            "unsaved": "Fraza gra ten łańcuch. Zapisz brzmienie, żeby ćwiczenia zostały przy tych zmianach.",
+            "empty": "Pusty łańcuch — gitara idzie sucho, potem korekcja.",
+            "presets": "Presety",
+            "builtIn": "Wbudowane",
+            "yourRigs": "Twoje brzmienia",
+            "noRigs": "Brak zapisanych brzmień.",
+            "newRig": "Nowe brzmienie",
+            "inspector": "Ustawienia bloku",
+            "bypass": "Omiń",
+            "enable": "Włącz",
+            "moveLeft": "W lewo",
+            "moveRight": "W prawo",
+            "remove": "Usuń blok",
+            "input": "Wejście",
+            "gate": "Bramka",
+            "gateThreshold": "Próg",
+            "bass": "Bas",
+            "middle": "Środek",
+            "treble": "Góra",
+            "output": "Wyjście",
+            "cabFilter": "Krzywa głośnika",
+            "yourModelsEmpty": "Plik .nam zostaje na tym urządzeniu i pojawia się jako karta.",
+            "insertHere": "Następny efekt wejdzie w podświetlonym plusie.",
+            "groups": {
+                "classic": "Klasyczny",
+                "clean": "Clean",
+                "crunch": "Crunch",
+                "lead": "Lead",
+                "bass": "Bas",
+                "yours": "Twoje modele",
+                "speaker": "Głośnik",
+                "cabinets": "Kolumny",
+                "reverb": "Pogłos",
+                "character": "Charakter"
+            },
+            "drives": {
+                "soft": "Gładki",
+                "screamer": "Screamer",
+                "transparent": "Przejrzysty",
+                "hard": "Twarde cięcie",
+                "fuzz": "Fuzz",
+                "note": "To nasze układy, nie nagranie konkretnej kostki."
+            },
+            "wah": {
+                "note": "Otwiera się z każdą nutą. Układ FretMemo."
+            },
+            "eq": {
+                "low": "Niski",
+                "mid": "Średni",
+                "high": "Wysoki",
+                "note": "Stoi tam, gdzie wstawisz go w łańcuchu."
+            },
+            "palette": {
+                "ampCab": "Wzmacniacz i kolumna",
+                "gain": "Gain",
+                "tone": "Barwa",
+                "modulation": "Modulacja",
+                "time": "Czas"
+            },
+            "audition": "Zagraj frazę",
+            "save": "Zapisz brzmienie",
+            "saving": "Zapisywanie…",
+            "saveFailed": "Nie udało się zapisać brzmienia.",
+            "saved": "Zapisano brzmienie „{{name}}”.",
+            "nameLabel": "Nazwa brzmienia",
+            "namePlaceholder": "np. Czysty pokój",
+            "blocks": {
+                "amp": "Wzmacniacz",
+                "cab": "Kolumna",
+                "drive": "Drive",
+                "comp": "Kompresor",
+                "eq": "EQ",
+                "chorus": "Chorus",
+                "tremolo": "Tremolo",
+                "phaser": "Phaser",
+                "flanger": "Flanger",
+                "wah": "Wah",
+                "delay": "Delay",
+                "reverb": "Pogłos"
             }
         }
     },
@@ -1845,7 +1964,8 @@
             "backingLoop": "Pętla akordowa",
             "practiceLink": "Trening na gryfie",
             "bendDrill": "Podciągnięcia z mikrofonem",
-            "voicingDrill": "Chwyty na zestawie strun"
+            "voicingDrill": "Chwyty na zestawie strun",
+            "echoDrill": "Zagraj, co słyszysz"
         },
         "quiz": {
             "circleTapKey": "Kliknij tonację na kole.",
@@ -2293,6 +2413,31 @@
                 "voiceMove": "Zmiana {{first}} na {{second}} najkrótszą drogą: dokąd idzie dźwięk {{source}}?",
                 "hintNotes": "{{first}}: {{notes}}. {{second}}: {{list}}.",
                 "hintMoves": "Głosy {{notes}} idą kolejno na {{list}}: wspólny dźwięk zostaje, pozostałe ruszają się o najmniejszy interwał."
+            },
+            "earDegree": {
+                "promptMajor": "Kadencja w {{key}}-dur, potem jeden dźwięk. Który to stopień?",
+                "promptMinor": "Kadencja w {{key}}-moll, potem jeden dźwięk. Który to stopień?",
+                "hint": "To był {{note}}, stopień {{degree}}."
+            },
+            "earInterval": {
+                "promptUp": "Dwa dźwięki, drugi wyżej. Jaki to interwał?",
+                "promptDown": "Dwa dźwięki, drugi niżej. Jaki to interwał?",
+                "promptHarmonic": "Dwa dźwięki naraz. Jaki to interwał?",
+                "hint": "Od {{first}} do {{second}}."
+            },
+            "earChord": {
+                "promptQuality": "Posłuchaj akordu. Jaki to rodzaj?",
+                "promptBass": "Posłuchaj akordu. Co jest w basie?",
+                "hint": "To był {{chord}}.",
+                "hintBass": "To był {{chord}}, w basie {{root}}.",
+                "bassRoot": "Pryma w basie",
+                "bassThird": "Tercja w basie",
+                "bassFifth": "Kwinta w basie"
+            },
+            "earProgression": {
+                "promptFunction": "Kadencja w {{key}}-dur, potem akord. Jaka to funkcja?",
+                "promptProgression": "Kadencja w {{key}}-dur, potem cztery akordy. Jaka to progresja?",
+                "hint": "W {{key}}-dur: {{chord}}."
             }
         },
         "modules": {
@@ -2595,6 +2740,66 @@
                 "name": "Akompaniament w standardach",
                 "term": "Comping Standards",
                 "theory": "Na koniec wszystko razem: prawdziwe progresje standardów, chwyty drop-2 prowadzone najkrótszą drogą i rytm swingu. Autumn Leaves to ciąg ii–V–I w dur i w moll, Rhythm changes szybka zmiana akordów co dwie ćwierćnuty, a All the Things You Are przejścia między odległymi tonacjami. Wybierz jedną progresję, zwolnij tempo i graj, aż przestaniesz myśleć o chwytach."
+            },
+            "ear-tonic": {
+                "name": "Tonika, tercja i kwinta",
+                "term": "Tonic, Third and Fifth",
+                "theory": "Słuch funkcyjny zaczyna się od tonacji, a nie od pojedynczych dźwięków. Kadencja I–IV–V–I ustawia w głowie tonikę, a każdy dźwięk po niej brzmi jak jej stopień: tonika jak powrót do domu, tercja jasno i spokojnie, kwinta otwarcie, jakby coś miało jeszcze nastąpić. Na początek rozróżniasz tylko te trzy stopnie, bo tworzą akord toniczny. Gdy nie wiesz, zaśpiewaj w myślach drogę od usłyszanego dźwięku do toniki; liczba kroków podpowie stopień. Tonacja zmienia się co pytanie, więc uczysz się relacji, a nie wysokości."
+            },
+            "ear-degrees": {
+                "name": "Wszystkie stopnie w dur",
+                "term": "Major Scale Degrees",
+                "theory": "Pozostałe stopnie mówią, dokąd chcą iść. Septyma ciągnie o pół tonu w górę do toniki, kwarta w dół do tercji, sekunda do toniki albo tercji, seksta do kwinty. Ten kierunek to najpewniejsza wskazówka: po usłyszeniu dźwięku poczuj, gdzie chciałby się rozwiązać. Metoda Benbassata i Arnolda jest prosta: kadencja, jeden dźwięk, odpowiedź, i tak setki razy, w coraz to innych tonacjach."
+            },
+            "ear-minor": {
+                "name": "Stopnie w moll",
+                "term": "Minor Scale Degrees",
+                "theory": "Moll ma tę samą tonikę i kwintę, ale tercja, seksta i septyma leżą o pół tonu niżej (b3, b6, b7). Kadencja i–iv–V–i z durową dominantą od razu mówi, że jesteśmy w mollu. b3 brzmi ciemniej niż tercja wielka, b6 ciągnie w dół do kwinty, a b7 nie prowadzi już tak mocno do toniki. Stopnie w odpowiedziach są nazwane względem dur, tak jak opisują je muzycy jazzowi i rockowi."
+            },
+            "ear-intervals-up": {
+                "name": "Interwały w górę: łatwe",
+                "term": "Ascending Intervals",
+                "theory": "Interwał to odległość między dwoma dźwiękami, bez tonacji. Zacznij od pięciu najbardziej różnych: tercji małej i wielkiej, kwarty, kwinty i oktawy. Tercja mała brzmi smutno, wielka jasno, kwarta jak wezwanie, kwinta pusto i mocno, oktawa jak ten sam dźwięk wyżej. Pomagają też początki znanych melodii, ale charakter interwału jest pewniejszy. Na gryfie to najczęstsze kształty: kwarta to ten sam próg na sąsiedniej, wyższej strunie (poza parą strun G–H)."
+            },
+            "ear-intervals-all": {
+                "name": "Wszystkie interwały, w górę i w dół",
+                "term": "All Intervals",
+                "theory": "Teraz pełny zestaw od sekundy małej do oktawy, także w dół. Sekundy brzmią jak krok w skali, seksta wielka jak szeroki, jasny skok, septyma mała jak akord dominantowy bez środka, tryton niestabilnie. Interwały w dół są trudniejsze, bo ucho chce słyszeć ostatni dźwięk jako tonikę; pomaga zaśpiewanie obu dźwięków od dołu do góry. Ćwiczenie dodatkowe łączy to z gryfem: posłuchaj dwóch dźwięków i zagraj je."
+            },
+            "ear-intervals-harmonic": {
+                "name": "Interwały zagrane razem",
+                "term": "Harmonic Intervals",
+                "theory": "Gdy dwa dźwięki brzmią jednocześnie, nie słychać kierunku, tylko barwę współbrzmienia. Tercje i seksty brzmią miękko i pełno, kwarty, kwinty i oktawy pusto, a sekundy, septymy i tryton chropowato. To podstawa dwudźwięków i dźwięków prowadzących w akordach septymowych. Jeśli nie możesz rozpoznać interwału, wyłap w myślach niższy dźwięk, potem wyższy, i zamień go w interwał melodyczny."
+            },
+            "ear-triads": {
+                "name": "Dur, moll, zmniejszony, zwiększony",
+                "term": "Triad Qualities",
+                "theory": "Cztery rodzaje trójdźwięków różnią się tercją i kwintą. Durowy brzmi jasno i stabilnie, molowy ciemniej, zmniejszony napięty i ciasny (dwie tercje małe), zwiększony niepewnie i rozmyto (dwie tercje wielkie). Akordy w quizie to prawdziwe chwyty gitarowe na różnych strunach i w różnych przewrotach, więc słuchasz rodzaju akordu, a nie jednego układu. Po uderzeniu akord gra się też dźwięk po dźwięku."
+            },
+            "ear-sevenths": {
+                "name": "Akordy septymowe",
+                "term": "Seventh Chord Qualities",
+                "theory": "maj7 brzmi miękko i marzycielsko, bo septyma wielka leży pół tonu pod oktawą. 7 (dominantowy) ma tryton między tercją a septymą i chce się rozwiązać. m7 brzmi łagodnie i ciepło, m7b5 ciemno i niepokojąco. Akordy w quizie to chwyty drop-2 ze ścieżki Akordy septymowe."
+            },
+            "ear-inversions": {
+                "name": "Co jest w basie",
+                "term": "Hearing Inversions",
+                "theory": "Ten sam akord brzmi inaczej zależnie od najniższego dźwięku. Pryma w basie daje najpełniejsze i najbardziej stabilne brzmienie. Tercja w basie jest lżejsza i jakby w ruchu, dlatego pojawia się w przejściowych liniach basu. Kwinta w basie brzmi zawieszona i zwykle prowadzi dalej. Słuchaj najniższego dźwięku osobno: zaśpiewaj go w myślach i sprawdź, czy to pryma akordu."
+            },
+            "ear-functions": {
+                "name": "Funkcja akordu",
+                "term": "Chord Function",
+                "theory": "Po kadencji każdy akord tonacji ma swoją rolę. I to dom, IV oddala się z jasnym brzmieniem, V wraca z napięciem, vi to molowy krewny toniki, ii to akord molowy przed V, a iii, najrzadszy, brzmi miękko i molowo. Słuchaj basu, bo to on wskazuje stopień, a rodzaj akordu (dur czy moll) zawęża wybór. Wielkie litery oznaczają akordy durowe, małe molowe."
+            },
+            "ear-progressions": {
+                "name": "Progresje czterech akordów",
+                "term": "Chord Progressions",
+                "theory": "Większość piosenek używa kilku tych samych progresji: I–V–vi–IV, I–vi–IV–V, I–IV–V–I, ii–V–I. Słuchaj linii basu akord po akordzie i nazywaj w myślach stopnie. Pomaga wyłapanie akordów molowych (ii, iii, vi) i miejsca, w którym wraca tonika. Dzięki tej umiejętności zagrasz piosenkę ze słuchu, bez szukania chwytów w internecie."
+            },
+            "ear-echo": {
+                "name": "Zagraj, co słyszysz",
+                "term": "Playing by Ear",
+                "theory": "Ostatni krok łączy słuch z gryfem. Aplikacja gra kadencję i krótką frazę, a ty grasz ją na gitarze w dowolnej oktawie; mikrofon sprawdza dźwięk po dźwięku. Najpierw znajdź na gryfie tonikę, potem myśl stopniami. Frazy zaczynają się od trzech dźwięków w obrębie pięciu stopni, potem są cztery dźwięki z całej skali. Zaśpiewaj frazę przed zagraniem: to, co umiesz zaśpiewać, łatwo znajdziesz na gryfie. Najlepiej graj w słuchawkach, żeby mikrofon nie słyszał głośnika."
             }
         },
         "ex": {
@@ -2624,7 +2829,7 @@
             },
             "standards.e1": {
                 "name": "Pętla: progresje ze standardów",
-                "desc": "Pięć progresji z prawdziwego repertuaru. Wybierz jedną, zwolnij tempo i graj to, czego nauczyły cię moduły. Ta sekcja niczego nie blokuje."
+                "desc": "Progresje z prawdziwego repertuaru. Wybierz jedną, zwolnij tempo i graj to, czego nauczyły cię moduły. Ta sekcja niczego nie blokuje."
             },
             "e-string-notes.e1": {
                 "name": "Trening: pozycja → dźwięk (struna E)",
@@ -3337,6 +3542,78 @@
             "comping-standards.e1": {
                 "name": "Pętla: trzy standardy",
                 "desc": "Autumn Leaves, Rhythm changes i All the Things You Are chwytami drop-2. Mikrofon sprawdza górny głos."
+            },
+            "ear-tonic.e1": {
+                "name": "Quiz: tonika, tercja czy kwinta",
+                "desc": "Kadencja w losowej tonacji, potem jeden dźwięk. Który to stopień?"
+            },
+            "ear-tonic.e2": {
+                "name": "Zagraj dźwięk ze słuchu",
+                "desc": "Po kadencji usłyszysz tonikę, tercję albo kwintę. Znajdź ją na gryfie i zagraj."
+            },
+            "ear-degrees.e1": {
+                "name": "Quiz: stopnie w dur",
+                "desc": "Kadencja, potem jeden z siedmiu stopni skali durowej."
+            },
+            "ear-degrees.e2": {
+                "name": "Zagraj stopień ze słuchu",
+                "desc": "Jeden dźwięk z całej skali durowej: znajdź go i zagraj."
+            },
+            "ear-minor.e1": {
+                "name": "Quiz: stopnie w moll",
+                "desc": "Kadencja molowa, potem jeden stopień skali molowej."
+            },
+            "ear-minor.e2": {
+                "name": "Zagraj stopień w moll",
+                "desc": "Jeden dźwięk ze skali molowej: znajdź go i zagraj."
+            },
+            "ear-intervals-up.e1": {
+                "name": "Quiz: łatwe interwały w górę",
+                "desc": "Tercje, kwarta, kwinta i oktawa, od niższego dźwięku."
+            },
+            "ear-intervals-all.e1": {
+                "name": "Quiz: wszystkie interwały",
+                "desc": "Od sekundy małej do oktawy, w górę i w dół."
+            },
+            "ear-intervals-all.e2": {
+                "name": "Zagraj dwa dźwięki ze słuchu",
+                "desc": "Po kadencji usłyszysz dwa dźwięki: zagraj je w tej samej kolejności."
+            },
+            "ear-intervals-harmonic.e1": {
+                "name": "Quiz: interwały zagrane razem",
+                "desc": "Dwa dźwięki naraz. Jaki to interwał?"
+            },
+            "ear-triads.e1": {
+                "name": "Quiz: rodzaj trójdźwięku",
+                "desc": "Dur, moll, zmniejszony czy zwiększony, w chwytach na różnych strunach."
+            },
+            "ear-sevenths.e1": {
+                "name": "Quiz: rodzaj akordu septymowego",
+                "desc": "maj7, 7, m7 czy m7b5, w chwytach drop-2."
+            },
+            "ear-inversions.e1": {
+                "name": "Quiz: co jest w basie",
+                "desc": "Trójdźwięk durowy albo molowy: w basie pryma, tercja czy kwinta?"
+            },
+            "ear-functions.e1": {
+                "name": "Quiz: funkcja akordu",
+                "desc": "Kadencja, potem jeden akord tonacji: I, ii, iii, IV, V czy vi?"
+            },
+            "ear-progressions.e1": {
+                "name": "Quiz: progresja",
+                "desc": "Kadencja, potem cztery akordy. Która to progresja?"
+            },
+            "ear-echo.e1": {
+                "name": "Frazy z trzech dźwięków",
+                "desc": "Stopnie 1–5 w dur, głównie krokami. Zagraj każdą frazę po usłyszeniu."
+            },
+            "ear-echo.e2": {
+                "name": "Frazy z czterech dźwięków",
+                "desc": "Cała skala durowa, głównie krokami, czasem skok."
+            },
+            "ear-echo.e3": {
+                "name": "Frazy w moll",
+                "desc": "Trzy dźwięki ze skali molowej."
             }
         },
         "practiceLink": {
@@ -3352,7 +3629,10 @@
             "caged": "Otwórz system CAGED",
             "rhythm": "Otwórz trening rytmu",
             "earTraining": "Otwórz trening słuchu",
-            "chordQuality": "Otwórz rozpoznawanie akordów"
+            "chordQuality": "Otwórz rozpoznawanie akordów",
+            "functionalEar": "Otwórz trening funkcyjny",
+            "intervalTrainer": "Otwórz trening interwałów",
+            "triadsTrack": "Otwórz ścieżkę Trójdźwięki"
         },
         "hints": {
             "lickPent3Descent": "Zagrywka: zjazd przez boks",
@@ -3650,6 +3930,19 @@
                     "drop2": "Drop-2 (6–8)",
                     "comping": "Akompaniament (9–12)"
                 }
+            },
+            "ear": {
+                "tab": "Słuch",
+                "title": "Słuch muzyczny dla gitarzysty",
+                "description": "Kształcenie słuchu w 12 modułach: stopnie po kadencji, interwały, rodzaje akordów i przewroty, funkcje akordów i progresje, a na koniec granie ze słuchu.",
+                "promise": "Rozpoznawaj stopnie, interwały i akordy, a potem zagraj ze słuchu to, co usłyszysz.",
+                "duration": "Ok. 2–3 miesięcy przy 15 minutach dziennie",
+                "stages": {
+                    "degrees": "Tonacja i stopnie (1–3)",
+                    "intervals": "Interwały (4–6)",
+                    "chords": "Akordy (7–9)",
+                    "music": "Muzyka (10–12)"
+                }
             }
         },
         "bend": {
@@ -3690,6 +3983,21 @@
             "runs": "Przebiegi: {{done}}/{{required}}",
             "runButton": "Przebieg zaliczony",
             "runNeedsMetronome": "Najpierw przejdź z metronomem przez wszystkie chwyty ({{steps}})."
+        },
+        "echo": {
+            "threshold": "Do zaliczenia: {{required}} fraz",
+            "promptMajor": "Tonacja {{key}}-dur. Posłuchaj kadencji i dźwięków po niej, potem zagraj je na gitarze w dowolnej oktawie.",
+            "promptMinor": "Tonacja {{key}}-moll. Posłuchaj kadencji i dźwięków po niej, potem zagraj je na gitarze w dowolnej oktawie.",
+            "progress": "Zagrane dźwięki: {{done}}/{{total}}",
+            "done": "Dobrze! Fraza zaliczona.",
+            "listen": "Słuchaj…",
+            "micOffHint": "Włącz mikrofon, żeby aplikacja sprawdziła, co grasz. Bez mikrofonu oznacz frazę sam.",
+            "waiting": "Zagraj frazę. Zły dźwięk zaczyna próbę od nowa.",
+            "degrees": "Stopnie: {{degrees}}",
+            "next": "Następna fraza",
+            "reveal": "Pokaż dźwięki",
+            "selfMark": "Zagrałem (bez mikrofonu)",
+            "count": "Frazy: {{done}}/{{required}}"
         }
     },
     "learn": {

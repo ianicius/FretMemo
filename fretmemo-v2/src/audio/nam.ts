@@ -129,6 +129,11 @@ export async function loadNamNode(
     ctx: AudioContext,
     modelId: string,
     modelUrl?: string,
+    /**
+     * Pool identity. Defaults to `modelId` (one shared node per model).
+     * Studio chains pass a per-block key so two amp blocks stay independent.
+     */
+    poolKey?: string,
 ): Promise<NamLoadResult> {
     const url = modelUrl ?? getNamModelUrl(modelId);
     if (!url) {
@@ -150,8 +155,9 @@ export async function loadNamNode(
             });
         }
 
-        const node = await attachment.pool.acquire(modelId);
-        if (attachment.loadedKeys.has(modelId)) {
+        const key = poolKey ?? modelId;
+        const node = await attachment.pool.acquire(key);
+        if (attachment.loadedKeys.has(key)) {
             // Pooled node still holds this exact model: instant switch.
             return { ok: true, node, info: undefined };
         }
@@ -186,7 +192,7 @@ export async function loadNamNode(
             // The engine rejected the file contents (e.g. corrupt weights).
             return mapUnknownError(error, 'model-load');
         }
-        attachment.loadedKeys.add(modelId);
+        attachment.loadedKeys.add(key);
         return { ok: true, node, info };
     } catch (error) {
         // Attach/createNode/acquire failures (worklet missing, wasm broken…).

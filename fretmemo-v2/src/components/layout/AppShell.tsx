@@ -28,7 +28,7 @@ const NAV_ITEMS: NavItem[] = [
     { id: "home", label: "Home", icon: Home, path: "/" },
     { id: "practice", label: "Train", icon: Target, path: "/train" },
     { id: "improv", label: "Learn", icon: GraduationCap, path: "/learn" },
-    { id: "sound", label: "Sound", icon: AudioWaveform, path: "/sound" },
+    { id: "sound", label: "Sound Studio", icon: AudioWaveform, path: "/sound" },
     { id: "challenges", label: "Challenges", icon: Trophy, path: "/challenges" },
     { id: "progress", label: "Me", icon: ChartBar, path: "/me" },
 ];

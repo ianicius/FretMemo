@@ -10,18 +10,24 @@ import { NAM_MODELS, type ChainParams, type SoundPreset } from "@/audio/presets"
 /** Simple structural type for the react-i18next translator (keeps helpers testable). */
 export type Translate = TFunction;
 
-/** Slider order (top → bottom in the tone designer). */
-export const CHAIN_PARAM_ORDER: Array<keyof ChainParams> = [
-    "inputGain",
-    "drive",
-    "bass",
-    "mid",
-    "treble",
-    "comp",
-    "delayMix",
-    "reverbMix",
-    "outputGain",
+/**
+ * Pedalboard sections in signal order (one card each in the sound studio).
+ * `cab` has no sliders, only the IR picker; `reverb` adds the IR picker.
+ */
+export const CHAIN_PARAM_GROUPS: Array<{ id: string; keys: Array<keyof ChainParams> }> = [
+    { id: "preamp", keys: ["inputGain", "drive"] },
+    { id: "cab", keys: [] },
+    { id: "eq", keys: ["bass", "mid", "treble"] },
+    { id: "comp", keys: ["comp"] },
+    { id: "chorus", keys: ["chorusMix"] },
+    { id: "tremolo", keys: ["tremoloDepth", "tremoloRate"] },
+    { id: "delay", keys: ["delayMix", "delayTime", "delayFeedback"] },
+    { id: "reverb", keys: ["reverbMix", "reverbDecay"] },
+    { id: "output", keys: ["outputGain"] },
 ];
+
+/** Slider order (top → bottom in the tone designer). */
+export const CHAIN_PARAM_ORDER: Array<keyof ChainParams> = CHAIN_PARAM_GROUPS.flatMap((group) => group.keys);
 
 /** Slider step per parameter (kept coarse enough for touch, fine enough to dial in). */
 export const CHAIN_PARAM_STEPS: Record<keyof ChainParams, number> = {
@@ -31,12 +37,18 @@ export const CHAIN_PARAM_STEPS: Record<keyof ChainParams, number> = {
     mid: 0.5,
     treble: 0.5,
     comp: 0.01,
+    chorusMix: 0.01,
+    tremoloDepth: 0.01,
+    tremoloRate: 0.1,
     delayMix: 0.01,
+    delayTime: 0.01,
+    delayFeedback: 0.01,
     reverbMix: 0.01,
+    reverbDecay: 0.1,
     outputGain: 0.05,
 };
 
-export type ParamUnit = "db" | "percent" | "x";
+export type ParamUnit = "db" | "percent" | "x" | "hz" | "ms" | "s";
 
 export const CHAIN_PARAM_UNITS: Record<keyof ChainParams, ParamUnit> = {
     inputGain: "x",
@@ -45,8 +57,14 @@ export const CHAIN_PARAM_UNITS: Record<keyof ChainParams, ParamUnit> = {
     mid: "db",
     treble: "db",
     comp: "percent",
+    chorusMix: "percent",
+    tremoloDepth: "percent",
+    tremoloRate: "hz",
     delayMix: "percent",
+    delayTime: "ms",
+    delayFeedback: "percent",
     reverbMix: "percent",
+    reverbDecay: "s",
     outputGain: "x",
 };
 
@@ -74,6 +92,12 @@ export function formatChainParamValue(key: keyof ChainParams, value: number, t: 
     }
     if (unit === "percent") {
         return formatPercentValue(clean, t);
+    }
+    if (unit === "ms") {
+        return `${Math.round(value * 1000)} ${t("sound.designer.units.ms")}`;
+    }
+    if (unit === "hz" || unit === "s") {
+        return `${Number(value.toFixed(1))} ${t(`sound.designer.units.${unit}`)}`;
     }
     return `${clean}${t("sound.designer.units.x")}`;
 }

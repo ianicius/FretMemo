@@ -24,6 +24,7 @@ const SCAN_FILES = [
     path.join(SOUND_DIR, "SoundSlider.tsx"),
     path.join(SOUND_DIR, "ToneDesigner.tsx"),
     path.join(SOUND_DIR, "LiveInputPanel.tsx"),
+    path.join(SOUND_DIR, "StudioBoard.tsx"),
     path.join(SOUND_DIR, "presetUtils.ts"),
     path.join(SOUND_DIR, "useAudition.ts"),
 ];

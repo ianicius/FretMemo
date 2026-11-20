@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { SectionCollapse } from "@/components/ui/section-collapse";
 import { useTranslation } from "react-i18next";
 
-export function LiveInputPanel() {
+export function LiveInputPanel({ embedded = false }: { embedded?: boolean }) {
     const { t } = useTranslation();
     const state = useSyncExternalStore(liveInput.subscribe, liveInput.getState);
     const [open, setOpen] = useState(false);
@@ -66,14 +66,7 @@ export function LiveInputPanel() {
     const isStarting = state.status === "starting";
     const statusText = t(`sound.live.status.${state.status}`);
 
-    return (
-        <SectionCollapse
-            title={t("sound.live.title")}
-            summary={t("sound.live.summary")}
-            open={open}
-            onOpenChange={setOpen}
-            className="[&>button:hover]:bg-muted/50"
-        >
+    const body = (
             <div className="space-y-4">
                 <p className="text-sm text-muted-foreground">{t("sound.live.description")}</p>
 
@@ -181,6 +174,29 @@ export function LiveInputPanel() {
                     </div>
                 )}
             </div>
+    );
+
+    if (embedded) {
+        return (
+            <section aria-label={t("sound.live.title")} className="space-y-3">
+                <div className="space-y-1">
+                    <h2 className="text-sm font-semibold">{t("sound.live.title")}</h2>
+                    <p className="text-xs text-muted-foreground">{t("sound.live.summary")}</p>
+                </div>
+                {body}
+            </section>
+        );
+    }
+
+    return (
+        <SectionCollapse
+            title={t("sound.live.title")}
+            summary={t("sound.live.summary")}
+            open={open}
+            onOpenChange={setOpen}
+            className="[&>button:hover]:bg-muted/50"
+        >
+            {body}
         </SectionCollapse>
     );
 }

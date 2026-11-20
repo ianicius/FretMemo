@@ -1,9 +1,10 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { BrowserRouter, HashRouter, Navigate, Routes, Route } from "react-router-dom";
 import { AppShell } from "./components/layout/AppShell";
 import { RouteAnalyticsTracker } from "./components/analytics/RouteAnalyticsTracker";
 import { PageSkeleton } from "./components/ui/page-skeleton";
 import { ErrorBoundary } from "./components/ui/error-boundary";
+import { useSoundStore } from "./stores/useSoundStore";
 
 const Home = lazy(() => import("./pages/Home"));
 const Practice = lazy(() => import("./pages/Practice"));
@@ -51,6 +52,10 @@ function AppRoutes() {
 }
 
 function App() {
+  useEffect(() => {
+    void useSoundStore.getState().loadCustomPresets();
+  }, []);
+
   import("./stores/useQuestStore").then(({ useQuestStore }) => {
     useQuestStore.getState().checkAndRefreshQuests();
   }).catch(err => console.error("Failed to refresh quests", err));

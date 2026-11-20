@@ -27,6 +27,7 @@ import { MultiTrackPlayback } from "@/audio/multiTrackPlayback";
 import { assemblePerTrackGraph, type AssembledTrackGraph } from "@/audio/perTrackGraph";
 import { masterGainValue } from "@/audio/engine";
 import { loadNamNode } from "@/audio/nam";
+import { loadPresetImpulseResponses } from "@/audio/irs";
 import { TabEditorPanel } from "@/components/score/TabEditorPanel";
 import {
     addNoteToString,
@@ -495,7 +496,7 @@ export default function ScoreViewer() {
             const outputs: Array<{
                 trackIndex: number;
                 buffer: AudioBuffer;
-                plan: { kind: "preset"; preset: SoundPreset; ampNode?: AudioNode } | { kind: "direct" };
+                plan: { kind: "preset"; preset: SoundPreset; ampNode?: AudioNode; cabBuffer?: AudioBuffer | null; reverbBuffer?: AudioBuffer | null } | { kind: "direct" };
                 muted: boolean;
             }> = [];
             for (const { index } of tracks) {
@@ -512,7 +513,7 @@ export default function ScoreViewer() {
                         progress.totalMs > 0 ? progress.renderedMs / progress.totalMs : 1;
                     setGuitarRenderProgress((index + trackFraction) / total);
                 });
-                let plan: { kind: "preset"; preset: SoundPreset; ampNode?: AudioNode } | { kind: "direct" } =
+                let plan: { kind: "preset"; preset: SoundPreset; ampNode?: AudioNode; cabBuffer?: AudioBuffer | null; reverbBuffer?: AudioBuffer | null } | { kind: "direct" } =
                     { kind: "direct" };
                 if (config?.kind === "preset" && config.presetId) {
                     const preset = resolvePresetById(config.presetId);
@@ -536,7 +537,7 @@ export default function ScoreViewer() {
                             // back to the built-in classic chain, never silent.
                             effective = getPresetById("classic-acoustic") ?? effective;
                         }
-                        plan = { kind: "preset", preset: effective, ampNode };
+                        plan = { kind: "preset", preset: effective, ampNode, ...(await loadPresetImpulseResponses(ctx, effective)) };
                     }
                 }
                 outputs.push({ trackIndex: index, buffer, plan, muted: false });

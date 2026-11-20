@@ -65,10 +65,17 @@ interface SoundPreset {
 ```
 
 Preset NAM trzyma `drive: 0` — modele NAM mają własny gain/przester; waveshaper przed
-modelem dublowałby przester. `kind: 'custom'` jest zarezerwowany na przyszły ekran Sound
-(persy/improwizowane presety, import .nam — poza zakresem tej iteracji).
+modelem dublowałby przester. Zapisany rig ze studia ma `kind: 'custom'` i, gdy użytkownik
+go edytował, `assembly: 'blocks'` plus `chain` / `globals`. Silnik dostaje adaptację
+`toEnginePreset` (`kind` wraca do `'classic' | 'nam'`).
 
 ## 4. Kolejność stage'ów łańcucha
+
+Presety wbudowane i nietknięte presety własne (`assembly` inne niż `'blocks'`)
+składane są grafem historycznym poniżej. Dzięki temu brzmią tak samo jak przed
+Sound Studio. Edycja w studio zapisuje `assembly: 'blocks'`.
+
+### 4a. Graf historyczny (`assembly: 'legacy'`)
 
 ```
 voices (lib/audio.ts; źródło: próbki nylon/electric z `src/audio/sampler.ts`,
@@ -78,10 +85,15 @@ voices (lib/audio.ts; źródło: próbki nylon/electric z `src/audio/sampler.ts`
     → drive (waveshaper; neutralny przy 0)
     → amp stage:  classic: peaking 280 Hz Q1.2 +6 dB → lowpass 8 kHz Q0.7
                   nam:     AudioWorkletNode z modelem NAM (mono)
+    → kolumna:    IR (`preset.cab`, ConvolverNode) | krzywa filtrów (bundlowane NAM)
+                  | brak (`cab: 'none'`, modele użytkownika bez IR)
     → EQ: lowshelf 200 → peaking 1k → highshelf 3.2k
     → compressor (DynamicsCompressorNode)
-    → delay block  (parallel: dry przelot + delay→wet)
-    → reverb block (parallel: dry przelot + convolver→wet)
+    → chorus  (tylko gdy chorusMix > 0: dry + delay 12 ms modulowany LFO 0.8 Hz)
+    → tremolo (tylko gdy tremoloDepth > 0: gain modulowany LFO tremoloRate)
+    → delay block  (parallel: dry przelot + delay→wet; delayTime, delayFeedback)
+    → reverb block (parallel: dry przelot + convolver→wet; IR `preset.reverb`
+                    albo syntetyczny pokój o długości reverbDecay)
     → chain output (outputGain)
     → fadeGain (crossfade przy zmianie presetu)
     → masterGain (volume × VOICE_BUS_TRIM)
@@ -94,11 +106,51 @@ Uwagi:
   historycznego (`peaking 280 Hz Q1.2 +6 dB`), z jednym utwornionym cutoffem lowpass 8 kHz (pierwotnie 4 kHz dla głosu
   addytywnego; od wprowadzenia próbek Karoryfer podniesiony do 8 kHz, żeby prawdziwe
   nagrania zachowały powietrze w transjencie).
-- **Reverb** używa syntetycznej odpowiedzi impulsowej (stereo, 1.6 s, zanikający szum
-  `pow(1-t, 2.5)`) generowanej w runtime — brak licencjonowanych plików IR.
+- **Reverb** domyślnie używa syntetycznej odpowiedzi impulsowej (stereo, `reverbDecay`
+  s, domyślnie 1.6 s, zanikający szum `pow(1-t, 2.5)`) generowanej w runtime. Opcjonalnie
+  IR plate/spring z `public/sound/irs/` (licencje: `public/sound/LICENSES.md`).
+- **IR** (kolumny i pogłosy) ładuje `src/audio/irs.ts`: fetch + decode raz na kontekst,
+  przed złożeniem łańcucha; błąd → null i łańcuch wraca do domyślnej kolumny/pokoju.
 - **VOICE_BUS_TRIM = 0.40**: historyczny per-wykrowany master gain 0.40 z `lib/audio.ts`
   przeniesiony jednorazowo do silnika. `masterGain = full.audio.volume × 0.40` — skala
   głosów bez zmian, głośność ogólna zbliżona (przy volume = 1 identyczna z dawną).
+
+### 4b. Graf studio (`assembly: 'blocks'`)
+
+```
+inputGain
+  → noise gate (tylko gdy globals.gateEnabled; worklet public/sound/engine/gate-worklet.js,
+    próg globals.gateThresholdDb, atak 1 ms, zwolnienie 80 ms)
+  → bloki chain[0 .. toneStackIndex) w kolejności listy
+  → EQ (bass → mid → treble) wstawione pod indeksem globals.toneStackIndex
+  → bloki chain[toneStackIndex ..] 
+  → outputGain
+```
+
+Blok wyłączony (`enabled: false`) nie wchodzi do grafu — poprzedni stage łączy się
+z następnym. Pusty `chain` łączy wejście wprost z EQ i wyjściem. Ten sam typ może
+wystąpić dwa razy (osobne węzły; dwa wzmacniacze NAM dostają osobny klucz puli).
+Maks. 10 bloków.
+
+Typy: `amp` (classic | id z `NAM_MODELS` | `user-*`), `cab` (`filter` | `ir` | `none`),
+`drive`, `comp`, `eq`, `chorus`, `tremolo`, `phaser`, `flanger`, `wah`, `delay`, `reverb`.
+Blok `eq` to drugi, przesuwalny korektor (półka 200 Hz, środek 1 kHz, półka 3,2 kHz). Pasek EQ w łańcuchu zostaje osobno.
+Wah to filtr pasmowy sterowany obwiednią nuty. Istnieje tylko w grafie bloków.
+Drive bez `character` albo z `soft` zostaje przy historycznym `tanh`. `screamer`,
+`transparent`, `hard` i `fuzz` to osobne krzywe (plus filtr przy screamer/hard/fuzz).
+Amount 0 jest krzywą identyczności dla każdego charakteru. Graf 4a tych charakterów nie używa.
+
+`deriveLegacyStudio()` buduje podgląd łańcucha dla starego rekordu (bez pedałów
+o mixie 0) i ustawia `toneStackIndex` za amp/cab, czyli tam, gdzie historyczny
+graf miał EQ. Dźwięk takiego rekordu idzie nadal grafem 4a, dopóki użytkownik
+nie zapisze edycji jako `assembly: 'blocks'`.
+
+Zestaw próbek: nylon, gdy włączony amp to `classic` albo ampów nie ma; electric
+dla każdego innego modelu (także `user-*`). Rozstrzyga `sampleSetForPreset`.
+Własne presety są wczytywane przy starcie aplikacji (`App`) i ponownie przed
+pierwszą nutą, jeśli aktywne id nie jest presetem wbudowanym
+(`ensureActiveRigReady`), więc ćwiczenie po przeładowaniu nie czeka na wizytę
+w `/sound`.
 
 ## 5. Integracja NAM + strategia zasobów
 

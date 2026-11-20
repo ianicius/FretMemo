@@ -161,6 +161,31 @@ describe("useSoundStore", () => {
         expect(persisted.find((r) => r.id === "custom-stale")?.amp).toBe("classic");
     });
 
+    it("loads presets saved before the effect pedals with neutral pedal values", async () => {
+        const added = ["chorusMix", "tremoloDepth", "tremoloRate", "delayTime", "delayFeedback", "reverbDecay"];
+        const legacy = Object.fromEntries(Object.entries(neutralChainParams()).filter(([key]) => !added.includes(key)));
+        await putCustomPresetRecord(makeRecord({ params: { ...legacy, drive: 0.4 } as CustomPresetRecord["params"] }));
+        await useSoundStore.getState().loadCustomPresets();
+        const [preset] = useSoundStore.getState().customPresets;
+        expect(preset.params).toEqual({ ...neutralChainParams(), drive: 0.4 });
+    });
+
+    it("keeps imported user amps and valid IR choices, drops unknown IR ids", () => {
+        const kept = parseCustomPresetRecord(makeRecord({ amp: "user-abc", cab: "cab-mesa-412", reverb: "reverb-plate" }));
+        expect(kept?.preset).toMatchObject({ amp: "user-abc", cab: "cab-mesa-412", reverb: "reverb-plate" });
+        expect(kept?.ampRepaired).toBe(false);
+        expect(parseCustomPresetRecord(makeRecord({ cab: "none" }))?.preset.cab).toBe("none");
+        const dropped = parseCustomPresetRecord(makeRecord({ cab: "reverb-plate", reverb: "nope" }))?.preset;
+        expect(dropped?.cab).toBeUndefined();
+        expect(dropped?.reverb).toBeUndefined();
+    });
+
+    it("saveCustomPreset persists cabinet and reverb IR choices", async () => {
+        await useSoundStore.getState().saveCustomPreset({ ...makeInput(), cab: "cab-celestion-v30", reverb: "reverb-spring" });
+        const [record] = await listCustomPresetRecords();
+        expect(record).toMatchObject({ cab: "cab-celestion-v30", reverb: "reverb-spring" });
+    });
+
     it("parseCustomPresetRecord returns null for a blank name", () => {
         expect(parseCustomPresetRecord(makeRecord({ nameKey: "   " }))).toBeNull();
         expect(parseCustomPresetRecord(makeRecord({ nameKey: "OK" }))).not.toBeNull();

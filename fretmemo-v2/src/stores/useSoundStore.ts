@@ -26,12 +26,28 @@ import {
     soundEngine,
     type SoundEngineState,
 } from "@/audio/engine";
+import { registerPresetLookup } from "@/audio/presetLookup";
 import {
+    CAB_NONE,
     CHAIN_PARAM_RANGES,
+    GATE_THRESHOLD_RANGE,
+    IMPULSE_RESPONSES,
+    MAX_CHAIN_BLOCKS,
     NAM_MODELS,
+    deriveLegacyStudio,
+    firstEnabledAmpModel,
+    getPresetById,
+    isBlockType,
+    neutralChainParams,
+    neutralGlobals,
+    projectStudioFields,
+    type ChainAssembly,
+    type ChainBlock,
+    type ChainGlobals,
     type ChainParams,
     type SoundPreset,
 } from "@/audio/presets";
+import { useSettingsStore } from "@/stores/useSettingsStore";
 
 export type SoundStorageError = "storage-error";
 
@@ -62,6 +78,14 @@ export interface SaveCustomPresetInput {
     /** 'classic' or a NAM model id from `NAM_MODELS`. */
     amp: string;
     params: ChainParams;
+    /** Cabinet IR id or `CAB_NONE`; absent = default cabinet handling. */
+    cab?: string;
+    /** Reverb IR id; absent = synthetic room. */
+    reverb?: string;
+    /** Studio chain. When set with `assembly: 'blocks'`, this is what gets saved and played. */
+    chain?: ChainBlock[];
+    globals?: ChainGlobals;
+    assembly?: ChainAssembly;
 }
 
 /* ─────────── IndexedDB wrapper (thin, promise-based) ─────────── */
@@ -71,6 +95,7 @@ const DB_VERSION = 1;
 const STORE = "customPresets";
 
 let dbPromise: Promise<IDBDatabase> | null = null;
+let loadInflight: Promise<void> | null = null;
 
 function openDb(): Promise<IDBDatabase> {
     if (!dbPromise) {
@@ -156,11 +181,16 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
     return typeof value === "object" && value !== null;
 }
 
-/** Type guard: is every `ChainParams` field a finite number in declared range? */
+/**
+ * Type guard: is every `ChainParams` field a finite number in declared range?
+ * Fields added after a record was saved (e.g. the effect pedals) are read as
+ * their neutral value, so older presets stay valid and sound unchanged.
+ */
 function isValidChainParams(value: unknown): value is ChainParams {
     if (!isPlainObject(value)) return false;
+    const filled: Record<string, unknown> = { ...neutralChainParams(), ...value };
     return (Object.keys(CHAIN_PARAM_RANGES) as Array<keyof ChainParams>).every((key) => {
-        const raw = value[key];
+        const raw = filled[key];
         const { min, max } = CHAIN_PARAM_RANGES[key];
         return typeof raw === "number" && Number.isFinite(raw) && raw >= min && raw <= max;
     });
@@ -196,17 +226,120 @@ export function parseCustomPresetRecord(value: CustomPresetRecord): ParsedCustom
     if (name.length === 0) {
         return null;
     }
-    const amp = value.amp === "classic" || value.amp in NAM_MODELS ? value.amp : "classic";
-    const preset: CustomPresetRecord = {
+    // `user-*` amps are imported models; a deleted one surfaces as an engine
+    // error (classic fallback) instead of silently rewriting the preset.
+    const amp =
+        value.amp === "classic" || value.amp in NAM_MODELS || value.amp.startsWith("user-")
+            ? value.amp
+            : "classic";
+    const cab = value.cab === CAB_NONE || IMPULSE_RESPONSES[value.cab ?? ""]?.kind === "cab" ? value.cab : undefined;
+    const reverb = IMPULSE_RESPONSES[value.reverb ?? ""]?.kind === "reverb" ? value.reverb : undefined;
+    const params = { ...neutralChainParams(), ...value.params };
+    const base: SoundPreset = {
         id: value.id,
         kind: "custom",
         amp,
-        params: { ...value.params },
+        ...(cab ? { cab } : {}),
+        ...(reverb ? { reverb } : {}),
+        params,
         nameKey: name,
         builtIn: false,
+    };
+    const stored = readStoredStudio(value);
+    let chain: ChainBlock[];
+    let globals: ChainGlobals;
+    let assembly: ChainAssembly = "legacy";
+    let ampRepaired = amp !== value.amp;
+    if (stored) {
+        chain = stored.blocks;
+        globals = stored.globals;
+        assembly = "blocks";
+        for (const block of chain) {
+            if (block.type !== "amp") continue;
+            const model = typeof block.params.model === "string" ? block.params.model : "classic";
+            const known = model === "classic" || model in NAM_MODELS || model.startsWith("user-");
+            if (!known) {
+                block.params.model = "classic";
+                ampRepaired = true;
+            }
+        }
+        if (ampRepaired) {
+            base.amp = firstEnabledAmpModel(chain);
+        }
+    } else {
+        const derived = deriveLegacyStudio(base);
+        chain = derived.blocks;
+        globals = derived.globals;
+    }
+    const preset: CustomPresetRecord = {
+        ...base,
+        chain,
+        globals,
+        assembly,
         updatedAt: value.updatedAt,
     };
-    return { preset, ampRepaired: amp !== value.amp };
+    return { preset, ampRepaired };
+}
+
+function readStoredStudio(value: CustomPresetRecord): { blocks: ChainBlock[]; globals: ChainGlobals } | null {
+    if (value.assembly !== "blocks") return null;
+    const blocks = parseStoredChain(value.chain);
+    if (!blocks) return null;
+    const globals = parseStoredGlobals(value.globals, blocks.length);
+    if (!globals) return null;
+    return { blocks, globals };
+}
+
+function parseStoredChain(value: unknown): ChainBlock[] | null {
+    if (!Array.isArray(value) || value.length > MAX_CHAIN_BLOCKS) return null;
+    const blocks: ChainBlock[] = [];
+    for (const item of value) {
+        if (!isPlainObject(item) || !isBlockType(item.type)) return null;
+        if (typeof item.id !== "string" || item.id.length === 0 || typeof item.enabled !== "boolean") return null;
+        if (!isPlainObject(item.params)) return null;
+        const params: Record<string, string | number> = {};
+        for (const [key, raw] of Object.entries(item.params)) {
+            if (typeof raw === "number" && Number.isFinite(raw)) params[key] = raw;
+            else if (typeof raw === "string") params[key] = raw;
+        }
+        blocks.push({ id: item.id, type: item.type, enabled: item.enabled, params });
+    }
+    return blocks;
+}
+
+function parseStoredGlobals(value: unknown, blockCount: number): ChainGlobals | null {
+    if (!isPlainObject(value) || typeof value.gateEnabled !== "boolean") return null;
+    const base = neutralGlobals(0);
+    const numeric: Array<keyof ChainGlobals> = ["inputGain", "bass", "mid", "treble", "outputGain", "gateThresholdDb", "toneStackIndex"];
+    for (const key of numeric) {
+        if (typeof value[key] !== "number" || !Number.isFinite(value[key])) return null;
+    }
+    const inputGain = value.inputGain as number;
+    const outputGain = value.outputGain as number;
+    const bass = value.bass as number;
+    const mid = value.mid as number;
+    const treble = value.treble as number;
+    const gateThresholdDb = value.gateThresholdDb as number;
+    const toneStackIndex = value.toneStackIndex as number;
+    const inRange = (n: number, min: number, max: number) => n >= min && n <= max;
+    if (!inRange(inputGain, CHAIN_PARAM_RANGES.inputGain.min, CHAIN_PARAM_RANGES.inputGain.max)) return null;
+    if (!inRange(outputGain, CHAIN_PARAM_RANGES.outputGain.min, CHAIN_PARAM_RANGES.outputGain.max)) return null;
+    if (!inRange(bass, CHAIN_PARAM_RANGES.bass.min, CHAIN_PARAM_RANGES.bass.max)) return null;
+    if (!inRange(mid, CHAIN_PARAM_RANGES.mid.min, CHAIN_PARAM_RANGES.mid.max)) return null;
+    if (!inRange(treble, CHAIN_PARAM_RANGES.treble.min, CHAIN_PARAM_RANGES.treble.max)) return null;
+    if (!inRange(gateThresholdDb, GATE_THRESHOLD_RANGE.min, GATE_THRESHOLD_RANGE.max)) return null;
+    if (!Number.isInteger(toneStackIndex) || toneStackIndex < 0 || toneStackIndex > blockCount) return null;
+    return {
+        ...base,
+        inputGain,
+        outputGain,
+        bass,
+        mid,
+        treble,
+        gateEnabled: value.gateEnabled,
+        gateThresholdDb,
+        toneStackIndex,
+    };
 }
 
 /** Stable id for a new custom preset: `custom-<uuid>`. */
@@ -227,10 +360,30 @@ function createCustomPresetId(): string {
  * is untouched — only the object handed to the engine is adapted.
  */
 export function toEnginePreset(preset: SoundPreset): SoundPreset {
+    if (preset.assembly === "blocks" && preset.chain && preset.globals) {
+        const model = firstEnabledAmpModel(preset.chain);
+        return { ...preset, amp: model, kind: model === "classic" ? "classic" : "nam" };
+    }
     if (preset.kind !== "custom") {
         return preset;
     }
     return { ...preset, kind: preset.amp === "classic" ? "classic" : "nam" };
+}
+
+/**
+ * Load custom rigs before the first note when the saved preset is not a
+ * built-in. Built-in ids return immediately so ordinary playback never waits
+ * on IndexedDB. If the engine already started on the wrong chain, re-apply.
+ */
+export async function ensureActiveRigReady(): Promise<void> {
+    const id = useSettingsStore.getState().full.audio.soundPreset;
+    if (!id || getPresetById(id)) return;
+    await useSoundStore.getState().loadCustomPresets();
+    const custom = useSoundStore.getState().customPresets.find((preset) => preset.id === id);
+    if (!custom || !soundEngine.hasContext()) return;
+    const state = soundEngine.getState();
+    if (state.presetId === id && state.status === "ready") return;
+    await soundEngine.setPreset(toEnginePreset(custom));
 }
 
 /* ─────────── Store ─────────── */
@@ -242,10 +395,9 @@ export const useSoundStore = create<SoundStoreState>()((set, get) => ({
     lastError: null,
     engine: soundEngine.getState(),
 
-    loadCustomPresets: async () => {
-        if (get().isLoading) {
-            return;
-        }
+    loadCustomPresets: () => {
+        if (loadInflight) return loadInflight;
+        loadInflight = (async () => {
         set({ isLoading: true });
         try {
             const records = await listCustomPresetRecords();
@@ -277,7 +429,11 @@ export const useSoundStore = create<SoundStoreState>()((set, get) => ({
             }
         } catch {
             set({ isLoading: false, lastError: "storage-error" });
+        } finally {
+            loadInflight = null;
         }
+        })();
+        return loadInflight;
     },
 
     saveCustomPreset: async (input) => {
@@ -288,14 +444,22 @@ export const useSoundStore = create<SoundStoreState>()((set, get) => ({
         const existing = input.id
             ? get().customPresets.find((preset) => preset.id === input.id)
             : undefined;
+        const studio = input.assembly === "blocks" && input.chain && input.globals
+            ? projectStudioFields(input.chain, input.globals)
+            : null;
         const record: CustomPresetRecord = {
             id: existing?.id ?? createCustomPresetId(),
             kind: "custom",
-            amp: input.amp,
-            params: { ...input.params },
+            amp: studio?.amp ?? input.amp,
+            ...(studio?.cab ? { cab: studio.cab } : input.cab ? { cab: input.cab } : {}),
+            ...(studio?.reverb ? { reverb: studio.reverb } : input.reverb ? { reverb: input.reverb } : {}),
+            params: { ...(studio?.params ?? input.params) },
             nameKey: name,
             builtIn: false,
             updatedAt: Date.now(),
+            ...(studio && input.chain && input.globals
+                ? { chain: input.chain, globals: input.globals, assembly: "blocks" as const }
+                : {}),
         };
         try {
             await putCustomPresetRecord(record);
@@ -362,4 +526,9 @@ soundEngine.subscribe((state) => {
     }
     repairedPresetIds.add(state.presetId);
     void soundEngine.setPreset(toEnginePreset(custom));
+});
+
+registerPresetLookup((id) => {
+    const found = useSoundStore.getState().customPresets.find((preset) => preset.id === id);
+    return found ? toEnginePreset(found) : undefined;
 });

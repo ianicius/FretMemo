@@ -3,17 +3,11 @@ import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-li
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import i18n from "@/lib/i18n";
+import { neutralChainParams, neutralGlobals } from "@/audio/presets";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { useSoundStore } from "@/stores/useSoundStore";
 import Sound from "../../../pages/Sound";
 
-/**
- * Light render test for the Sound page: engine and playback modules are
- * mocked at our module boundaries (no AudioContext in jsdom); IndexedDB runs
- * on fake-indexeddb, so custom presets load as an empty list.
- */
-
-// jsdom lacks ResizeObserver (Radix Slider measures its thumb).
 class ResizeObserverStub {
     observe() {}
     unobserve() {}
@@ -33,12 +27,12 @@ vi.mock("@/audio/engine", () => ({
         getState: () => ({ presetId: "classic-acoustic", status: "idle" }),
         subscribe: () => () => {},
         setPreset: setPresetMock,
+        hasContext: () => false,
+        getCurrentPreset: () => null,
         getAudioContext: vi.fn(() => {
             throw new Error("AudioContext is not available in tests");
         }),
-        getVoiceBus: vi.fn(() => {
-            throw new Error("AudioContext is not available in tests");
-        }),
+        getVoiceBus: vi.fn(),
         getMasterGain: () => null,
         applyVolumeFromSettings: vi.fn(),
     },
@@ -62,15 +56,6 @@ vi.mock("@/lib/audio", () => ({
     midiToFrequency: (midi: number) => 440 * Math.pow(2, (midi - 69) / 12),
 }));
 
-const BUILT_IN_NAMES = [
-    "Classic guitar",
-    "Clean JC-120",
-    "Clean Deluxe",
-    "Crunch AC10",
-    "Lead JCM800",
-    "High Gain 5153",
-];
-
 function renderPage() {
     return render(
         <MemoryRouter>
@@ -91,6 +76,7 @@ beforeEach(async () => {
             },
         },
     });
+    useSoundStore.setState({ customPresets: [], isLoaded: false });
 });
 
 afterEach(() => {
@@ -98,137 +84,94 @@ afterEach(() => {
     vi.clearAllMocks();
 });
 
-describe("Sound page", () => {
-    it("renders a card for every built-in preset with select and audition actions", async () => {
+describe("Sound Studio page", () => {
+    it("opens on the chain with the Sound Studio title and the active preset loaded", async () => {
         renderPage();
 
-        for (const name of BUILT_IN_NAMES) {
-            const heading = await screen.findByRole("heading", { name });
-            expect(heading).toBeInTheDocument();
-            const card = heading.closest(".bg-card") ?? document.body;
-            expect(
-                within(card as HTMLElement).getByRole("button", { name: /Select(ed)?/ }),
-            ).toBeInTheDocument();
-            expect(within(card as HTMLElement).getByRole("button", { name: "Audition" })).toBeInTheDocument();
-        }
-        expect(screen.getAllByRole("button", { name: /Select(ed)?/ })).toHaveLength(8);
-        expect(screen.getAllByRole("button", { name: "Audition" })).toHaveLength(8);
+        expect(screen.getByRole("heading", { level: 1, name: "Sound Studio" })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: "Classic guitar", pressed: true })).toBeInTheDocument();
+        const chain = screen.getByTestId("signal-chain");
+        expect(within(chain).getByRole("button", { name: /Amp/ })).toBeInTheDocument();
+        expect(chain.className).toContain("overflow-x-auto");
     });
 
-    it("highlights the active preset and marks its button as selected", async () => {
+    it("keeps the master volume slider and updates the setting from the keyboard", async () => {
         renderPage();
-
-        const activeHeading = await screen.findByRole("heading", { name: "Classic guitar" });
-        const card = activeHeading.closest(".bg-card") as HTMLElement;
-        expect(within(card).getByRole("button", { name: "Selected" })).toBeDisabled();
-        expect(within(card).getByText("Active")).toBeInTheDocument();
-        expect(screen.getAllByRole("button", { name: "Select" })).toHaveLength(7);
-    });
-
-    it("shows the active sound summary from the settings store", async () => {
-        renderPage();
-
-        expect(screen.getByText("Active sound: Classic guitar")).toBeInTheDocument();
-        expect(screen.getByRole("heading", { level: 1, name: "Sound" })).toBeInTheDocument();
-    });
-
-    it("renders the master volume slider bound to full.audio.volume with an accessible name and value text", async () => {
-        renderPage();
-
-        // The only slider while the designer is closed: named from the same
-        // i18n key as the visible label, valuetext carries the unit (V1/V4).
         const slider = screen.getByRole("slider", { name: "Volume" });
         expect(slider).toHaveAttribute("aria-valuenow", "80");
         expect(slider).toHaveAttribute("aria-valuetext", "80 %");
-        expect(screen.getByText("80 %")).toBeInTheDocument();
-    });
-
-    it("updates full.audio.volume when the slider is moved", () => {
-        renderPage();
-
-        const slider = screen.getByRole("slider", { name: "Volume" });
-        // Radix slider thumb: arrow keys step by `step` (1 → 80% → 79%).
         fireEvent.keyDown(slider, { key: "ArrowLeft" });
-
-        return waitFor(() => {
+        await waitFor(() => {
             expect(useSettingsStore.getState().full.audio.volume).toBeCloseTo(0.79, 5);
         });
     });
 
-    it("selecting a preset persists soundPreset and calls engine.setPreset", async () => {
+    it("loads the selected built-in into the chain", async () => {
         renderPage();
-
-        const heading = await screen.findByRole("heading", { name: "Lead JCM800" });
-        const card = heading.closest(".bg-card") as HTMLElement;
-        fireEvent.click(within(card).getByRole("button", { name: "Select" }));
-
+        fireEvent.click(screen.getByRole("button", { name: "Lead JCM800" }));
         await waitFor(() => {
-            expect(setPresetMock).toHaveBeenCalledTimes(1);
+            expect(useSettingsStore.getState().full.audio.soundPreset).toBe("nam-lead-jcm");
         });
-        const handed = (setPresetMock.mock.calls[0] as unknown[])[0] as { id: string; kind: string };
-        expect(handed.id).toBe("nam-lead-jcm");
-        expect(handed.kind).toBe("nam");
-        expect(useSettingsStore.getState().full.audio.soundPreset).toBe("nam-lead-jcm");
+        expect(screen.getByRole("button", { name: "Lead JCM800", pressed: true })).toBeInTheDocument();
+        expect(screen.getByTestId("signal-chain").querySelector("[data-chain-block='cab']")).not.toBeNull();
+        expect(screen.getByTestId("signal-chain").querySelector("[data-chain-block='comp']")).not.toBeNull();
+        expect(screen.getByRole("button", { name: "Marshall JCM800 (NAM)", pressed: true })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: "Fender Deluxe Reverb (NAM)" })).toBeInTheDocument();
+        expect(screen.queryByRole("combobox", { name: "Amp" })).not.toBeInTheDocument();
     });
 
-    it("shows the empty state as the single designer entry point while no custom presets exist", async () => {
+    it("inserts, moves, bypasses and removes a block from the chain", async () => {
         renderPage();
+        const chain = screen.getByTestId("signal-chain");
+        const addButtons = within(chain).getAllByRole("button", { name: "Add effect" });
+        fireEvent.click(addButtons[addButtons.length - 1]);
+        fireEvent.click(screen.getByRole("button", { name: "Delay" }));
+        expect(chain.querySelector("[data-chain-block='delay']")).not.toBeNull();
 
-        expect(await screen.findByText("No custom tones yet")).toBeInTheDocument();
-        // The collapsed designer accordion is hidden while the list is empty —
-        // the empty-state CTA is the only visible entry point (V6).
-        expect(screen.queryByText("Amp, EQ, effects")).not.toBeInTheDocument();
-        const cta = screen.getByRole("button", { name: "Tone designer" });
-        expect(screen.getByRole("button", { name: "More audio settings" })).toBeInTheDocument();
+        fireEvent.click(screen.getByRole("button", { name: "Move left" }));
+        const blocks = chain.querySelectorAll("[data-chain-block]");
+        expect(blocks[blocks.length - 1]?.getAttribute("data-chain-block")).not.toBe("delay");
 
-        // The CTA expands (and scrolls to) the designer accordion.
-        fireEvent.click(cta);
-        expect(await screen.findByText(/Build your own tone/)).toBeInTheDocument();
-        expect(screen.getByText("Amp, EQ, effects")).toBeInTheDocument();
+        fireEvent.click(screen.getByRole("button", { name: "Bypass" }));
+        expect(chain.querySelector("[data-chain-block='delay']")).toHaveClass("opacity-50");
+        fireEvent.click(screen.getByRole("button", { name: "Remove block" }));
+        expect(chain.querySelector("[data-chain-block='delay']")).toBeNull();
     });
 
-    it("exposes accessible names and unit value text on all designer sliders", async () => {
+    it("steps a global knob from the keyboard", () => {
         renderPage();
-
-        // Open the designer via the empty-state CTA (the single entry while empty).
-        fireEvent.click(screen.getByRole("button", { name: "Tone designer" }));
-
-        // 9 designer sliders + master volume, each named from its visible
-        // label key and exposing a unit-bearing valuetext (V1).
-        await screen.findByText(/Build your own tone/);
-        expect(screen.getAllByRole("slider")).toHaveLength(10);
-        const inputGain = screen.getByRole("slider", { name: "Input gain" });
-        expect(inputGain).toHaveAttribute("aria-valuetext", "1x");
-        expect(screen.getByRole("slider", { name: "Drive" })).toHaveAttribute("aria-valuetext", "0 %");
-        expect(screen.getByRole("slider", { name: "Bass" })).toHaveAttribute("aria-valuetext", "0 dB");
-        expect(screen.getByRole("slider", { name: "Output gain" })).toHaveAttribute("aria-valuetext", "1x");
+        const input = screen.getByRole("slider", { name: "Input" });
+        expect(input).toHaveAttribute("aria-valuetext", "1x");
+        fireEvent.keyDown(input, { key: "ArrowUp" });
+        expect(input).toHaveAttribute("aria-valuenow", "1.05");
+        fireEvent.keyDown(input, { key: "Home" });
+        expect(input).toHaveAttribute("aria-valuenow", "0");
+        fireEvent.keyDown(input, { key: "End" });
+        expect(input).toHaveAttribute("aria-valuenow", "2");
     });
 
-    it("shows the Ready line only on the active card when the engine reports ready for it", () => {
-        useSoundStore.setState({
-            engine: { presetId: "classic-acoustic", status: "ready" },
+    it("deletes a saved rig", async () => {
+        await useSoundStore.getState().saveCustomPreset({
+            name: "Room clean",
+            amp: "classic",
+            params: neutralChainParams(),
+            assembly: "blocks",
+            chain: [],
+            globals: neutralGlobals(0),
         });
         renderPage();
-
-        const activeCard = screen
-            .getByRole("heading", { name: "Classic guitar" })
-            .closest(".bg-card") as HTMLElement;
-        expect(within(activeCard).getByText("Ready")).toBeInTheDocument();
-        const otherCard = screen
-            .getByRole("heading", { name: "Lead JCM800" })
-            .closest(".bg-card") as HTMLElement;
-        expect(within(otherCard).queryByText("Ready")).not.toBeInTheDocument();
+        expect(await screen.findByRole("button", { name: "Room clean" })).toBeInTheDocument();
+        fireEvent.click(screen.getByRole("button", { name: "Delete tone" }));
+        fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+        await waitFor(() => {
+            expect(screen.queryByRole("button", { name: "Room clean" })).not.toBeInTheDocument();
+        });
     });
 
-    it("renders the same preset names in Polish", async () => {
+    it("uses the Sound Studio title in Polish", async () => {
         await i18n.changeLanguage("pl");
         renderPage();
-
-        expect(screen.getByRole("heading", { level: 1, name: "Dźwięk" })).toBeInTheDocument();
-        for (const name of ["Klasyczna gitara", "Czysty JC-120", "Lead JCM800"]) {
-            expect(await screen.findByRole("heading", { name })).toBeInTheDocument();
-        }
-        expect(screen.getAllByRole("button", { name: "Wybierz" })).toHaveLength(7);
-        expect(screen.getAllByRole("button", { name: "Posłuchaj" })).toHaveLength(8);
+        expect(screen.getByRole("heading", { level: 1, name: "Sound Studio" })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: "Klasyczna gitara" })).toBeInTheDocument();
     });
 });

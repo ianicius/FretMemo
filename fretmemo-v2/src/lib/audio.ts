@@ -19,8 +19,10 @@ import {
     initSoundEngine,
     soundEngine,
 } from '@/audio/engine';
-import { getPresetById } from '@/audio/presets';
+import { lookupPreset } from '@/audio/presetLookup';
+import { sampleSetForPreset } from '@/audio/presets';
 import { useSettingsStore } from '@/stores/useSettingsStore';
+import { ensureActiveRigReady } from '@/stores/useSoundStore';
 import {
     ensureSamplerLoaded,
     isSamplerReady,
@@ -56,8 +58,9 @@ function createNoiseBurst(ctx: AudioContext, duration: number): AudioBufferSourc
 function resolveSampleSetId(presetId?: string): SampleSetId {
     try {
         const id = presetId ?? soundEngine.getState().presetId;
-        const preset = id ? getPresetById(id) : null;
-        return preset && preset.amp !== 'classic' ? 'electric' : 'nylon';
+        const live = soundEngine.getCurrentPreset();
+        const preset = live && live.id === id ? live : lookupPreset(id);
+        return sampleSetForPreset(preset);
     } catch {
         return 'nylon';
     }
@@ -74,7 +77,8 @@ function resolveSampleSetId(presetId?: string): SampleSetId {
  * engine's voice bus, where the preset chain (amp stage, EQ, effects, master
  * volume) shapes it further.
  */
-export function playTone(midi: number, durationSec = 1.2): Promise<void> {
+export async function playTone(midi: number, durationSec = 1.2): Promise<void> {
+    await ensureActiveRigReady();
     const ctx = getSoundEngineContext();
     const freq = midiToFrequency(midi);
     const now = ctx.currentTime;
@@ -166,7 +170,8 @@ export interface PlayChordOptions {
     up?: boolean;
 }
 
-export function playChord(midis: number[], durationSec = 1.5, options: PlayChordOptions = {}): Promise<void> {
+export async function playChord(midis: number[], durationSec = 1.5, options: PlayChordOptions = {}): Promise<void> {
+    await ensureActiveRigReady();
     const ctx = getSoundEngineContext();
     const now = Math.max(ctx.currentTime, options.when ?? 0);
     const waitSec = now - ctx.currentTime;
@@ -328,13 +333,18 @@ export async function playFunctionalPrompt(options: FunctionalPromptOptions): Pr
  * earlier to the wrong output), and AudioBuffers play in any context.
  */
 export function preloadGuitarSamples(): void {
-    try {
-        // The engine reports its preset only once it runs; read the saved one.
-        const saved = useSettingsStore.getState().full.audio.soundPreset;
-        ensureSamplerLoaded(new OfflineAudioContext(1, 1, 44100), resolveSampleSetId(saved || undefined));
-    } catch {
-        // No Web Audio (tests, old browsers): playback falls back as before.
-    }
+    const start = () => {
+        try {
+            // The engine reports its preset only once it runs; read the saved one.
+            const saved = useSettingsStore.getState().full.audio.soundPreset;
+            ensureSamplerLoaded(new OfflineAudioContext(1, 1, 44100), resolveSampleSetId(saved || undefined));
+        } catch {
+            // No Web Audio (tests, old browsers): playback falls back as before.
+        }
+    };
+    // Custom rigs live in IndexedDB. Wait for them so a NAM rig does not
+    // preload the nylon set. Built-ins resolve inside ensure without waiting.
+    void ensureActiveRigReady().then(start, start);
 }
 
 /**

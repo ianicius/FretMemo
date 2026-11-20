@@ -19,7 +19,7 @@ export interface ResolvedTrackOutput {
     buffer: AudioBuffer;
     /** Resolved voice plan for this track. */
     plan:
-        | { kind: "preset"; preset: SoundPreset; ampNode?: AudioNode }
+        | { kind: "preset"; preset: SoundPreset; ampNode?: AudioNode; cabBuffer?: AudioBuffer | null; reverbBuffer?: AudioBuffer | null }
         | { kind: "direct" };
     muted: boolean;
 }
@@ -62,6 +62,8 @@ export function assemblePerTrackGraph(
         if (output.plan.kind === "preset") {
             const chain = assembleChain(ctx, output.plan.preset, {
                 ampNode: output.plan.ampNode,
+                cabBuffer: output.plan.cabBuffer,
+                reverbBuffer: output.plan.reverbBuffer,
             });
             chains.push(chain);
             // Buffer feeds the chain input; the chain output drives the master.

@@ -8,6 +8,7 @@ import {
     buildClassicAmpStage,
     createCompressorNode,
     createDelayNodes,
+    createDriveCharacterCurve,
     createDriveCurve,
     createEqNodes,
     createInputGainNode,
@@ -23,6 +24,7 @@ import {
     FakeConvolverNode,
     FakeDynamicsCompressorNode,
     FakeGainNode,
+    FakeOscillatorNode,
 } from './fixtures/audioStubs';
 
 function classicPreset(): SoundPreset {
@@ -76,6 +78,31 @@ describe('drive waveshaper curves', () => {
             } else {
                 expect(soft[i]).toBeLessThanOrEqual(neutral[i] + 1e-6);
             }
+        }
+    });
+
+    it('keeps the smooth character identical to the historical drive curve', () => {
+        expect(Array.from(createDriveCharacterCurve('soft', 0.4))).toEqual(Array.from(createDriveCurve(0.4)));
+        expect(Array.from(createDriveCharacterCurve('screamer', 0))).toEqual(Array.from(createDriveCurve(0)));
+    });
+
+    it('makes the screamer clip one polarity harder than the other', () => {
+        const curve = createDriveCharacterCurve('screamer', 1);
+        let asymmetry = 0;
+        for (let i = 0; i < curve.length; i += 1) {
+            asymmetry = Math.max(asymmetry, Math.abs(curve[i] + curve[curve.length - 1 - i]));
+        }
+        expect(asymmetry).toBeGreaterThan(0.05);
+        expect(curve[0]).toBeCloseTo(-1, 5);
+        expect(curve[curve.length - 1]).toBeCloseTo(1, 5);
+    });
+
+    it('holds the hard character on a wide, symmetric rail', () => {
+        const hard = createDriveCharacterCurve('hard', 1);
+        const atRail = hard.filter((value) => Math.abs(value) === 1).length;
+        expect(atRail).toBeGreaterThan(hard.length / 2);
+        for (let i = 0; i < hard.length; i += 1) {
+            expect(hard[i]).toBeCloseTo(-hard[hard.length - 1 - i], 5);
         }
     });
 });
@@ -258,5 +285,62 @@ describe('assembleChain', () => {
         const nodes = (ctx.createdNodes as FakeAudioNode[]).filter((n) => Array.isArray(n.disconnectCalls));
         const notDisconnected = nodes.filter((n) => n.disconnectCalls.length === 0);
         expect(notDisconnected).toEqual([]);
+    });
+});
+
+describe('effect pedals and cabinet IRs', () => {
+    const oscillatorsOf = (ctx: FakeAudioContext) =>
+        (ctx.createdNodes as FakeAudioNode[]).filter((n) => n instanceof FakeOscillatorNode) as FakeOscillatorNode[];
+
+    it('neutral presets build no modulation LFOs', () => {
+        const ctx = new FakeAudioContext();
+        assembleChain(ctx as unknown as BaseAudioContext, classicPreset()).dispose();
+        expect(oscillatorsOf(ctx)).toHaveLength(0);
+    });
+
+    it('chorus + tremolo insert started LFOs that dispose stops', () => {
+        const ctx = new FakeAudioContext();
+        const preset: SoundPreset = {
+            ...classicPreset(),
+            params: { ...classicPreset().params, chorusMix: 0.5, tremoloDepth: 0.6, tremoloRate: 7 },
+        };
+        const chain = assembleChain(ctx as unknown as BaseAudioContext, preset);
+        const oscillators = oscillatorsOf(ctx);
+        expect(oscillators).toHaveLength(2);
+        expect(oscillators.map((o) => o.frequency.value)).toContain(7);
+        oscillators.forEach((o) => expect(o.start).toHaveBeenCalled());
+        chain.dispose();
+        oscillators.forEach((o) => expect(o.stop).toHaveBeenCalled());
+    });
+
+    it('delay time and feedback follow the params', () => {
+        const ctx = new FakeAudioContext();
+        const delay = createDelayNodes(ctx as unknown as BaseAudioContext, 0.4, 0.5, 0.6);
+        expect((delay.delay as unknown as { delayTime: { value: number } }).delayTime.value).toBe(0.5);
+        expect(delay.feedback.gain.value).toBe(0.6);
+    });
+
+    it('a cabinet IR replaces the filter-curve stand-in after a NAM amp', () => {
+        const ctx = new FakeAudioContext();
+        const ampNode = new FakeAudioNode();
+        const cabBuffer = {} as AudioBuffer;
+        assembleChain(ctx as unknown as BaseAudioContext, { ...getPresetById('nam-clean-jc')!, cab: 'cab-mesa-412' }, {
+            ampNode: ampNode as unknown as ChainAudioNode,
+            cabBuffer,
+        });
+        const nodes = ctx.createdNodes as FakeAudioNode[];
+        const cab = nodes.find((n) => n instanceof FakeConvolverNode && n.buffer === cabBuffer);
+        expect(connectedDestinations(ampNode)).toContain(cab);
+        expect(nodes.some((n) => (n as { type?: string }).type === 'highpass')).toBe(false);
+    });
+
+    it("cab 'none' leaves a bundled NAM amp without any speaker stage", () => {
+        const ctx = new FakeAudioContext();
+        const ampNode = new FakeAudioNode();
+        assembleChain(ctx as unknown as BaseAudioContext, { ...getPresetById('nam-clean-jc')!, cab: 'none' }, {
+            ampNode: ampNode as unknown as ChainAudioNode,
+        });
+        const bass = (ctx.createdNodes as FakeAudioNode[]).find((n) => (n as { type?: string }).type === 'lowshelf');
+        expect(connectedDestinations(ampNode)).toEqual([bass]);
     });
 });

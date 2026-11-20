@@ -18,7 +18,10 @@
 
 import { useSettingsStore } from '@/stores/useSettingsStore';
 import { assembleChain, connectNodes, disconnectNodes, type AssembledChain, type ChainAudioNode } from './chain';
+import { loadGateWorklet } from './gate';
+import { loadBlockImpulseResponses, loadPresetImpulseResponses } from './irs';
 import { loadNamNode } from './nam';
+import { lookupPreset } from './presetLookup';
 import { getUserModelBlobUrl } from './userModels';
 import { DEFAULT_PRESET_ID, getPresetById, type SoundPreset } from './presets';
 
@@ -63,6 +66,10 @@ class SoundEngineController {
     private active: ActiveChain | null = null;
     private voiceBusBypassed = false;
     private state: SoundEngineState = { presetId: DEFAULT_PRESET_ID, status: 'idle' };
+    /** Last preset handed to the engine, including unsaved studio drafts. */
+    private currentPreset: SoundPreset | null = null;
+    /** Bumps on every activation so a slower rebuild cannot replace a newer one. */
+    private activation = 0;
     private listeners = new Set<SoundEngineListener>();
     private unsubscribeStore: (() => void) | null = null;
     private storeVolumeSeen: number | null = null;
@@ -89,9 +96,10 @@ class SoundEngineController {
             // the default (an unknown persisted id falls back with an error
             // status, mirroring the setPreset fallback policy).
             const requestedId = useSettingsStore.getState().full.audio.soundPreset || DEFAULT_PRESET_ID;
-            const preset = getPresetById(requestedId);
+            const preset = lookupPreset(requestedId);
             if (!preset) {
                 const fallback = getPresetById(DEFAULT_PRESET_ID)!;
+                this.currentPreset = fallback;
                 this.installChain(fallback, { crossfade: false });
                 this.state = {
                     presetId: requestedId,
@@ -99,13 +107,19 @@ class SoundEngineController {
                     error: `Unknown sound preset: ${requestedId}`,
                 };
                 this.emit();
+            } else if (preset.assembly === 'blocks') {
+                this.currentPreset = preset;
+                this.connectBypass();
+                void this.activatePreset(preset, { crossfade: true });
             } else if (preset.kind === 'nam') {
                 // Classic chain cannot be built synchronously for a NAM
                 // preset: pass audio through untouched until the model is
                 // loaded, then crossfade into the full chain.
+                this.currentPreset = preset;
                 this.connectBypass();
                 void this.activatePreset(preset, { crossfade: true });
             } else {
+                this.currentPreset = preset;
                 this.installChain(preset, { crossfade: false });
                 this.state = { presetId: preset.id, status: 'ready' };
                 this.emit();
@@ -142,17 +156,35 @@ class SoundEngineController {
      * Unknown/failed NAM models fall back to the classic stage and set an
      * error status. Never throws.
      */
-    async setPreset(preset: SoundPreset): Promise<void> {
+    async setPreset(preset: SoundPreset, options?: { force?: boolean }): Promise<void> {
         this.getAudioContext();
-        if (this.state.presetId === preset.id && this.state.status === 'ready') {
+        if (!options?.force && this.state.presetId === preset.id && this.state.status === 'ready') {
             return;
         }
+        this.currentPreset = preset;
         await this.activatePreset(preset, { crossfade: true });
+    }
+
+    /** True after the AudioContext has been created. Does not create one. */
+    hasContext(): boolean {
+        return this.ctx !== null;
+    }
+
+    /** Preset currently installed, or the one activation is aiming at. */
+    getCurrentPreset(): SoundPreset | null {
+        return this.currentPreset;
     }
 
     private async activatePreset(preset: SoundPreset, options: { crossfade: boolean }): Promise<void> {
         const ctx = this.ctx;
         if (!ctx) return;
+        const ticket = ++this.activation;
+        this.currentPreset = preset;
+
+        if (preset.assembly === 'blocks' && preset.chain && preset.globals) {
+            await this.activateBlockPreset(preset, options, ticket);
+            return;
+        }
 
         if (this.state.presetId !== preset.id || this.state.status !== 'ready') {
             this.state = { presetId: preset.id, status: 'loading' };
@@ -177,7 +209,12 @@ class SoundEngineController {
                 ampNode = result.node;
             }
 
-            const next = assembleChain(ctx, preset, { ampNode });
+            const irs = await loadPresetImpulseResponses(ctx, preset);
+            const next = assembleChain(ctx, preset, { ampNode, ...irs });
+            if (ticket !== this.activation) {
+                next.dispose();
+                return;
+            }
             const swap = () => {
                 this.installChain(preset, { crossfade: options.crossfade, next });
                 this.state = { presetId: preset.id, status: 'ready' };
@@ -188,11 +225,74 @@ class SoundEngineController {
                 // Swap on the next microtask-ish tick so a `loading` status
                 // can render before the (synchronous) node rebuild.
                 await Promise.resolve();
+                if (ticket !== this.activation) {
+                    next.dispose();
+                    return;
+                }
                 swap();
             } else {
                 swap();
             }
         } catch (error) {
+            if (ticket !== this.activation) return;
+            this.fallbackToClassic(preset, error);
+        }
+    }
+
+    /** Studio rig: load every NAM amp and IR, then assemble blocks in order. */
+    private async activateBlockPreset(preset: SoundPreset, options: { crossfade: boolean }, ticket: number): Promise<void> {
+        const ctx = this.ctx;
+        const chain = preset.chain;
+        if (!ctx || !chain) return;
+
+        if (this.state.presetId !== preset.id || this.state.status !== 'ready') {
+            this.state = { presetId: preset.id, status: 'loading' };
+            this.emit();
+        }
+
+        try {
+            const ampNodes: Record<string, ChainAudioNode> = {};
+            for (const block of chain) {
+                if (block.type !== 'amp' || !block.enabled) continue;
+                const model = typeof block.params.model === 'string' ? block.params.model : 'classic';
+                if (model === 'classic') continue;
+                const userModelUrl = model.startsWith('user-') ? await getUserModelBlobUrl(model) : null;
+                if (model.startsWith('user-') && !userModelUrl) {
+                    throw new Error(`NAM load failed (unknown-model): user model ${model} not found`);
+                }
+                const result = await loadNamNode(ctx, model, userModelUrl ?? undefined, `${model}::${block.id}`);
+                if (!result.ok) {
+                    throw new Error(`NAM load failed (${result.code}): ${result.message}`);
+                }
+                ampNodes[block.id] = result.node;
+            }
+
+            await loadGateWorklet(ctx).catch(() => {
+                // Gate falls back to a unity gain inside the chain.
+            });
+            const buffers = await loadBlockImpulseResponses(ctx, chain);
+            const next = assembleChain(ctx, preset, { ampNodes, ...buffers });
+            if (ticket !== this.activation) {
+                next.dispose();
+                return;
+            }
+            const swap = () => {
+                this.installChain(preset, { crossfade: options.crossfade, next });
+                this.state = { presetId: preset.id, status: 'ready' };
+                this.emit();
+            };
+            if (options.crossfade) {
+                await Promise.resolve();
+                if (ticket !== this.activation) {
+                    next.dispose();
+                    return;
+                }
+                swap();
+            } else {
+                swap();
+            }
+        } catch (error) {
+            if (ticket !== this.activation) return;
             this.fallbackToClassic(preset, error);
         }
     }
@@ -201,10 +301,12 @@ class SoundEngineController {
     private fallbackToClassic(preset: SoundPreset, error: unknown): void {
         const message = error instanceof Error ? error.message : String(error);
         const fallback: SoundPreset = {
-            ...preset,
+            id: preset.id,
             kind: 'classic',
             amp: 'classic',
             params: getPresetById(DEFAULT_PRESET_ID)!.params,
+            nameKey: preset.nameKey,
+            builtIn: false,
         };
         this.installChain(fallback, { crossfade: true });
         this.state = { presetId: preset.id, status: 'error', error: message };

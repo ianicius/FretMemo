@@ -1,4 +1,4 @@
-# Ekran Dźwięk (Sound) — presety, projektant brzmienia, własne presety
+# Sound Studio — łańcuch, presety, głośność, wejście na żywo
 
 Date: 2026-11-03
 Scope: `fretmemo-v2` (`src/pages/Sound.tsx`, `src/components/sound/`, `src/stores/useSoundStore.ts`, nawigacja, `src/locales`)
@@ -8,22 +8,33 @@ Backend dźwięku jest wyłącznie zweryfikowanym silnikiem z `src/audio/` — t
 
 ## 1. Co to jest
 
-Dźwięk to piąty, najwyższego poziomu zakładka aplikacji: użytkownik wybiera brzmienie gitary używane
-przez **wszystkie** ćwiczenia (trening słuchu, dźwięk→prog, itd. — wszystko, co gra przez
-`src/lib/audio.ts` → voice bus silnika). Ekran udostępnia:
+Sound Studio (`/sound`) to miejsce, w którym układasz brzmienie gitary używane przez
+**wszystkie** ćwiczenia (cokolwiek gra przez `src/lib/audio.ts` → voice bus).
+Etykieta nawigacji i nagłówek strony to „Sound Studio” (en i pl).
 
-- siatkę kart presetów (6 wbudowanych + własne), każda z odsłuchem i przełączeniem jednym kliknięciem,
-- suwak głośności głównej (`full.audio.volume`, live — silnik sam śledzi zmiany ustawień),
-- Projektanta brzmienia (Tone Designer): wybór wzmacniacza + suwaki wszystkich parametrów `ChainParams`,
-  odsłuch frazy testowej, zapis własnego presetu, usuwanie własnych presetów,
+Na stronie od razu widać:
+
+- przeglądarkę presetów (wbudowane + własne brzmienia); wybór ustawia aktywny preset
+  i wczytuje jego łańcuch do edytora,
+- łańcuch sygnału: bloki połączone w rzędzie, przycisk „+” przed, między i za blokami,
+  wybór typu, zaznaczenie bloku, ominięcie, przesunięcie w lewo/prawo, usunięcie,
+- pasek globalny: Input, Gate (włącznik + próg), Bass, Middle, Treble, Output — pokrętła
+  `role="slider"` (strzałki, PageUp/PageDown, Home/End),
+- nazwę, odsłuch frazy i zapis brzmienia (własne id da się nadpisać; wbudowanego
+  zapis tworzy nowy preset),
+- głośność główną (`full.audio.volume`) i wejście na żywo (mikrofon przez aktywny tor)
+  na tej samej powierzchni, nie w zwiniętych sekcjach,
 - link „Więcej ustawień audio” do `/me?section=settings`.
+
+Zmiana pokrętła jest wysyłana do silnika z krótkim opóźnieniem (`setPreset` z `force`),
+więc słychać ją bez zapisu. Zapisany preset (`assembly: 'blocks'`) jest tym, co ćwiczenie
+odtworzy po pełnym przeładowaniu strony — także gdy użytkownik wejdzie od razu w ćwiczenie.
 
 ## 2. Jak dojść
 
-- Desktop: pozycja **Dźwięk** w lewym pasku nawigacji (`AppShell`, między „Trening” a „Wyzwania”).
-- Mobile: pozycja **Dźwięk** w dolnym pasku (`BottomNav`, 5 pozycji, etykieta „Dźwięk”).
-- Menu mobilne (hamburger) również zawiera pozycję Dźwięk.
-- Adres URL: `/sound` (lazy-loaded chunk, dostępny jako punkt wejścia SPA).
+- Desktop: pozycja **Sound Studio** w lewym pasku (`AppShell`). Widoczna etykieta to `nav.sound` — w en i pl ten sam napis „Sound Studio”.
+- Mobile: ta sama etykieta w dolnym pasku (`BottomNav`: Home, Train, Learn, Sound Studio, Challenges, Me).
+- Adres URL: `/sound` (lazy-loaded chunk, punkt wejścia SPA).
 
 ## 3. Presety wbudowane
 
@@ -118,43 +129,35 @@ W spoczynku zapisany preset i łańcuch silnika są zawsze zgodne. Własne prese
 przez `toEnginePreset` (adaptacja `kind: 'custom'` → `'classic' | 'nam'`, bo silnik decyduje o NAM
 na podstawie `kind`; zapisany model danych nie jest zmieniany).
 
-## 5. Projektant brzmienia (Tone Designer)
+## 5. Edytor łańcucha (StudioBoard)
 
-Sekcja zwijana pod siatką presetów (`SectionCollapse`, wzorzec spójny z Ustawieniami).
-Gdy lista własnych presetów jest **pusta**, zwinięta sekcja jest ukryta — jedynym punktem
-wejścia jest CTA w pustym stanie, które rozwija sekcję i przewija do niej; po rozwinięciu
-lub gdy istnieje choć jeden własny preset, sekcja zachowuje się standardowo.
+Edytor jest widoczny od razu (`src/components/sound/StudioBoard.tsx`). Nie ma zwijanej sekcji.
 
-- **Wzmacniacz**: `classic` + 5 modeli z rejestru `NAM_MODELS` (klucze `sound.designer.amps.<id>`).
-- **Suwaki**: wszystkie 9 pól `ChainParams`, zakresy z `CHAIN_PARAM_RANGES`, etykiety
-  `sound.designer.params.<pole>` i jednostki (`dB`, `%`, `x`). Każdy suwak (jak i suwak
-  głośności) wystawia dostępną nazwę (`aria-label` z tego samego klucza i18n co widoczna
-  etykieta) oraz `aria-valuetext` z jednostką (np. `1.95x`, `0 dB`, `99 %`) — przez lokalny
-  wrapper `SoundSlider`, bo thumb Radixa nie przyjmuje asocjacji `htmlFor`/`id`.
+- **Przeglądarka**: wbudowane + własne. Na wąskim ekranie łańcuch jest nad listą.
+- **Łańcuch**: rząd bloków, przycisk „+” przed, między i za nimi (maks. 10, duplikaty dozwolone).
+  Chip **EQ** stoi w `globals.toneStackIndex` i nie jest blokiem. Na klocku widać numer, typ i pełną
+  nazwę sprzętu (dwie linie). Pod łańcuchem paleta jest pogrupowana: wzmacniacz i kolumna, gain,
+  modulacja, czas. Zaznaczenie otwiera inspektor: dla amp, cab i reverb karty sprzętu (nie lista
+  rozwijana), dla reszty pokrętła, oraz bypass, przesunięcie i usunięcie. Import `.nam` jest przy
+  kartach wzmacniacza i zostaje w IndexedDB `fretmemo-user-models-v1`.
+- **Pasek globalny**: Input, Gate (włącznik + próg), Bass, Middle, Treble, Output. Pokrętła
+  `role="slider"` (strzałki, PageUp/PageDown, Home/End, przeciąganie). Głośność główna zostaje
+  suwakiem `SoundSlider` (`aria-label` + `aria-valuetext`).
+- **Typy bloków**: amp (`classic`, modele `NAM_MODELS`, import `user-*`), cab (`filter` / `ir` / `none`),
+  drive (`soft` historyczny, plus `screamer`, `transparent`, `hard`, `fuzz` — własne układy,
+  nie capture’e), comp, chorus, tremolo, phaser (4 allpass + LFO), flanger (krótki delay + LFO),
+  wah (filtr pasmowy sterowany obwiednią nuty), eq (przesuwalny korektor, osobno od chipu EQ),
+  delay, reverb. Brak `character` na starym bloku zostaje przy `soft`. Phaser, flanger, wah i eq
+  istnieją tylko w grafie bloków.
 
-| Parametr | Zakres | Krok | Znaczenie |
-| --- | --- | --- | --- |
-| `inputGain` | 0–2 | 0.05 | wzmocnienie wejścia (x, 1 = neutralnie) |
-| `drive` | 0–1 | 0.01 | siła waveshapera (tylko stage classic; 0 = wyłączony) |
-| `bass` | −12…+12 dB | 0.5 | lowshelf 200 Hz |
-| `mid` | −12…+12 dB | 0.5 | peaking 1 kHz |
-| `treble` | −12…+12 dB | 0.5 | highshelf 3.2 kHz |
-| `comp` | 0–1 | 0.01 | siła kompresora |
-| `delayMix` | 0–1 | 0.01 | wet delayu (~280 ms, feedback 0.35) |
-| `reverbMix` | 0–1 | 0.01 | wet pogłosu (syntetyczny IR) |
-| `outputGain` | 0–2 | 0.05 | wzmocnienie wyjścia (x) |
+Nietknięty preset wbudowany brzmi grafem historycznym (`assembly` inne niż `'blocks'`). Pierwsza
+edycja łańcucha albo pokrętła oznacza projekt jako brudny i od tej chwili dźwięk idzie grafem bloków.
+Sam zapis nazwy nie brudzi projektu. Zmiana jest wysyłana do silnika z opóźnieniem ~120 ms
+(`setPreset`, id `studio-draft`, `force`). „Posłuchaj frazy” gra frazę testową przez aktualny tor.
 
-Odsłuch live: projektant **nie dotyka silnika** dopóki nic nie zmienisz. Pierwsza zmiana zaznacza
-projekt jako „brudny”; każda zmiana (debounce ~180 ms) aplikuje projekt do silnika jako przejściowy
-preset (`custom-draft-*`), więc ruchy suwaków słychać od razu. Przycisk „Posłuchaj frazy” domyka
-oczekującą zmianę i gra frazę testową. Odrzucenie (zamknięcie bez zapisu) przywraca łańcuch
-aktywnego presetu; zapis ustawia nowy preset jako aktywny (persist + silnik) i zamyka projektant.
-
-Zapis: nazwa (wymagana, walidowana) + aktualny wzmacniacz/parametry → `saveCustomPreset`.
-Własne presety mają `id: custom-<uuid>`, `kind: 'custom'`, a pole `nameKey` przechowuje **nazwę
-dosłowną** (wpisaną przez użytkownika — to nie jest klucz i18n; interfejs renderuje ją wprost).
-Usuwanie własnego presetu: ikona kosza na karcie + `ConfirmDialog` (wzorzec aplikacji). Usunięcie
-aktywnego presetu wraca do `classic-acoustic` (persist + silnik).
+Zapis wymaga nazwy. Wbudowany preset zapisuje się jako nowy `custom-<uuid>`; własny id da się nadpisać.
+`nameKey` trzyma **nazwę dosłowną**, nie klucz i18n. Usunięcie aktywnego własnego presetu wraca do
+`classic-acoustic`. Zakresy liczbowe parametrów zostają w `CHAIN_PARAM_RANGES`.
 
 ## 6. Trwałość własnych presetów
 
@@ -170,10 +173,10 @@ od najnowszych). Walidacja przy odczycie:
 
 Stan aktywnego presetu żyje **wyłącznie w ustawieniach** (`full.audio.soundPreset`) — store Dźwięku
 trzyma tylko listę własnych presetów i mirror statusu silnika (`engine.presetId/status/error`).
-Po odświeżeniu strony z aktywnym własnym presetem pierwszy start silnika nie zna własnych presetów
-(rejestr wbudowanych) i fall backuje do classic ze statusem błędu `Unknown sound preset: …`;
-`useSoundStore` nasłuchuje tego błędu i **naprawia** go, aplikując zapisany własny preset
-(max 1 naprawa na preset na sesję — nie tworzy pętli przy naprawdę zepsutym modelu).
+Po odświeżeniu `App` woła `loadCustomPresets()`, a `playTone` / `playChord` czekają na
+`ensureActiveRigReady()`, zanim powstanie AudioContext, gdy aktywne id nie jest presetem
+wbudowanym. Ćwiczenie nie wymaga wcześniejszej wizyty w `/sound`. Jeśli silnik zdąży
+zgłosić `Unknown sound preset`, store nadal naprawia ten błąd raz na preset na sesję.
 
 ## 7. Integracja z ustawieniami
 
@@ -220,8 +223,7 @@ Poza tym blueprint pozostał zachowany: ustawienia globalne nadal w `/me?section
 
 ## 11. Ograniczenia
 
-- Import własnych plików `.nam` — poza zakresem tego node’a (rejestrowane wcześniej jako przyszła
-  funkcja; projektant używa wyłącznie modeli z rejestru `NAM_MODELS`).
+- Import własnych plików `.nam` jest opisany w sekcji 3 (IndexedDB, tylko A2, limit 15 MB).
 - Cache PWA dla `/sound/**` (CacheFirst `sound-assets`) jest skonfigurowany w `vite.config.ts`
   przez node silnika; chunk `/sound` wchodzi do standardowego precache SPA. `vite.config.ts` nie
   był modyfikowany w tym node’ie.
@@ -232,7 +234,7 @@ Poza tym blueprint pozostał zachowany: ustawienia globalne nadal w `/me?section
 
 ## 12. Wejście na żywo (Live input)
 
-Sekcja zwijana na ekranie Dźwięk (pod projektantem brzmienia, `SectionCollapse`), renderowana przez
+Karta na dole Sound Studio (`LiveInputPanel` z `embedded`, bez zwijania), renderowana przez
 `src/components/sound/LiveInputPanel.tsx`; logika życia w `src/audio/liveInput.ts` (kontroler
 `liveInput` ze stanem `{ status: 'off' | 'starting' | 'on' | 'error', errorKind?, muted }` i
 `subscribe()`).
@@ -243,9 +245,10 @@ Sekcja zwijana na ekranie Dźwięk (pod projektantem brzmienia, `SectionCollapse
   `{ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } }` —
   żadne DSP przeglądarki nie dotyka sygnału (echo cancellation dodatkowo ucina długie sustainy).
 - **Ścieżka sygnału**: `MediaStreamAudioSourceNode → inputGain (0.9) → voiceBus silnika` — to samo
-  wejście łańcucha, do którego podłączają się głosy z `lib/audio.ts` (publiczne API silnika,
-  bez edycji `engine.ts`), więc mikrofon płynie przez aktualnie wybrany preset: wzmacniacz →
-  drive → EQ → comp → delay → reverb → master. Równolegle `inputGain → AnalyserNode`
+  wejście łańcucha, do którego podłączają się głosy z `lib/audio.ts` (publiczne API silnika),
+  więc mikrofon płynie przez aktywny preset. Nietknięty preset idzie grafem historycznym;
+  zapisany rig (`assembly: 'blocks'`) — kolejnością bloków (`docs/sound-engine.md`, 4b).
+  Równolegle `inputGain → AnalyserNode`
   (`fftSize = 256`) zasila wskaźnik poziomu w panelu (pętla rAF, sprzątana przy stopie/odmontowaniu;
   szerokość słupka pisana bezpośrednio do DOM, bez re-renderów).
 - **Odsłuch i słuchawki**: przed włączeniem panel pokazuje krótką podpowiedź, a cały czas gdy
