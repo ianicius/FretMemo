@@ -9,6 +9,8 @@ import { ExerciseCard } from "@/components/ui/exercise-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
 import { Compass, Drum, Ear, Guitar, Loader2, Music, Music2, Sparkles, Star, Target, Trash2, X } from "lucide-react";
+import { BackingLoopExercise } from "@/components/improv/BackingLoopExercise";
+import { STANDARDS, STANDARDS_ID } from "@/data/improv/curriculum";
 import { useTranslation } from "react-i18next";
 import type { ChangeEvent } from "react";
 import { Button } from "@/components/ui/button";
@@ -19,7 +21,7 @@ import type { ScoreSummary } from "@/types/scores";
 
 type TechniqueDifficulty = "beginner" | "intermediate" | "advanced";
 type PracticeMode = "fretboardToNote" | "tabToNote" | "noteToTab" | "playNotes" | "playTab";
-type TrainSectionKey = "pinned" | "scores" | "drills" | "technique" | "theory" | "ear" | "rhythm";
+type TrainSectionKey = "pinned" | "scores" | "drills" | "technique" | "theory" | "ear" | "rhythm" | "standards";
 type TrainSectionsOpenState = Record<TrainSectionKey, boolean>;
 
 type CatalogCard = {
@@ -128,6 +130,7 @@ const DEFAULT_SECTIONS_OPEN: TrainSectionsOpenState = {
     theory: true,
     ear: true,
     rhythm: true,
+    standards: true,
 };
 
 function normalizeSectionsOpen(
@@ -142,6 +145,7 @@ function normalizeSectionsOpen(
         theory: typeof sectionsOpen?.theory === "boolean" ? sectionsOpen.theory : DEFAULT_SECTIONS_OPEN.theory,
         ear: typeof sectionsOpen?.ear === "boolean" ? sectionsOpen.ear : DEFAULT_SECTIONS_OPEN.ear,
         rhythm: typeof sectionsOpen?.rhythm === "boolean" ? sectionsOpen.rhythm : DEFAULT_SECTIONS_OPEN.rhythm,
+        standards: typeof sectionsOpen?.standards === "boolean" ? sectionsOpen.standards : DEFAULT_SECTIONS_OPEN.standards,
     };
 }
 
@@ -930,6 +934,14 @@ export default function Library() {
                         </div>
                     ))}
                 </div>
+            </SectionCollapse>
+
+            <SectionCollapse
+                title={t("improv.standards.title")}
+                open={sectionsOpen.standards}
+                onOpenChange={(nextOpen) => handleSectionOpenChange("standards", nextOpen)}
+            >
+                <BackingLoopExercise moduleId={STANDARDS_ID} exercise={STANDARDS} />
             </SectionCollapse>
 
             <div className="rounded-xl border border-border bg-muted/40 p-4 text-sm text-muted-foreground">

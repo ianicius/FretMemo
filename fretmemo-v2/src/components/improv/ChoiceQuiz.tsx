@@ -10,8 +10,8 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Note } from "tonal";
-import { playTone } from "@/lib/audio";
+import { playSoundSteps } from "@/lib/improv/playSound";
+import type { SoundStep } from "@/lib/improv/questionSound";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,7 +19,6 @@ import {
     type ChoiceQuestion,
 } from "@/lib/improv/questions";
 import { isExercisePassed, QUIZ_PASSED_ATTEMPTS, type ChoiceQuizParams, type ImprovExercise } from "@/data/improv/curriculum";
-import { modeNotesFromRoot } from "@/lib/improv/questions";
 import { selectModuleProgress, useImprovStore } from "@/stores/useImprovStore";
 import { useProgressStore } from "@/stores/useProgressStore";
 import { cn } from "@/lib/utils";
@@ -98,26 +97,21 @@ export function ChoiceQuiz({ moduleId, exercise, onQuestionAnswered, onRunFinish
         }, visual ? BOARD_ADVANCE_MS : ANSWER_ADVANCE_MS);
     };
 
-    const audioTimersRef = useRef<number[]>([]);
+    const cancelSoundRef = useRef<(() => void) | null>(null);
+    /** After the first "Play" (a user gesture unlocks audio), the next questions play by themselves. */
+    const listeningRef = useRef(false);
 
-    useEffect(() => () => {
-        for (const id of audioTimersRef.current) window.clearTimeout(id);
-        audioTimersRef.current = [];
+    const playSound = useCallback((steps: SoundStep[]) => {
+        cancelSoundRef.current?.();
+        listeningRef.current = true;
+        cancelSoundRef.current = playSoundSteps(steps);
     }, []);
 
-    /** Plan phase 5: ear recognition — plays the mode's scale up and down. */
-    const playScaleAudio = useCallback((root: string, order: number) => {
-        for (const id of audioTimersRef.current) window.clearTimeout(id);
-        audioTimersRef.current = [];
-        const rootPc = Note.chroma(root) ?? 0;
-        const notes = modeNotesFromRoot(root, order);
-        const midis = notes.map((note) => 60 + ((Note.chroma(note) - rootPc + 12) % 12));
-        midis.push(72); // octave top
-        const sequence = [...midis, ...[...midis].slice(0, -1).reverse()];
-        sequence.forEach((midi, position) => {
-            audioTimersRef.current.push(window.setTimeout(() => void playTone(midi, 0.7), position * 280));
-        });
-    }, []);
+    useEffect(() => {
+        if (listeningRef.current && question?.audio) playSound(question.audio);
+    }, [playSound, question]);
+
+    useEffect(() => () => cancelSoundRef.current?.(), []);
 
     const restart = useCallback(() => {
         attemptSeed.current += 1;
@@ -168,7 +162,7 @@ export function ChoiceQuiz({ moduleId, exercise, onQuestionAnswered, onRunFinish
                     />
                     <p className="text-sm font-medium">{t(question.promptKey, localizePromptValues(question.promptValues))}</p>
                     {question.audio && (
-                        <Button type="button" size="sm" variant="outline" onClick={() => playScaleAudio(question.audio!.root, question.audio!.order)}>
+                        <Button type="button" size="sm" variant="outline" onClick={() => playSound(question.audio!)}>
                             {t("improv.quiz.play")}
                         </Button>
                     )}

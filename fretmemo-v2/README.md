@@ -16,8 +16,9 @@ UI po polsku z terminami angielskimi; dokumentacja modułów w `docs/`.
 - **Improv Training (`/improv`)** — 22 moduły nauki improwizacji w kolejności z wideo źródłowego
   (od dźwięków struny E po „Giant Steps"): teoria PL + terminy EN, quizy na gryfie, quizy zamknięte,
   diagramy skal z metronomem i loopy akordowe z progami przejścia; postęp persystowany.
-  Moduł ma własną zakładkę „Improv" w nawigacji głównej (dolna belka + sidebar desktop); nie jest
-  osiągalny z biblioteki Train.
+  Moduł ma własną zakładkę „Improv" w nawigacji głównej (dolna belka + sidebar desktop).
+  Mapa modułów zostaje tylko tam. Pętla standardów (te same progresje i ten sam postęp)
+  jest też na końcu biblioteki Train (`/train`), za Rhythm Dojo, żeby ćwiczyć ją osobno.
   Architektura: `docs/improv-training.md`.
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

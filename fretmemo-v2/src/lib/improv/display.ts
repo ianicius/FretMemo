@@ -23,6 +23,7 @@ export const ENGINE_LABEL_KEYS: Record<ImprovEngineType, string> = {
     lick: "improv.engine.lick",
     "bend-drill": "improv.engine.bendDrill",
     "voicing-drill": "improv.engine.voicingDrill",
+    "echo-drill": "improv.engine.echoDrill",
 };
 
 /** Per-bar cue of the phrasing loops (plan B4): play/rest bars and the 2+2 question–answer bars. */
@@ -55,14 +56,14 @@ const PARENT_MINOR = /^([A-G][#b]?) (melodic|harmonic) minor$/;
 /**
  * Display text of a raw answer/label token. Matching always uses the raw
  * value; this is display-only:
- * - "improv.…" keys are translated;
+ * - "improv.…" and "ear.…" keys are translated;
  * - words with an `improv.term.*` entry (mode names, chord types,
  *   "major"…) use the localized term;
  * - "G melodic minor" style parents use a localized template;
  * - everything else gets the note notation on each embedded chord token.
  */
 export function localizeAnswer(value: string): string {
-    if (value.startsWith("improv.")) return i18n.t(value);
+    if (value.startsWith("improv.") || value.startsWith("ear.")) return i18n.t(value);
     const termKey = `improv.term.${value}`;
     if (i18n.exists(termKey)) return i18n.t(termKey);
     const parent = PARENT_MINOR.exec(value);
@@ -81,7 +82,7 @@ const TERM_FIELDS = new Set(["mode", "label", "type", "parent"]);
  * Field names are the generator contract in src/lib/improv/questions.ts;
  * matching always happens on raw tokens — this map is display-only.
  */
-const NOTE_TOKEN_FIELDS = new Set(["key", "chord", "sub", "v", "dominant", "target", "ii", "first", "second", "source", "root", "offset"]);
+const NOTE_TOKEN_FIELDS = new Set(["key", "chord", "sub", "v", "dominant", "target", "ii", "first", "second", "source", "root", "offset", "note"]);
 /** Comma-joined note tokens ("F#, C#, G#"). */
 const LIST_NOTE_FIELDS = new Set(["list", "keys"]);
 /** Dash-joined note tokens ("A-C#-E" triad spellings, "B–G–Eb…" cycles). */

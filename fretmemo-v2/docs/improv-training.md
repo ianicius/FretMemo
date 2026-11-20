@@ -15,8 +15,9 @@ istniejącą architekturę aplikacji (trasy, store z persystencją, silnik audio
 Moduł „Trening improwizacji / Improv Training" to nowa trasa `/improv` (mapa drogowa 22 modułów)
 i `/improv/:moduleId` (szczegół modułu: teoria + ćwiczenia). Wejście: własna zakładka „Improv" w
 nawigacji głównej — dolna belka mobilna (`BottomNav`) i sidebar desktopowy (`AppShell`), id
-`improv` w `TabId`, etykieta `nav.improv` (PL/EN: „Improv"); od rundy 2 moduł **nie ma** karty
-w bibliotece `/train` (sekcja i handler usunięte z `Library.tsx`).
+`improv` w `TabId`, etykieta `nav.improv` (PL/EN: „Improv"). Mapa modułów **nie ma** karty
+w bibliotece `/train`. Pętla standardów (`STANDARDS`, postęp pod `standards`) jest na końcu
+`/train`, za Rhythm Dojo — ten sam silnik i ten sam zapis co pod mapą improwizacji.
 Postęp jest persystowany (`localStorage`, klucz `fretmemo-improv-v1`); odblokowywanie sekwencyjne:
 moduł N jest dostępny po zaliczeniu modułu N-1 (albo globalny przełącznik „Odblokuj wszystkie").
 
@@ -86,10 +87,12 @@ Moduł jest zaliczony (`completed`), gdy **każde** jego ćwiczenie poza `nonGat
   rozszerzony o `'improv'`; etykieta `nav.improv` w obu locale. `SeoManager.getRouteMeta` ma meta
   dla `/improv` (tytuł + description wg wzorca pozostałych tras). Minimalna korekta dolnej belki:
   padding kontenera `px-2` → `px-1`, by 6 pozycji mieściło się na 390px bez zawijania.
-- **Biblioteka `/train`**: brak karty — `Library.tsx` nie zawiera sekcji `improv` (`TrainSectionKey`,
-  `DEFAULT_SECTIONS_OPEN`, `openImprov` i importy `useImprovStore`/`countCompletedModules` usunięte
-  w rundzie 2); moduł jest osiągalny wyłącznie z nawigacji głównej. Klucze locale
-  `library.improv`, `library.improvSummary`, `improv.libraryCard.*` zostały usunięte w rundzie 7 (patrz i18n).
+- **Biblioteka `/train`**: brak karty mapy improwizacji — `Library.tsx` nie zawiera sekcji `improv`
+  ani handlera `openImprov` (usunięte w rundzie 2). Na końcu katalogu, za Rhythm Dojo, jest
+  `SectionCollapse` ze `BackingLoopExercise` dla `STANDARDS` / `STANDARDS_ID` (klucz sekcji
+  `standards`, domyślnie otwarta). Postęp leci w `useImprovStore` pod `standards`, wspólnie
+  z mapą. Klucze locale `library.improv`, `library.improvSummary`, `improv.libraryCard.*`
+  zostały usunięte w rundzie 7; tytuł sekcji to istniejące `improv.standards.title`.
 - **E4 pętle** (faza 3 planu): pętle w modułach 3, 4, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22
   (spoza pętli pozostają 1, 2, 5, 8 — moduły wiedzy); wpisy progresji niosą opcjonalny `hintKey` (podpowiedź
   pod akordem w prompterze, np. „Skala D dorycka — celuj w H”) i `beats` (Am7 trzymane 4 takty w module 3); moduł 12

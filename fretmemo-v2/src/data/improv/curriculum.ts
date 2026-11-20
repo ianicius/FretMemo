@@ -21,7 +21,7 @@ import type { DrumStyleId } from "@/lib/improv/drumStyles";
 
 /* ─────────── Engine parameter types ─────────── */
 
-export type ImprovEngineType = "choice-quiz" | "diagram-drill" | "backing-improv" | "practice-link" | "lick" | "bend-drill" | "voicing-drill";
+export type ImprovEngineType = "choice-quiz" | "diagram-drill" | "backing-improv" | "practice-link" | "lick" | "bend-drill" | "voicing-drill" | "echo-drill";
 
 /** Tonic for shapes/keys: sharp spellings plus the flat keys the curriculum needs. */
 export type ImprovKey = NoteName | "Bb" | "Db" | "Eb" | "Gb" | "Ab";
@@ -219,7 +219,22 @@ export type ImprovExerciseParams =
     | PracticeLinkParams
     | LickParams
     | BendDrillParams
-    | VoicingDrillParams;
+    | VoicingDrillParams
+    | EchoDrillParams;
+
+/**
+ * "Play what you hear": a cadence and a short phrase from the allowed degrees;
+ * the microphone checks the phrase played back. `requiredPhrases` phrases pass it.
+ */
+export interface EchoDrillParams {
+    /** Scale degrees "1"–"7" the phrases use. */
+    degrees: Array<"1" | "2" | "3" | "4" | "5" | "6" | "7">;
+    mode: "major" | "minor";
+    /** Notes per phrase. */
+    length: number;
+    requiredPhrases: number;
+    nonGating?: boolean;
+}
 
 /** Plan D2: licks from `licks.ts`; each one needs `requiredRuns` "played it" marks. Extra practice. */
 export interface LickParams {
@@ -1410,6 +1425,9 @@ export function isExercisePassed(
             const params = exercise.params as LickParams;
             return params.lickIds.every((id) => (progress.exerciseRuns[loopRunKey(exercise.id, id)] ?? 0) >= params.requiredRuns);
         }
+        case "echo-drill": {
+            return (progress.exerciseRuns[exercise.id] ?? 0) >= (exercise.params as EchoDrillParams).requiredPhrases;
+        }
         case "bend-drill": {
             const params = exercise.params as BendDrillParams;
             return params.bends.every((bend) => (progress.exerciseRuns[loopRunKey(exercise.id, bend.id)] ?? 0) >= params.requiredReps);
@@ -1583,7 +1601,8 @@ export function reviewQuiz(generators: ChoiceGeneratorId[]): ImprovExercise {
 export const REVIEW_ID = "review";
 
 /**
- * Plan F1: the session of the day — a review quiz, one diagram and one loop.
+ * Plan F1: the session of the day — a review quiz, one diagram and one loop
+ * (and one "play what you hear" phrase drill in the tracks that have it).
  * Diagram and loop come from the current module, or from the nearest module
  * that has one (earlier modules first). Before any module is complete the
  * quiz is the nearest module quiz instead of a review.
@@ -1604,5 +1623,6 @@ export function dailySession(moduleState: ModuleStateShape, modules: ImprovModul
         ...(passed.length > 0 ? [{ moduleId: REVIEW_ID, exercise: reviewQuiz(passed) }] : pick("choice-quiz")),
         ...pick("diagram-drill"),
         ...pick("backing-improv"),
+        ...pick("echo-drill"),
     ];
 }

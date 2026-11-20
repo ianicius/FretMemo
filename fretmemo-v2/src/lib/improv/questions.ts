@@ -13,9 +13,11 @@
 
 import type { NoteName } from "@/types/fretboard";
 import { NOTES } from "@/lib/constants";
-import { Key } from "tonal";
+import { Key, Note } from "tonal";
 import { generateBluesForm, generateBluesScale, generateBluesTones } from "./bluesQuestions";
 import { generateTriadInversion, generateVoiceLeading } from "./triadQuestions";
+import { generateEarChord, generateEarDegree, generateEarInterval, generateEarProgression } from "./earQuestions";
+import { tone, type SoundStep } from "./questionSound";
 
 /* ─────────── Seeded PRNG ─────────── */
 
@@ -76,8 +78,8 @@ export interface ChoiceQuestion {
     /** Optional i18n key + values of an after-answer explanation. */
     hintKey?: string;
     hintValues?: Record<string, string | number>;
-    /** Optional audio prompt (plan phase 5: mode recognition by ear). */
-    audio?: { root: string; order: number };
+    /** Optional sound of the question (a scale, a cadence and a note, chords…), played by lib/improv/playSound.ts. */
+    audio?: SoundStep[];
     /** Optional board drawn with the question; with `tap` it replaces the answer buttons. */
     visual?: QuestionVisual;
 }
@@ -273,6 +275,14 @@ const MAJOR_SCALE_OFFSETS = [0, 2, 4, 5, 7, 9, 11];
 
 /** The notes of a mode rooted on `root`: the parent major scale starts
  * MAJOR_SCALE_OFFSETS[order-1] semitones below the root (D dorian → C major). */
+/** The mode's scale from the root up an octave and back down, one note every 0.28 s. */
+function modeScaleSound(root: string, order: number): SoundStep[] {
+    const rootPc = Note.chroma(root) ?? 0;
+    const midis = modeNotesFromRoot(root, order).map((note) => 60 + (((Note.chroma(note) ?? 0) - rootPc + 12) % 12));
+    midis.push(72);
+    return [...midis, ...midis.slice(0, -1).reverse()].map((midi) => tone(midi, 0.28));
+}
+
 export function modeNotesFromRoot(root: string, order: number): string[] {
     const parentPc = (pcOf(root) - MAJOR_SCALE_OFFSETS[order - 1] + 12) % 12;
     const parent = Key.majorKey(flatName(parentPc)).scale as string[];
@@ -358,10 +368,14 @@ export type ChoiceGeneratorId =
     | "bluesTones"
     | "bluesScale"
     | "triadInversion"
-    | "voiceLeading";
+    | "voiceLeading"
+    | "earDegree"
+    | "earInterval"
+    | "earChord"
+    | "earProgression";
 
 export function listChoiceGeneratorIds(): ChoiceGeneratorId[] {
-    return ["keySig", "modes", "triadBuild", "chordScaleMajor", "triadType", "chordScaleMelodic", "chordScaleHarmonic", "tritone", "secondaryDom", "borrowed", "pivot", "coltrane", "bluesForm", "bluesTones", "bluesScale", "triadInversion", "voiceLeading"];
+    return ["keySig", "modes", "triadBuild", "chordScaleMajor", "triadType", "chordScaleMelodic", "chordScaleHarmonic", "tritone", "secondaryDom", "borrowed", "pivot", "coltrane", "bluesForm", "bluesTones", "bluesScale", "triadInversion", "voiceLeading", "earDegree", "earInterval", "earChord", "earProgression"];
 }
 
 function generateKeySig(rng: Rng, direction: string): ChoiceQuestion {
@@ -604,7 +618,7 @@ function generateModes(rng: Rng, direction: string): ChoiceQuestion {
             promptValues: { root },
             options,
             correctIndex,
-            audio: { root, order: entry.order },
+            audio: modeScaleSound(root, entry.order),
             hintKey: "improv.q.modes.hintPattern",
             hintValues: { mode: entry.name, pattern: entry.pattern },
         };
@@ -1146,6 +1160,10 @@ function generateQuestion(generatorId: ChoiceGeneratorId, rng: Rng, direction: s
             case "bluesScale": return rng.pick(["blue-note", "clash", "relative-box", "major-pent-notes"]);
             case "triadInversion": return rng.pick(["bass-to-inversion", "bass-to-inversion", "inversion-to-bass", "inversion-notes"]);
             case "voiceLeading": return rng.pick(["common-count", "common-name", "voice-move", "voice-move"]);
+            case "earDegree": return rng.pick(["major-135", "major", "minor"]);
+            case "earInterval": return rng.pick(["easy-up", "all", "harmonic"]);
+            case "earChord": return rng.pick(["triads", "sevenths", "inversions"]);
+            case "earProgression": return rng.pick(["function", "progression"]);
             default: return "mixed";
         }
     };
@@ -1198,6 +1216,10 @@ function generateQuestion(generatorId: ChoiceGeneratorId, rng: Rng, direction: s
         case "bluesScale": return generateBluesScale(rng, pickDirection());
         case "triadInversion": return generateTriadInversion(rng, pickDirection());
         case "voiceLeading": return generateVoiceLeading(rng, pickDirection());
+        case "earDegree": return generateEarDegree(rng, pickDirection());
+        case "earInterval": return generateEarInterval(rng, pickDirection());
+        case "earChord": return generateEarChord(rng, pickDirection());
+        case "earProgression": return generateEarProgression(rng, pickDirection());
         default: return withKeySigVisual(generateKeySig(rng, "key-notes"));
     }
 }

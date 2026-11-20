@@ -47,6 +47,14 @@ export const TRACK_META = {
             description: "Learn blues guitar in 14 modules: the 12-bar form, shuffle rhythm, string bends with pitch feedback, licks, phrasing, and playing the changes over backing tracks.",
         },
     },
+    ear: {
+        id: "ear",
+        path: "/improv/ear",
+        seo: {
+            title: "Ear Training Roadmap for Guitarists | FretMemo",
+            description: "Train your ear in 12 modules: scale degrees after a cadence, intervals, chord qualities and inversions, chord functions and progressions, then play back what you hear on the guitar.",
+        },
+    },
 } satisfies Record<string, TrackMeta>;
 
 export const TRACK_META_LIST: TrackMeta[] = Object.values(TRACK_META);

@@ -94,6 +94,19 @@
     "/improv/drop3",
     "/improv/guide-tones",
     "/improv/comping-rhythm",
-    "/improv/comping-standards"
+    "/improv/comping-standards",
+    "/improv/ear",
+    "/improv/ear-tonic",
+    "/improv/ear-degrees",
+    "/improv/ear-minor",
+    "/improv/ear-intervals-up",
+    "/improv/ear-intervals-all",
+    "/improv/ear-intervals-harmonic",
+    "/improv/ear-triads",
+    "/improv/ear-sevenths",
+    "/improv/ear-inversions",
+    "/improv/ear-functions",
+    "/improv/ear-progressions",
+    "/improv/ear-echo"
   ]
 }
